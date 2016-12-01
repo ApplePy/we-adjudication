@@ -16,7 +16,7 @@ You will need the following things properly installed on your computer.
 ## Installation
 
 * `git clone https://incode.ca/se3352a/requirements-assignment-2.git` this repository
-* `cd students-records`
+* `cd requirements-assignment-2`
 * `npm install`
 * `bower install`
 
