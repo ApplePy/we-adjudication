@@ -1,0 +1,58 @@
+<div class="ui segment container">
+  <img class="ui small centered  image" src="/assets/images/DigitalPanda.png">
+
+  <h1 align="center">Students Records</h1>
+
+  <div class="ui inverted menu">
+    <a class="item">
+      <i class="save icon"></i>
+      Save
+    </a>
+    <a class="item">
+      <i class="undo icon"></i>
+      Undo
+    </a>
+    <a class="item">
+      <i class="step backward icon"></i>
+      First
+    </a>
+    <a class="item">
+      <i class="caret left icon"></i>
+      Previous Record
+    </a>
+    <a class="item">
+      <i class="caret right icon"></i>
+      Next Record
+    </a>
+    <a class="item">
+      <i class="step forward icon"></i>
+      Last Record
+    </a>
+    <a class="item">
+      <i class="content icon"></i>
+      {{#link-to 'all'}}All Records{{/link-to}}
+    </a>
+    <a class="item">
+      <i class="search icon"></i>
+      {{#link-to 'find'}}Find Record{{/link-to}}
+    </a>
+    <a class="item">
+      <i class="help icon"></i>
+        {{#link-to 'help'}}Help{{/link-to}}
+    </a>
+  </div>
+
+  {{outlet}}
+
+  <footer>
+    <div class="ui violet inverted grid segment">
+      <div class="thirteen wide column">
+        © Copyright - Digital Panda
+      </div>
+      <div class="three wide column">
+        <img class="ui right aligned container tiny image" src="/assets/images/UWO Stacked_Rev.png">
+      </div>
+    </div>
+  </footer>
+
+</div>
