@@ -13,10 +13,28 @@ router.route('/')
             });
     })
     .get('/first', function(request, response) {
-
+        models.Student.sort({studentNo: 1}).limit(1).then(
+            students => {
+                if (students.length > 0) {
+                    response.send(students[0])
+                } else {
+                    response.status(404).send("No first student found.");
+                }
+            },
+            err => response.status(500).send("First student error.")
+        );
     })
     .get('/last', function(request, response) {
-
+        models.Student.sort({studentNo: -1}).limit(1).then(
+            students => {
+                if (students.length > 0) {
+                    response.send(students[0])
+                } else {
+                    response.status(404).send("No last student found.");
+                }
+            },
+            err => response.status(500).send("Last student error.")
+        );
     });
 
 router.route('/:studentNo')
@@ -53,8 +71,34 @@ router.route('/:studentNo')
     })
     .get('/next', function (request, response) {
 
+        let studentNo = request.params.studentNo;
+
+        models.Student.find({studentNo: {$gt: studentNo}}).sort({studentNo: 1}).limit(1).then(
+            students => {
+                if (students.length > 0) {
+                    response.send(students[0])
+                } else {
+                    response.status(404).send("No next student found.");
+                }
+            },
+            err => response.status(500).send("Next student error.")
+        );
+
     })
     .get('/previous', function(request, response) {
+
+        let studentNo = request.params.studentNo;
+
+        models.Student.find({studentNo: {$gt: studentNo}}).sort({studentNo: -1}).limit(1).then(
+            students => {
+                if (students.length > 0) {
+                    response.send(students[0])
+                } else {
+                    response.status(404).send("No previous student found.");
+                }
+            },
+            err => response.status(500).send("Previous student error.")
+        );
 
     });
 
