@@ -4,10 +4,12 @@ let express = require('express');
 let router = express.Router();
 let models = require('../models/studentDB');
 
+
+
 router.route('/')
 
 
-    // Get all students
+    // Get all students, sorted ascending by studentNo
     .get(function (request, response) {
             models.Student
                 .find({})
@@ -32,6 +34,7 @@ router.get('/first', function(request, response) {
         );
     });
 
+
 router.get('/last', function(request, response) {
         models.Student.find({}).sort({studentNo: -1}).limit(1).then(
             students => {
@@ -44,6 +47,8 @@ router.get('/last', function(request, response) {
             err => response.status(500).send("Last student error.")
         );
     });
+
+
 
 router.route('/:studentNo')
 
@@ -124,8 +129,16 @@ router.get('/:studentNo/previous', function(request, response) {
 module.exports = router;
 
 
+
 // ---- HELPERS ---- //
 
+/** Check the validity of a variable based on it's type and an optional regex.
+ *
+ * @param variable      The variable to check
+ * @param type          The type the variable is expected to be.
+ * @param regex         (Optional) the regex to be used to test strings (an object will do, as long as it implements .test(variable)
+ * @returns {boolean}   Returns validity
+ */
 function checkValidity(variable, type, regex) {
     if (typeof variable != type) return false;
     if (type === "boolean") return true;
@@ -133,8 +146,14 @@ function checkValidity(variable, type, regex) {
     return Boolean(variable);
 }
 
+
+/** Sanitizes a string. Is idempotent.
+ *
+ * @param str           The string to sanitize.
+ * @returns {string}    Returns the sanitized string.
+ */
 function sanitize (str) {
-    if (typeof str != "string") return str;
+    if (typeof str != "string") throw new Error("Input is not a string!");
     return str
         .replace(/&(?!amp;)/g, '&amp;')
         .replace(/&/g, '&amp;')
@@ -143,4 +162,4 @@ function sanitize (str) {
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/\//g, '&#x2F;');
-};
+}
