@@ -59,3 +59,6 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
+## Darryl Additions
+.idea/
+
