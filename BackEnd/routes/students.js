@@ -5,58 +5,56 @@ let router = express.Router();
 let models = require('../models/studentDB');
 
 
-
 router.route('/')
 
 
-    // Get all students, sorted ascending by studentNo
+// Get all students, sorted ascending by studentNo
     .get(function (request, response) {
-            models.Student
-                .find({})
-                .sort({studentNo: 1})
-                .then(
-                    results => response.send(results),
-                    err => response.status(500).send("Unable to retrieve all students. Error: " + err)
-                );
+        models.Student
+            .find({})
+            .sort({studentNo: 1})
+            .then(
+                results => response.send(results),
+                err => response.status(500).send("Unable to retrieve all students. Error: " + err)
+            );
     });
 
 //Get the first student
-router.get('/first', function(request, response) {
-        //Order studentNO ascending and take the first student
-        models.Student.find({}).sort({studentNo: 1}).limit(1).then(
-            students => {
-                if (students.length > 0) {
-                    response.send(students[0])
-                } else {
-                    response.status(404).send("No first student found.");
-                }
-            },
-            err => response.status(500).send("First student error.")
-        );
-    });
+router.get('/first', function (request, response) {
+    //Order studentNO ascending and take the first student
+    models.Student.find({}).sort({studentNo: 1}).limit(1).then(
+        students => {
+            if (students.length > 0) {
+                response.send(students[0])
+            } else {
+                response.status(404).send("No first student found.");
+            }
+        },
+        err => response.status(500).send("First student error.")
+    );
+});
 
 
 //Get the last student
-router.get('/last', function(request, response) {
-        //Order studentNo descending and take the last student
-        models.Student.find({}).sort({studentNo: -1}).limit(1).then(
-            students => {
-                if (students.length > 0) {
-                    response.send(students[0])
-                } else {
-                    response.status(404).send("No last student found.");
-                }
-            },
-            err => response.status(500).send("Last student error.")
-        );
-    });
-
+router.get('/last', function (request, response) {
+    //Order studentNo descending and take the last student
+    models.Student.find({}).sort({studentNo: -1}).limit(1).then(
+        students => {
+            if (students.length > 0) {
+                response.send(students[0])
+            } else {
+                response.status(404).send("No last student found.");
+            }
+        },
+        err => response.status(500).send("Last student error.")
+    );
+});
 
 
 router.route('/:studentNo')
 
 
-    //Get student
+//Get student
     .get(function (request, response) {
         let studentNo = request.params.studentNo;
         models.Student
@@ -74,18 +72,16 @@ router.route('/:studentNo')
     // Save new student info (create new student if required)
     .put(function (req, response) {
 
-        if (!checkValidity(sanitize(req.body.firstName), "string") ||
-            !checkValidity(sanitize(req.body.lastName), "string") ||
-            !checkValidity(req.body.dob, "string", /(\d{2}\/){2}\d{4}/))
+        if (!checkValidity(sanitize(req.body.firstName), "string") || !checkValidity(sanitize(req.body.lastName), "string") || !checkValidity(req.body.dob, "string", /(\d{2}\/){2}\d{4}/))
             return response.status(400).send("Missing or invalid parameter.");
 
         let student = {};
-        student.studentNo   = parseInt(req.params.studentNo);
-        student.firstName   = req.body.firstName;
-        student.lastName    = req.body.lastName;
-        student.dob         = req.body.dob;
-        student.native      = Boolean(req.body.native);
-        student.gender      = Boolean(req.body.gender);
+        student.studentNo = parseInt(req.params.studentNo);
+        student.firstName = req.body.firstName;
+        student.lastName = req.body.lastName;
+        student.dob = req.body.dob;
+        student.native = Boolean(req.body.native);
+        student.gender = Boolean(req.body.gender);
 
 
         models.Student
@@ -98,42 +94,40 @@ router.route('/:studentNo')
 
 //Get the next student given a current studentNo
 router.get('/:studentNo/next', function (request, response) {
-	let studentNo = request.params.studentNo;
-        //Get all student numbers greater than the current studentNo and order ascending
-        //Take the first studentNo
-        models.Student.find({studentNo: {$gt: studentNo}}).sort({studentNo: 1}).limit(1).then(
-            students => {
-                if (students.length > 0) {
-                    response.send(students[0])
-                } else {
-                    response.status(404).send("No next student found.");
-                }
-            },
-            err => response.status(500).send("Next student error.")
-        );
+    let studentNo = request.params.studentNo;
+    //Get all student numbers greater than the current studentNo and order ascending
+    //Take the first studentNo
+    models.Student.find({studentNo: {$gt: studentNo}}).sort({studentNo: 1}).limit(1).then(
+        students => {
+            if (students.length > 0) {
+                response.send(students[0])
+            } else {
+                response.status(404).send("No next student found.");
+            }
+        },
+        err => response.status(500).send("Next student error.")
+    );
 });
 
 //Get the prevous student given a current studentNo
-router.get('/:studentNo/previous', function(request, response) {
-	let studentNo = request.params.studentNo;
+router.get('/:studentNo/previous', function (request, response) {
+    let studentNo = request.params.studentNo;
 
-	    //Get all the student numbers less than the current studentNO and order descending
-        //Take the first studentNo
-        models.Student.find({studentNo: {$lt: studentNo}}).sort({studentNo: -1}).limit(1).then(
-
-            students => {
-                if (students.length > 0) {
-                    response.send(students[0])
-                } else {
-                    response.status(404).send("No previous student found.");
-                }
-            },
-            err => response.status(500).send("Previous student error.")
-        );
-    });
+    //Get all the student numbers less than the current studentNO and order descending
+    //Take the first studentNo
+    models.Student.find({studentNo: {$lt: studentNo}}).sort({studentNo: -1}).limit(1).then(
+        students => {
+            if (students.length > 0) {
+                response.send(students[0])
+            } else {
+                response.status(404).send("No previous student found.");
+            }
+        },
+        err => response.status(500).send("Previous student error.")
+    );
+});
 
 module.exports = router;
-
 
 
 // ---- HELPERS ---- //
@@ -158,7 +152,7 @@ function checkValidity(variable, type, regex) {
  * @param str           The string to sanitize.
  * @returns {string}    Returns the sanitized string.
  */
-function sanitize (str) {
+function sanitize(str) {
     if (typeof str != "string") throw new Error("Input is not a string!");
     return str
         .replace(/&(?!amp;)/g, '&amp;')
