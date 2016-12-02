@@ -13,6 +13,7 @@ var studentSchema = mongoose.Schema(
 var Student = mongoose.model('students', studentSchema);
 
 mongoose.connect('mongodb://localhost/students:27017');
+mongoose.Promise = Promise;
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
