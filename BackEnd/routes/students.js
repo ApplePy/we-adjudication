@@ -19,7 +19,7 @@ router.route('/')
 
 
 router.get('/first', function(request, response) {
-        models.Student.sort({studentNo: 1}).limit(1).then(
+        models.Student.find({}).sort({studentNo: 1}).limit(1).then(
             students => {
                 if (students.length > 0) {
                     response.send(students[0])
@@ -32,7 +32,7 @@ router.get('/first', function(request, response) {
     });
 
 router.get('/last', function(request, response) {
-        models.Student.sort({studentNo: -1}).limit(1).then(
+        models.Student.find({}).sort({studentNo: -1}).limit(1).then(
             students => {
                 if (students.length > 0) {
                     response.send(students[0])
