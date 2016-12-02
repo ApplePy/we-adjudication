@@ -1,18 +1,24 @@
 "use strict";
 
-var express = require('express');
-var router = express.Router();
-var models = require('../models/studentDB');
+let express = require('express');
+let router = express.Router();
+let models = require('../models/studentDB');
 
 router.route('/')
-    // TODO: Get all students
+
+
+    // Get all students
     .get(function (request, response) {
-            models.Student.find(function (error, posts) {
-                if (error) response.send(error);
-                response.json({post: posts});
-            });
-    })
-    .get('/first', function(request, response) {
+            models.Student
+                .find({})
+                .then(
+                    results => response.send(results),
+                    err => response.status(500).send("Unable to retrieve all students. Error: " + err)
+                );
+    });
+
+
+router.get('/first', function(request, response) {
         models.Student.sort({studentNo: 1}).limit(1).then(
             students => {
                 if (students.length > 0) {
@@ -23,8 +29,9 @@ router.route('/')
             },
             err => response.status(500).send("First student error.")
         );
-    })
-    .get('/last', function(request, response) {
+    });
+
+router.get('/last', function(request, response) {
         models.Student.sort({studentNo: -1}).limit(1).then(
             students => {
                 if (students.length > 0) {
@@ -38,40 +45,53 @@ router.route('/')
     });
 
 router.route('/:studentNo')
-    // TODO: Get students
-    .get(function (request, response) {
-        models.Student.findById(request.params.post_id, function (error, post) {
-            if (error) {
-                response.send({error: error});
-            }
-            else {
-                response.json({post: post});
-            }
-        });
-    })
-    // TODO: Save new student info
-    .put(function (request, response) {
-        models.Student.findById(request.params.post_id, function (error, post) {
-            if (error) {
-                response.send({error: error});
-            }
-            else {
-                post.title = request.body.post.title;
-                post.body = request.body.post.body;
-                post.save(function (error) {
-                    if (error) {
-                        response.send({error: error});
-                    }
-                    else {
-                        response.json({post: post});
-                    }
-                });
-            }
-        });
-    })
-    .get('/next', function (request, response) {
 
+
+    //Get student
+    .get(function (request, response) {
         let studentNo = request.params.studentNo;
+        models.Student
+            .find({studentNo: studentNo})
+            .then(
+                results => {
+                    if (results.length > 1) response.send(results);
+                    else response.status(404).send("Student " + studentNo + " not found.");
+                },
+                err => response.status(500).send("Unable to retrieve student " + studentNo + ". Error: " + err)
+            );
+    })
+
+
+    // Save new student info (create new student if required)
+    .put(function (req, response) {
+
+        if (!checkValidity(req.body.firstName, "string") ||
+            !checkValidity(req.body.lastName, "string") ||
+            !checkValidity(req.body.dob, "string") ||
+            !checkValidity(req.body.native, "boolean") ||
+            !checkValidity(req.body.gender, "boolean"))
+            return response.status(400).send("Missing or invalid parameter.");
+
+        let student = {};
+        student.studentNo   = parseInt(req.params.studentNo);
+        student.firstName   = req.body.firstName;
+        student.lastName    = req.body.lastName;
+        student.dob         = req.body.dob;
+        student.native      = Boolean(req.body.native);
+        student.gender      = Boolean(req.body.gender);
+
+
+        models.Student
+            .update({studentNo: studentNo}, student, {upsert: true, setDefaultsOnInsert: true, overwrite: true})
+            .then(
+                success => response.status(201).location(req.originalUrl),
+                error => response.status(500).send("Error saving student. Error: " + error)
+            );
+    });
+
+
+router.get('/:studentNo/next', function (request, response) {
+	let studentNo = request.params.studentNo;
 
         models.Student.find({studentNo: {$gt: studentNo}}).sort({studentNo: 1}).limit(1).then(
             students => {
@@ -83,13 +103,14 @@ router.route('/:studentNo')
             },
             err => response.status(500).send("Next student error.")
         );
+});
 
-    })
-    .get('/previous', function(request, response) {
 
-        let studentNo = request.params.studentNo;
+router.get('/:studentNo/previous', function(request, response) {
+	let studentNo = request.params.studentNo;
 
         models.Student.find({studentNo: {$gt: studentNo}}).sort({studentNo: -1}).limit(1).then(
+
             students => {
                 if (students.length > 0) {
                     response.send(students[0])
@@ -99,7 +120,15 @@ router.route('/:studentNo')
             },
             err => response.status(500).send("Previous student error.")
         );
-
     });
 
 module.exports = router;
+
+
+// ---- HELPERS ---- //
+
+function checkValidity(variable, type) {
+    if (typeof variable != type) return false;
+    if (type === "boolean") return true;
+    return Boolean(variable);
+}
