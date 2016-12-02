@@ -108,7 +108,7 @@ router.get('/:studentNo/next', function (request, response) {
 router.get('/:studentNo/previous', function(request, response) {
 	let studentNo = request.params.studentNo;
 
-        models.Student.find({studentNo: {$gt: studentNo}}).sort({studentNo: -1}).limit(1).then(
+        models.Student.find({studentNo: {$lt: studentNo}}).sort({studentNo: -1}).limit(1).then(
 
             students => {
                 if (students.length > 0) {
