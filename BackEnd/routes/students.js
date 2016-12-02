@@ -18,8 +18,9 @@ router.route('/')
                 );
     });
 
-
+//Get the first student
 router.get('/first', function(request, response) {
+        //Order studentNO ascending and take the first student
         models.Student.find({}).sort({studentNo: 1}).limit(1).then(
             students => {
                 if (students.length > 0) {
@@ -32,7 +33,9 @@ router.get('/first', function(request, response) {
         );
     });
 
+//Get the last student
 router.get('/last', function(request, response) {
+        //Order studentNo descending and take the last student
         models.Student.find({}).sort({studentNo: -1}).limit(1).then(
             students => {
                 if (students.length > 0) {
@@ -88,10 +91,11 @@ router.route('/:studentNo')
             );
     });
 
-
+//Get the next student given a current studentNo
 router.get('/:studentNo/next', function (request, response) {
 	let studentNo = request.params.studentNo;
-
+        //Get all student numbers greater than the current studentNo and order ascending
+        //Take the first studentNo
         models.Student.find({studentNo: {$gt: studentNo}}).sort({studentNo: 1}).limit(1).then(
             students => {
                 if (students.length > 0) {
@@ -104,10 +108,12 @@ router.get('/:studentNo/next', function (request, response) {
         );
 });
 
-
+//Get the prevous student given a current studentNo
 router.get('/:studentNo/previous', function(request, response) {
 	let studentNo = request.params.studentNo;
 
+	    //Get all the student numbers less than the current studentNO and order descending
+        //Take the first studentNo
         models.Student.find({studentNo: {$lt: studentNo}}).sort({studentNo: -1}).limit(1).then(
 
             students => {
