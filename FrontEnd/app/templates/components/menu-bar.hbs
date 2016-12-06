@@ -1,9 +1,16 @@
+<!-- THIS FILE IS POINTLESS IGNORE IT-->
+
 <div class="ui inverted menu">
-  <a class="item" {{action 'save'}}>
+  <!--each input feild needs the value = selectedStudent.whatever_model_value_it_corrisponds_to
+  this is how we grab the user input because in the 'save' action we send the studentNo of the
+  selected student and then we refer to other input feilds as 'selectedStudent.whatever'-->
+  
+  <!-- all actions called are in main-page.js file from the controllers file.... its basically calling a function  -->
+  <a class="item" {{action 'save' selectedStudent.studentNo}}> 
     <i class="save icon"></i>
     Save
   </a>
-  <a class="item">
+  <a class="item" {{action 'undo'}}>
     <i class="undo icon"></i>
     Undo
   </a>

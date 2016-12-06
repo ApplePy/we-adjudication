@@ -1,3 +1,11 @@
 <h2>All Student Records</h2>
 
-<br><br><br>
+{{#link-to 'main-page'}}<button class="ui button">Back</button>{{/link-to}}
+<br>
+
+{{#each model as |student|}}
+  <div class="ui segment">
+    <strong>{{student.fullName}}</strong>
+    <p>{{student.studentNo}}</p>
+  </div>
+{{/each}}

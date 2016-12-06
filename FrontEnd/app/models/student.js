@@ -6,5 +6,8 @@ export default DS.Model.extend({
   lastName: DS.attr(),
   dob: DS.attr(),
   residency: DS.attr(),
-  gender: DS.attr()
+  gender: DS.attr(),
+  fullName: Ember.computed('firstName', 'lastName', function() {
+    return `${this.get('firstName')} ${this.get('lastName')}`;
+  })
 });

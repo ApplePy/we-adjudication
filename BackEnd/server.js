@@ -10,7 +10,7 @@ var v2 = require('./routes/students_v2');
 
 
 app.use(function (request, response, next) {
-    response.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200'); // TODO: Allow localhost 3700
+    response.setHeader('Access-Control-Allow-Origin', 'https://dontstealourcode-etarlton.c9users.io');
     response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     response.header('Access-Control-Allow-Methods', 'POST, PATCH, GET, PUT, DELETE, OPTIONS');
     next();
@@ -21,12 +21,14 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(mlogger('dev'));
 
 app.use(logger);
-app.use(express.static(path.join(__dirname, '..', 'FrontEnd', 'dist')));    // To pull ember build straight from build foler.
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api/v2/students', v2);
 app.use('/api/students', students);
 
-app.listen(3700, function () {
-    console.log('Listening on port 3700');
+app.use(express.static(path.join(__dirname, '..', 'FrontEnd', 'dist')));    // To pull ember build straight from build foler.
+app.get('/*', function(req, res) {res.sendFile(path.join(__dirname, '..' , 'FrontEnd', 'dist','index.html'))});
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.listen(8080, function () {
+    console.log('Listening on port 8080');
 });
