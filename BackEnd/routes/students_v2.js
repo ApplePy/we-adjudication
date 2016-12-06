@@ -13,23 +13,34 @@ router.route('/')
             .find({})
             .sort({studentNo: 1})
             .then(
-                results => {
-                    let newResults = [];
-
-                    // Convert the mongoose object to a regular object, and update the data to be Ember-friendly
-                    results.forEach((piece, index, theArray) => {
-                        let part = piece.toObject();
-                        part.id = part.studentNo;
-                        delete part._id;
-                       newResults.push(part);
-                    });
-
-                    // Send new results
-                    response.send({"students": newResults});
-                },
+                results => response.send(convertList(results)),
                 err => response.status(500).send("Unable to retrieve all students. Error: " + err)
             );
+    })
+
+    // Create and save new student info
+    .post(function (req, response) {
+        // TODO: Untested, probably busted from ember's point of view. Just FYI.
+
+        if (!checkValidity(sanitize(req.body.firstName), "string") || !checkValidity(sanitize(req.body.lastName), "string") || !checkValidity(req.body.dob, "string", /(\d{2}\/){2}\d{4}/))
+            return response.status(400).send("Missing or invalid parameter.");
+
+        let student = {};
+        student.studentNo = parseInt(req.params.studentNo);
+        student.firstName = req.body.firstName;
+        student.lastName = req.body.lastName;
+        student.dob = req.body.dob;
+        student.residency = parseInt(req.body.residency);
+        student.gender = Boolean(req.body.gender);
+
+        models.Student
+            .insert(student)
+            .then(
+                success => response.status(201).location(req.originalUrl).send(),
+                error => response.status(500).send("Error saving student. Error: " + error)
+            );
     });
+
 
 //Get the first student
 router.get('/first', function (request, response) {
@@ -37,7 +48,7 @@ router.get('/first', function (request, response) {
     models.Student.find({}).sort({studentNo: 1}).limit(1).then(
         students => {
             if (students.length > 0) {
-                response.send(students[0])
+                response.send(convertObj(students[0]))
             } else {
                 response.status(404).send("No first student found.");
             }
@@ -53,7 +64,7 @@ router.get('/last', function (request, response) {
     models.Student.find({}).sort({studentNo: -1}).limit(1).then(
         students => {
             if (students.length > 0) {
-                response.send(students[0])
+                response.send(convertObj(students[0]))
             } else {
                 response.status(404).send("No last student found.");
             }
@@ -65,15 +76,14 @@ router.get('/last', function (request, response) {
 
 router.route('/:studentNo')
 
-
-//Get student
+    //Get student
     .get(function (request, response) {
         let studentNo = request.params.studentNo;
         models.Student
             .find({studentNo: studentNo})
             .then(
                 results => {
-                    if (results.length > 0) response.send(results[0]);
+                    if (results.length > 0) response.send(convertObj(results[0]));
                     else response.status(404).send("Student " + studentNo + " not found.");
                 },
                 err => response.status(500).send("Unable to retrieve student " + studentNo + ". Error: " + err)
@@ -83,6 +93,7 @@ router.route('/:studentNo')
 
     // Save new student info (create new student if required)
     .put(function (req, response) {
+        // TODO: Untested, probably busted from ember's point of view. Just FYI.
 
         if (!checkValidity(sanitize(req.body.firstName), "string") || !checkValidity(sanitize(req.body.lastName), "string") || !checkValidity(req.body.dob, "string", /(\d{2}\/){2}\d{4}/))
             return response.status(400).send("Missing or invalid parameter.");
@@ -92,7 +103,7 @@ router.route('/:studentNo')
         student.firstName = req.body.firstName;
         student.lastName = req.body.lastName;
         student.dob = req.body.dob;
-        student.native = Boolean(req.body.native);
+        student.residency = parseInt(req.body.residency);
         student.gender = Boolean(req.body.gender);
 
 
@@ -102,7 +113,13 @@ router.route('/:studentNo')
                 success => response.status(201).location(req.originalUrl).send(),
                 error => response.status(500).send("Error saving student. Error: " + error)
             );
+    })
+
+    // Delete student
+    .delete(function(req, response) {
+        response.sendStatus(403);
     });
+
 
 //Get the next student given a current studentNo
 router.get('/:studentNo/next', function (request, response) {
@@ -112,7 +129,7 @@ router.get('/:studentNo/next', function (request, response) {
     models.Student.find({studentNo: {$gt: studentNo}}).sort({studentNo: 1}).limit(1).then(
         students => {
             if (students.length > 0) {
-                response.send(students[0])
+                response.send(convertObj(students[0]))
             } else {
                 response.status(404).send("No next student found.");
             }
@@ -120,6 +137,7 @@ router.get('/:studentNo/next', function (request, response) {
         err => response.status(500).send("Next student error.")
     );
 });
+
 
 //Get the prevous student given a current studentNo
 router.get('/:studentNo/previous', function (request, response) {
@@ -130,7 +148,7 @@ router.get('/:studentNo/previous', function (request, response) {
     models.Student.find({studentNo: {$lt: studentNo}}).sort({studentNo: -1}).limit(1).then(
         students => {
             if (students.length > 0) {
-                response.send(students[0])
+                response.send(convertObj(students[0]))
             } else {
                 response.status(404).send("No previous student found.");
             }
@@ -167,11 +185,46 @@ function checkValidity(variable, type, regex) {
 function sanitize(str) {
     if (typeof str != "string") throw new Error("Input is not a string!");
     return str
-        .replace(/&(?!amp;)/g, '&amp;')
+        .replace(/&(?![A-Za-z#]{2,4};)/g, '&amp;')
         .replace(/&/g, '&amp;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/\//g, '&#x2F;');
+}
+
+
+/** Convert a list of mongo results to "ember format".
+ *
+ * @param data      The array to change.
+ * @returns {{students: Array}}
+ */
+function convertList(data) {
+    let newResults = [];
+
+    // Convert the mongoose object to a regular object, and update the data to be Ember-friendly
+    data.forEach((piece, index, theArray) => {
+        let part = piece.toObject();
+        part.id = part.studentNo;
+        delete part._id;
+        newResults.push(part);
+    });
+
+    return {'students': newResults};
+}
+
+
+/** Convert a single mongo result to "ember format"
+ *
+ * @param data      The data object to change
+ * @returns {{student: Object}}
+ */
+function convertObj(data) {
+    // Convert the mongoose object to a regular object, and update the data to be Ember-friendly
+    let part = data.toObject();
+    part.id = part.studentNo;
+    delete part._id;
+
+    return {'student': part};
 }
