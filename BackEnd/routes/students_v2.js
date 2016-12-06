@@ -20,23 +20,25 @@ router.route('/')
 
     // Create and save new student info
     .post(function (req, response) {
-        // TODO: Untested, probably busted from ember's point of view. Just FYI.
 
-        if (!checkValidity(sanitize(req.body.firstName), "string") || !checkValidity(sanitize(req.body.lastName), "string") || !checkValidity(req.body.dob, "string", /(\d{2}\/){2}\d{4}/))
+        if (!checkValidity(sanitize(req.body.student.firstName), "string") ||
+            !checkValidity(sanitize(req.body.student.lastName), "string") ||
+            !checkValidity(req.body.student.dob, "string", /\d{4}-\d{2}-\d{2}/))        //Does not do a good job
             return response.status(400).send("Missing or invalid parameter.");
 
         let student = {};
-        student.studentNo = parseInt(req.params.studentNo);
-        student.firstName = req.body.firstName;
-        student.lastName = req.body.lastName;
-        student.dob = req.body.dob;
-        student.residency = parseInt(req.body.residency);
-        student.gender = Boolean(req.body.gender);
+        // TODO: Control studentNo length
+        student.studentNo = parseInt(req.body.student.studentNo);
+        student.firstName = sanitize(req.body.student.firstName);
+        student.lastName = sanitize(req.body.student.lastName);
+        student.dob = req.body.student.dob;
+        student.residency = parseInt(req.body.student.residency);
+        student.gender = Boolean(req.body.student.gender);
 
         models.Student
-            .insert(student)
+            .create(student)
             .then(
-                success => response.status(201).location(req.originalUrl).send(),
+                success => response.status(201).location(req.originalUrl).send(convertObj(success)),
                 error => response.status(500).send("Error saving student. Error: " + error)
             );
     });
@@ -74,6 +76,7 @@ router.get('/last', function (request, response) {
 });
 
 
+// TODO: Control studentNo length
 router.route('/:studentNo')
 
     //Get student
@@ -93,18 +96,20 @@ router.route('/:studentNo')
 
     // Save new student info (create new student if required)
     .put(function (req, response) {
-        // TODO: Untested, probably busted from ember's point of view. Just FYI.
 
-        if (!checkValidity(sanitize(req.body.firstName), "string") || !checkValidity(sanitize(req.body.lastName), "string") || !checkValidity(req.body.dob, "string", /(\d{2}\/){2}\d{4}/))
+        // Check incoming data
+        if (!checkValidity(sanitize(req.body.student.firstName), "string") ||
+            !checkValidity(sanitize(req.body.student.lastName), "string") ||
+            !checkValidity(req.body.student.dob, "string", /\d{4}-\d{2}-\d{2}/))    // Does not do good job
             return response.status(400).send("Missing or invalid parameter.");
 
         let student = {};
         student.studentNo = parseInt(req.params.studentNo);
-        student.firstName = req.body.firstName;
-        student.lastName = req.body.lastName;
-        student.dob = req.body.dob;
-        student.residency = parseInt(req.body.residency);
-        student.gender = Boolean(req.body.gender);
+        student.firstName = sanitize(req.body.student.firstName);
+        student.lastName = sanitize(req.body.student.lastName);
+        student.dob = req.body.student.dob;
+        student.residency = parseInt(req.body.student.residency);
+        student.gender = Boolean(req.body.student.gender);
 
 
         models.Student
