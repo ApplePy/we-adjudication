@@ -6,6 +6,7 @@ var path = require('path');
 var bodyParser = require('body-parser');
 var mlogger = require('morgan'); // helps log all requests
 var students = require('./routes/students');
+var v2 = require('./routes/students_v2');
 
 
 app.use(function (request, response, next) {
@@ -23,6 +24,7 @@ app.use(logger);
 app.use(express.static(path.join(__dirname, '..', 'FrontEnd', 'dist')));    // To pull ember build straight from build foler.
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/api/v2/students', v2);
 app.use('/api/students', students);
 
 app.listen(3700, function () {
