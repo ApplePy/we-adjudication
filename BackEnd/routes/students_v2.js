@@ -82,6 +82,16 @@ router.route('/:studentNo')
     //Get student
     .get(function (request, response) {
         let studentNo = request.params.studentNo;
+
+        if (request.query.filter) {
+            if (request.query.filter.after)
+                return response.redirect(`${studentNo}/next`);
+            else if (request.query.filter.before)
+                return response.redirect(`${studentNo}/previous`);
+            else
+                return response.status(400).send("Bad parameter.");
+        }
+
         models.Student
             .find({studentNo: studentNo})
             .then(
