@@ -9,6 +9,16 @@ router.route('/')
 
     // Get all students, sorted ascending by studentNo
     .get(function (request, response) {
+
+        if (request.query.filter) {
+            if (request.query.filter.after)
+                return getAdjacentRecord(request, response, request.query.filter.after, "$gt");
+            else if (request.query.filter.before)
+                return getAdjacentRecord(request, response, request.query.filter.before, "$lt");
+            else
+                return response.status(400).send("Bad parameter.");
+        }
+
         models.Student
             .find({})
             .sort({studentNo: 1})
@@ -83,15 +93,6 @@ router.route('/:studentNo')
     .get(function (request, response) {
         let studentNo = request.params.studentNo;
 
-        if (request.query.filter) {
-            if (request.query.filter.after)
-                return response.redirect(`${studentNo}/next`);
-            else if (request.query.filter.before)
-                return response.redirect(`${studentNo}/previous`);
-            else
-                return response.status(400).send("Bad parameter.");
-        }
-
         models.Student
             .find({studentNo: studentNo})
             .then(
@@ -135,42 +136,6 @@ router.route('/:studentNo')
         response.sendStatus(403);
     });
 
-
-//Get the next student given a current studentNo
-router.get('/:studentNo/next', function (request, response) {
-    let studentNo = request.params.studentNo;
-    //Get all student numbers greater than the current studentNo and order ascending
-    //Take the first studentNo
-    models.Student.find({studentNo: {$gt: studentNo}}).sort({studentNo: 1}).limit(1).then(
-        students => {
-            if (students.length > 0) {
-                response.send(convertObj(students[0]))
-            } else {
-                response.status(404).send("No next student found.");
-            }
-        },
-        err => response.status(500).send("Next student error.")
-    );
-});
-
-
-//Get the prevous student given a current studentNo
-router.get('/:studentNo/previous', function (request, response) {
-    let studentNo = request.params.studentNo;
-
-    //Get all the student numbers less than the current studentNO and order descending
-    //Take the first studentNo
-    models.Student.find({studentNo: {$lt: studentNo}}).sort({studentNo: -1}).limit(1).then(
-        students => {
-            if (students.length > 0) {
-                response.send(convertObj(students[0]))
-            } else {
-                response.status(404).send("No previous student found.");
-            }
-        },
-        err => response.status(500).send("Previous student error.")
-    );
-});
 
 module.exports = router;
 
@@ -242,4 +207,25 @@ function convertObj(data) {
     delete part._id;
 
     return {'student': part};
+}
+
+
+function getAdjacentRecord(request, response, studentNum, filter) {
+    let studentNo = parseInt(studentNum);
+
+    //Get all student numbers greater(or less than) than the current studentNo and order ascending
+    let filterParams = {studentNo: {}};
+
+    filterParams.studentNo[filter] = studentNo;
+
+    models.Student.find(filterParams).sort({studentNo: 1}).limit(1).then(
+        students => {
+            if (students.length > 0) {
+                response.send(convertObj(students[0]))
+            } else {
+                response.status(404).send("No adjacent student found.");
+            }
+        },
+        err => response.status(500).send("Adjacent student error.")
+    );
 }
