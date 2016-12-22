@@ -12,9 +12,9 @@ router.route('/')
 
         if (request.query.filter) {
             if (request.query.filter.after)
-                return getAdjacentRecord(request, response, request.query.filter.after, "$gt");
+                return getAdjacentRecord(request, response, request.query.filter.after, "$gt", false);
             else if (request.query.filter.before)
-                return getAdjacentRecord(request, response, request.query.filter.before, "$lt");
+                return getAdjacentRecord(request, response, request.query.filter.before, "$lt", true);
             else
                 return response.status(400).send("Bad parameter.");
         }
@@ -210,7 +210,7 @@ function convertObj(data) {
 }
 
 
-function getAdjacentRecord(request, response, studentNum, filter) {
+function getAdjacentRecord(request, response, studentNum, filter, reverseOrder) {
     let studentNo = parseInt(studentNum);
 
     //Get all student numbers greater(or less than) than the current studentNo and order ascending
@@ -218,7 +218,7 @@ function getAdjacentRecord(request, response, studentNum, filter) {
 
     filterParams.studentNo[filter] = studentNo;
 
-    models.Student.find(filterParams).sort({studentNo: 1}).limit(1).then(
+    models.Student.find(filterParams).sort({studentNo: (reverseOrder) ? -1 : 1}).limit(1).then(
         students => {
             if (students.length > 0) {
                 response.send(convertObj(students[0]))
