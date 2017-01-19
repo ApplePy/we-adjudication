@@ -61,5 +61,4 @@ fabric.properties
 
 ## Darryl Additions
 .idea/
-node_modules/
-bower_components/
+
