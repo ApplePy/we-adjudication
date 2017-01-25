@@ -1,7 +1,7 @@
 # This file is a template, and might need editing before it works on your project.
 # Official framework image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/node/tags/
-image: incode.ca:9001/se3352a/requirements-assignment-2:latest
+image: incode.ca:9001/dummy/requirements-assignment-2:latest
 
 # Pick zero or more services to be used on all builds.
 # Only needed when using a docker container to run your tests in.
@@ -17,25 +17,35 @@ cache:
   - FrontEnd/studentsRecords/node_modules/
   - FrontEnd/studentsRecords/bower_components/
 
-before_script:
-   - 'echo "{ \"allow_root\": true }" > /root/.bowerrc'
+stages:
+  - back_tests
+  - front_tests
+
+variables:
+  MONGO_DB_HOST: "mongo"
 
 test_backend:
+  stage: back_tests
   script:
    - pushd .
    - cd BackEnd/studentsRecords && npm install
    - popd
-   - cd BackEnd/studentsRecords && node server.js
-  when: manual
+   - cd BackEnd/studentsRecords && node server.js &
+   - sleep 10 && pkill node
+#  when: manual
 
 test_frontend:
+  before_script:
+   - 'echo "{ \"allow_root\": true }" > /root/.bowerrc'
+  stage: front_tests
   script:
    - pushd .
-   - cd FrontEnd/studentsRecords && npm install && bower install
+   - cd BackEnd/studentsRecords && npm install && node server.js &
    - popd
    - pushd .
-   - cd BackEnd/studentsRecords && node server.js &
+   - cd FrontEnd/studentsRecords && npm install && bower install && npm install phantomjs && ember test
    - popd
    - pushd .
-   - cd FrontEnd/studentsRecords && ember serve
-  when: manual
+   - cd FrontEnd/studentsRecords && ember test
+   - pkill node
+#  when: manual
