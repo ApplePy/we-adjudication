@@ -6,9 +6,9 @@ RUN apt-get update -y && \
 	apt-get dist-upgrade -y --no-install-recommends && \
 	apt-get clean
 
-# Install build tools for native npm packages
+# Install build tools for native npm packages and mongodb client tools
 RUN apt-get update -y && \
-	apt-get install -y --no-install-recommends build-essential && \
+	apt-get install -y --no-install-recommends build-essential mongodb-clients && \
 	apt-get clean
 
 # Install Python2, Python3, Pip, and then update all pip packages
