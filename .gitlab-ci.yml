@@ -32,10 +32,10 @@ before_script:
 
 test_backend:
   stage: back_tests
-  before_script:
-   - cd BackEnd/studentsRecords && npm install
   script:
-   - cd BackEnd/studentsRecords && node server.js &
+   - cd BackEnd/studentsRecords
+   - npm install
+   - node server.js &
   after_script:
    - sleep 10 && pkill node
   allow_failure: true   # Temporary for testing purposes
@@ -45,14 +45,16 @@ test_frontend:
   stage: front_tests
   before_script:
    - 'echo "{ \"allow_root\": true }" > /root/.bowerrc'
-   - pushd .
-   - cd BackEnd/studentsRecords && npm install && node server.js &
-   - popd
-   - pushd .
-   - cd FrontEnd/studentsRecords && npm install && bower install && ember test
-   - popd
   script:
-   - cd FrontEnd/studentsRecords && ember test
+   - pushd .
+   - cd BackEnd/studentsRecords
+   - npm install
+   - node server.js &
+   - popd
+   - cd FrontEnd/studentsRecords
+   - npm install
+   - bower install
+   - ember test
   after_script:
    - pkill node
 #  when: manual
