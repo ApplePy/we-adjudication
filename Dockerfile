@@ -33,6 +33,21 @@ RUN apt-get update -y && \
 	curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
 	apt-get install -y nodejs libfontconfig --no-install-recommends && \
 	apt-get clean
+	
+# Install watchman
+RUN apt-get update && \
+	apt-get install -y autoconf python-setuptools python3-setuptools python-dev python3-dev && \
+	git clone https://github.com/facebook/watchman.git && \
+	cd watchman && \
+	./autogen.sh && \
+	./configure && \
+	make && \
+	make install && \
+	cd .. && \
+	rm -rf watchman && \
+	apt-get purge -y autoconf python-setuptools python3-setuptools python-dev python3-dev && \
+	apt-get autoremove --purge -y && \
+	apt-get clean
 
 # Install nodemon, express, bower, and ember
 RUN export USER=root && \
