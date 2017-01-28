@@ -17,36 +17,42 @@ cache:
   - FrontEnd/studentsRecords/node_modules/
   - FrontEnd/studentsRecords/bower_components/
 
+# Ensure that the back passes its tests first since the front relies on the back
 stages:
   - back_tests
   - front_tests
 
+# Tell the backend where to find the MongoDB database
 variables:
   MONGO_DB_HOST: "mongo"
+  
+# Restore the mongodb database
+before_script:
+  - mongorestore -h $MONGO_DB_HOST -d studentsRecords studentsRecords/
 
 test_backend:
   stage: back_tests
-  script:
-   - pushd .
+  before_script:
    - cd BackEnd/studentsRecords && npm install
-   - popd
+  script:
    - cd BackEnd/studentsRecords && node server.js &
+  after_script:
    - sleep 10 && pkill node
-#  when: manual
   allow_failure: true   # Temporary for testing purposes
+# when: manual
 
 test_frontend:
+  stage: front_tests
   before_script:
    - 'echo "{ \"allow_root\": true }" > /root/.bowerrc'
-  stage: front_tests
-  script:
    - pushd .
    - cd BackEnd/studentsRecords && npm install && node server.js &
    - popd
    - pushd .
    - cd FrontEnd/studentsRecords && npm install && bower install && ember test
    - popd
-   - pushd .
+  script:
    - cd FrontEnd/studentsRecords && ember test
+  after_script:
    - pkill node
 #  when: manual
