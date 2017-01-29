@@ -38,8 +38,7 @@ test_backend:
    - node server.js &
   after_script:
    - sleep 10 && pkill node
-  allow_failure: true   # Temporary for testing purposes
-# when: manual
+  when: manual
 
 test_frontend:
   stage: front_tests
@@ -57,4 +56,4 @@ test_frontend:
    - ember test
   after_script:
    - pkill node
-#  when: manual
+  when: manual
