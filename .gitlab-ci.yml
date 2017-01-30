@@ -25,13 +25,12 @@ stages:
 # Tell the backend where to find the MongoDB database
 variables:
   MONGO_DB_HOST: "mongo"
-  
-# Restore the mongodb database
-before_script:
-  - mongorestore -h $MONGO_DB_HOST -d studentsRecords studentsRecords/
 
 test_backend:
   stage: back_tests
+  # Restore the mongodb database
+  before_script:
+   - mongorestore -h $MONGO_DB_HOST -d studentsRecords studentsRecords/
   script:
    - cd BackEnd/studentsRecords
    - npm install
@@ -44,6 +43,7 @@ test_frontend:
   stage: front_tests
   before_script:
    - 'echo "{ \"allow_root\": true }" > /root/.bowerrc'
+   - mongorestore -h $MONGO_DB_HOST -d studentsRecords studentsRecords/
   script:
    - pushd .
    - cd BackEnd/studentsRecords
