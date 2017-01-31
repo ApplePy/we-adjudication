@@ -1,5 +1,25 @@
 var mongoose = require('mongoose');
 var mongoosePaginate = require('mongoose-paginate');
+
+var advancedStandingSchema = mongoose.Schema(
+    {
+
+        course: String,
+        description: String,
+        units: Number,
+        grade: Number,
+        from: String,
+        recipient: {type: mongoose.Schema.ObjectId, ref: 'Students'}
+    }
+);
+
+var awardsSchema = mongoose.Schema(
+    {
+        note: String,
+        recipient: {type: mongoose.Schema.ObjectId, ref: 'Students'}
+    }
+);
+
 var studentsSchema = mongoose.Schema(
     {
         number: String,
@@ -8,6 +28,10 @@ var studentsSchema = mongoose.Schema(
         gender: Number,
         DOB: Date,
         photo: String,
+        registrationComments: String,
+        basisOfAdmission: String,
+        admissionAverage: Number,
+        admissionComments: String,
         resInfo: {type: mongoose.Schema.ObjectId, ref: 'Residencies'}
     }
 );
@@ -22,6 +46,8 @@ var residencySchema = mongoose.Schema(
 
 var Students = mongoose.model('student', studentsSchema);
 var Residencies = mongoose.model('residency', residencySchema);
+var AdvancedStandings = mongoose.model('advancedStanding', advancedStandingSchema);
+var Awards = mongoose.model('awards', awardsSchema);
 
 
 mongoose.connect('mongodb://localhost/studentsRecords');
@@ -31,6 +57,8 @@ db.once('open', function() {
 
     exports.Students = Students;
     exports.Residencies = Residencies;
+    exports.AdvancedStandings = AdvancedStandings;
+    exports.Awards = Awards;
 
 });
 
