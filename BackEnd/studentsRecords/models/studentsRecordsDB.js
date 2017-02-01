@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var mockgoose = include('mockgoose');
+if (process.env.NODE_ENV === 'test') var mockgoose = require('mockgoose');
 var mongoosePaginate = require('mongoose-paginate');
 
 // Use native promises
