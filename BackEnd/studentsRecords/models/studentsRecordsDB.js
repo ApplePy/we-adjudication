@@ -50,8 +50,16 @@ var residencySchema = mongoose.Schema(
     }
 );
 
+var genderSchema = mongoose.Schema(
+    {
+        name: String,
+        students: [{type: mongoose.Schema.ObjectId, ref: ('Students')}]
+    }
+);
+
 var Students = mongoose.model('student', studentsSchema);
 var Residencies = mongoose.model('residency', residencySchema);
+var Genders = mongoose.model('gender', genderSchema);
 var AdvancedStandings = mongoose.model('advancedStanding', advancedStandingSchema);
 var Awards = mongoose.model('awards', awardsSchema);
 
@@ -74,6 +82,7 @@ db.on('error', function() {
 
 exports.Students = Students;
 exports.Residencies = Residencies;
+exports.Genders = Genders;
 exports.AdvancedStandings = AdvancedStandings;
 exports.Awards = Awards;
 
