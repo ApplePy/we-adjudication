@@ -13,8 +13,15 @@ app.use(function (request, response, next) {
     response.header('Access-Control-Allow-Methods', 'POST, PATCH, GET, PUT, DELETE, OPTIONS');
     next();
 });
-app.use(logger);
+
+// Shut off logging if testing
+if (process.env.NODE_ENV !== 'test') {
+    app.use(logger);
+}
 //app.use(express.static('public'));
+
+// Set json header
+app.use((req, res, next)=>{res.setHeader('Content-Type', 'application/json'); next();});
 
 app.use('/students', students);
 app.use('/residencies', residencies);
@@ -23,3 +30,5 @@ app.use('/residencies', residencies);
 app.listen(3700, function () {
     console.log('Listening on port 3700');
 });
+
+module.exports = app;   // For supporting tests
