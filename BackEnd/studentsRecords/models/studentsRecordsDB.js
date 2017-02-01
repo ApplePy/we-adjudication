@@ -32,7 +32,9 @@ var studentsSchema = mongoose.Schema(
         basisOfAdmission: String,
         admissionAverage: Number,
         admissionComments: String,
-        resInfo: {type: mongoose.Schema.ObjectId, ref: 'Residencies'}
+        resInfo: {type: mongoose.Schema.ObjectId, ref: 'Residencies'},
+        awards: [{type: mongoose.Schema.ObjectId, ref: 'Awards'}],
+        advancedStandings: [{type: mongoose.Schema.ObjectId, ref: 'AdvancedStandings'}]
     }
 );
 studentsSchema.plugin(mongoosePaginate);

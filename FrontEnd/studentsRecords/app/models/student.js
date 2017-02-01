@@ -11,6 +11,8 @@ export default DS.Model.extend({
   basisOfAdmission: DS.attr('string'),
   admissionAverage: DS.attr('number'),
   admissionComments: DS.attr('string'),
+  awards: DS.hasMany('awards'),
+  advancedStandings: DS.hasMany('advancedStandings'),
   resInfo: DS.belongsTo('residency')
 
 });
