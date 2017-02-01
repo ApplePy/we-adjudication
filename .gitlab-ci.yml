@@ -36,7 +36,6 @@ test_backend:
    - cd BackEnd/studentsRecords
    - npm install
    - npm test
-  when: manual
 
 test_frontend:
   stage: front_tests
@@ -55,4 +54,3 @@ test_frontend:
    - ember test
   after_script:
    - pkill node
-  when: manual
