@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var mockgoose = include('mockgoose');
 var mongoosePaginate = require('mongoose-paginate');
 
 // Use native promises
@@ -28,12 +29,31 @@ var Students = mongoose.model('student', studentsSchema);
 var Residencies = mongoose.model('residency', residencySchema);
 
 
-// Dynamically control where to contact the DB 
+// Dynamically control where to contact the DB, and wrap the db with mockgoose if testing
 if (typeof (process.env.MONGO_DB_HOST) != "undefined") {
-    mongoose.connect('mongodb://' + process.env.MONGO_DB_HOST + '/studentsRecords');
+    // Production
+    if (process.env.NODE_ENV !== 'test')
+        mongoose.connect('mongodb://' + process.env.MONGO_DB_HOST + '/studentsRecords');
+
+    // Testing
+    else
+        mockgoose(mongoose).then(function() {
+            // mongoose connection
+            mongoose.connect('mongodb://' + process.env.MONGO_DB_HOST + '/studentsRecords');
+        });
+
 }
 else {
-    mongoose.connect('mongodb://localhost/studentsRecords');
+    // Production
+    if (process.env.NODE_ENV !== 'test')
+        mongoose.connect('mongodb://localhost/studentsRecords');
+    // Testing
+    else
+        mockgoose(mongoose).then(function() {
+            // mongoose connection
+            mongoose.connect('mongodb://' + process.env.MONGO_DB_HOST + '/studentsRecords');
+        });
+
 }
 
 var db = mongoose.connection;
