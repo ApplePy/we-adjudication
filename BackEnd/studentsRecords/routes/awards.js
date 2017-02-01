@@ -19,13 +19,17 @@ router.route('/')
     // Get awards
     .get(parseUrlencoded, parseJSON, function (request, response) {
         var Student = request.query.filter;
+        // Get all awards
         if (!Student) {
             models.Awards.find(function (error, residencies) {
                 if (error) response.send(error);
                 response.json({award: residencies});
             });
-        } else {
-            models.Awards.find({"student": Student.student}, function (error, students) {
+        }
+
+        // Get awards for a student
+        else {
+            models.Awards.find({"recipient": Student.student}, function (error, students) {
                 if (error) response.send(error);
                 response.json({award: students});
             });
@@ -48,8 +52,8 @@ router.route('/:award_id')
                 response.send({error: error});
             }
             else {
-                award.name = request.body.award.name;
-                award.students = request.body.award.students;
+                award.note = request.body.award.note;
+                award.recipient = request.body.award.recipient;
 
                 award.save(function (error) {
                     if (error) {

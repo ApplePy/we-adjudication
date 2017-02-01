@@ -27,9 +27,9 @@ router.route('/')
                 response.json({advancedStanding: advancedStanding});
             });
         }
-        // Get advanced standing for a student
+        // Get advanced standings for a student
         else {
-            models.AdvancedStandings.find({"student": Student.student}, function (error, students) {
+            models.AdvancedStandings.find({"recipient": Student.student}, function (error, students) {
                 if (error) response.send(error);
                 response.json({advancedStanding: students});
             });

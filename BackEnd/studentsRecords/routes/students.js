@@ -60,6 +60,12 @@ router.route('/:student_id')
                 student.DOB = request.body.student.DOB;
                 student.photo = request.body.student.photo;
                 student.resInfo = request.body.student.resInfo;
+                student.registrationComments = request.body.student.registrationComments;
+                student.basisOfAdmission = request.body.student.basisOfAdmission;
+                student.admissionAverage = request.body.student.admissionAverage;
+                student.admissionComments = request.body.student.admissionComments;
+                student.awards = request.body.student.awards;
+                student.advancedStandings = request.body.student.advancedStandings;
 
                 student.save(function (error) {
                     if (error) {
