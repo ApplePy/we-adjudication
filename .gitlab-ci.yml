@@ -54,3 +54,4 @@ test_frontend:
    - ember test
   after_script:
    - pkill node
+  allow_failure: true
