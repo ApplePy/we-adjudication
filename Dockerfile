@@ -51,6 +51,6 @@ RUN apt-get update && \
 
 # Install nodemon, express, bower, and ember
 RUN export USER=root && \
-	npm install -g nodemon express bower ember-cli phantomjs-prebuilt && \
+	npm install -g nodemon express bower ember-cli phantomjs-prebuilt mocha && \
 	npm cache clean
 

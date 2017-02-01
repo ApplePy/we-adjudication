@@ -1,5 +1,9 @@
 var mongoose = require('mongoose');
 var mongoosePaginate = require('mongoose-paginate');
+
+// Use native promises
+mongoose.Promise = global.Promise;
+
 var studentsSchema = mongoose.Schema(
     {
         number: String,

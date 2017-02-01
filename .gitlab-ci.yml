@@ -22,8 +22,9 @@ stages:
   - back_tests
   - front_tests
 
-# Tell the backend where to find the MongoDB database
+# Tell the backend where to find the MongoDB database, and that we're running in test mode
 variables:
+  NODE_ENV: 'test'
   MONGO_DB_HOST: "mongo"
 
 test_backend:
@@ -34,9 +35,7 @@ test_backend:
   script:
    - cd BackEnd/studentsRecords
    - npm install
-   - node server.js &
-  after_script:
-   - sleep 10 && pkill node
+   - npm test
   when: manual
 
 test_frontend:
