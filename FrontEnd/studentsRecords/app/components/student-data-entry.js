@@ -18,6 +18,7 @@ export default Ember.Component.extend({
   old_offset: null,
   pageSize: null,
   movingBackword: false,
+  isDeleting: false,
 
   studentModel: Ember.observer('offset', function () {
     var self = this;
@@ -140,6 +141,10 @@ export default Ember.Component.extend({
 
     assignDate (date){
       this.set('selectedDate', date);
+    },
+
+    deleteStudent(){
+      this.set('isDeleting', true);
     },
   }
 });

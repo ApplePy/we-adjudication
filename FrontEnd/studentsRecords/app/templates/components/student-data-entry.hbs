@@ -44,6 +44,8 @@
 {{#if showAllStudents}}
   <!-- Note that offset is an "in" and "out" parameter !-->
  {{all-students INDEX = currentIndex notDONE = showAllStudents offset = offset studentsModel = studentsRecords}}
+{{else if isDeleting}}
+  {{confirm-delete notDone = isDeleting toDelete = currentStudent studentsModel = studentsRecords}}
 {{else}}
   <!-- Show data entry form -->
 
@@ -113,7 +115,7 @@
 
 
 
-  <button class="ui button">Delete Record</button>
+  <button class="ui button" {{action 'deleteStudent'}}>Delete Record</button>
 {{/if}}
 
 
