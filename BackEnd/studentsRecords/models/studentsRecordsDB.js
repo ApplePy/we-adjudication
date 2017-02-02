@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var mongoosePaginate = require('mongoose-paginate');
 var studentsSchema = mongoose.Schema(
     {
-        number: String,
+        number: Number,
         firstName: String,
         lastName: String,
         gender: Number,
