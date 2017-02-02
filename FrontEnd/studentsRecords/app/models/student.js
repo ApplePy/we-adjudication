@@ -4,7 +4,6 @@ export default DS.Model.extend({
   number: DS.attr(),
   firstName: DS.attr(),
   lastName: DS.attr(),
-  gender: DS.attr('number'),
   DOB: DS.attr('date'),
   photo: DS.attr(),
   registrationComments: DS.attr('string'),
@@ -13,6 +12,7 @@ export default DS.Model.extend({
   admissionComments: DS.attr('string'),
   awards: DS.hasMany('award'),
   advancedStandings: DS.hasMany('advanced-standing'),
-  resInfo: DS.belongsTo('residency')
+  resInfo: DS.belongsTo('residency'),
+  genderInfo: DS.belongsTo('gender')
 
 });
