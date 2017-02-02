@@ -16,8 +16,15 @@ router.route('/')
     .get(parseUrlencoded, parseJSON, function (request, response) {
         var l = parseInt(request.query.limit) ;
         var o = parseInt(request.query.offset);
-        var Student = request.query.student;
-        if (!Student) {
+        try {
+            var StudentNo = request.query.filter.number;
+            console.log(request.query.filter);
+            console.log(request.query.filter.number);
+        }
+        catch (err) {
+            // TODO: Fix this, dirty hack
+        }
+        if (!StudentNo) {
             //models.Students.find(function (error, students) {
             //    if (error) response.send(error);
             //    response.json({student: students});
@@ -29,8 +36,10 @@ router.route('/')
                 });
         } else {
             //        if (Student == "residency")
-            models.Students.find({"residency": request.query.residency}, function (error, students) {
+            console.log('in here');
+            models.Students.findOne({number: StudentNo}, function (error, students) {
                 if (error) response.send(error);
+                console.log(students);
                 response.json({student: students});
             });
         }
@@ -38,11 +47,17 @@ router.route('/')
 
 router.route('/:student_id')
     .get(parseUrlencoded, parseJSON, function (request, response) {
-        models.Students.findById(request.params.student_id, function (error, student) {
+        //models.Students.findById(request.params.student_id, function (error, student)
+        console.log("params id: " + request.params.student_id);
+        models.Students.findOne({'number': request.params.student_id}, function (error, student)
+        {
+        console.log('hello world');
             if (error) {
+                console.log("error!");
                 response.send({error: error});
             }
             else {
+                console.log({student: student});
                 response.json({student: student});
             }
         });
