@@ -40,7 +40,7 @@ export default Ember.Component.extend({
     exit: function () {
       this.set('notDONE', false);
       Ember.$('.ui.modal').modal('toggle');
-
+      Ember.$('.ui.modal').remove();
     }
 
   },
