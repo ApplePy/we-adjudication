@@ -13,8 +13,7 @@ var studentsSchema = mongoose.Schema(
         gender: Number,
         DOB: Date,
         photo: String,
-        resInfo: {type: mongoose.Schema.ObjectId, ref: 'Residencies'},
-        genderInfo: {type: mongoose.Schema.ObjectId, ref: 'Genders'}
+        resInfo: {type: mongoose.Schema.ObjectId, ref: 'Residencies'}
     }
 );
 studentsSchema.plugin(mongoosePaginate);
@@ -26,16 +25,8 @@ var residencySchema = mongoose.Schema(
     }
 );
 
-var genderSchema = mongoose.Schema(
-    {
-        name: String,
-        students: [{type: mongoose.Schema.ObjectId, ref: ('Students')}]
-    }
-);
-
 var Students = mongoose.model('student', studentsSchema);
 var Residencies = mongoose.model('residency', residencySchema);
-var Genders = mongoose.model('gender', genderSchema);
 
 
 // Dynamically control where to contact the DB, and wrap the db with mockgoose if testing
@@ -74,7 +65,6 @@ db.once('open', function() {
 
     exports.Students = Students;
     exports.Residencies = Residencies;
-    exports.Genders = Genders;
 
 });
 
