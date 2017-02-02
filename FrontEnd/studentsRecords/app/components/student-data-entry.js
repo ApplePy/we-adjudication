@@ -27,7 +27,6 @@ export default Ember.Component.extend({
     }).then(function (records) {
       // Make sure records were returned before setting the new records
       if (records.get('length') > 0 || self.get('old_offset') === null) {
-        console.log('good, set ' + records.get('length'));
         self.set('old_offset', self.get('offset')); // Update last good offset property
         self.set('studentsRecords', records);
         self.set('firstIndex', records.indexOf(records.get("firstObject")));
