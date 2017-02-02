@@ -17,6 +17,7 @@ export default Ember.Component.extend({
   offset: null,
   pageSize: null,
   movingBackword: false,
+  showHelp: false,
 
   studentModel: Ember.observer('offset', function () {
     var self = this;
@@ -132,6 +133,10 @@ export default Ember.Component.extend({
 
     assignDate (date){
       this.set('selectedDate', date);
+    },
+
+    help(){
+      this.set('showHelp', true);
     },
   }
 });
