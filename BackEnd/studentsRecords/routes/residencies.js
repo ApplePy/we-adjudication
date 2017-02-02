@@ -9,21 +9,21 @@ router.route('/')
     .post(parseUrlencoded, parseJSON, function (request, response) {
         var residency = new models.Residencies(request.body.residency);
         residency.save(function (error) {
-            if (error) response.send(error);
-            response.json({residency: residency});
+            if (error) response.status(500).send(error);
+            else response.json({residency: residency});
         });
     })
     .get(parseUrlencoded, parseJSON, function (request, response) {
         var Student = request.query.filter;
         if (!Student) {
             models.Residencies.find(function (error, residencies) {
-                if (error) response.send(error);
-                response.json({residency: residencies});
+                if (error) response.status(500).send(error);
+                else response.json({residency: residencies});
             });
         } else {
-            models.Residencies.find({"student": Student.student}, function (error, students) {
-                if (error) response.send(error);
-                response.json({residency: students});
+            models.Residencies.find({"students": {$in: [Student.student]}}, function (error, students) {
+                if (error) response.status(500).send(error);
+                else response.json({residency: students});
             });
         }
     });
@@ -31,14 +31,14 @@ router.route('/')
 router.route('/:residency_id')
     .get(parseUrlencoded, parseJSON, function (request, response) {
         models.Residencies.findById(request.params.residency_id, function (error, residency) {
-            if (error) response.send(error);
-            response.json({residency: residency});
+            if (error) response.status(404).send(error);
+            else response.json({residency: residency});
         })
     })
     .put(parseUrlencoded, parseJSON, function (request, response) {
         models.Residencies.findById(request.params.residency_id, function (error, residency) {
             if (error) {
-                response.send({error: error});
+                response.status(404).send({error: error});
             }
             else {
                 residency.name = request.body.residency.name;
@@ -46,7 +46,7 @@ router.route('/:residency_id')
 
                 residency.save(function (error) {
                     if (error) {
-                        response.send({error: error});
+                        response.status(500).send({error: error});
                     }
                     else {
                         response.json({residency: residency});

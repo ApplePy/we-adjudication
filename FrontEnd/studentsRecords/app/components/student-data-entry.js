@@ -15,6 +15,7 @@ export default Ember.Component.extend({
   studentPhoto: null,
   limit: null,
   offset: null,
+  old_offset: null,
   pageSize: null,
   movingBackword: false,
 
@@ -24,13 +25,20 @@ export default Ember.Component.extend({
       limit: self.get('limit'),
       offset: self.get('offset')
     }).then(function (records) {
-      self.set('studentsRecords', records);
-      self.set('firstIndex', records.indexOf(records.get("firstObject")));
-      self.set('lastIndex', records.indexOf(records.get("lastObject")));
-      if (self.get('movingBackword')) {
-        self.set('currentIndex', records.indexOf(records.get("lastObject")));
+      // Make sure records were returned before setting the new records
+      if (records.get('length') > 0 || self.get('old_offset') === null) {
+        self.set('old_offset', self.get('offset')); // Update last good offset property
+        self.set('studentsRecords', records);
+        self.set('firstIndex', records.indexOf(records.get("firstObject")));
+        self.set('lastIndex', records.indexOf(records.get("lastObject")));
+        if (self.get('movingBackword')) {
+          self.set('currentIndex', records.indexOf(records.get("lastObject")));
+        } else {
+          self.set('currentIndex', records.indexOf(records.get("firstObject")));
+        }
       } else {
-        self.set('currentIndex', records.indexOf(records.get("firstObject")));
+        // Revert to last good offset property
+        self.set('offset', self.get('old_offset'));
       }
     });
   }),
