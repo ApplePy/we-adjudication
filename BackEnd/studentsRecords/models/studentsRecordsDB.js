@@ -8,7 +8,8 @@ var studentsSchema = mongoose.Schema(
         gender: Number,
         DOB: Date,
         photo: String,
-        resInfo: {type: mongoose.Schema.ObjectId, ref: 'Residencies'}
+        resInfo: {type: mongoose.Schema.ObjectId, ref: 'Residencies'},
+        genderInfo: {type: mongoose.Schema.ObjectId, ref: 'Genders'}
     }
 );
 studentsSchema.plugin(mongoosePaginate);
