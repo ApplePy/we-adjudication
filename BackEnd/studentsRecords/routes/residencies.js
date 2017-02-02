@@ -5,6 +5,9 @@ var bodyParser = require('body-parser');
 var parseUrlencoded = bodyParser.urlencoded({extended: false});
 var parseJSON = bodyParser.json();
 
+// TODO: WARNING: PUT/POST does not check for missing data
+
+
 router.route('/')
     // Post a new residency
     .post(parseUrlencoded, parseJSON, function (request, response) {
@@ -13,7 +16,7 @@ router.route('/')
 
         residency.save(function (error) {
             if (error) response.status(500).send(error);
-            else response.json({residency: residency});
+            else response.status(201).json({residency: residency});
         });
     })
 
