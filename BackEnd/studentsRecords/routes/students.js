@@ -5,26 +5,21 @@ var bodyParser = require('body-parser');
 var parseUrlencoded = bodyParser.urlencoded({extended: false});
 var parseJSON = bodyParser.json();
 
+// TODO: WARNING: PUT/POST does not check for missing data
+
 router.route('/')
     .post(parseUrlencoded, parseJSON, function (request, response) {
         var student = new models.Students(request.body.student);
         student.save(function (error) {
             if (error) response.send(error);
-            response.json({student: student});
+            response.status(201).json({student: student});
         });
     })
     .get(parseUrlencoded, parseJSON, function (request, response) {
         var l = parseInt(request.query.limit) ;
         var o = parseInt(request.query.offset);
-        try {
-            var StudentNo = request.query.filter.number;
-            console.log(request.query.filter);
-            console.log(request.query.filter.number);
-        }
-        catch (err) {
-            // TODO: Fix this, dirty hack
-        }
-        if (!StudentNo) {
+
+        if (!request.query.filter) {
             //models.Students.find(function (error, students) {
             //    if (error) response.send(error);
             //    response.json({student: students});
@@ -35,11 +30,10 @@ router.route('/')
                     response.json({student: students.docs});
                 });
         } else {
-            //        if (Student == "residency")
-            console.log('in here');
-            models.Students.findOne({number: StudentNo}, function (error, students) {
+            var StudentNo = request.query.filter.number;
+            // TODO: This causes a deprecation warning from Ember, should not return an array
+            models.Students.find({number: StudentNo}, function (error, students) {
                 if (error) response.send(error);
-                console.log(students);
                 response.json({student: students});
             });
         }
@@ -47,17 +41,11 @@ router.route('/')
 
 router.route('/:student_id')
     .get(parseUrlencoded, parseJSON, function (request, response) {
-        //models.Students.findById(request.params.student_id, function (error, student)
-        console.log("params id: " + request.params.student_id);
-        models.Students.findOne({'number': request.params.student_id}, function (error, student)
-        {
-        console.log('hello world');
+        models.Students.findById(request.params.student_id, function (error, student) {
             if (error) {
-                console.log("error!");
-                response.send({error: error});
+                response.status(404).send({error: error});
             }
             else {
-                console.log({student: student});
                 response.json({student: student});
             }
         });
@@ -65,7 +53,7 @@ router.route('/:student_id')
     .put(parseUrlencoded, parseJSON, function (request, response) {
         models.Students.findById(request.params.student_id, function (error, student) {
             if (error) {
-                response.send({error: error});
+                response.status(404).send({error: error});
             }
             else {
                 student.number = request.body.student.number;
@@ -75,6 +63,12 @@ router.route('/:student_id')
                 student.DOB = request.body.student.DOB;
                 student.photo = request.body.student.photo;
                 student.resInfo = request.body.student.resInfo;
+                student.registrationComments = request.body.student.registrationComments;
+                student.basisOfAdmission = request.body.student.basisOfAdmission;
+                student.admissionAverage = request.body.student.admissionAverage;
+                student.admissionComments = request.body.student.admissionComments;
+                student.awards = request.body.student.awards;
+                student.advancedStandings = request.body.student.advancedStandings;
 
                 student.save(function (error) {
                     if (error) {

@@ -13,16 +13,16 @@ export default Ember.Component.extend({
 
   actions: {
     loadNext: function () {
-      Ember.$('.ui.modal').modal('hide');
+      //Ember.$('.ui.modal').modal('hide');
       this.set('offset', this.get('offset') + this.get('pageSize'));
-      Ember.$('.ui.modal').modal('show');
+      //Ember.$('.ui.modal').modal('show');
     },
 
     loadPrevious: function () {
       if (this.get('offset') >= this.get('pageSize')) {
-        Ember.$('.ui.modal').modal('hide');
+        //Ember.$('.ui.modal').modal('hide');
         this.set('offset', this.get('offset') - this.get('pageSize'));
-        Ember.$('.ui.modal').modal('show');
+        //Ember.$('.ui.modal').modal('show');
       }
     },
 
@@ -35,6 +35,7 @@ export default Ember.Component.extend({
     exit: function () {
       this.set('notDONE', false);
       Ember.$('.ui.modal').modal('hide');
+      Ember.$('.ui.modal').remove();
     }
   },
 
