@@ -31,6 +31,7 @@ router.route('/')
                 });
         } else {
             var StudentNo = request.query.filter.number;
+            // TODO: This causes a deprecation warning from Ember, should not return an array
             models.Students.find({number: StudentNo}, function (error, students) {
                 if (error) response.send(error);
                 response.json({student: students});

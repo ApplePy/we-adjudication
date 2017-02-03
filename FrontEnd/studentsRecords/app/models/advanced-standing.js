@@ -7,5 +7,4 @@ export default DS.Model.extend({
   grade: DS.attr('number'),
   from: DS.attr('string'),
   recipient: DS.belongsTo('student')
-
 });

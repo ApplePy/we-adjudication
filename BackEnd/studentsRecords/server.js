@@ -28,7 +28,7 @@ app.use((req, res, next)=>{res.setHeader('Content-Type', 'application/json'); ne
 app.use('/students', students);
 app.use('/residencies', residencies);
 app.use('/awards', awards);
-app.use('/advancedStandings', advancedStandings);
+app.use('/advanced-standings', advancedStandings);
 
 
 app.listen(3700, function () {
