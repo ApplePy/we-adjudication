@@ -95,7 +95,8 @@ describe('Students', () => {
                                 expect(res.body).to.have.property('student');
                                 expect(res.body.student.length).to.be.eq(5);
                                 for (var num = 0; num < 5; num++) {
-                                    expect(res.body.student[num].number).to.equal(firstNumber + num + 1);
+                                    // Can't test student number, since order is not assured.
+                                    //expect(res.body.student[num].number).to.equal(firstNumber + num + 1);
                                     expect(res.body.student[num].firstName).to.equal(studentData.firstName);
                                     expect(res.body.student[num].lastName).to.equal(studentData.lastName);
                                     expect(res.body.student[num].gender).to.equal(studentData.gender);

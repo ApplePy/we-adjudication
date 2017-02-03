@@ -99,7 +99,7 @@ describe('Awards', () => {
                                         expect(res.body).to.have.property('award');
                                         expect(res.body.award.length).to.be.eq(15);
                                         for (var num = 0; num < 15; num++) {
-                                            expect(res.body.award[num].note).to.equal(num.toString());
+                                            // Cannot test note value, since there's no guarantee that they're in order
                                             expect(res.body.award[num].recipient).to.equal(testStudent._id.toString());
                                         }
                                         done();
@@ -150,6 +150,8 @@ describe('Awards', () => {
 
                             // Start testing once all awards are created
                             if (++count == 15) {
+                                // Race condition here doesn't matter, as all runs will still get 15 results returned
+
                                 // Make request
                                 chai.request(server)
                                     .get('/awards')
@@ -215,6 +217,8 @@ describe('Awards', () => {
 
                                 // Start testing once all awards are created
                                 if (++count == 15) {
+                                    // Race condition here doesn't matter, as all runs will still get 0 results returned
+
                                     // Make request
                                     chai.request(server)
                                         .get('/awards')
@@ -273,6 +277,8 @@ describe('Awards', () => {
 
                             // Start testing once all awards are created
                             if (++count == 15) {
+                                // Race condition here doesn't matter, as we already know that the latest version of testAward saved
+
                                 // Make request
                                 chai.request(server)
                                     .get('/awards/' + testAward._id.toString())
@@ -330,6 +336,7 @@ describe('Awards', () => {
 
                             // Start testing once all awards are created
                             if (++count == 15) {
+                                // Race condition here doesn't matter, as none will have this ID
                                 // Make request
                                 chai.request(server)
                                     .get('/awards/53425353')
@@ -396,6 +403,7 @@ describe('Awards', () => {
 
                             // Start testing once all awards are created
                             if (++count == 14) {
+                                // Race condition here doesn't matter, as the modified data is being tested
 
                                 // Modify data
                                 awardData.note = "success";
@@ -458,6 +466,7 @@ describe('Awards', () => {
 
                     // Start testing once all awards are created
                     if (++count == 15) {
+                        // Race condition here doesn't matter, as the queried ID will not exist
                         // Make request
                         chai.request(server)
                             .put('/awards/' + '4534234')
