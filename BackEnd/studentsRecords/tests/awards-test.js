@@ -13,7 +13,7 @@ let expect = chai.expect;
 chai.use(chaiHttp);
 
 // Our parent block - stores the test
-describe('Students', () => {
+describe('Awards', () => {
     let host = "http://localhost:3700";     // This is the Node.js server
 
     //Before each test we empty the database
@@ -37,16 +37,16 @@ describe('Students', () => {
     /*
      * Test the /GET routes
      */
-    describe('/GET students', () => {
-        it('it should GET all students ', (done) => {
+    describe('/GET awards', () => {
+        it('it should GET all awards ', (done) => {
             // Request all students
             chai.request(server)
                 .get('/residencies')
                 .end((err, res) => {
                     expect(res).to.have.status(200);
                     expect(res).to.be.json;
-                    expect(res.body).to.have.property('residency');
-                    expect(res.body.residency.length).to.be.eq(0);
+                    expect(res.body).to.have.property('award');
+                    expect(res.body.award.length).to.be.eq(0);
                     done();
                 });
         });
@@ -209,7 +209,7 @@ describe('Students', () => {
 
                     // Start testing once all students are created
                     if (++count == 15) {
-                        // Make residency request
+                        // Make award request
                         chai.request(server)
                             .get('/students')
                             .query({filter: {number: 102}})
@@ -291,7 +291,7 @@ describe('Students', () => {
             }
         });
 
-        it('it should 404 for residency when given bad ID', (done) => {
+        it('it should 404 for award when given bad ID', (done) => {
 
             // Set up mock data
             let testRes = new Models.Residencies({name: "Johnny Test House"});
@@ -460,7 +460,7 @@ describe('Students', () => {
                         // Make request
                         chai.request(server)
                             .put('/students/' + '4534234')
-                            .send({student: studentData})
+                            .send({award: studentData})
                             .end((err, res) => {
                                 expect(res).to.have.status(404);
                                 done();
