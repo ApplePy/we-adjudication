@@ -13,7 +13,7 @@ let expect = chai.expect;
 chai.use(chaiHttp);
 
 // Our parent block - stores the test
-describe('Awards', () => {
+describe('Advanced Standings', () => {
     let host = "http://localhost:3700";     // This is the Node.js server
 
     //Before each test we empty the database
@@ -37,28 +37,28 @@ describe('Awards', () => {
     /*
      * Test the /GET routes
      */
-    describe('/GET awards', () => {
-        it('it should GET all awards ', (done) => {
-            // Request all awards
+    describe('/GET advanced standings', () => {
+        it('it should GET all advanced standings ', (done) => {
+            // Request all advanced standings
             chai.request(server)
-                .get('/awards')
+                .get('/advanced-standings')
                 .end((err, res) => {
                     expect(res).to.have.status(200);
                     expect(res).to.be.json;
-                    expect(res.body).to.have.property('award');
-                    expect(res.body.award.length).to.be.eq(0);
+                    expect(res.body).to.have.property('advanced-standing');
+                    expect(res.body['advanced-standing'].length).to.be.eq(0);
                     done();
                 });
         });
 
-        it('it should GET all awards when created', (done) => {
+        it('it should GET all advanced standings when created', (done) => {
 
             // Set up mock data
             let testRes = new Models.Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err;
 
-                // Make some students, then make awards for the students, then query for all
+                // Make some students, then make advanced standings for the students, then query for all
                 var studentData = {
                     number: 594265372,
                     firstName: "Johnny",
@@ -76,31 +76,39 @@ describe('Awards', () => {
                 testStudent.save((err) => {
                     if (err) throw err;
 
-                    var awardData = {
+                    var standingData = {
+                        course: "BASKWV 1000",
+                        description: "Basket weaving",
+                        grade: 100,
+                        from: "UBC",
                         recipient: testStudent
                     };
 
-                    // Create 15 awards
+                    // Create 15 advanced standings
                     var count = 0;
                     for (var num = 0; num < 15; num++) {
-                        awardData.note = num.toString();
-                        let testAward = new Models.Awards(awardData);
-                        testAward.save((err) => {
+                        standingData.units = num.toString();
+                        let testStanding = new Models.AdvancedStandings(standingData);
+                        testStanding.save((err) => {
                             if (err) throw err;
 
-                            // Start testing once all awards are created
+                            // Start testing once all advanced standings are created
                             if (++count == 15) {
                                 // Make request
                                 chai.request(server)
-                                    .get('/awards')
+                                    .get('/advanced-standings')
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
                                         expect(res).to.be.json;
-                                        expect(res.body).to.have.property('award');
-                                        expect(res.body.award.length).to.be.eq(15);
-                                        for (var num = 0; num < 15; num++) {
-                                            // Cannot test note value, since there's no guarantee that they're in order
-                                            expect(res.body.award[num].recipient).to.equal(testStudent._id.toString());
+                                        expect(res.body).to.have.property('advanced-standing');
+                                        expect(res.body['advanced-standing'].length).to.eq(15);
+                                        for (var num = 0; num < 5; num++) {
+                                            expect(res.body['advanced-standing'][num].course).to.eq(standingData.course);
+                                            expect(res.body['advanced-standing'][num].description).to.eq(standingData.description);
+                                            expect(res.body['advanced-standing'][num].grade).to.eq(standingData.grade);
+                                            expect(res.body['advanced-standing'][num].from).to.eq(standingData.from);
+                                            expect(res.body['advanced-standing'][num].units).to.equal(num);
+                                            expect(res.body['advanced-standing'][num].recipient).to.equal(testStudent._id.toString());
                                         }
                                         done();
                                     });
@@ -111,14 +119,14 @@ describe('Awards', () => {
             });
         });
 
-        it('it should GET a award by recipient', (done) => {
+        it('it should GET an advanced standing by recipient', (done) => {
 
             // Set up mock data
             let testRes = new Models.Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err;
 
-                // Make some students, then make awards for the students, then query for all
+                // Make some students, then make advanced standings for the students, then query for all
                 var studentData = {
                     number: 594265372,
                     firstName: "Johnny",
@@ -136,33 +144,40 @@ describe('Awards', () => {
                 testStudent.save((err) => {
                     if (err) throw err;
 
-                    var awardData = {
+                    var standingData = {
+                        course: "BASKWV 1000",
+                        description: "Basket weaving",
+                        grade: 100,
+                        from: "UBC",
                         recipient: testStudent
                     };
 
-                    // Create 15 awards
+                    // Create 15 advanced standings
                     var count = 0;
                     for (var num = 0; num < 15; num++) {
-                        awardData.note = num.toString();
-                        let testAward = new Models.Awards(awardData);
-                        testAward.save((err) => {
+                        standingData.units = num;
+                        let testStanding = new Models.AdvancedStandings(standingData);
+                        testStanding.save((err) => {
                             if (err) throw err;
 
-                            // Start testing once all awards are created
+                            // Start testing once all advanced standings are created
                             if (++count == 15) {
-                                // Race condition here doesn't matter, as all runs will still get 15 results returned
-
                                 // Make request
                                 chai.request(server)
-                                    .get('/awards')
+                                    .get('/advanced-standings')
                                     .query({filter: {student: testStudent._id.toString()}})
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
                                         expect(res).to.be.json;
-                                        expect(res.body).to.have.property('award');
-                                        expect(res.body.award.length).to.be.equal(15);
+                                        expect(res.body).to.have.property('advanced-standing');
+                                        expect(res.body['advanced-standing'].length).to.eq(15);
                                         for (var num = 0; num < 15; num++) {
-                                            expect(res.body.award[num].recipient).to.equal(testAward.recipient.toString());
+                                            expect(res.body['advanced-standing'][num].course).to.eq(standingData.course);
+                                            expect(res.body['advanced-standing'][num].description).to.eq(standingData.description);
+                                            expect(res.body['advanced-standing'][num].grade).to.eq(standingData.grade);
+                                            expect(res.body['advanced-standing'][num].from).to.eq(standingData.from);
+                                            //expect(res.body['advanced-standing'][num].units).to.equal(num);
+                                            expect(res.body['advanced-standing'][num].recipient).to.equal(testStudent._id.toString());
                                         }
                                         done();
                                     });
@@ -173,14 +188,14 @@ describe('Awards', () => {
             });
         });
 
-        it('it should GET nothing if student has no award', (done) => {
+        it('it should GET nothing if student has no advanced standing', (done) => {
 
             // Set up mock data
             let testRes = new Models.Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err;
 
-                // Make some students, then make awards for the students (except one), then query for all
+                // Make some students, then make advanced standings for the students (except one), then query for all
                 var studentData = {
                     number: 594265372,
                     firstName: "Johnny",
@@ -203,31 +218,33 @@ describe('Awards', () => {
                     otherStudent.save((err) => {
                         if (err) throw err;
 
-                        var awardData = {
+                        var standingData = {
+                            course: "BASKWV 1000",
+                            description: "Basket weaving",
+                            grade: 100,
+                            from: "UBC",
                             recipient: otherStudent
                         };
 
-                        // Create 15 awards
+                        // Create 15 advanced standings
                         var count = 0;
                         for (var num = 0; num < 15; num++) {
-                            awardData.note = num.toString();
-                            let testAward = new Models.Awards(awardData);
-                            testAward.save((err) => {
+                            standingData.units = num;
+                            let testStanding = new Models.AdvancedStandings(standingData);
+                            testStanding.save((err) => {
                                 if (err) throw err;
 
-                                // Start testing once all awards are created
+                                // Start testing once all advanced standings are created
                                 if (++count == 15) {
-                                    // Race condition here doesn't matter, as all runs will still get 0 results returned
-
                                     // Make request
                                     chai.request(server)
-                                        .get('/awards')
+                                        .get('/advanced-standings')
                                         .query({filter: {student: testStudent._id.toString()}})
                                         .end((err, res) => {
                                             expect(res).to.have.status(200);
                                             expect(res).to.be.json;
-                                            expect(res.body).to.have.property('award');
-                                            expect(res.body.award.length).to.be.equal(0);
+                                            expect(res.body).to.have.property('advanced-standing');
+                                            expect(res.body['advanced-standing'].length).to.be.equal(0);
                                             done();
                                         });
                                 }
@@ -238,14 +255,14 @@ describe('Awards', () => {
             });
         });
 
-        it('it should GET award when given ID', (done) => {
+        it('it should GET advanced standing when given ID', (done) => {
 
             // Set up mock data
             let testRes = new Models.Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err;
 
-                // Make some students, then make awards for the students, then query for all
+                // Make some students, then make advanced standings for the students, then query for all
                 var studentData = {
                     number: 594265372,
                     firstName: "Johnny",
@@ -263,31 +280,37 @@ describe('Awards', () => {
                 testStudent.save((err) => {
                     if (err) throw err;
 
-                    var awardData = {
+                    var standingData = {
+                        course: "BASKWV 1000",
+                        description: "Basket weaving",
+                        grade: 100,
+                        from: "UBC",
                         recipient: testStudent
                     };
 
-                    // Create 15 awards
+                    // Create 15 advanced standings
                     var count = 0;
                     for (var num = 0; num < 15; num++) {
-                        awardData.note = num.toString();
-                        let testAward = new Models.Awards(awardData);
-                        testAward.save((err) => {
+                        standingData.units = num;
+                        let testStanding = new Models.AdvancedStandings(standingData);
+                        testStanding.save((err) => {
                             if (err) throw err;
 
-                            // Start testing once all awards are created
+                            // Start testing once all advanced standings are created
                             if (++count == 15) {
-                                // Race condition here doesn't matter, as we already know that the latest version of testAward saved
-
                                 // Make request
                                 chai.request(server)
-                                    .get('/awards/' + testAward._id.toString())
+                                    .get('/advanced-standings/' + testStanding._id.toString())
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
                                         expect(res).to.be.json;
-                                        expect(res.body).to.have.property('award');
-                                        expect(res.body.award.note).to.equal(testAward.note.toString());
-                                        expect(res.body.award.recipient).to.equal(testAward.recipient.toString());
+                                        expect(res.body).to.have.property('advanced-standing');
+                                        expect(res.body['advanced-standing'].course).to.eq(standingData.course);
+                                        expect(res.body['advanced-standing'].description).to.eq(standingData.description);
+                                        expect(res.body['advanced-standing'].grade).to.eq(standingData.grade);
+                                        expect(res.body['advanced-standing'].from).to.eq(standingData.from);
+                                        expect(res.body['advanced-standing'].units).to.equal(testStanding.units);
+                                        expect(res.body['advanced-standing'].recipient).to.equal(testStudent._id.toString());
                                         done();
                                     });
                             }
@@ -297,7 +320,7 @@ describe('Awards', () => {
             });
         });
 
-        it('it should 404 for award when given bad ID', (done) => {
+        it('it should 404 for advanced standing when given bad ID', (done) => {
 
             // Set up mock data
             let testRes = new Models.Residencies({name: "Johnny Test House"});
@@ -322,24 +345,27 @@ describe('Awards', () => {
                 testStudent.save((err) => {
                     if (err) throw err;
 
-                    var awardData = {
+                    var standingData = {
+                        course: "BASKWV 1000",
+                        description: "Basket weaving",
+                        grade: 100,
+                        from: "UBC",
                         recipient: testStudent
                     };
 
-                    // Create 15 awards
+                    // Create 15 advanced standings
                     var count = 0;
                     for (var num = 0; num < 15; num++) {
-                        awardData.note = num.toString();
-                        let testAward = new Models.Awards(awardData);
-                        testAward.save((err) => {
+                        standingData.units = num;
+                        let testStanding = new Models.AdvancedStandings(standingData);
+                        testStanding.save((err) => {
                             if (err) throw err;
 
-                            // Start testing once all awards are created
+                            // Start testing once all advanced standings are created
                             if (++count == 15) {
-                                // Race condition here doesn't matter, as none will have this ID
                                 // Make request
                                 chai.request(server)
-                                    .get('/awards/53425353')
+                                    .get('/advanced-standings/53425353')
                                     .end((err, res) => {
                                         expect(res).to.have.status(404);
                                         done();
@@ -355,8 +381,8 @@ describe('Awards', () => {
     /*
      * Test the /PUT routes
      */
-    describe('/PUT awards', () => {
-        it('it should PUT an updated award', (done) => {
+    describe('/PUT advanced standing', () => {
+        it('it should PUT an updated advanced standing', (done) => {
 
             // Set up mock data
             let testRes = new Models.Residencies({name: "Johnny Test House"});
@@ -382,47 +408,57 @@ describe('Awards', () => {
             testStudent.save((err) =>{
                 if (err) throw err;
 
-                var awardData = {
+                var standingData = {
+                    course: "BASKWV 1000",
+                    description: "Basket weaving",
+                    grade: 100,
+                    from: "UBC",
                     recipient: testStudent
                 };
 
-
-                // Create first award
-                awardData.note = 0;
-                let testAward = new Models.Awards(awardData);
-                testAward.save((err) => {
+                // Create first advanced standing
+                standingData.units = 0;
+                let testStanding = new Models.AdvancedStandings(standingData);
+                testStanding.save((err) => {
                     if (err) throw err;
 
-                    // Create 14 awards
+                    // Create 14 advanced standings
                     var count = 0;
                     for (var num = 1; num < 15; num++) {
-                        awardData.note = num;
-                        let otherAwards = new Models.Awards(awardData);
-                        otherAwards.save((err) => {
+                        standingData.units = num;
+                        let otherStandings = new Models.AdvancedStandings(standingData);
+                        otherStandings.save((err) => {
                             if (err) throw err;
 
                             // Start testing once all awards are created
                             if (++count == 14) {
-                                // Race condition here doesn't matter, as the modified data is being tested
 
                                 // Modify data
-                                awardData.note = "success";
+                                standingData.units = 9001;
 
                                 // Make request
                                 chai.request(server)
-                                    .put('/awards/' + testAward._id.toString())
-                                    .send({award: awardData})
+                                    .put('/advanced-standings/' + testStanding._id.toString())
+                                    .send({'advanced-standing': standingData})
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
                                         expect(res).to.be.json;
-                                        expect(res.body).to.have.property('award');
-                                        expect(res.body.award.note).to.equal(awardData.note);
-                                        expect(res.body.award.recipient).to.equal(testStudent._id.toString());
+                                        expect(res.body).to.have.property('advanced-standing');
+                                        expect(res.body['advanced-standing'].course).to.eq(standingData.course);
+                                        expect(res.body['advanced-standing'].description).to.eq(standingData.description);
+                                        expect(res.body['advanced-standing'].grade).to.eq(standingData.grade);
+                                        expect(res.body['advanced-standing'].from).to.eq(standingData.from);
+                                        expect(res.body['advanced-standing'].units).to.equal(standingData.units);
+                                        expect(res.body['advanced-standing'].recipient).to.equal(testStudent._id.toString());
 
                                         // Test mongo to ensure it was written
-                                        Models.Awards.findById(testAward._id, (error, res) => {
+                                        Models.AdvancedStandings.findById(testStanding._id, (error, res) => {
                                             expect(error || res.length === 0).to.be.false;
-                                            expect(res.note).to.equal(awardData.note);
+                                            expect(res.course).to.eq(standingData.course);
+                                            expect(res.description).to.eq(standingData.description);
+                                            expect(res.grade).to.eq(standingData.grade);
+                                            expect(res.from).to.eq(standingData.from);
+                                            expect(res.units).to.equal(standingData.units);
                                             expect(res.recipient.toString()).to.equal(testStudent._id.toString());
                                             done();
                                         });
@@ -434,57 +470,68 @@ describe('Awards', () => {
             });
         });
 
-        it('it should 404 on PUT a nonexistent award', (done) => {
+        it('it should 404 on PUT a nonexistent advanced standing', (done) => {
 
             // Set up mock data
             let testRes = new Models.Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
-                if (err) throw err
-            });
+                if (err) throw err;
 
-            let firstNumber = 594265372;
-            var awardData = {
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-                resInfo: testRes
-            };
-
-            // Create 15 awards
-            var count = 0;
-            for (var num = 0; num < 15; num++) {
-                awardData.number = firstNumber + num;
-                let testAward = new Models.Awards(awardData);
-                testAward.save((err) => {
+                // Make some students, then make advanced standings for the students, then query for all
+                var studentData = {
+                    number: 594265372,
+                    firstName: "Johnny",
+                    lastName: "Test",
+                    gender: 1,
+                    DOB: new Date().toISOString(),
+                    photo: "/some/link",
+                    registrationComments: "No comment",
+                    basisOfAdmission: "Because",
+                    admissionAverage: 90,
+                    admissionComments: "None",
+                    resInfo: testRes
+                };
+                let testStudent = new Models.Students(studentData);
+                testStudent.save((err) => {
                     if (err) throw err;
 
-                    // Start testing once all awards are created
-                    if (++count == 15) {
-                        // Race condition here doesn't matter, as the queried ID will not exist
-                        // Make request
-                        chai.request(server)
-                            .put('/awards/' + '4534234')
-                            .send({award: awardData})
-                            .end((err, res) => {
-                                expect(res).to.have.status(404);
-                                done();
-                            });
+                    var standingData = {
+                        course: "BASKWV 1000",
+                        description: "Basket weaving",
+                        grade: 100,
+                        from: "UBC",
+                        recipient: testStudent
+                    };
+
+                    // Create 15 advanced standings
+                    var count = 0;
+                    for (var num = 0; num < 15; num++) {
+                        standingData.units = num;
+                        let testStanding = new Models.AdvancedStandings(standingData);
+                        testStanding.save((err) => {
+                            if (err) throw err;
+
+                            // Start testing once all advanced standings are created
+                            if (++count == 15) {
+                                // Make request
+                                chai.request(server)
+                                    .get('/advanced-standings/4765437876543')
+                                    .end((err, res) => {
+                                        expect(res).to.have.status(404);
+                                        done();
+                                    });
+                            }
+                        });
                     }
                 });
-            }
+            });
         });
     });
 
     /*
      * Test the /POST routes
      */
-    describe('/POST an award', () => {
+    describe('/POST an advanced standing', () => {
         it('it should POST successfully', (done) => {
 
             // Set up mock data
@@ -493,32 +540,45 @@ describe('Awards', () => {
             };
             let testStudent = new Models.Students(studentData);
 
-            let awardData ={
-                note: "A note",
+            let standingData ={
+                course: "BASKWV 1000",
+                description: "Basket weaving",
+                grade: 100,
+                units: 1,
+                from: "UBC",
                 recipient: testStudent
             };
 
             // Save mock
             testStudent.save((err) => {
-               if(err) throw err;
+                if(err) throw err;
 
                 // Make request
                 chai.request(server)
-                    .post('/awards')
-                    .send({award: awardData})
+                    .post('/advanced-standings')
+                    .send({'advanced-standing': standingData})
                     .end((err, res) => {
                         expect(res).to.have.status(201);
                         expect(res).to.be.json;
-                        expect(res.body).to.have.property('award');
-                        expect(res.body.award.note).to.be.a('String');
-                        expect(res.body.award.recipient).to.equal(testStudent._id.toString());
+                        expect(res.body).to.have.property('advanced-standing');
+                        expect(res.body['advanced-standing'].course).to.eq(standingData.course);
+                        expect(res.body['advanced-standing'].description).to.eq(standingData.description);
+                        expect(res.body['advanced-standing'].grade).to.eq(standingData.grade);
+                        expect(res.body['advanced-standing'].from).to.eq(standingData.from);
+                        expect(res.body['advanced-standing'].units).to.equal(standingData.units);
+                        expect(res.body['advanced-standing'].recipient).to.equal(testStudent._id.toString());
 
                         // Check underlying database
-                        Models.Awards.findById(res.body.award._id, function (error, award) {
+                        Models.AdvancedStandings.findById(res.body['advanced-standing']._id, function (error, standing) {
                             expect(error).to.be.null;
-                            expect(award).to.not.be.null;
-                            expect(award.note).to.be.a('String');
-                           expect(award.recipient.toString()).to.equal(testStudent._id.toString());
+                            expect(standing).to.not.be.null;
+                            expect(res.body).to.have.property('advanced-standing');
+                            expect(standing.course).to.eq(standingData.course);
+                            expect(standing.description).to.eq(standingData.description);
+                            expect(standing.grade).to.eq(standingData.grade);
+                            expect(standing.from).to.eq(standingData.from);
+                            expect(standing.units).to.equal(standingData.units);
+                            expect(standing.recipient.toString()).to.equal(testStudent._id.toString());
 
                             done();
                         });

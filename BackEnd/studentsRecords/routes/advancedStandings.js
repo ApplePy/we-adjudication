@@ -9,10 +9,10 @@ router.route('/')
 
     // New advanced standing entry
     .post(parseUrlencoded, parseJSON, function (request, response) {
-        var advancedStanding = new models.AdvancedStandings(request.body.advancedStanding);
+        var advancedStanding = new models.AdvancedStandings(request.body['advanced-standing']);
         advancedStanding.save(function (error) {
-            if (error) response.send(error);
-            response.json({advancedStanding: advancedStanding});
+            if (error) response.status(500).send(error);
+            else response.status(201).json({'advanced-standing': advancedStanding});
         });
     })
 
@@ -23,15 +23,15 @@ router.route('/')
         // Get all advanced standings
         if (!Student) {
             models.AdvancedStandings.find(function (error, advancedStanding) {
-                if (error) response.send(error);
-                response.json({advancedStanding: advancedStanding});
+                if (error) response.status(500).send(error);
+                response.json({'advanced-standing': advancedStanding});
             });
         }
         // Get advanced standings for a student
         else {
             models.AdvancedStandings.find({"recipient": Student.student}, function (error, students) {
-                if (error) response.send(error);
-                response.json({advancedStanding: students});
+                if (error) response.status(500).send(error);
+                response.json({'advanced-standing': students});
             });
         }
     });
@@ -41,8 +41,8 @@ router.route('/:advancedStanding_id')
     // Get advanced standing by id
     .get(parseUrlencoded, parseJSON, function (request, response) {
         models.AdvancedStandings.findById(request.params.advancedStanding_id, function (error, advancedStanding) {
-            if (error) response.send(error);
-            response.json({advancedStanding: advancedStanding});
+            if (error) response.status(404).send(error);
+            else response.json({'advanced-standing': advancedStanding});
         })
     })
 
@@ -50,18 +50,22 @@ router.route('/:advancedStanding_id')
     .put(parseUrlencoded, parseJSON, function (request, response) {
         models.AdvancedStandings.findById(request.params.advancedStanding_id, function (error, advancedStanding) {
             if (error) {
-                response.send({error: error});
+                response.status(404).send({error: error});
             }
             else {
-                advancedStanding.note = request.body.advancedStanding.note;
-                advancedStanding.recipient = request.body.advancedStanding.recipient;
+                advancedStanding.course = request.body['advanced-standing'].course;
+                advancedStanding.description = request.body['advanced-standing'].description;
+                advancedStanding.grade = request.body['advanced-standing'].grade;
+                advancedStanding.from = request.body['advanced-standing'].from;
+                advancedStanding.units = request.body['advanced-standing'].units;
+                advancedStanding.recipient = request.body['advanced-standing'].recipient;
 
                 advancedStanding.save(function (error) {
                     if (error) {
-                        response.send({error: error});
+                        response.status(500).send({error: error});
                     }
                     else {
-                        response.json({advancedStanding: advancedStanding});
+                        response.json({'advanced-standing': advancedStanding});
                     }
                 });
             }
