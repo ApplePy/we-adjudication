@@ -150,7 +150,23 @@ export default Ember.Component.extend({
 
     //Called from confirmation on modal
     confirmedDelete(){
-      console.log("pls work");
+
+      //Delete the student from the database.  **Also need to delete advanced standing and scholarships and awards**
+      this.get('store').findRecord('student', this.get('currentStudent').id, { backgroundReload: false }).then(function(student) {
+        student.deleteRecord();
+        student.get('isDeleted'); // => true
+        student.save(); // => DELETE to /student/:_id
+      });
+
+      //If this is the last student on the page, load previous.  If not, load next
+      if(this.get('currentIndex') == this.get('lastIndex')){
+        this.send('previousStudent');
+      } else {
+        this.send('nextStudent');
+      }
+
+      //Subtract 1 from the last index of this page of students to account for the missing record
+      this.set('lastIndex', this.get('lastIndex') - 1);
     },
   }
 });
