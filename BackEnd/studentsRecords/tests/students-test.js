@@ -497,9 +497,6 @@ describe('Students', () => {
                 resInfo: testRes._id.toString()
             };
 
-            // Modify data
-            studentData.firstName = "Noop";
-
             // Make request
             chai.request(server)
                 .post('/students')
