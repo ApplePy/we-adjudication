@@ -24,7 +24,14 @@ export default Ember.Component.extend({
      ).catch((err)=>{
        alert("Invalid student number!");
      });
-    }
+    },
+
+   close: function() {
+     this.set('notDONE', false);
+
+     Ember.$('.ui.modal').modal('hide');
+     Ember.$('.ui.modal').remove();
+   }
   },
 
   didRender() {
