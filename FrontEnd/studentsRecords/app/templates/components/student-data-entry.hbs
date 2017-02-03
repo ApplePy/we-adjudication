@@ -45,7 +45,7 @@
   <!-- Note that offset is an "in" and "out" parameter !-->
  {{all-students INDEX = currentIndex notDONE = showAllStudents offset = offset studentsModel = studentsRecords}}
 {{else if isDeleting}}
-  {{confirm-delete notDone = isDeleting toDelete = currentStudent studentsModel = studentsRecords}}
+  {{confirm-delete notDONE = isDeleting onConfirm=(action 'confirmedDelete')}}
 {{else}}
   <!-- Show data entry form -->
 

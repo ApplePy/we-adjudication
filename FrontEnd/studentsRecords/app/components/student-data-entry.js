@@ -143,8 +143,14 @@ export default Ember.Component.extend({
       this.set('selectedDate', date);
     },
 
+    //Brings up the confirm-delete component.  Will ask if sure wants to delete
     deleteStudent(){
       this.set('isDeleting', true);
+    },
+
+    //Called from confirmation on modal
+    confirmedDelete(){
+      console.log("pls work");
     },
   }
 });

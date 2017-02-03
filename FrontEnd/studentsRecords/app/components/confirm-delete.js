@@ -1,18 +1,22 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-  notDone: null,
+  notDONE: null,
   toDelete: null,
   studentsModel: null,
 
   actions: {
+    //Gets rid of the modal
     cancel: function () {
-      this.set('notDone', false);
+      this.set('notDONE', false);
       Ember.$('.ui.modal').modal('hide');
       Ember.$('.ui.modal').remove();
     },
+
+    //Calls the action defined by onConfirm in student-data-entry template
     confirm: function(){
-      this.set('notDone', false);
+      this.get('onConfirm')();
+      this.set('notDONE', false);
       Ember.$('.ui.modal').modal('hide');
       Ember.$('.ui.modal').remove();
     }
