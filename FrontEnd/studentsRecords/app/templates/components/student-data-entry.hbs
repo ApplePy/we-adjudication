@@ -41,9 +41,14 @@
   </a>
 </div>
 
-{{#if showAllStudents}}
+{{#if showFindStudent}}
+  {{find-student INDEX = currentIndex notDONE = showFindStudent offset = offset studentsModel = studentsRecords}}
+<!-- close if -->
+{{else if showAllStudents}}
   <!-- Note that offset is an "in" and "out" parameter !-->
  {{all-students INDEX = currentIndex notDONE = showAllStudents offset = offset studentsModel = studentsRecords}}
+
+
 {{else}}
   <!-- Show data entry form -->
 
