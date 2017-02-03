@@ -5,19 +5,21 @@ var bodyParser = require('body-parser');
 var parseUrlencoded = bodyParser.urlencoded({extended: false});
 var parseJSON = bodyParser.json();
 
+// TODO: WARNING: PUT/POST does not check for missing data
+
 router.route('/')
     .post(parseUrlencoded, parseJSON, function (request, response) {
         var student = new models.Students(request.body.student);
         student.save(function (error) {
             if (error) response.send(error);
-            response.json({student: student});
+            response.status(201).json({student: student});
         });
     })
     .get(parseUrlencoded, parseJSON, function (request, response) {
         var l = parseInt(request.query.limit) ;
         var o = parseInt(request.query.offset);
-        var Student = request.query.student;
-        if (!Student) {
+
+        if (!request.query.filter) {
             //models.Students.find(function (error, students) {
             //    if (error) response.send(error);
             //    response.json({student: students});
@@ -28,8 +30,8 @@ router.route('/')
                     response.json({student: students.docs});
                 });
         } else {
-            //        if (Student == "residency")
-            models.Students.find({"residency": request.query.residency}, function (error, students) {
+            var StudentNo = request.query.filter.number;
+            models.Students.find({number: StudentNo}, function (error, students) {
                 if (error) response.send(error);
                 response.json({student: students});
             });
@@ -40,7 +42,7 @@ router.route('/:student_id')
     .get(parseUrlencoded, parseJSON, function (request, response) {
         models.Students.findById(request.params.student_id, function (error, student) {
             if (error) {
-                response.send({error: error});
+                response.status(404).send({error: error});
             }
             else {
                 response.json({student: student});
@@ -50,7 +52,7 @@ router.route('/:student_id')
     .put(parseUrlencoded, parseJSON, function (request, response) {
         models.Students.findById(request.params.student_id, function (error, student) {
             if (error) {
-                response.send({error: error});
+                response.status(404).send({error: error});
             }
             else {
                 student.number = request.body.student.number;
