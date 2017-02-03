@@ -14,7 +14,7 @@ router.route('/')
         var award = new models.Awards(request.body.award);
         award.save(function (error) {
             if (error) response.status(500).send(error);
-            response.status(201).json({award: award});
+            else response.status(201).json({award: award});
         });
     })
 
@@ -25,7 +25,7 @@ router.route('/')
         if (!Student) {
             models.Awards.find(function (error, residencies) {
                 if (error) response.status(500).send(error);
-                response.json({award: residencies});
+                else response.json({award: residencies});
             });
         }
 
@@ -33,7 +33,7 @@ router.route('/')
         else {
             models.Awards.find({"recipient": Student.student}, function (error, students) {
                 if (error) response.status(500).send(error);
-                response.json({award: students});
+                else response.json({award: students});
             });
         }
     });
@@ -43,7 +43,7 @@ router.route('/:award_id')
     .get(parseUrlencoded, parseJSON, function (request, response) {
         models.Awards.findById(request.params.award_id, function (error, award) {
             if (error) response.status(404).send(error);
-            response.json({award: award});
+            else response.json({award: award});
         })
     })
 
