@@ -41,12 +41,12 @@ describe('Students', () => {
         it('it should GET all students ', (done) => {
             // Request all students
             chai.request(server)
-                .get('/residencies')
+                .get('/students')
                 .end((err, res) => {
                     expect(res).to.have.status(200);
                     expect(res).to.be.json;
-                    expect(res.body).to.have.property('residency');
-                    expect(res.body.residency.length).to.be.eq(0);
+                    expect(res.body).to.have.property('student');
+                    expect(res.body.student.length).to.be.eq(0);
                     done();
                 });
         });
