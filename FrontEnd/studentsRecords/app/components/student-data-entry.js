@@ -18,6 +18,7 @@ export default Ember.Component.extend({
   old_offset: null,
   pageSize: null,
   movingBackword: false,
+  showHelp: false,
   showFindStudent: false,
 
   studentModel: Ember.observer('offset', function () {
@@ -147,6 +148,10 @@ export default Ember.Component.extend({
     findStudent() {
       this.set('showFindStudent', true);
       this.set('showAllStudents', false);
+    },
+
+    help(){
+      this.set('showHelp', true);
     },
   }
 });
