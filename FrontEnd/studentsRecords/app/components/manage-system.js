@@ -2,28 +2,53 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
 
+  genders: null,
+  residencies: null,
   modifyResidencyClicked: false,
+  newGender: null,
+  newResidency: null,
+  genderNames: [],
+  residencyNames: [],
+
+  init() {
+
+    genders = this.get('store').findAll('gender');
+    residencies = this.get('store').findAll('residency');
+
+    for each gender in genders {
+      genderNames.push(gender.name);
+    }
+
+    for each residency in residencies {
+      genderNames.push(gender.name);
+    }
+
+    a.forEach(function(element) {
+      console.log(element);
+    });
+
+  },
 
   actions: {
-    addGender (newGender) {
+    addGender () {
       var gender = this.get('store').createRecord('gender', {
         gender: newGender
       });
 
       gender.save().then(function(value) {
-        console.log('saved');
+        console.log(value);
       }, function(reason) {
-        console.log('failed');
+        console.log(reason);
       }); // => POST to '/genders'
     },
 
-    modifyGender (newGenderName, genderId){
+    modifyGender (genderId, newGenderName){
       this.get('store').findRecord('gender', genderId).then(function(gender) {
-        gender.set('name', newGenderName);
+        gender.set('name', this.get(newGenderName));
         gender.save().then(function(value) {
-          console.log('saved');
-        }, function(reason) {
-          console.log('failed');
+          console.log(value);
+        }, function() {
+          console.log("Could not modify gender.");
         }); // => PATCH to '/genders/1'
       });
     },
@@ -34,26 +59,26 @@ export default Ember.Component.extend({
       });
     },
 
-    addResidency (newResidency) {
+    addResidency () {
       var gender = this.get('store').createRecord('residency', {
         residency: newResidency
       });
 
       gender.save().then(function(value) {
-        console.log('saved');
+        console.log(value);
       }, function(reason) {
-        console.log('failed');
+        console.log(reason);
       }); // => POST to '/genders'
     },
 
-    modifyResidency (newResidencyName, residencyId){
+    modifyResidency (residencyId, newResidencyName){
       this.get('store').findRecord('residency', residencyId).then(function(residency) {
-        residency.set('name', newResidencyName);
+        residency.set('name', this.get(newResidencyName));
         residency.save().then(function(value) {
-          console.log('saved');
+          console.log(value);
         }, function(reason) {
-          console.log('failed');
-        });; // => PATCH to '/genders/1'
+          console.log(reason);
+        }); // => PATCH to '/genders/1'
       });
     },
 
