@@ -94,7 +94,7 @@ export default Ember.Component.extend({
          //console.log(awards.objectAt(0).get('note'));
         //console.log("size " + awards.get('length'));
         for(var i = 0; i < awards.get('length'); i++) {
-          this.get('awardNotes').push(awards.objectAt(i));
+          this.get('awardNotes').pushObject(awards.objectAt(i));
         }
        // alert(this.get('awardNotes').objectAt(0).get('note'));
        });
