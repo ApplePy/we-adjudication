@@ -4,7 +4,6 @@ export default Ember.Component.extend({
 
   genders: null,
   residencies: null,
-  modifyResidencyClicked: false,
   newGender: null,
   newResidency: null,
   genderNames: [],
@@ -12,19 +11,15 @@ export default Ember.Component.extend({
 
   init() {
 
-    genders = this.get('store').findAll('gender');
-    residencies = this.get('store').findAll('residency');
+    this.get('genders') = this.get('store').findAll('gender');
+    this.get('residencies') = this.get('store').findAll('residency');
 
-    for each gender in genders {
-      genderNames.push(gender.name);
-    }
+    this.get('genders').forEach(function(gender) {
+      this.get('genderNames').push(gender.name);
+    });
 
-    for each residency in residencies {
-      genderNames.push(gender.name);
-    }
-
-    a.forEach(function(element) {
-      console.log(element);
+    this.get('residencies').forEach(function(residency) {
+      this.get('residencyNames').push(residency.name);
     });
 
   },
@@ -32,7 +27,7 @@ export default Ember.Component.extend({
   actions: {
     addGender () {
       var gender = this.get('store').createRecord('gender', {
-        gender: newGender
+        gender: this.get('newGender')
       });
 
       gender.save().then(function(value) {
@@ -61,7 +56,7 @@ export default Ember.Component.extend({
 
     addResidency () {
       var gender = this.get('store').createRecord('residency', {
-        residency: newResidency
+        residency: this.get('newResidency')
       });
 
       gender.save().then(function(value) {
