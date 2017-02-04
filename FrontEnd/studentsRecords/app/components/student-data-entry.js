@@ -143,8 +143,22 @@ export default Ember.Component.extend({
       while(undoStack.length > 0) {
         //Get the student from the stack and reset the record in the database
         var studentToUndo = undoStack.popObject();
-        var recordToChange = this.get('studentsRecords', studentToUndo.id);
-        console.log(recordToChange.get('firstName'));
+        this.get('store').findRecord('student', studentToUndo.id, { backgroundReload: false }).then(function(student) {
+          student.number = studentToUndo.number;
+          student.firstName = studentToUndo.firstName;
+          student.lastName = studentToUndo.lastName;
+          student.gender = studentToUndo.gender;
+          student.DOB = studentToUndo.DOB;
+          student.photo = studentToUndo.photo;
+          student.registrationComments = studentToUndo.registrationComments;
+          student.basisOfAdmission = studentToUndo.basisOfAdmission;
+          student.admissionAverage = studentToUndo.admissionAverage;
+          student.admissionComments = studentToUndo.admissionComments;
+          student.awards = studentToUndo.awards;
+          student.advancedStandings = studentToUndo.advancedStandings;
+          student.resInfo = studentToUndo.resInfo;
+        });
+
       }
     },
 
