@@ -18,6 +18,8 @@ export default Ember.Component.extend({
   old_offset: null,
   pageSize: null,
   movingBackword: false,
+  showHelp: false,
+  showFindStudent: false,
 
   studentModel: Ember.observer('offset', function () {
     var self = this;
@@ -128,6 +130,7 @@ export default Ember.Component.extend({
 
     allStudents() {
       this.set('showAllStudents', true);
+      this.set('showFindStudent', false);
     },
 
     selectGender (gender){
@@ -140,6 +143,15 @@ export default Ember.Component.extend({
 
     assignDate (date){
       this.set('selectedDate', date);
+    },
+
+    findStudent() {
+      this.set('showFindStudent', true);
+      this.set('showAllStudents', false);
+    },
+
+    help(){
+      this.set('showHelp', true);
     },
   }
 });

@@ -1,0 +1,19 @@
+<div class="ui modal">
+  <div class="header">Help</div>
+  <div class="content">
+    <div class="ui header">Data Form Actions</div>
+    <ul>
+      {{#each hints as |hint|}}
+        <li>
+          {{hint.button}}: {{hint.hint}}
+        </li>
+      <br/>
+      {{/each}}
+    </ul>
+    <div class="actions">
+      <hr>
+      <div class="ui button" {{action "exit"}}>OK</div>
+    </div>
+
+  </div>
+</div>

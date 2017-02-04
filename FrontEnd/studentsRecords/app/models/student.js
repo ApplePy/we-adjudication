@@ -7,6 +7,12 @@ export default DS.Model.extend({
   gender: DS.attr('number'),
   DOB: DS.attr('date'),
   photo: DS.attr(),
+  registrationComments: DS.attr('string'),
+  basisOfAdmission: DS.attr('string'),
+  admissionAverage: DS.attr('number'),
+  admissionComments: DS.attr('string'),
+  awards: DS.hasMany('award'),
+  advancedStandings: DS.hasMany('advanced-standing'),
   resInfo: DS.belongsTo('residency')
 
 });
