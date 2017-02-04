@@ -9,9 +9,10 @@
         <i class="large leanpub icon"></i>
         Students Records
       </a>
-      <div class="item">
-        <br><br>
-      </div>
+      <a class="item" {{action "manageSystem"}}a>
+        <i class="large code icon"></i>
+        Manage System
+      </a>
       <a class="item " {{action "about"}}>
         <i class="large user icon"></i>
         About
@@ -25,6 +26,9 @@
       {{/if}}
       {{#if isStudentsRecordsDataEntry}}
         {{student-data-entry}}
+      {{/if}}
+      {{#if isManageSystemShowing}}
+        {{manage-system}}
       {{/if}}
       {{#if isAboutShowing}}
         {{about-us}}
