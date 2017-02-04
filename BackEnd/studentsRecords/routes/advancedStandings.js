@@ -10,7 +10,9 @@ router.route('/')
     // New advanced standing entry
     .post(parseUrlencoded, parseJSON, function (request, response) {
         var advancedStanding = new models.AdvancedStandings(request.body.advancedStanding);
-        advancedStanding.save(function (error) {
+
+        if (!advancedStanding.recipient) response.status(400).json({error: {message: "Recipient must be specified."}});
+        else advancedStanding.save(function (error) {
             if (error) response.status(500).send(error);
             else response.status(201).json({advancedStanding: advancedStanding});
         });
@@ -60,7 +62,8 @@ router.route('/:advancedStanding_id')
                 advancedStanding.units = request.body.advancedStanding.units;
                 advancedStanding.recipient = request.body.advancedStanding.recipient;
 
-                advancedStanding.save(function (error) {
+                if (!advancedStanding.recipient) response.status(400).json({error: {message: "Recipient must be specified."}});
+                else advancedStanding.save(function (error) {
                     if (error) {
                         // Ends up here if the recipient specified is bad
                         response.status(500).send({error: error});
