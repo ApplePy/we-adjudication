@@ -6,7 +6,6 @@ var parseUrlencoded = bodyParser.urlencoded({extended: false});
 var parseJSON = bodyParser.json();
 
 // TODO: WARNING: PUT/POST does not check for missing data
-// TODO: Also, residencies/awards/standings and students are not properly linked both ways
 
 router.route('/')
     .post(parseUrlencoded, parseJSON, function (request, response) {
