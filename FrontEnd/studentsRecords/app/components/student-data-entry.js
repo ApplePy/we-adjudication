@@ -72,6 +72,7 @@ export default Ember.Component.extend({
       // Show first student data
       self.set('currentIndex', self.get('firstIndex'));
     });
+
   },
 
   showStudentData: function (index) {
@@ -102,6 +103,11 @@ export default Ember.Component.extend({
       updatedStudent.save().then(() => {
         //     this.set('isStudentFormEditing', false);
       });
+    },
+
+    undoSave(){
+      //Rollback the store value to the value last saved in the database
+      this.get('currentStudent').rollbackAttributes();
     },
 
     firstStudent() {
