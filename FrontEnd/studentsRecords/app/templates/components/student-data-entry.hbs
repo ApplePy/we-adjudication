@@ -148,8 +148,9 @@
     <h2>{{currentStudent.number}}</h2>
     <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
     <br><br>
-    {{#each currentStudent.advancedStandings as |course|}}
-    {{advanced-standing course = course.course unit = course.unit description = course.description grade = course.grade from = course.from recipient = currentStudent}}
+    {{#each advancedStandingArray as |course|}}
+    {{advanced-standing standing = course}}
+    <br>
     {{/each}}
 
     <br>
@@ -168,6 +169,7 @@
     <br><br>
     {{#each awardNotes as |award|}}
     {{scholarships-awards award = award}}
+    <br>
     {{/each}}
     <div class="ui button" {{action "addAward"}}>Add Scholarship/Award</div>
 

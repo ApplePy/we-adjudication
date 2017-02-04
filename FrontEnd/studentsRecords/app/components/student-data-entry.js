@@ -23,6 +23,7 @@ export default Ember.Component.extend({
   showNewCourse: false,
   showNewAward: false,
   awardNotes: [],
+  advancedStandingArray: [],
 
   studentModel: Ember.observer('offset', function () {
     var self = this;
@@ -91,12 +92,20 @@ export default Ember.Component.extend({
            recipient: this.get('currentStudent').id
          }
        }).then((awards) => {
-         //console.log(awards.objectAt(0).get('note'));
-        //console.log("size " + awards.get('length'));
         for(var i = 0; i < awards.get('length'); i++) {
           this.get('awardNotes').pushObject(awards.objectAt(i));
         }
-       // alert(this.get('awardNotes').objectAt(0).get('note'));
+       });
+
+       this.get('store').query('advanced-standing', {
+         filter: {
+           recipient: this.get('currentStudent').id
+         }
+       }).then((standing) => {
+        for(var i = 0; i < standing.get('length'); i++) {
+          this.get('advancedStandingArray').pushObject(standing.objectAt(i));
+        }
+        console.log(this.get('advancedStandingArray').objectAt(0));
        });
   },
 

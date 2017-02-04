@@ -1,10 +1,11 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    course: null,
+    /*course: null,
     unit: null,
     description: null,
     grade: null,
-    from: null,
+    from: null, */
     recipient: null,
+    standing: null
 });
