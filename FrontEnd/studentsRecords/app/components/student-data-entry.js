@@ -80,6 +80,11 @@ export default Ember.Component.extend({
     var date = this.get('currentStudent').get('DOB');
     var datestring = date.toISOString().substring(0, 10);
     this.set('selectedDate', datestring);
+
+    //Fixes gender/residency bug.  Sets selectedResidency/selectedGender to the value
+    //the student has in the database.  Before, would only set the value if it was selected
+    this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
+    this.set('selectedGender', this.get('currentStudent').get('gender'));
   },
 
   didRender() {
