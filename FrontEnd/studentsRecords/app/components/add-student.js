@@ -40,6 +40,8 @@ export default Ember.Component.extend({
 
       $('.small.modal').modal('show');
 
+      // TODO: Review later to see if necessary. Merging for now.
+
       this.set('numBox', null);
       this.set('fNameBox', null);
       this.set('lNameBox', null);
