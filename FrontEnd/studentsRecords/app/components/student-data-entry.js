@@ -18,6 +18,7 @@ export default Ember.Component.extend({
   old_offset: null,
   pageSize: null,
   movingBackword: false,
+  isDeleting: false,
   showHelp: false,
   showFindStudent: false,
 
@@ -156,6 +157,31 @@ export default Ember.Component.extend({
       this.set('selectedDate', date);
     },
 
+    //Brings up the confirm-delete component.  Will ask if sure wants to delete
+    deleteStudent(){
+      this.set('isDeleting', true);
+    },
+
+    //Called from confirmation on modal
+    confirmedDelete(){
+
+      //Delete the student from the database.  **Also need to delete advanced standing and scholarships and awards**
+      this.get('store').findRecord('student', this.get('currentStudent').id, { backgroundReload: false }).then(function(student) {
+        student.deleteRecord();
+        student.save(); // => DELETE to /student/:_id
+      });
+
+      //If this is the last student on the page, load previous.  If not, load next
+      if(this.get('currentIndex') == this.get('lastIndex')){
+        this.send('previousStudent');
+      } else {
+        this.send('nextStudent');
+      }
+
+      //Subtract 1 from the last index of this page of students to account for the missing record
+      this.set('lastIndex', this.get('lastIndex') - 1);
+    },
+    
     findStudent() {
       this.set('showFindStudent', true);
       this.set('showAllStudents', false);
