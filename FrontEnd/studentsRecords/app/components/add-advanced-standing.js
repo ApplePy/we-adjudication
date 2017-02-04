@@ -16,6 +16,7 @@ export default Ember.Component.extend({
 
  actions: {
   saveCourse() {
+      alert(this.get('newcourse'));
      var advancedStanding = this.get('store').createRecord('advanced-standing', {
       course: this.get('newcourse'),
       description: this.get('newdescription'),
@@ -25,14 +26,7 @@ export default Ember.Component.extend({
       recipient: this.get('currentStudent')
       });
 console.log("before");
-      advancedStanding.save();/*.then(function(value) {
-          
-//what happens if save works
-console.log("it worked");
-      }, function(reason) {
-//what happens if save doesnt work
-console.log("didnt work");
-      }); */
+      advancedStanding.save();
 console.log("after");
     //this.set('notDONE', false);
      //Ember.$('.ui.modal').modal('hide');

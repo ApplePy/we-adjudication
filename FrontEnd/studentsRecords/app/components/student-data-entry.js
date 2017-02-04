@@ -22,6 +22,7 @@ export default Ember.Component.extend({
   showFindStudent: false,
   showNewCourse: false,
   showNewAward: false,
+  awardNotes: [],
 
   studentModel: Ember.observer('offset', function () {
     var self = this;
@@ -73,6 +74,8 @@ export default Ember.Component.extend({
 
       // Show first student data
       self.set('currentIndex', self.get('firstIndex'));
+
+      
     });
   },
 
@@ -82,6 +85,19 @@ export default Ember.Component.extend({
     var date = this.get('currentStudent').get('DOB');
     var datestring = date.toISOString().substring(0, 10);
     this.set('selectedDate', datestring);
+
+    this.get('store').query('award', {
+         filter: {
+           recipient: this.get('currentStudent').id
+         }
+       }).then((awards) => {
+         //console.log(awards.objectAt(0).get('note'));
+        //console.log("size " + awards.get('length'));
+        for(var i = 0; i < awards.get('length'); i++) {
+          this.get('awardNotes').push(awards.objectAt(i));
+        }
+       // alert(this.get('awardNotes').objectAt(0).get('note'));
+       });
   },
 
   didRender() {

@@ -166,8 +166,10 @@
     <h2>{{currentStudent.number}}</h2>
     <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
     <br><br>
-    {{#each currentStudent.awardss as |award|}}
-    {{scholarships-awards note = award.note recipient = currentStudent}}
+    <!-- {{#each awardNotes as |award|}} -->
+    {{#each award in awardNotes}}
+    <!-- {{scholarships-awards note = award.note recipient = currentStudent}} -->
+    {{scholarships-awards}} <!-- note = award.note id = award.id recipient = currentStudent -->
     {{/each}}
     <div class="ui button" {{action "addAward"}}>Add Scholarship/Award</div>
 
