@@ -25,32 +25,51 @@ export default Ember.Component.extend({
   },
 
   actions: {
+
+    update() {
+      this.get('genders') = this.get('store').findAll('gender');
+      this.get('residencies') = this.get('store').findAll('residency');
+
+      this.get('genders').forEach(function(gender) {
+        this.get('genderNames').push(gender.name);
+      });
+
+      this.get('residencies').forEach(function(residency) {
+        this.get('residencyNames').push(residency.name);
+      });
+    },
+
     addGender () {
       var gender = this.get('store').createRecord('gender', {
         gender: this.get('newGender')
       });
 
-      gender.save().then(function(value) {
-        console.log(value);
-      }, function(reason) {
-        console.log(reason);
+      gender.save().then(function() {
+        this.send('update');
+        console.log("Added Gender");
+      }, function() {
+        console.log("Could not add gender");
       }); // => POST to '/genders'
     },
 
     modifyGender (genderId, newGenderName){
       this.get('store').findRecord('gender', genderId).then(function(gender) {
         gender.set('name', this.get(newGenderName));
-        gender.save().then(function(value) {
-          console.log(value);
+        gender.save().then(function() {
+          this.send('update');
+          console.log("Modified Gender");
         }, function() {
-          console.log("Could not modify gender.");
+          console.log("Could not modify gender");
         }); // => PATCH to '/genders/1'
       });
     },
 
     deleteGender (genderId){
       this.get('store').findRecord('gender', genderId, { backgroundReload: false }).then(function(gender) {
-        gender.destroyRecord(); // => DELETE to /genders/:genderId
+        gender.destroyRecord().then(function() {
+          this.send('update');
+          console.log("Deleted gender");
+        }); // => DELETE to /genders/:genderId
       });
     },
 
@@ -59,27 +78,32 @@ export default Ember.Component.extend({
         residency: this.get('newResidency')
       });
 
-      gender.save().then(function(value) {
-        console.log(value);
-      }, function(reason) {
-        console.log(reason);
+      gender.save().then(function() {
+        this.send('update');
+        console.log("Added Residency");
+      }, function() {
+        console.log("Could not add residency");
       }); // => POST to '/genders'
     },
 
     modifyResidency (residencyId, newResidencyName){
       this.get('store').findRecord('residency', residencyId).then(function(residency) {
         residency.set('name', this.get(newResidencyName));
-        residency.save().then(function(value) {
-          console.log(value);
-        }, function(reason) {
-          console.log(reason);
+        residency.save().then(function() {
+          this.send('update');
+          console.log("Modified Residency");
+        }, function() {
+          console.log("Could not modify residency");
         }); // => PATCH to '/genders/1'
       });
     },
 
     deleteResidency (residencyId){
       this.get('store').findRecord('gender', residencyId, { backgroundReload: false }).then(function(residency) {
-        residency.destroyRecord(); // => DELETE to /genders/:genderId
+        residency.destroyRecord().then(function() {
+          this.send('update');
+          console.log("Deleted residency");
+        }); // => DELETE to /genders/:genderId
       });
     }
   }
