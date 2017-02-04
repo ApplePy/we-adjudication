@@ -20,6 +20,8 @@ export default Ember.Component.extend({
   movingBackword: false,
   showHelp: false,
   showFindStudent: false,
+  showNewCourse: false,
+  showNewAward: false,
 
   studentModel: Ember.observer('offset', function () {
     var self = this;
@@ -153,5 +155,14 @@ export default Ember.Component.extend({
     help(){
       this.set('showHelp', true);
     },
+
+    addCourse() {
+     this.set('showNewCourse', true);
+     //this.set('showAddCourseButton', false);
+    },
+
+    addAward() {
+      this.set('showNewAward', true);
+    }
   }
 });
