@@ -1,0 +1,18 @@
+<div class="ui modal">
+  <div class="header">Search for a student number</div>
+  <div class="content">
+      <div class="inline field">
+        <label>Student Number</label>
+        {{input size="10" type="text" valueBinding="studentID"}}
+      </div>
+
+      <div class="actions">
+        <hr>
+        <div class="ui positive button" {{action "find"}}>Find</div>
+        <div class="ui negative basic button" {{action "close"}}>Close</div>
+      </div>
+
+  </div>
+</div>
+
+

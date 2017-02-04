@@ -19,6 +19,8 @@ export default Ember.Component.extend({
   pageSize: null,
   movingBackword: false,
   isDeleting: false,
+  showHelp: false,
+  showFindStudent: false,
 
   studentModel: Ember.observer('offset', function () {
     var self = this;
@@ -71,6 +73,7 @@ export default Ember.Component.extend({
       // Show first student data
       self.set('currentIndex', self.get('firstIndex'));
     });
+
   },
 
   showStudentData: function (index) {
@@ -79,6 +82,11 @@ export default Ember.Component.extend({
     var date = this.get('currentStudent').get('DOB');
     var datestring = date.toISOString().substring(0, 10);
     this.set('selectedDate', datestring);
+
+    //Fixes gender/residency bug.  Sets selectedResidency/selectedGender to the value
+    //the student has in the database.  Before, would only set the value if it was selected
+    this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
+    this.set('selectedGender', this.get('currentStudent').get('gender'));
   },
 
   didRender() {
@@ -96,6 +104,11 @@ export default Ember.Component.extend({
       updatedStudent.save().then(() => {
         //     this.set('isStudentFormEditing', false);
       });
+    },
+
+    undoSave(){
+      //Rollback the store value to the value last saved in the database
+      this.get('currentStudent').rollbackAttributes();
     },
 
     firstStudent() {
@@ -129,6 +142,7 @@ export default Ember.Component.extend({
 
     allStudents() {
       this.set('showAllStudents', true);
+      this.set('showFindStudent', false);
     },
 
     selectGender (gender){
@@ -166,6 +180,15 @@ export default Ember.Component.extend({
 
       //Subtract 1 from the last index of this page of students to account for the missing record
       this.set('lastIndex', this.get('lastIndex') - 1);
+    },
+    
+    findStudent() {
+      this.set('showFindStudent', true);
+      this.set('showAllStudents', false);
+    },
+
+    help(){
+      this.set('showHelp', true);
     },
   }
 });
