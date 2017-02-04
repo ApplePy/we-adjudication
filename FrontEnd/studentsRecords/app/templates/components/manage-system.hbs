@@ -31,16 +31,12 @@
 <h1 class="ui header">Add Residency:</h1>
 <div class="ui action input">
   <input type="text" placeholder="Add residency..." onchange={{action 'addResidency' value="target.value"}}>
-  <button class="ui button" {{action 'addGender' value=residencyToAdd }}>Add</button>
 </div>
 
 {{#each residencies as |residency|}}
   <div class="ui segment">
     <h6 class="ui header">{{residency.name}}</h6>
-    <button class="ui yellow button" {{action 'showModifyResidency'}}>Modify</button>
-    {{#if modifyResidencyClicked}}
-      <input type="text" placeholder="Modify residency..." onchange={{action 'modifyResidency' residency.id value="target.value"}}>
-    {{/if}}
+    <input type="text" placeholder="Modify residency..." onchange={{action 'modifyResidency' residency.id value="target.value"}}>
     <button class="negative ui button" {{action 'deleteResidency' residency.id }}>Delete</button>
   </div>
 {{/each}}
