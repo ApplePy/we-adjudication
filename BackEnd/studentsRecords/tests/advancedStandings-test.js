@@ -381,7 +381,7 @@ describe('Advanced Standings', () => {
     /*
      * Test the /PUT routes
      */
-    describe('/PUT advanced standing', () => {
+    describe('/PUT advanced standings', () => {
         it('it should PUT an updated advanced standing', (done) => {
 
             // Set up mock data
@@ -405,7 +405,7 @@ describe('Advanced Standings', () => {
             };
 
             let testStudent = new Models.Students(studentData);
-            testStudent.save((err) =>{
+            testStudent.save((err) => {
                 if (err) throw err;
 
                 var standingData = {
@@ -531,7 +531,7 @@ describe('Advanced Standings', () => {
     /*
      * Test the /POST routes
      */
-    describe('/POST an advanced standing', () => {
+    describe('/POST an advanced standings', () => {
         it('it should POST successfully', (done) => {
 
             // Set up mock data
@@ -540,7 +540,7 @@ describe('Advanced Standings', () => {
             };
             let testStudent = new Models.Students(studentData);
 
-            let standingData ={
+            let standingData = {
                 course: "BASKWV 1000",
                 description: "Basket weaving",
                 grade: 100,
@@ -551,7 +551,7 @@ describe('Advanced Standings', () => {
 
             // Save mock
             testStudent.save((err) => {
-                if(err) throw err;
+                if (err) throw err;
 
                 // Make request
                 chai.request(server)
@@ -591,48 +591,51 @@ describe('Advanced Standings', () => {
     /*
      * Test the /DELETE routes
      */
-    // describe('/DELETE an award', () => {
-    //     it('it should DELETE successfully', (done) => {
-    //
-    //         // Set up mock data
-    //         let testRes = new Models.Residencies({name: "Johnny Test House"});
-    //         testRes.save((err) => {
-    //             if (err) throw err
-    //         });
-    //
-    //         var awardData = {
-    //             number: 594265372,
-    //             firstName: "Johnny",
-    //             lastName: "Test",
-    //             gender: 1,
-    //             DOB: new Date().toISOString(),
-    //             photo: "/some/link",
-    //             registrationComments: "No comment",
-    //             basisOfAdmission: "Because",
-    //             admissionAverage: 90,
-    //             admissionComments: "None",
-    //             resInfo: testRes._id.toString()
-    //         };
-    //         let testAward = new Models.Awards(awardData);
-    //         testAward.save((err) => {
-    //             if (err) throw err;
-    //
-    //             // Make request
-    //             chai.request(server)
-    //                 .delete('/awards/' + testAward._id.toString())
-    //                 .end((err, res) => {
-    //                     expect(res).to.have.status(200);
-    //
-    //                     // Check underlying database
-    //                     Models.Awards.findById(testAward._id, function (error, award) {
-    //                         expect(error).to.be.null;
-    //                         expect(award).to.be.null;
-    //                         done();
-    //                     });
-    //                 });
-    //         });
-    //     });
-    //
-    // });
+    describe('/DELETE an award', () => {
+        it('it should DELETE successfully and remove links', (done) => {
+
+            // Set up mock data
+            let studentData = {
+                number: 594265372
+            };
+            let testStudent = new Models.Students(studentData);
+
+            let standingData = {
+                course: "BASKWV 1000",
+                description: "Basket weaving",
+                grade: 100,
+                units: 1,
+                from: "UBC",
+                recipient: testStudent
+            };
+
+            // Save mock student
+            testStudent.save((err) => {
+                if (err) throw err;
+
+                // save advanced standing
+                let testStanding = new Models.AdvancedStandings(standingData);
+                testStanding.save((err) => {
+                    if (err) throw err;
+
+
+                    // Make request
+                    chai.request(server)
+                        .delete('/advanced-standings/' + testStanding._id.toString())
+                        .send({'advanced-standing': standingData})
+                        .end((err, res) => {
+                            expect(res).to.have.status(200);
+
+                            // Check underlying database
+                            Models.AdvancedStandings.findById(testStanding._id, function (error, award) {
+                                expect(error).to.be.null;
+                                expect(award).to.be.null;
+                                done();
+                            });
+                        });
+                });
+            });
+        });
+    });
 
 });

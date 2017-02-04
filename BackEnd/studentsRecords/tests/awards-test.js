@@ -531,48 +531,59 @@ describe('Awards', () => {
     /*
      * Test the /DELETE routes
      */
-    // describe('/DELETE an award', () => {
-    //     it('it should DELETE successfully', (done) => {
-    //
-    //         // Set up mock data
-    //         let testRes = new Models.Residencies({name: "Johnny Test House"});
-    //         testRes.save((err) => {
-    //             if (err) throw err
-    //         });
-    //
-    //         var awardData = {
-    //             number: 594265372,
-    //             firstName: "Johnny",
-    //             lastName: "Test",
-    //             gender: 1,
-    //             DOB: new Date().toISOString(),
-    //             photo: "/some/link",
-    //             registrationComments: "No comment",
-    //             basisOfAdmission: "Because",
-    //             admissionAverage: 90,
-    //             admissionComments: "None",
-    //             resInfo: testRes._id.toString()
-    //         };
-    //         let testAward = new Models.Awards(awardData);
-    //         testAward.save((err) => {
-    //             if (err) throw err;
-    //
-    //             // Make request
-    //             chai.request(server)
-    //                 .delete('/awards/' + testAward._id.toString())
-    //                 .end((err, res) => {
-    //                     expect(res).to.have.status(200);
-    //
-    //                     // Check underlying database
-    //                     Models.Awards.findById(testAward._id, function (error, award) {
-    //                         expect(error).to.be.null;
-    //                         expect(award).to.be.null;
-    //                         done();
-    //                     });
-    //                 });
-    //         });
-    //     });
-    //
-    // });
+    describe('/DELETE an award', () => {
+        it('it should DELETE successfully and remove associated link from Student', (done) => {
+
+            // Set up mock data
+            // Create student
+            var studentData = {
+                number: 594265372,
+                firstName: "Johnny",
+                lastName: "Test",
+                gender: 1,
+                DOB: new Date().toISOString(),
+                photo: "/some/link",
+                registrationComments: "No comment",
+                basisOfAdmission: "Because",
+                admissionAverage: 90,
+                admissionComments: "None",
+            };
+            let testStudent = new Models.Students(studentData);
+            testStudent.save((err) => {
+                if (err) throw err;
+
+                // Create award
+                var awardData = {
+                    note: "Test",
+                    recipient: testStudent
+                };
+                let testAward = new Models.Awards(awardData);
+                testAward.save((err) => {
+                    if (err) throw err;
+
+                    // Link student to award
+                    testStudent.awards = [testAward];
+                    testStudent.save((err) => {
+                        if (err) throw err;
+
+                        // Make request
+                        chai.request(server)
+                            .delete('/awards/' + testAward._id.toString())
+                            .end((err, res) => {
+                                expect(res).to.have.status(200);
+
+                                // Check underlying database
+                                Models.Awards.findById(testAward._id, function (error, award) {
+                                    expect(error).to.be.null;
+                                    expect(award).to.be.null;
+                                    done();
+                                });
+                            });
+                    });
+                });
+            });
+        });
+
+    });
 
 });

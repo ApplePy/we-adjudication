@@ -62,6 +62,7 @@ router.route('/:advancedStanding_id')
 
                 advancedStanding.save(function (error) {
                     if (error) {
+                        // Ends up here if the recipient specified is bad
                         response.status(500).send({error: error});
                     }
                     else {
@@ -69,7 +70,17 @@ router.route('/:advancedStanding_id')
                     }
                 });
             }
-        })
+        });
+    })
+
+    // Delete award
+    .delete(parseUrlencoded, parseJSON, function (request, response) {
+        models.AdvancedStandings.findByIdAndRemove(request.params.advancedStanding_id,
+            function (error, deleted) {
+                if (error) response.status(500).send({error: error});
+                else response.json({'advanced-standing': deleted});
+            }
+        );
     });
 
 module.exports = router;
