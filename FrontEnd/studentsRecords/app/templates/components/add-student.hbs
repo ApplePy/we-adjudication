@@ -16,7 +16,7 @@
     <i class="image icon"></i>
     Add Female Photo
   </a>
-  <a class="item">
+  <a class="item" {{action 'helpMe'}}>
     Help
   </a>
 </div>
@@ -61,4 +61,7 @@
   <div class="ui center aligned  seven wide column segment">
     <img  src={{studentPhoto}}>
   </div>
+  {{#if isHelpShowing}}
+    {{help-page notDONE = isHelpShowing}}
+  {{/if}}
 </div>
