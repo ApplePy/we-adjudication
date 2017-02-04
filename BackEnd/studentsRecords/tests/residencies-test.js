@@ -85,11 +85,11 @@ describe('Residencies', () => {
                 testRes2.save((err) => {
                     if (err) throw err;
 
-                    let testStudent1 = new Models.Students({name: "Johnny Test", resInfo: testRes});
+                    let testStudent1 = new Models.Students({number: 12345, name: "Johnny Test", resInfo: testRes});
                     testStudent1.save((err) => {
                         if (err) throw err;
 
-                        let testStudent2 = new Models.Students({name: "Jane Test", resInfo: testRes2});
+                        let testStudent2 = new Models.Students({number: 12346, name: "Jane Test", resInfo: testRes2});
                         testStudent2.save((err) => {
                             if (err) throw err;
 
@@ -119,15 +119,15 @@ describe('Residencies', () => {
             testRes.save((err) => {
                 if (err) throw err;
 
-                let testStudent1 = new Models.Students({name: "Johnny Test", resInfo: testRes});
+                let testStudent1 = new Models.Students({number: 12345, name: "Johnny Test", resInfo: testRes});
                 testStudent1.save((err) => {
                     if (err) throw err;
 
-                    let testStudent2 = new Models.Students({name: "Jane Test", resInfo: testRes});
+                    let testStudent2 = new Models.Students({number: 12346, name: "Jane Test", resInfo: testRes});
                     testStudent2.save((err) => {
                         if (err) throw err;
 
-                        let testStudent3 = new Models.Students({name: "Eve Test"});
+                        let testStudent3 = new Models.Students({number:12347, name: "Eve Test"});
                         testStudent2.save((err) => {
                             if (err) throw err;
 
@@ -275,6 +275,43 @@ describe('Residencies', () => {
             });
         });
 
+        it('it should 500 on PUT a residency with duplicate name', (done) => {
+
+            // Set up mock data
+            var resData = {
+                name: "Johnny Test House"
+            };
+
+            // Create first residence
+            let testRes = new Models.Residencies(resData);
+            testRes.save((err) => {
+                if (err) throw err;
+
+                // Create second residence
+                resData.name = "Johnny Test Shack";
+                let testRes2 = new Models.Residencies(resData);
+                testRes2.save((err) => {
+                   if (err) throw err;
+
+                    // Make bad request
+                    chai.request(server)
+                        .put('/residencies/' + testRes._id)
+                        .send({residency: resData})
+                        .end((err, res) => {
+                            // Test server response
+                            expect(res).to.have.status(500);
+
+                            // Test mongo for changes
+                            Models.Residencies.findById(testRes._id, (err, res) => {
+                                expect(err).to.be.null;
+                                expect(res.name).to.equal("Johnny Test House");
+                                done();
+                            });
+                        });
+                });
+            });
+        });
+
         it('it should 404 on PUT a nonexistent residency', (done) => {
 
             // Set up mock data
@@ -326,6 +363,35 @@ describe('Residencies', () => {
                         done();
                     });
                 });
+        });
+
+        it('it should 500 on POST with duplicate residency name', (done) => {
+
+            // Set up mock data
+            let residencyData = {
+                residency: {
+                    name: "Johnny Test Residence"
+                }
+            };
+            let testRes = new Models.Residencies(residencyData.residency);
+            testRes.save((err) => {
+               if (err) throw err;
+
+                // Make request
+                chai.request(server)
+                    .post('/residencies')
+                    .send(residencyData)
+                    .end((err, res) => {
+                        expect(res).to.have.status(500);
+
+                        // Ensure no new residency was created
+                        Models.Residencies.find(residencyData.residency, function (error, residency) {
+                            expect(error).to.be.null;
+                            expect(residency.length).to.equal(1);
+                            done();
+                        });
+                    });
+            });
         });
     });
 

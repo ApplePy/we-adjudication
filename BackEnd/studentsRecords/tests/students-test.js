@@ -373,8 +373,8 @@ describe('Students', () => {
                 var count = 0;
                 for (var num = 1; num < 15; num++) {
                     studentData.number = firstNumber + num;
-                    let testStudent = new Models.Students(studentData);
-                    testStudent.save((err) => {
+                    let otherStudent = new Models.Students(studentData);
+                    otherStudent.save((err) => {
                         if (err) throw err;
 
                         // Start testing once all students are created
@@ -404,6 +404,77 @@ describe('Students', () => {
                                     expect(res.body.student.resInfo).to.equal(testRes._id.toString());
 
                                     // Test mongo to ensure it was written
+                                    Models.Students.findById(testStudent._id, (error, res) => {
+                                        expect(error || res.length === 0).to.be.false;
+                                        expect(res.number).to.equal(firstNumber);
+                                        expect(res.firstName).to.equal(studentData.firstName);
+                                        expect(res.lastName).to.equal(studentData.lastName);
+                                        expect(res.gender).to.equal(studentData.gender);
+                                        expect(res.DOB.toISOString()).to.equal(studentData.DOB);
+                                        expect(res.photo).to.equal(studentData.photo);
+                                        expect(res.registrationComments).to.equal(studentData.registrationComments);
+                                        expect(res.basisOfAdmission).to.equal(studentData.basisOfAdmission);
+                                        expect(res.admissionAverage).to.equal(studentData.admissionAverage);
+                                        expect(res.admissionComments).to.equal(studentData.admissionComments);
+                                        expect(res.resInfo.toString()).to.equal(testRes._id.toString());
+                                        done();
+                                    });
+                                });
+                        }
+                    });
+                }
+            });
+        });
+
+        it('it should 500 on PUT a student with duplicate number', (done) => {
+
+            // Set up mock data
+            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            testRes.save((err) => {
+                if (err) throw err
+            });
+
+            let firstNumber = 594265372;
+            var studentData = {
+                firstName: "Johnny",
+                lastName: "Test",
+                gender: 1,
+                DOB: new Date().toISOString(),
+                photo: "/some/link",
+                registrationComments: "No comment",
+                basisOfAdmission: "Because",
+                admissionAverage: 90,
+                admissionComments: "None",
+                resInfo: testRes
+            };
+
+            // Create first student
+            studentData.number = firstNumber;
+            let testStudent = new Models.Students(studentData);
+            testStudent.save((err) => {
+                if (err) throw err;
+
+                // Create 14 students
+                var count = 0;
+                for (var num = 1; num < 15; num++) {
+                    studentData.number = firstNumber + num;
+                    let otherStudent = new Models.Students(studentData);
+                    otherStudent.save((err) => {
+                        if (err) throw err;
+
+                        // Start testing once all students are created
+                        if (++count == 14) {
+                            // Modify data
+                            studentData.number = firstNumber + 4;
+
+                            // Make request
+                            chai.request(server)
+                                .put('/students/' + testStudent._id.toString())
+                                .send({student: studentData})
+                                .end((err, res) => {
+                                    expect(res).to.have.status(500);
+
+                                    // Test mongo to ensure nothing was written
                                     Models.Students.findById(testStudent._id, (error, res) => {
                                         expect(error || res.length === 0).to.be.false;
                                         expect(res.number).to.equal(firstNumber);
@@ -477,6 +548,69 @@ describe('Students', () => {
      */
     describe('/POST a student', () => {
         it('it should POST successfully', (done) => {
+
+            // Set up mock data
+            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            testRes.save((err) => {
+                if (err) throw err
+            });
+
+            var studentData = {
+                number: 594265372,
+                firstName: "Johnny",
+                lastName: "Test",
+                gender: 1,
+                DOB: new Date().toISOString(),
+                photo: "/some/link",
+                registrationComments: "No comment",
+                basisOfAdmission: "Because",
+                admissionAverage: 90,
+                admissionComments: "None",
+                resInfo: testRes._id.toString()
+            };
+
+            // Make request
+            chai.request(server)
+                .post('/students')
+                .send({student: studentData})
+                .end((err, res) => {
+                    expect(res).to.have.status(201);
+                    expect(res).to.be.json;
+                    expect(res.body).to.have.property('student');
+                    expect(res.body.student.number).to.equal(studentData.number);
+                    expect(res.body.student.firstName).to.equal(studentData.firstName);
+                    expect(res.body.student.lastName).to.equal(studentData.lastName);
+                    expect(res.body.student.gender).to.equal(studentData.gender);
+                    expect(res.body.student.DOB).to.equal(studentData.DOB);
+                    expect(res.body.student.photo).to.equal(studentData.photo);
+                    expect(res.body.student.registrationComments).to.equal(studentData.registrationComments);
+                    expect(res.body.student.basisOfAdmission).to.equal(studentData.basisOfAdmission);
+                    expect(res.body.student.admissionAverage).to.equal(studentData.admissionAverage);
+                    expect(res.body.student.admissionComments).to.equal(studentData.admissionComments);
+                    expect(res.body.student.resInfo).to.equal(testRes._id.toString());
+
+                    // Check underlying database
+                    Models.Students.findById(res.body.student._id, function (error, student) {
+                        expect(error).to.be.null;
+                        expect(student).to.not.be.null;
+                        expect(student.number).to.equal(studentData.number);
+                        expect(student.firstName).to.equal(studentData.firstName);
+                        expect(student.lastName).to.equal(studentData.lastName);
+                        expect(student.gender).to.equal(studentData.gender);
+                        expect(student.DOB.toISOString()).to.equal(studentData.DOB);
+                        expect(student.photo).to.equal(studentData.photo);
+                        expect(student.registrationComments).to.equal(studentData.registrationComments);
+                        expect(student.basisOfAdmission).to.equal(studentData.basisOfAdmission);
+                        expect(student.admissionAverage).to.equal(studentData.admissionAverage);
+                        expect(student.admissionComments).to.equal(studentData.admissionComments);
+                        expect(student.resInfo.toString()).to.equal(testRes._id.toString());
+
+                        done();
+                    });
+                });
+        });
+
+        it('it should 500 on POST of student with duplicate number', (done) => {
 
             // Set up mock data
             let testRes = new Models.Residencies({name: "Johnny Test House"});

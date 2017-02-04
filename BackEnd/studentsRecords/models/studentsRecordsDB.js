@@ -26,7 +26,7 @@ var awardsSchema = mongoose.Schema(
 
 var studentsSchema = mongoose.Schema(
     {
-        number: Number,
+        number: {type: Number, index: {unique: true}},
         firstName: String,
         lastName: String,
         gender: Number,
@@ -45,7 +45,7 @@ studentsSchema.plugin(mongoosePaginate);
 
 var residencySchema = mongoose.Schema(
     {
-        name: String,
+        name: {type: String, index: {unique: true}},
         students: [{type: mongoose.Schema.ObjectId, ref: ('Students')}]
     }
 );

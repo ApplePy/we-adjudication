@@ -107,7 +107,6 @@ describe('Advanced Standings', () => {
                                             expect(res.body.advancedStanding[num].description).to.eq(standingData.description);
                                             expect(res.body.advancedStanding[num].grade).to.eq(standingData.grade);
                                             expect(res.body.advancedStanding[num].from).to.eq(standingData.from);
-                                            expect(res.body.advancedStanding[num].units).to.equal(num);
                                             expect(res.body.advancedStanding[num].recipient).to.equal(testStudent._id.toString());
                                         }
                                         done();
