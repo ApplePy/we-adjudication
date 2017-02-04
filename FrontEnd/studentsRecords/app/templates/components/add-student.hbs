@@ -1,0 +1,57 @@
+<div class="ui center aligned header">
+  <h2>Add Student</h2>
+</div>
+
+
+<div class="ui inverted menu">
+  <a class="item" {{action 'saveStudent'}}>
+    <i class="save icon"></i>
+    Save
+  </a>
+  <a class="item">
+    <i class="image icon"></i>
+    Add Photo
+  </a>
+  <a class="item">
+    Help
+  </a>
+</div>
+
+
+<div class="ui grid">
+  <div class="ui right aligned  seven wide column">
+    <div class="ui form">
+      <div class="inline field">
+        <label>Student Number</label>
+        {{input size="10" type="text" value = numBox}}
+      </div>
+      <div class="inline field">
+        <label>First Name</label>
+        {{input type="text"  value = fNameBox}}
+      </div>
+      <div class="inline field">
+        <label>Last Name</label>
+        {{input type="text" value = lNameBox}}
+      </div>
+      <div class="inline field">
+        <label>Gender</label>
+        <select onchange={{action 'selectGender' value="target.value"}}>
+          <option value=1 selected={{eq 1 currentStudent.gender}}>Male</option>
+          <option value=2 selected={{eq 2 currentStudent.gender}}>Female</option>
+        </select>
+      </div>
+      <div class="inline field">
+        <label>Date of Birth</label>
+        <input value={{selectedDate}} type="date" onchange={{action 'assignDate' value="target.value"}}>
+      </div>
+      <div class="inline field">
+        <label>Residency</label>
+        <select onchange={{action 'selectResidency' value="target.value"}}>
+          {{#each residencyModel as |residencyChoice|}}
+            <option value={{residencyChoice.id}}>{{residencyChoice.name}} </option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
