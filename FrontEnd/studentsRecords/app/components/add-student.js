@@ -37,6 +37,22 @@ export default Ember.Component.extend({
         resInfo: res
       });
       newStudent.save();
+
+      $('.small.modal').modal('show');
+
+      this.set('numBox', null);
+      this.set('fNameBox', null);
+      this.set('lNameBox', null);
+      this.set('residencyModel', null);
+      this.set('selectedResidency', null);
+      this.set('selectedGender', null);
+      this.set('selectedDate', null);
+      this.set('studentPhoto', null);
+
+      this.get('store').findAll('residency').then((records) => {
+        this.set('residencyModel', records);
+      });
+
     },
 
     addMalePhoto () {
