@@ -85,7 +85,13 @@ router.route('/:student_id')
         models.Students.findByIdAndRemove(request.params.student_id,
             function (error, deleted) {
                 if (!error) {
-                    response.json({student: deleted});
+                    // Delete all awards associated with student
+                    models.Awards.remove({recipient: deleted._id}, (err, removed) => {
+                        // Delete all advanced standings associated with student
+                        models.AdvancedStandings.remove({recipient: deleted._id}, (err2, removed2) => {
+                            response.json({student: deleted});
+                        });
+                    });
                 }
             }
         );

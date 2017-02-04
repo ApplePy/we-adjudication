@@ -7,7 +7,6 @@ var parseJSON = bodyParser.json();
 
 // TODO: WARNING: PUT/POST does not check for missing data
 
-
 router.route('/')
     // Post a new residency
     .post(parseUrlencoded, parseJSON, function (request, response) {
@@ -35,9 +34,14 @@ router.route('/')
 
         // A query was submitted for the residency of a student
         else if (filter.student) {
-            models.Residencies.find({"students": {$in: [filter.student]}}, function (error, students) {
-                if (error) response.status(500).send(error);
-                else response.json({residency: students});
+            models.Students.findById(filter.student, function (error, student) {
+                if (error || student == null) response.status(404).send(error);
+                else {
+                    models.Residencies.findById(student.resInfo, function(error, res) {
+                        if (error) response.status(404).send(error);
+                        response.json({residency: res});
+                    });
+                }
             });
         }
 
@@ -81,6 +85,26 @@ router.route('/:residency_id')
                 });
             }
         })
+    })
+
+    // Delete a residency
+    .delete(parseUrlencoded, parseJSON, function (request, response) {
+
+        // Map all affected students to null
+        models.Students.update(
+            {resInfo: request.params.residency_id},
+            {$set: {resInfo: null}},
+            {multi: true},
+            function (error, students) {
+                if (error) response.status(500).send({error: error});
+                else {
+                    // All students mapped successfully, delete residency
+                    models.Residencies.findByIdAndRemove(request.params.residency_id, function(error, residency) {
+                       if (error) response.status(500).send({error: error});
+                       else response.json({residency: residency});
+                    });
+                }
+            });
     });
 
 module.exports = router;
