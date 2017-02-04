@@ -20,6 +20,7 @@ export default Ember.Component.extend({
   movingBackword: false,
   showHelp: false,
   showFindStudent: false,
+  undoStack: [],
 
   studentModel: Ember.observer('offset', function () {
     var self = this;
@@ -72,6 +73,7 @@ export default Ember.Component.extend({
       // Show first student data
       self.set('currentIndex', self.get('firstIndex'));
     });
+
   },
 
   showStudentData: function (index) {
@@ -89,14 +91,61 @@ export default Ember.Component.extend({
 
   actions: {
     saveStudent () {
+
       var updatedStudent = this.get('currentStudent');
       var res = this.get('store').peekRecord('residency', this.get('selectedResidency'));
       updatedStudent.set('gender', this.get('selectedGender'));
       updatedStudent.set('DOB', new Date(this.get('selectedDate')));
       updatedStudent.set('resInfo', res);
+
+      //Deal with clearing and adding this saved student to the stack
+      this.send('clearStack');
+      this.send('addRecordToStack', updatedStudent);
+
       updatedStudent.save().then(() => {
         //     this.set('isStudentFormEditing', false);
       });
+    },
+
+    clearStack(){
+      //Clear the stack
+      var stackToSave = this.get('undoStack');
+      while(stackToSave.length > 0){
+        stackToSave.popObject();
+      }
+    },
+
+    addRecordToStack(student){
+      //Create a copy of the student as a basic object
+      var studentCopy = {
+        id: student.get('id'),
+        number: student.get('number'),
+        firstName: student.get('firstName'),
+        lastName: student.get('lastName'),
+        gender: student.get('gender'),
+        DOB: student.get('DOB'),
+        photo: student.get('photo'),
+        registrationComments: student.get('registrationComments'),
+        basisOfAdmission: student.get('basisOfAdmission'),
+        admissionAverage: student.get('admissionAverage'),
+        admissionComments: student.get('admissionComments'),
+        awards: student.get('awards'),
+        advancedStandings: student.get('advancedStandings'),
+        resInfo: student.get('resInfo')
+      };
+      //Save to the stack
+      this.get('undoStack').pushObject(studentCopy);
+    },
+
+    undoSave(){
+      //Cycle through the undo stack
+      var undoStack = this.get('undoStack');
+      while(undoStack.length > 0) {
+        //Get the student from the stack and reset the record in the database
+        var studentToUndo = undoStack.popObject();
+        var recordToChange = this.get('studentsRecords', studentToUndo.id);
+        console.log(recordToChange.get('firstName'));
+      }
     },
 
     firstStudent() {
