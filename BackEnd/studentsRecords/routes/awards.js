@@ -66,7 +66,7 @@ router.route('/:award_id')
                     }
                 });
             }
-        })
+        });
     })
 
     // Delete award
