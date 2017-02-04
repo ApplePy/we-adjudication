@@ -8,9 +8,13 @@
     <i class="save icon"></i>
     Save
   </a>
-  <a class="item">
-    <i class="image icon" {{action 'addPhoto'}}></i>
-    Add Photo
+  <a class="item" {{action 'addMalePhoto'}}>
+    <i class="image icon"></i>
+    Add Male Photo
+  </a>
+  <a class="item" {{action 'addFemPhoto'}}>
+    <i class="image icon"></i>
+    Add Female Photo
   </a>
   <a class="item">
     Help
@@ -53,5 +57,8 @@
         </select>
       </div>
     </div>
+  </div>
+  <div class="ui center aligned  seven wide column segment">
+    <img  src={{studentPhoto}}>
   </div>
 </div>

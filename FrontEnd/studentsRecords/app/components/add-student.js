@@ -32,14 +32,19 @@ export default Ember.Component.extend({
         firstName: this.get('fNameBox'),
         lastName: this.get('lNameBox'),
         gender: null,
+        photo: this.get('studentPhoto'),
         DOB: new Date(this.get('selectedDate')),
         resInfo: res
       });
       newStudent.save();
     },
 
-    addPhoto () {
+    addMalePhoto () {
+      this.set('studentPhoto', "/assets/studentsPhotos/male.png");
+    },
 
+    addFemPhoto () {
+      this.set('studentPhoto', "/assets/studentsPhotos/female.png");
     },
 
     selectGender (gender){
