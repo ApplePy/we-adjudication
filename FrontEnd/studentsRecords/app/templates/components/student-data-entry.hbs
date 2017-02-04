@@ -157,7 +157,7 @@
      <div class="ui button" {{action "addCourse"}}>Add Course</div>
 
     {{#if showNewCourse}}
-    {{add-advanced-standing newrecipient = currentStudent}}
+    {{add-advanced-standing newrecipient = currentStudent}} <!-- INDEX = currentIndex notDONE = showFindStudent offset = offset studentsModel = studentsRecords -->
     {{/if}}
   </div>
 
@@ -174,11 +174,9 @@
     <div class="ui button" {{action "addAward"}}>Add Scholarship/Award</div>
 
     {{#if showNewAward}}
-    {{add-award newrecipient = currentStudent}}
+    {{add-award newrecipient = currentStudent studentID = currentStudent.number INDEX = currentIndex notDONE = showNewAward offset = offset studentsModel = studentsRecords}}
     {{/if}}
   </div>
-
-
 
 {{/if}}
 
