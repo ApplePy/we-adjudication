@@ -11,12 +11,9 @@ export default Ember.Component.extend({
     });
   },
 
-
-
-
-
   isHomeShowing: true,
   isStudentsRecordsDataEntry: false,
+  isAdding: false,
   isAboutShowing: false,
 
   actions: {
@@ -24,18 +21,27 @@ export default Ember.Component.extend({
       this.set('isHomeShowing', true);
       this.set('isStudentsRecordsDataEntry', false);
       this.set('isAboutShowing', false);
+      this.set('isAdding', false);
     },
 
     studentsDataEntry (){
       this.set('isHomeShowing', false);
       this.set('isStudentsRecordsDataEntry', true);
       this.set('isAboutShowing', false);
+      this.set('isAdding', false);
     },
 
+    addStudent (){
+      this.set('isHomeShowing', false);
+      this.set('isStudentsRecordsDataEntry', false);
+      this.set('isAboutShowing', false);
+      this.set('isAdding', true);
+    },
     about (){
       this.set('isHomeShowing', false);
       this.set('isStudentsRecordsDataEntry', false);
       this.set('isAboutShowing', true);
+      this.set('isAdding', false);
     }
   }
 });
