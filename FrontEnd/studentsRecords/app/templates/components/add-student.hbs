@@ -61,11 +61,7 @@
   <div class="ui center aligned  seven wide column segment">
     <img  src={{studentPhoto}}>
   </div>
-  <div class="thirteen wide column ">
-    <div class="ui segment container">
-      {{#if isHelpShowing}}
-        {{help-page}}
-      {{/if}}
-    </div>
-  </div>
+  {{#if isHelpShowing}}
+    {{help-page notDONE = isHelpShowing}}
+  {{/if}}
 </div>
