@@ -9,21 +9,21 @@ router.route('/')
     .post(parseUrlencoded, parseJSON, function (request, response) {
         var gender = new models.Genders(request.body.gender);
         gender.save(function (error) {
-            if (error) response.send(error);
-            response.json({gender: gender});
+            if (error) response.status(500).send(error);
+            else response.json({gender: gender});
         });
     })
     .get(parseUrlencoded, parseJSON, function (request, response) {
         var Student = request.query.filter;
         if (!Student) {
             models.Genders.find(function (error, genders) {
-                if (error) response.send(error);
-                response.json({gender: genders});
+                if (error) response.status(500).send(error);
+                else response.json({gender: genders});
             });
         } else {
             models.Genders.find({"student": Student.student}, function (error, students) {
-                if (error) response.send(error);
-                response.json({gender: students});
+                if (error) response.status(500).send(error);
+                else response.json({gender: students});
             });
         }
     });
@@ -31,14 +31,14 @@ router.route('/')
 router.route('/:residency_id')
     .get(parseUrlencoded, parseJSON, function (request, response) {
         models.Genders.findById(request.params.gender_id, function (error, gender) {
-            if (error) response.send(error);
-            response.json({gender: gender});
+            if (error) response.status(500).send(error);
+            else response.json({gender: gender});
         })
     })
     .put(parseUrlencoded, parseJSON, function (request, response) {
         models.Genders.findById(request.params.gender_id, function (error, gender) {
             if (error) {
-                response.send({error: error});
+                response.status(404).send({error: error});
             }
             else {
                 gender.name = request.body.gender.name;
@@ -46,7 +46,7 @@ router.route('/:residency_id')
 
                 gender.save(function (error) {
                     if (error) {
-                        response.send({error: error});
+                        response.status(500).send({error: error});
                     }
                     else {
                         response.json({gender: gender});
