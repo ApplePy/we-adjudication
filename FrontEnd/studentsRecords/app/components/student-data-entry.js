@@ -129,6 +129,9 @@ export default Ember.Component.extend({
       updatedStudent.set('gender', this.get('selectedGender'));
       updatedStudent.set('DOB', new Date(this.get('selectedDate')));
       updatedStudent.set('resInfo', res);
+     // updateStudent.set('registrationComments', this.get('registrationComments'));
+
+      //updatedStudent.set('awards', this.get('awardNotes'));
       updatedStudent.save().then(() => {
         //     this.set('isStudentFormEditing', false);
       });
