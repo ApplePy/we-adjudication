@@ -12,7 +12,8 @@ router.route('/')
     // New award entry
     .post(parseUrlencoded, parseJSON, function (request, response) {
         var award = new models.Awards(request.body.award);
-        award.save(function (error) {
+        if (!award.recipient) response.status(400).json({error: {message: "Recipient must be specified."}});
+        else award.save(function (error) {
             if (error) response.status(500).send(error);
             else response.status(201).json({award: award});
         });
@@ -31,7 +32,7 @@ router.route('/')
 
         // Get awards for a student
         else {
-            models.Awards.find({"recipient": Student.student}, function (error, students) {
+            models.Awards.find({"recipient": Student.recipient}, function (error, students) {
                 if (error) response.status(500).send(error);
                 else response.json({award: students});
             });
@@ -57,7 +58,8 @@ router.route('/:award_id')
                 award.note = request.body.award.note;
                 award.recipient = request.body.award.recipient;
 
-                award.save(function (error) {
+                if (!award.recipient) response.status(400).json({error: {message: "Recipient must be specified."}});
+                else award.save(function (error) {
                     if (error) {
                         response.status(500).send({error: error});
                     }
@@ -66,7 +68,17 @@ router.route('/:award_id')
                     }
                 });
             }
-        })
+        });
+    })
+
+    // Delete award
+    .delete(parseUrlencoded, parseJSON, function (request, response) {
+        models.Awards.findByIdAndRemove(request.params.award_id,
+            function (error, deleted) {
+                if (error) response.status(500).send({error: error});
+                else response.json({award: deleted});
+            }
+        );
     });
 
 module.exports = router;

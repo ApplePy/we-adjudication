@@ -1,32 +1,54 @@
-var mongoose = require('mongoose');
+var MongooseVariables = require('mongoose');
+var mongoose = new MongooseVariables.Mongoose;
+if (process.env.NODE_ENV === 'test') var mockgoose = require('mockgoose');
 var mongoosePaginate = require('mongoose-paginate');
+
+
+//-------- SERVER CONNECTION --------//
+
+// Dynamically set mongodb location
+var mongoDBHost = 'localhost';
+if (typeof (process.env.MONGO_DB_HOST) != "undefined") mongoDBHost = process.env.MONGO_DB_HOST;
+var mongoConnectFunc = () => mongoose.connect('mongodb://' + mongoDBHost + '/studentsRecords');
+
+// Connect to database
+if (process.env.NODE_ENV === 'test') mockgoose(mongoose).then(mongoConnectFunc);    // Testing with mockgoose
+else mongoConnectFunc();                                                            // Production database
+
+var db = mongoose.connection;
+db.on('error', function() {
+    console.error.bind(console, 'connection error:');
+    throw "connection error";
+});
+
+
+//-------- DB SETUP --------//
 
 // Use native promises
 mongoose.Promise = global.Promise;
 
-
-var advancedStandingSchema = mongoose.Schema(
+var advancedStandingSchema = MongooseVariables.Schema(
     {
         course: String,
         description: String,
         units: Number,
         grade: Number,
         from: String,
-        recipient: {type: mongoose.Schema.ObjectId, ref: 'Students'}
+        recipient: {type: MongooseVariables.Schema.ObjectId, ref: 'Students'}
     }
 );
 
-var awardsSchema = mongoose.Schema(
+var awardsSchema = MongooseVariables.Schema(
     {
         note: String,
-        recipient: {type: mongoose.Schema.ObjectId, ref: 'Students'}
+        recipient: {type: MongooseVariables.Schema.ObjectId, ref: 'Students'}
     }
 );
 
 
-var studentsSchema = mongoose.Schema(
+var studentsSchema = MongooseVariables.Schema(
     {
-        number: Number,
+        number: {type: Number, index: {unique: true}},
         firstName: String,
         lastName: String,
         gender: Number,
@@ -36,17 +58,17 @@ var studentsSchema = mongoose.Schema(
         basisOfAdmission: String,
         admissionAverage: Number,
         admissionComments: String,
-        resInfo: {type: mongoose.Schema.ObjectId, ref: 'Residencies'},
-        awards: [{type: mongoose.Schema.ObjectId, ref: 'Awards'}],
-        advancedStandings: [{type: mongoose.Schema.ObjectId, ref: 'AdvancedStandings'}]
+        resInfo: {type: MongooseVariables.Schema.ObjectId, ref: 'Residencies'},
+        awards: [{type: MongooseVariables.Schema.ObjectId, ref: 'Awards'}],
+        advancedStandings: [{type: MongooseVariables.Schema.ObjectId, ref: 'AdvancedStandings'}]
     }
 );
 studentsSchema.plugin(mongoosePaginate);
 
-var residencySchema = mongoose.Schema(
+var residencySchema = MongooseVariables.Schema(
     {
-        name: String,
-        students: [{type: mongoose.Schema.ObjectId, ref: ('Students')}]
+        name: {type: String, index: {unique: true}},
+        students: [{type: MongooseVariables.Schema.ObjectId, ref: ('Students')}]
     }
 );
 
@@ -55,22 +77,6 @@ var Residencies = mongoose.model('residency', residencySchema);
 var AdvancedStandings = mongoose.model('advancedStanding', advancedStandingSchema);
 var Awards = mongoose.model('awards', awardsSchema);
 
-
-// Dynamically control where to contact the DB, and wrap the db with mockgoose if testing
-if (typeof (process.env.MONGO_DB_HOST) != "undefined") {
-    // Production
-    mongoose.connect('mongodb://' + process.env.MONGO_DB_HOST + '/studentsRecords');
-}
-else {
-    // Production
-    mongoose.connect('mongodb://localhost/studentsRecords');
-}
-
-var db = mongoose.connection;
-db.on('error', function() {
-    console.error.bind(console, 'connection error:');
-    throw "connection error";
-});
 
 exports.Students = Students;
 exports.Residencies = Residencies;

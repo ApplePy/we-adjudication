@@ -373,8 +373,8 @@ describe('Students', () => {
                 var count = 0;
                 for (var num = 1; num < 15; num++) {
                     studentData.number = firstNumber + num;
-                    let testStudent = new Models.Students(studentData);
-                    testStudent.save((err) => {
+                    let otherStudent = new Models.Students(studentData);
+                    otherStudent.save((err) => {
                         if (err) throw err;
 
                         // Start testing once all students are created
@@ -404,6 +404,77 @@ describe('Students', () => {
                                     expect(res.body.student.resInfo).to.equal(testRes._id.toString());
 
                                     // Test mongo to ensure it was written
+                                    Models.Students.findById(testStudent._id, (error, res) => {
+                                        expect(error || res.length === 0).to.be.false;
+                                        expect(res.number).to.equal(firstNumber);
+                                        expect(res.firstName).to.equal(studentData.firstName);
+                                        expect(res.lastName).to.equal(studentData.lastName);
+                                        expect(res.gender).to.equal(studentData.gender);
+                                        expect(res.DOB.toISOString()).to.equal(studentData.DOB);
+                                        expect(res.photo).to.equal(studentData.photo);
+                                        expect(res.registrationComments).to.equal(studentData.registrationComments);
+                                        expect(res.basisOfAdmission).to.equal(studentData.basisOfAdmission);
+                                        expect(res.admissionAverage).to.equal(studentData.admissionAverage);
+                                        expect(res.admissionComments).to.equal(studentData.admissionComments);
+                                        expect(res.resInfo.toString()).to.equal(testRes._id.toString());
+                                        done();
+                                    });
+                                });
+                        }
+                    });
+                }
+            });
+        });
+
+        it('it should 500 on PUT a student with duplicate number', (done) => {
+
+            // Set up mock data
+            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            testRes.save((err) => {
+                if (err) throw err
+            });
+
+            let firstNumber = 594265372;
+            var studentData = {
+                firstName: "Johnny",
+                lastName: "Test",
+                gender: 1,
+                DOB: new Date().toISOString(),
+                photo: "/some/link",
+                registrationComments: "No comment",
+                basisOfAdmission: "Because",
+                admissionAverage: 90,
+                admissionComments: "None",
+                resInfo: testRes
+            };
+
+            // Create first student
+            studentData.number = firstNumber;
+            let testStudent = new Models.Students(studentData);
+            testStudent.save((err) => {
+                if (err) throw err;
+
+                // Create 14 students
+                var count = 0;
+                for (var num = 1; num < 15; num++) {
+                    studentData.number = firstNumber + num;
+                    let otherStudent = new Models.Students(studentData);
+                    otherStudent.save((err) => {
+                        if (err) throw err;
+
+                        // Start testing once all students are created
+                        if (++count == 14) {
+                            // Modify data
+                            studentData.number = firstNumber + 4;
+
+                            // Make request
+                            chai.request(server)
+                                .put('/students/' + testStudent._id.toString())
+                                .send({student: studentData})
+                                .end((err, res) => {
+                                    expect(res).to.have.status(500);
+
+                                    // Test mongo to ensure nothing was written
                                     Models.Students.findById(testStudent._id, (error, res) => {
                                         expect(error || res.length === 0).to.be.false;
                                         expect(res.number).to.equal(firstNumber);
@@ -539,13 +610,7 @@ describe('Students', () => {
                 });
         });
 
-    });
-
-    /*
-     * Test the /DELETE routes
-     */
-    describe('/DELETE a student', () => {
-        it('it should DELETE successfully', (done) => {
+        it('it should 500 on POST of student with duplicate number', (done) => {
 
             // Set up mock data
             let testRes = new Models.Residencies({name: "Johnny Test House"});
@@ -569,20 +634,91 @@ describe('Students', () => {
             let testStudent = new Models.Students(studentData);
             testStudent.save((err) => {
                 if (err) throw err;
-
+                
+                // Modify data
+                studentData.firstName = "Josh";
+                
                 // Make request
                 chai.request(server)
-                    .delete('/students/' + testStudent._id.toString())
+                    .post('/students')
+                    .send({student: studentData})
                     .end((err, res) => {
-                        expect(res).to.have.status(200);
-
-                        // Check underlying database
-                        Models.Students.findById(testStudent._id, function (error, student) {
-                            expect(error).to.be.null;
-                            expect(student).to.be.null;
-                            done();
-                        });
+                        expect(res).to.have.status(500);
+                        done();
                     });
+            });
+        });
+
+    });
+
+    /*
+     * Test the /DELETE routes
+     */
+    describe('/DELETE a student', () => {
+        it('it should DELETE successfully and delete linked awards and advanced standings', (done) => {
+
+            // Set up mock data
+            var studentData = {
+                number: 594265372,
+                firstName: "Johnny",
+                lastName: "Test",
+                gender: 1,
+                DOB: new Date().toISOString(),
+                photo: "/some/link",
+                registrationComments: "No comment",
+                basisOfAdmission: "Because",
+                admissionAverage: 90,
+                admissionComments: "None"
+            };
+            let testStudent = new Models.Students(studentData);
+            testStudent.save((err) => {
+                if (err) throw err;
+
+                var awardData = {
+                    note: "test",
+                    recipient: testStudent
+                };
+                let testAward = new Models.Awards(awardData);
+                testAward.save((err) => {
+                   if (err) throw err;
+
+                    var standingData = {
+                        course: "BASKWV 1000",
+                        description: "Basket weaving",
+                        grade: 100,
+                        from: "UBC",
+                        recipient: testStudent
+                    };
+                    let testStanding = new Models.AdvancedStandings(standingData);
+                    testStanding.save((err) => {
+                        if (err) throw err;
+
+                        // Make request
+                        chai.request(server)
+                            .delete('/students/' + testStudent._id.toString())
+                            .end((err, res) => {
+                                expect(res).to.have.status(200);
+
+                                // Check underlying database
+                                Models.Students.findById(testStudent._id, function (error, student) {
+                                    expect(error).to.be.null;
+                                    expect(student).to.be.null;
+
+                                    Models.Awards.findById(testAward._id, function(error, award) {
+                                       expect(error).to.be.null;
+                                       expect(award).to.be.null;
+
+                                       Models.AdvancedStandings.findById(testStanding._id, function(error, standing) {
+                                          expect(error).to.be.null;
+                                          expect(standing).to.be.null;
+
+                                          done();
+                                       });
+                                    });
+                                });
+                            });
+                    });
+                });
             });
         });
 

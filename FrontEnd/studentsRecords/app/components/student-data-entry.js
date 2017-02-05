@@ -19,8 +19,13 @@ export default Ember.Component.extend({
   old_offset: null,
   pageSize: null,
   movingBackword: false,
+  isDeleting: false,
   showHelp: false,
   showFindStudent: false,
+  showNewCourse: false,
+  showNewAward: false,
+  awardNotes: [],
+  advancedStandingArray: [],
 
   studentModel: Ember.observer('offset', function () {
     var self = this;
@@ -75,7 +80,10 @@ export default Ember.Component.extend({
 
       // Show first student data
       self.set('currentIndex', self.get('firstIndex'));
+
+      
     });
+
   },
 
   showStudentData: function (index) {
@@ -84,6 +92,33 @@ export default Ember.Component.extend({
     var date = this.get('currentStudent').get('DOB');
     var datestring = date.toISOString().substring(0, 10);
     this.set('selectedDate', datestring);
+
+    //Fixes gender/residency bug
+
+    this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
+    this.set('awardNotes', []);
+    this.set('advancedStandingArray', []);
+
+    this.set('selectedGender', this.get('currentStudent').get('gender'));
+    this.get('store').query('award', {
+         filter: {
+           recipient: this.get('currentStudent').id
+         }
+       }).then((awards) => {
+        for(var i = 0; i < awards.get('length'); i++) {
+          this.get('awardNotes').pushObject(awards.objectAt(i));
+        }
+       });
+
+       this.get('store').query('advanced-standing', {
+         filter: {
+           recipient: this.get('currentStudent').id
+         }
+       }).then((standing) => {
+        for(var i = 0; i < standing.get('length'); i++) {
+          this.get('advancedStandingArray').pushObject(standing.objectAt(i));
+        }
+       });
   },
 
   didRender() {
@@ -94,13 +129,24 @@ export default Ember.Component.extend({
   actions: {
     saveStudent () {
       var updatedStudent = this.get('currentStudent');
-      var res = this.get('store').peekRecord('residency', this.get('selectedResidency'));
-      updatedStudent.set('gender', this.get('selectedGender'));
       updatedStudent.set('DOB', new Date(this.get('selectedDate')));
       updatedStudent.set('resInfo', res);
+     // updateStudent.set('registrationComments', this.get('registrationComments'));
+
+      //updatedStudent.set('awards', this.get('awardNotes'));
       updatedStudent.save().then(() => {
         //     this.set('isStudentFormEditing', false);
       });
+
+    },
+
+    undoSave(){
+      this.get('currentStudent').rollbackAttributes();
+      //Change the selected values so it doesn't mess with next student
+      this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
+      //WILL HAVE TO CHANGE GENDER BASED ON NEW MODEL
+      this.set('selectedGender', this.get('currentStudent').get('gender'));
+      this.set('selectedDate', this.get('currentStudent').get('DOB').toISOString().substring(0, 10));
     },
 
     firstStudent() {
@@ -139,14 +185,44 @@ export default Ember.Component.extend({
 
     selectGender (gender){
       this.set('selectedGender', gender);
+      //Set the value of this student's gender to the gender selected
+      this.get('currentStudent').set('gender', this.get('selectedGender'));
     },
 
     selectResidency (residency){
       this.set('selectedResidency', residency);
+      //Set the value of this student's residency to this one
+      var res = this.get('store').peekRecord('residency', this.get('selectedResidency'));
+      this.get('currentStudent').set('resInfo', res);
     },
 
     assignDate (date){
       this.set('selectedDate', date);
+    },
+
+    //Brings up the confirm-delete component.  Will ask if sure wants to delete
+    deleteStudent(){
+      this.set('isDeleting', true);
+    },
+
+    //Called from confirmation on modal
+    confirmedDelete(){
+
+      //Delete the student from the database.  **Also need to delete advanced standing and scholarships and awards**
+      this.get('store').findRecord('student', this.get('currentStudent').id, { backgroundReload: false }).then(function(student) {
+        student.deleteRecord();
+        student.save(); // => DELETE to /student/:_id
+      });
+
+      //If this is the last student on the page, load previous.  If not, load next
+      if(this.get('currentIndex') == this.get('lastIndex')){
+        this.send('previousStudent');
+      } else {
+        this.send('nextStudent');
+      }
+
+      //Subtract 1 from the last index of this page of students to account for the missing record
+      this.set('lastIndex', this.get('lastIndex') - 1);
     },
 
     findStudent() {
@@ -157,5 +233,14 @@ export default Ember.Component.extend({
     help(){
       this.set('showHelp', true);
     },
+
+    addCourse() {
+     this.set('showNewCourse', true);
+     //this.set('showAddCourseButton', false);
+    },
+
+    addAward() {
+      this.set('showNewAward', true);
+    }
   }
 });

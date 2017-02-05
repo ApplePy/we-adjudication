@@ -2,14 +2,19 @@
   <div class="header">Help</div>
   <div class="content">
     <div class="ui header">Data Form Actions</div>
-    <ul>
-      {{#each hints as |hint|}}
+    <br>
+      {{#each hints as |hintgroup|}}
+        <b>{{hintgroup.title}}</b>
+        <p>{{hintgroup.description}}</p>
+      <ul>
+        {{#each hintgroup.list as |hint|}}
         <li>
           {{hint.button}}: {{hint.hint}}
         </li>
+        {{/each}}
+      </ul>
       <br/>
       {{/each}}
-    </ul>
     <div class="actions">
       <hr>
       <div class="ui button" {{action "exit"}}>OK</div>

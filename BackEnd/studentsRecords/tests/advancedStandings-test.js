@@ -41,12 +41,12 @@ describe('Advanced Standings', () => {
         it('it should GET all advanced standings ', (done) => {
             // Request all advanced standings
             chai.request(server)
-                .get('/advanced-standings')
+                .get('/advancedStandings')
                 .end((err, res) => {
                     expect(res).to.have.status(200);
                     expect(res).to.be.json;
-                    expect(res.body).to.have.property('advanced-standing');
-                    expect(res.body['advanced-standing'].length).to.be.eq(0);
+                    expect(res.body).to.have.property('advancedStanding');
+                    expect(res.body.advancedStanding.length).to.be.eq(0);
                     done();
                 });
         });
@@ -96,19 +96,18 @@ describe('Advanced Standings', () => {
                             if (++count == 15) {
                                 // Make request
                                 chai.request(server)
-                                    .get('/advanced-standings')
+                                    .get('/advancedStandings')
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
                                         expect(res).to.be.json;
-                                        expect(res.body).to.have.property('advanced-standing');
-                                        expect(res.body['advanced-standing'].length).to.eq(15);
+                                        expect(res.body).to.have.property('advancedStanding');
+                                        expect(res.body.advancedStanding.length).to.eq(15);
                                         for (var num = 0; num < 5; num++) {
-                                            expect(res.body['advanced-standing'][num].course).to.eq(standingData.course);
-                                            expect(res.body['advanced-standing'][num].description).to.eq(standingData.description);
-                                            expect(res.body['advanced-standing'][num].grade).to.eq(standingData.grade);
-                                            expect(res.body['advanced-standing'][num].from).to.eq(standingData.from);
-                                            expect(res.body['advanced-standing'][num].units).to.equal(num);
-                                            expect(res.body['advanced-standing'][num].recipient).to.equal(testStudent._id.toString());
+                                            expect(res.body.advancedStanding[num].course).to.eq(standingData.course);
+                                            expect(res.body.advancedStanding[num].description).to.eq(standingData.description);
+                                            expect(res.body.advancedStanding[num].grade).to.eq(standingData.grade);
+                                            expect(res.body.advancedStanding[num].from).to.eq(standingData.from);
+                                            expect(res.body.advancedStanding[num].recipient).to.equal(testStudent._id.toString());
                                         }
                                         done();
                                     });
@@ -164,20 +163,20 @@ describe('Advanced Standings', () => {
                             if (++count == 15) {
                                 // Make request
                                 chai.request(server)
-                                    .get('/advanced-standings')
-                                    .query({filter: {student: testStudent._id.toString()}})
+                                    .get('/advancedStandings')
+                                    .query({filter: {recipient: testStudent._id.toString()}})
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
                                         expect(res).to.be.json;
-                                        expect(res.body).to.have.property('advanced-standing');
-                                        expect(res.body['advanced-standing'].length).to.eq(15);
+                                        expect(res.body).to.have.property('advancedStanding');
+                                        expect(res.body.advancedStanding.length).to.eq(15);
                                         for (var num = 0; num < 15; num++) {
-                                            expect(res.body['advanced-standing'][num].course).to.eq(standingData.course);
-                                            expect(res.body['advanced-standing'][num].description).to.eq(standingData.description);
-                                            expect(res.body['advanced-standing'][num].grade).to.eq(standingData.grade);
-                                            expect(res.body['advanced-standing'][num].from).to.eq(standingData.from);
-                                            //expect(res.body['advanced-standing'][num].units).to.equal(num);
-                                            expect(res.body['advanced-standing'][num].recipient).to.equal(testStudent._id.toString());
+                                            expect(res.body.advancedStanding[num].course).to.eq(standingData.course);
+                                            expect(res.body.advancedStanding[num].description).to.eq(standingData.description);
+                                            expect(res.body.advancedStanding[num].grade).to.eq(standingData.grade);
+                                            expect(res.body.advancedStanding[num].from).to.eq(standingData.from);
+                                            //expect(res.body.advancedStanding[num].units).to.equal(num);
+                                            expect(res.body.advancedStanding[num].recipient).to.equal(testStudent._id.toString());
                                         }
                                         done();
                                     });
@@ -238,13 +237,13 @@ describe('Advanced Standings', () => {
                                 if (++count == 15) {
                                     // Make request
                                     chai.request(server)
-                                        .get('/advanced-standings')
-                                        .query({filter: {student: testStudent._id.toString()}})
+                                        .get('/advancedStandings')
+                                        .query({filter: {recipient: testStudent._id.toString()}})
                                         .end((err, res) => {
                                             expect(res).to.have.status(200);
                                             expect(res).to.be.json;
-                                            expect(res.body).to.have.property('advanced-standing');
-                                            expect(res.body['advanced-standing'].length).to.be.equal(0);
+                                            expect(res.body).to.have.property('advancedStanding');
+                                            expect(res.body.advancedStanding.length).to.be.equal(0);
                                             done();
                                         });
                                 }
@@ -300,17 +299,17 @@ describe('Advanced Standings', () => {
                             if (++count == 15) {
                                 // Make request
                                 chai.request(server)
-                                    .get('/advanced-standings/' + testStanding._id.toString())
+                                    .get('/advancedStandings/' + testStanding._id.toString())
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
                                         expect(res).to.be.json;
-                                        expect(res.body).to.have.property('advanced-standing');
-                                        expect(res.body['advanced-standing'].course).to.eq(standingData.course);
-                                        expect(res.body['advanced-standing'].description).to.eq(standingData.description);
-                                        expect(res.body['advanced-standing'].grade).to.eq(standingData.grade);
-                                        expect(res.body['advanced-standing'].from).to.eq(standingData.from);
-                                        expect(res.body['advanced-standing'].units).to.equal(testStanding.units);
-                                        expect(res.body['advanced-standing'].recipient).to.equal(testStudent._id.toString());
+                                        expect(res.body).to.have.property('advancedStanding');
+                                        expect(res.body.advancedStanding.course).to.eq(standingData.course);
+                                        expect(res.body.advancedStanding.description).to.eq(standingData.description);
+                                        expect(res.body.advancedStanding.grade).to.eq(standingData.grade);
+                                        expect(res.body.advancedStanding.from).to.eq(standingData.from);
+                                        expect(res.body.advancedStanding.units).to.equal(testStanding.units);
+                                        expect(res.body.advancedStanding.recipient).to.equal(testStudent._id.toString());
                                         done();
                                     });
                             }
@@ -365,7 +364,7 @@ describe('Advanced Standings', () => {
                             if (++count == 15) {
                                 // Make request
                                 chai.request(server)
-                                    .get('/advanced-standings/53425353')
+                                    .get('/advancedStandings/53425353')
                                     .end((err, res) => {
                                         expect(res).to.have.status(404);
                                         done();
@@ -381,7 +380,7 @@ describe('Advanced Standings', () => {
     /*
      * Test the /PUT routes
      */
-    describe('/PUT advanced standing', () => {
+    describe('/PUT advanced standings', () => {
         it('it should PUT an updated advanced standing', (done) => {
 
             // Set up mock data
@@ -405,7 +404,7 @@ describe('Advanced Standings', () => {
             };
 
             let testStudent = new Models.Students(studentData);
-            testStudent.save((err) =>{
+            testStudent.save((err) => {
                 if (err) throw err;
 
                 var standingData = {
@@ -438,18 +437,18 @@ describe('Advanced Standings', () => {
 
                                 // Make request
                                 chai.request(server)
-                                    .put('/advanced-standings/' + testStanding._id.toString())
-                                    .send({'advanced-standing': standingData})
+                                    .put('/advancedStandings/' + testStanding._id.toString())
+                                    .send({advancedStanding: standingData})
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
                                         expect(res).to.be.json;
-                                        expect(res.body).to.have.property('advanced-standing');
-                                        expect(res.body['advanced-standing'].course).to.eq(standingData.course);
-                                        expect(res.body['advanced-standing'].description).to.eq(standingData.description);
-                                        expect(res.body['advanced-standing'].grade).to.eq(standingData.grade);
-                                        expect(res.body['advanced-standing'].from).to.eq(standingData.from);
-                                        expect(res.body['advanced-standing'].units).to.equal(standingData.units);
-                                        expect(res.body['advanced-standing'].recipient).to.equal(testStudent._id.toString());
+                                        expect(res.body).to.have.property('advancedStanding');
+                                        expect(res.body.advancedStanding.course).to.eq(standingData.course);
+                                        expect(res.body.advancedStanding.description).to.eq(standingData.description);
+                                        expect(res.body.advancedStanding.grade).to.eq(standingData.grade);
+                                        expect(res.body.advancedStanding.from).to.eq(standingData.from);
+                                        expect(res.body.advancedStanding.units).to.equal(standingData.units);
+                                        expect(res.body.advancedStanding.recipient).to.equal(testStudent._id.toString());
 
                                         // Test mongo to ensure it was written
                                         Models.AdvancedStandings.findById(testStanding._id, (error, res) => {
@@ -460,6 +459,82 @@ describe('Advanced Standings', () => {
                                             expect(res.from).to.eq(standingData.from);
                                             expect(res.units).to.equal(standingData.units);
                                             expect(res.recipient.toString()).to.equal(testStudent._id.toString());
+                                            done();
+                                        });
+                                    });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
+        it('it should 400 on PUT an advanced standing with no recipient', (done) => {
+
+            // Set up mock data
+            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            testRes.save((err) => {
+                if (err) throw err
+            });
+
+            var studentData = {
+                number: 594265372,
+                firstName: "Johnny",
+                lastName: "Test",
+                gender: 1,
+                DOB: new Date().toISOString(),
+                photo: "/some/link",
+                registrationComments: "No comment",
+                basisOfAdmission: "Because",
+                admissionAverage: 90,
+                admissionComments: "None",
+                resInfo: testRes
+            };
+
+            let testStudent = new Models.Students(studentData);
+            testStudent.save((err) => {
+                if (err) throw err;
+
+                var standingData = {
+                    course: "BASKWV 1000",
+                    description: "Basket weaving",
+                    grade: 100,
+                    from: "UBC",
+                    recipient: testStudent
+                };
+
+                // Create first advanced standing
+                standingData.units = 0;
+                let testStanding = new Models.AdvancedStandings(standingData);
+                testStanding.save((err) => {
+                    if (err) throw err;
+
+                    // Create 14 advanced standings
+                    var count = 0;
+                    for (var num = 1; num < 15; num++) {
+                        standingData.units = num;
+                        let otherStandings = new Models.AdvancedStandings(standingData);
+                        otherStandings.save((err) => {
+                            if (err) throw err;
+
+                            // Start testing once all awards are created
+                            if (++count == 14) {
+
+                                // Modify data
+                                standingData.units = 9001;
+                                standingData.recipient = null;
+
+                                // Make request
+                                chai.request(server)
+                                    .put('/advancedStandings/' + testStanding._id.toString())
+                                    .send({advancedStanding: standingData})
+                                    .end((err, res) => {
+                                        expect(res).to.have.status(400);
+
+                                        // Test mongo to ensure it was written
+                                        Models.AdvancedStandings.findById(testStanding._id, (error, res) => {
+                                            expect(error).to.be.null;
+                                            expect(res.recipient).to.not.be.null;
                                             done();
                                         });
                                     });
@@ -515,7 +590,7 @@ describe('Advanced Standings', () => {
                             if (++count == 15) {
                                 // Make request
                                 chai.request(server)
-                                    .get('/advanced-standings/4765437876543')
+                                    .get('/advancedStandings/4765437876543')
                                     .end((err, res) => {
                                         expect(res).to.have.status(404);
                                         done();
@@ -531,7 +606,7 @@ describe('Advanced Standings', () => {
     /*
      * Test the /POST routes
      */
-    describe('/POST an advanced standing', () => {
+    describe('/POST an advanced standings', () => {
         it('it should POST successfully', (done) => {
 
             // Set up mock data
@@ -540,7 +615,7 @@ describe('Advanced Standings', () => {
             };
             let testStudent = new Models.Students(studentData);
 
-            let standingData ={
+            let standingData = {
                 course: "BASKWV 1000",
                 description: "Basket weaving",
                 grade: 100,
@@ -551,28 +626,28 @@ describe('Advanced Standings', () => {
 
             // Save mock
             testStudent.save((err) => {
-                if(err) throw err;
+                if (err) throw err;
 
                 // Make request
                 chai.request(server)
-                    .post('/advanced-standings')
-                    .send({'advanced-standing': standingData})
+                    .post('/advancedStandings')
+                    .send({advancedStanding: standingData})
                     .end((err, res) => {
                         expect(res).to.have.status(201);
                         expect(res).to.be.json;
-                        expect(res.body).to.have.property('advanced-standing');
-                        expect(res.body['advanced-standing'].course).to.eq(standingData.course);
-                        expect(res.body['advanced-standing'].description).to.eq(standingData.description);
-                        expect(res.body['advanced-standing'].grade).to.eq(standingData.grade);
-                        expect(res.body['advanced-standing'].from).to.eq(standingData.from);
-                        expect(res.body['advanced-standing'].units).to.equal(standingData.units);
-                        expect(res.body['advanced-standing'].recipient).to.equal(testStudent._id.toString());
+                        expect(res.body).to.have.property('advancedStanding');
+                        expect(res.body.advancedStanding.course).to.eq(standingData.course);
+                        expect(res.body.advancedStanding.description).to.eq(standingData.description);
+                        expect(res.body.advancedStanding.grade).to.eq(standingData.grade);
+                        expect(res.body.advancedStanding.from).to.eq(standingData.from);
+                        expect(res.body.advancedStanding.units).to.equal(standingData.units);
+                        expect(res.body.advancedStanding.recipient).to.equal(testStudent._id.toString());
 
                         // Check underlying database
-                        Models.AdvancedStandings.findById(res.body['advanced-standing']._id, function (error, standing) {
+                        Models.AdvancedStandings.findById(res.body.advancedStanding._id, function (error, standing) {
                             expect(error).to.be.null;
                             expect(standing).to.not.be.null;
-                            expect(res.body).to.have.property('advanced-standing');
+                            expect(res.body).to.have.property('advancedStanding');
                             expect(standing.course).to.eq(standingData.course);
                             expect(standing.description).to.eq(standingData.description);
                             expect(standing.grade).to.eq(standingData.grade);
@@ -586,53 +661,83 @@ describe('Advanced Standings', () => {
             });
         });
 
+        it('it should 400 on POST with no recipient', (done) => {
+
+            // Set up mock data
+            let studentData = {
+                number: 594265372
+            };
+            let testStudent = new Models.Students(studentData);
+
+            let awardData ={
+                note: "A note"
+            };
+
+            // Save mock
+            testStudent.save((err) => {
+                if(err) throw err;
+
+                // Make request
+                chai.request(server)
+                    .post('/awards')
+                    .send({award: awardData})
+                    .end((err, res) => {
+                        expect(res).to.have.status(400);
+                        done();
+                    });
+            });
+        });
+
     });
 
     /*
      * Test the /DELETE routes
      */
-    // describe('/DELETE an award', () => {
-    //     it('it should DELETE successfully', (done) => {
-    //
-    //         // Set up mock data
-    //         let testRes = new Models.Residencies({name: "Johnny Test House"});
-    //         testRes.save((err) => {
-    //             if (err) throw err
-    //         });
-    //
-    //         var awardData = {
-    //             number: 594265372,
-    //             firstName: "Johnny",
-    //             lastName: "Test",
-    //             gender: 1,
-    //             DOB: new Date().toISOString(),
-    //             photo: "/some/link",
-    //             registrationComments: "No comment",
-    //             basisOfAdmission: "Because",
-    //             admissionAverage: 90,
-    //             admissionComments: "None",
-    //             resInfo: testRes._id.toString()
-    //         };
-    //         let testAward = new Models.Awards(awardData);
-    //         testAward.save((err) => {
-    //             if (err) throw err;
-    //
-    //             // Make request
-    //             chai.request(server)
-    //                 .delete('/awards/' + testAward._id.toString())
-    //                 .end((err, res) => {
-    //                     expect(res).to.have.status(200);
-    //
-    //                     // Check underlying database
-    //                     Models.Awards.findById(testAward._id, function (error, award) {
-    //                         expect(error).to.be.null;
-    //                         expect(award).to.be.null;
-    //                         done();
-    //                     });
-    //                 });
-    //         });
-    //     });
-    //
-    // });
+    describe('/DELETE an award', () => {
+        it('it should DELETE successfully and remove links', (done) => {
+
+            // Set up mock data
+            let studentData = {
+                number: 594265372
+            };
+            let testStudent = new Models.Students(studentData);
+
+            let standingData = {
+                course: "BASKWV 1000",
+                description: "Basket weaving",
+                grade: 100,
+                units: 1,
+                from: "UBC",
+                recipient: testStudent
+            };
+
+            // Save mock student
+            testStudent.save((err) => {
+                if (err) throw err;
+
+                // save advanced standing
+                let testStanding = new Models.AdvancedStandings(standingData);
+                testStanding.save((err) => {
+                    if (err) throw err;
+
+
+                    // Make request
+                    chai.request(server)
+                        .delete('/advancedStandings/' + testStanding._id.toString())
+                        .send({advancedStanding: standingData})
+                        .end((err, res) => {
+                            expect(res).to.have.status(200);
+
+                            // Check underlying database
+                            Models.AdvancedStandings.findById(testStanding._id, function (error, award) {
+                                expect(error).to.be.null;
+                                expect(award).to.be.null;
+                                done();
+                            });
+                        });
+                });
+            });
+        });
+    });
 
 });

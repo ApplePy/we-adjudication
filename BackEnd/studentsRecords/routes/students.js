@@ -6,14 +6,13 @@ var parseUrlencoded = bodyParser.urlencoded({extended: false});
 var parseJSON = bodyParser.json();
 
 // TODO: WARNING: PUT/POST does not check for missing data
-// TODO: Also, residencies/awards/standings and students are not properly linked both ways
 
 router.route('/')
     .post(parseUrlencoded, parseJSON, function (request, response) {
         var student = new models.Students(request.body.student);
         student.save(function (error) {
-            if (error) response.send(error);
-            response.status(201).json({student: student});
+            if (error) response.status(500).send(error);
+            else response.status(201).json({student: student});
         });
     })
     .get(parseUrlencoded, parseJSON, function (request, response) {
@@ -27,15 +26,15 @@ router.route('/')
             //});
             models.Students.paginate({}, { offset: o, limit: l },
                 function (error, students) {
-                    if (error) response.send(error);
-                    response.json({student: students.docs});
+                    if (error) response.status(500).send(error);
+                    else response.json({student: students.docs});
                 });
         } else {
             var StudentNo = request.query.filter.number;
             // TODO: This causes a deprecation warning from Ember, should not return an array
             models.Students.find({number: StudentNo}, function (error, students) {
-                if (error) response.send(error);
-                response.json({student: students});
+                if (error) response.status(500).send(error);
+                else response.json({student: students});
             });
         }
     });
@@ -73,7 +72,7 @@ router.route('/:student_id')
 
                 student.save(function (error) {
                     if (error) {
-                        response.send({error: error});
+                        response.status(500).send({error: error});
                     }
                     else {
                         response.json({student: student});
@@ -86,7 +85,13 @@ router.route('/:student_id')
         models.Students.findByIdAndRemove(request.params.student_id,
             function (error, deleted) {
                 if (!error) {
-                    response.json({student: deleted});
+                    // Delete all awards associated with student
+                    models.Awards.remove({recipient: deleted._id}, (err, removed) => {
+                        // Delete all advanced standings associated with student
+                        models.AdvancedStandings.remove({recipient: deleted._id}, (err2, removed2) => {
+                            response.json({student: deleted});
+                        });
+                    });
                 }
             }
         );
