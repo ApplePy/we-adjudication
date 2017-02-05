@@ -10,8 +10,13 @@
         Students Records
       </a>
 
+      <a class="item" {{action "manageSystem"}}a>
+        <i class="large code icon"></i>
+        Manage System
+      </a>
+
       <a class="item" {{action "addStudent"}}>
-        <i class="add user icon"></i>
+        <i class="large add user icon"></i>
         Add Student
       </a>
       <a class="item " {{action "about"}}>
@@ -27,6 +32,9 @@
       {{/if}}
       {{#if isStudentsRecordsDataEntry}}
         {{student-data-entry}}
+      {{/if}}
+      {{#if isManageSystemShowing}}
+        {{manage-system}}
       {{/if}}
       {{#if isAboutShowing}}
         {{about-us}}
