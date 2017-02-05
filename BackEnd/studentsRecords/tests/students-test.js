@@ -610,7 +610,7 @@ describe('Students', () => {
                 });
         });
 
-        it('BROKEN it should 500 on POST of student with duplicate number', (done) => {
+        it('it should 500 on POST of student with duplicate number', (done) => {
 
             // Set up mock data
             let testRes = new Models.Residencies({name: "Johnny Test House"});
