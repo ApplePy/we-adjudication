@@ -11,8 +11,8 @@ router.route('/')
     .post(parseUrlencoded, parseJSON, function (request, response) {
         var student = new models.Students(request.body.student);
         student.save(function (error) {
-            if (error) response.send(error);
-            response.status(201).json({student: student});
+            if (error) response.status(500).send(error);
+            else response.status(201).json({student: student});
         });
     })
     .get(parseUrlencoded, parseJSON, function (request, response) {
@@ -26,15 +26,15 @@ router.route('/')
             //});
             models.Students.paginate({}, { offset: o, limit: l },
                 function (error, students) {
-                    if (error) response.send(error);
-                    response.json({student: students.docs});
+                    if (error) response.status(500).send(error);
+                    else response.json({student: students.docs});
                 });
         } else {
             var StudentNo = request.query.filter.number;
             // TODO: This causes a deprecation warning from Ember, should not return an array
             models.Students.find({number: StudentNo}, function (error, students) {
-                if (error) response.send(error);
-                response.json({student: students});
+                if (error) response.status(500).send(error);
+                else response.json({student: students});
             });
         }
     });

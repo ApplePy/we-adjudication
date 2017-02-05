@@ -1,0 +1,47 @@
+<!-- Genders -->
+
+<div class="ui segment">
+
+  <h1 class="ui header">Genders</h1>
+  <div class="ui action input">
+    {{input type="text" placeholder="Add gender..." value=newGender}}
+    <button class="positive ui button" {{action 'addGender'}}>Add</button>
+  </div>
+
+  <div class="ui divider"></div>
+
+  {{#each genders as |gender|}}
+    <h6 class="ui header">{{gender.name}}</h6>
+    <div class="ui input">
+      {{input type="text" value=genderNames[index]}}
+    </div>
+    <button class="ui primary button" {{action 'modifyGender' gender.id genderNames[index] }}>Save</button>
+    <button class="negative ui button" {{action 'deleteGender' gender.id}}>Delete</button>
+  {{/each}}
+
+</div>
+
+<!-- Residencies -->
+
+<div class="ui segment">
+
+  <h1 class="ui header">Residencies</h1>
+  <div class="ui action input">
+    {{input type="text" placeholder="Add residency..." value=newResidency}}
+    <button class="positive ui button" {{action 'addResidency'}}>Add</button>
+  </div>
+
+  <div class="ui divider"></div>
+
+  {{#each residencies as |residency|}}
+    <h6 class="ui header">{{residency.name}}</h6>
+    <div class="ui input">
+      {{input type="text" value=residencyNames[index]}}
+    </div>
+    <button class="ui primary button" {{action 'modifyResidency' residency.id residencyNames[index] }} >Save</button>
+    <button class="negative ui button" {{action 'deleteResidency' residency.id }}>Delete</button>
+  {{/each}}
+
+</div>
+
+

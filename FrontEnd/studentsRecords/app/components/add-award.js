@@ -17,14 +17,14 @@ export default Ember.Component.extend({
       });
 
       award.save();
-
-   //var index = this.get('studentsModel').indexOf(currentStudent);
-     // this.set('INDEX', index);
-
-    //this.set('notDONE', false);
-    // Ember.$('.ui.modal').modal('hide');
-     //Ember.$('.ui.modal').remove();
 /*
+   var index = this.get('studentsModel').indexOf(newrecipient);
+     this.set('INDEX', index);
+
+    this.set('notDONE', false);
+     Ember.$('.ui.modal').modal('hide');
+     Ember.$('.ui.modal').remove();
+
       this.get('store').query('student', {filter: {number: this.get('studentID')}}).then(
        (result) => {
          var index = this.get('studentsModel').indexOf(result);
