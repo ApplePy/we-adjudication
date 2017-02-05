@@ -31,7 +31,7 @@ router.route('/')
         }
         // Get advanced standings for a student
         else {
-            models.AdvancedStandings.find({"recipient": Student.student}, function (error, students) {
+            models.AdvancedStandings.find({"recipient": Student.recipient}, function (error, students) {
                 if (error) response.status(500).send(error);
                 response.json({advancedStanding: students});
             });
