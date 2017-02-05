@@ -162,7 +162,7 @@ describe('Awards', () => {
                                     // Make request
                                     chai.request(server)
                                         .get('/awards')
-                                        .query({filter: {student: testStudent._id.toString()}})
+                                        .query({filter: {recipient: testStudent._id.toString()}})
                                         .end((err, res) => {
                                             expect(res).to.have.status(200);
                                             expect(res).to.be.json;
@@ -230,7 +230,7 @@ describe('Awards', () => {
                                     // Make request
                                     chai.request(server)
                                         .get('/awards')
-                                        .query({filter: {student: testStudent._id.toString()}})
+                                        .query({filter: {recipient: testStudent._id.toString()}})
                                         .end((err, res) => {
                                             expect(res).to.have.status(200);
                                             expect(res).to.be.json;

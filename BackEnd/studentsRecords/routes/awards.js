@@ -32,7 +32,7 @@ router.route('/')
 
         // Get awards for a student
         else {
-            models.Awards.find({"recipient": Student.student}, function (error, students) {
+            models.Awards.find({"recipient": Student.recipient}, function (error, students) {
                 if (error) response.status(500).send(error);
                 else response.json({award: students});
             });
