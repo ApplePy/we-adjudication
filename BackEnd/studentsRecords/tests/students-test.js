@@ -610,7 +610,7 @@ describe('Students', () => {
                 });
         });
 
-        it('it should 500 on POST of student with duplicate number', (done) => {
+        it('BROKEN it should 500 on POST of student with duplicate number', (done) => {
 
             // Set up mock data
             let testRes = new Models.Residencies({name: "Johnny Test House"});
@@ -637,39 +637,8 @@ describe('Students', () => {
                 .post('/students')
                 .send({student: studentData})
                 .end((err, res) => {
-                    expect(res).to.have.status(201);
-                    expect(res).to.be.json;
-                    expect(res.body).to.have.property('student');
-                    expect(res.body.student.number).to.equal(studentData.number);
-                    expect(res.body.student.firstName).to.equal(studentData.firstName);
-                    expect(res.body.student.lastName).to.equal(studentData.lastName);
-                    expect(res.body.student.gender).to.equal(studentData.gender);
-                    expect(res.body.student.DOB).to.equal(studentData.DOB);
-                    expect(res.body.student.photo).to.equal(studentData.photo);
-                    expect(res.body.student.registrationComments).to.equal(studentData.registrationComments);
-                    expect(res.body.student.basisOfAdmission).to.equal(studentData.basisOfAdmission);
-                    expect(res.body.student.admissionAverage).to.equal(studentData.admissionAverage);
-                    expect(res.body.student.admissionComments).to.equal(studentData.admissionComments);
-                    expect(res.body.student.resInfo).to.equal(testRes._id.toString());
-
-                    // Check underlying database
-                    Models.Students.findById(res.body.student._id, function (error, student) {
-                        expect(error).to.be.null;
-                        expect(student).to.not.be.null;
-                        expect(student.number).to.equal(studentData.number);
-                        expect(student.firstName).to.equal(studentData.firstName);
-                        expect(student.lastName).to.equal(studentData.lastName);
-                        expect(student.gender).to.equal(studentData.gender);
-                        expect(student.DOB.toISOString()).to.equal(studentData.DOB);
-                        expect(student.photo).to.equal(studentData.photo);
-                        expect(student.registrationComments).to.equal(studentData.registrationComments);
-                        expect(student.basisOfAdmission).to.equal(studentData.basisOfAdmission);
-                        expect(student.admissionAverage).to.equal(studentData.admissionAverage);
-                        expect(student.admissionComments).to.equal(studentData.admissionComments);
-                        expect(student.resInfo.toString()).to.equal(testRes._id.toString());
-
-                        done();
-                    });
+                    expect(res).to.have.status(500);
+                    done();
                 });
         });
 
