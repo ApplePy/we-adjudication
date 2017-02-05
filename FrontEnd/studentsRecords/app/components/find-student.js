@@ -16,13 +16,16 @@ export default Ember.Component.extend({
        (result) => {
          var index = this.get('studentsModel').indexOf(result);
          this.set('INDEX', index);
+         
          this.set('notDONE', false);
-
          Ember.$('.ui.modal').modal('hide');
          Ember.$('.ui.modal').remove();
        }
      ).catch((err)=>{
-       alert("Invalid student number!");
+      alert("Invalid student number!");
+      this.set('notDONE', false);
+      Ember.$('.ui.modal').modal('hide');
+      Ember.$('.ui.modal').remove();
      });
     },
 
