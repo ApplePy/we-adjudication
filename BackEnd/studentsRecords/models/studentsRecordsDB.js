@@ -51,16 +51,16 @@ var studentsSchema = MongooseVariables.Schema(
         number: {type: Number, index: {unique: true}},
         firstName: String,
         lastName: String,
-        gender: Number,
         DOB: Date,
         photo: String,
         registrationComments: String,
         basisOfAdmission: String,
         admissionAverage: Number,
         admissionComments: String,
-        resInfo: {type: MongooseVariables.Schema.ObjectId, ref: 'Residencies'},
-        awards: [{type: MongooseVariables.Schema.ObjectId, ref: 'Awards'}],
-        advancedStandings: [{type: MongooseVariables.Schema.ObjectId, ref: 'AdvancedStandings'}]
+        resInfo: {type: mongoose.Schema.ObjectId, ref: 'Residencies'},
+        genderInfo: {type: mongoose.Schema.ObjectId, ref: 'Genders'},
+        awards: [{type: mongoose.Schema.ObjectId, ref: 'Awards'}],
+        advancedStandings: [{type: mongoose.Schema.ObjectId, ref: 'AdvancedStandings'}]
     }
 );
 studentsSchema.plugin(mongoosePaginate);
@@ -72,14 +72,22 @@ var residencySchema = MongooseVariables.Schema(
     }
 );
 
+var genderSchema = mongoose.Schema(
+    {
+        name: {type: String, index: {unique: true}},
+        students: [{type: mongoose.Schema.ObjectId, ref: ('Students')}]
+    }
+);
+
 var Students = mongoose.model('student', studentsSchema);
 var Residencies = mongoose.model('residency', residencySchema);
+var Genders = mongoose.model('gender', genderSchema);
 var AdvancedStandings = mongoose.model('advancedStanding', advancedStandingSchema);
 var Awards = mongoose.model('awards', awardsSchema);
 
 
 exports.Students = Students;
 exports.Residencies = Residencies;
+exports.Genders = Genders;
 exports.AdvancedStandings = AdvancedStandings;
 exports.Awards = Awards;
-

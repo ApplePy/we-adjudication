@@ -5,6 +5,7 @@ var app = express();
 
 var students = require('./routes/students');
 var residencies = require('./routes/residencies');
+var genders = require('./routes/genders');
 var awards = require('./routes/awards');
 var advancedStandings = require('./routes/advancedStandings');
 
@@ -27,6 +28,7 @@ app.use((req, res, next)=>{res.setHeader('Content-Type', 'application/json'); ne
 
 app.use('/students', students);
 app.use('/residencies', residencies);
+app.use('/genders', genders);
 app.use('/awards', awards);
 app.use('/advancedStandings', advancedStandings);
 

@@ -81,11 +81,14 @@
           <div class="inline field">
             <label>Gender</label>
             <select onchange={{action 'selectGender' value="target.value"}}>
+
+              <!-- GENDER HERE -->
               {{#each genderModel as |genderChoice|}}
-                <option value={{genderChoice.id}} selected={{eq currentStudent.gender.id
+                <option value={{genderChoice.id}} selected={{eq currentStudent.genderInfo.id
                                                                    genderChoice.id}}>{{genderChoice.name}} </option>
               {{/each}}
             </select>
+
           </div>
           <div class="inline field">
             <label>Date of Birth</label>

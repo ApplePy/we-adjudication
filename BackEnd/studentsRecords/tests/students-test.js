@@ -18,16 +18,19 @@ describe('Students', () => {
 
     //Before each test we empty the database
     beforeEach((done) => {
-        // Clear out all Residences and Students then call done
-        Models.Residencies.remove({}, (err) => {
-            if (err) throw "Error cleaning out Residencies";
-            Models.Students.remove({}, (err) => {
-                if (err) throw "Error cleaning out Students";
-                Models.Awards.remove({}, (err) => {
-                    if (err) throw "Error cleaning out Awards";
-                    Models.AdvancedStandings.remove({}, (err) => {
-                        if (err) throw "Error cleaning out Advanced Standings";
-                        done()
+        // Clear out all Genders, Residences and Students then call done
+        Models.Genders.remove({}, (err) => {
+            if (err) throw "Error cleaning out Genders";
+            Models.Residencies.remove({}, (err) => {
+                if (err) throw "Error cleaning out Residencies";
+                Models.Students.remove({}, (err) => {
+                    if (err) throw "Error cleaning out Students";
+                    Models.Awards.remove({}, (err) => {
+                        if (err) throw "Error cleaning out Awards";
+                        Models.AdvancedStandings.remove({}, (err) => {
+                            if (err) throw "Error cleaning out Advanced Standings";
+                            done()
+                        });
                     });
                 });
             });
@@ -61,11 +64,16 @@ describe('Students', () => {
 
             });
 
+            let testGender = new Models.Genders({name: "Male"});
+            testGender.save((err) => {
+               if (err) throw err;
+            });
+
             let firstNumber = 594265372;
             var studentData = {
                 firstName: "Johnny",
                 lastName: "Test",
-                gender: 1,
+                genderInfo: testGender,
                 DOB: new Date().toISOString(),
                 photo: "/some/link",
                 registrationComments: "No comment",
@@ -99,7 +107,7 @@ describe('Students', () => {
                                     //expect(res.body.student[num].number).to.equal(firstNumber + num + 1);
                                     expect(res.body.student[num].firstName).to.equal(studentData.firstName);
                                     expect(res.body.student[num].lastName).to.equal(studentData.lastName);
-                                    expect(res.body.student[num].gender).to.equal(studentData.gender);
+                                    expect(res.body.student[num].genderInfo).to.equal(testGender._id.toString());
                                     expect(res.body.student[num].DOB).to.equal(studentData.DOB);
                                     expect(res.body.student[num].photo).to.equal(studentData.photo);
                                     expect(res.body.student[num].registrationComments).to.equal(studentData.registrationComments);
@@ -125,11 +133,16 @@ describe('Students', () => {
                 if (err) throw err
             });
 
+            let testGender = new Models.Genders({name: "Male"});
+            testGender.save((err) => {
+                if (err) throw err;
+            });
+
             let firstNumber = 594265372;
             var studentData = {
                 firstName: "Johnny",
                 lastName: "Test",
-                gender: 1,
+                genderInfo: testGender,
                 DOB: new Date().toISOString(),
                 photo: "/some/link",
                 registrationComments: "No comment",
@@ -161,7 +174,7 @@ describe('Students', () => {
                                 expect(res.body.student[0].number).to.equal(firstNumber + 3);
                                 expect(res.body.student[0].firstName).to.equal(studentData.firstName);
                                 expect(res.body.student[0].lastName).to.equal(studentData.lastName);
-                                expect(res.body.student[0].gender).to.equal(studentData.gender);
+                                expect(res.body.student[0].genderInfo).to.equal(testGender._id.toString());
                                 expect(res.body.student[0].DOB).to.equal(studentData.DOB);
                                 expect(res.body.student[0].photo).to.equal(studentData.photo);
                                 expect(res.body.student[0].registrationComments).to.equal(studentData.registrationComments);
@@ -186,11 +199,16 @@ describe('Students', () => {
                 if (err) throw err
             });
 
+            let testGender = new Models.Genders({name: "Male"});
+            testGender.save((err) => {
+                if (err) throw err;
+            });
+
             let firstNumber = 594265372;
             var studentData = {
                 firstName: "Johnny",
                 lastName: "Test",
-                gender: 1,
+                genderInfo: testGender,
                 DOB: new Date().toISOString(),
                 photo: "/some/link",
                 registrationComments: "No comment",
@@ -234,11 +252,16 @@ describe('Students', () => {
                 if (err) throw err
             });
 
+            let testGender = new Models.Genders({name: "Male"});
+            testGender.save((err) => {
+                if (err) throw err;
+            });
+
             let firstNumber = 594265372;
             var studentData = {
                 firstName: "Johnny",
                 lastName: "Test",
-                gender: 1,
+                genderInfo: testGender,
                 DOB: new Date().toISOString(),
                 photo: "/some/link",
                 registrationComments: "No comment",
@@ -274,7 +297,7 @@ describe('Students', () => {
                                     expect(res.body.student.number).to.equal(firstNumber + 14);
                                     expect(res.body.student.firstName).to.equal(studentData.firstName);
                                     expect(res.body.student.lastName).to.equal(studentData.lastName);
-                                    expect(res.body.student.gender).to.equal(studentData.gender);
+                                    expect(res.body.student.genderInfo).to.equal(testGender._id.toString());
                                     expect(res.body.student.DOB).to.equal(studentData.DOB);
                                     expect(res.body.student.photo).to.equal(studentData.photo);
                                     expect(res.body.student.registrationComments).to.equal(studentData.registrationComments);
@@ -300,11 +323,16 @@ describe('Students', () => {
                 if (err) throw err
             });
 
+            let testGender = new Models.Genders({name: "Male"});
+            testGender.save((err) => {
+                if (err) throw err;
+            });
+
             let firstNumber = 594265372;
             var studentData = {
                 firstName: "Johnny",
                 lastName: "Test",
-                gender: 1,
+                genderInfo: testGender,
                 DOB: new Date().toISOString(),
                 photo: "/some/link",
                 registrationComments: "No comment",
@@ -349,11 +377,16 @@ describe('Students', () => {
                 if (err) throw err
             });
 
+            let testGender = new Models.Genders({name: "Male"});
+            testGender.save((err) => {
+                if (err) throw err;
+            });
+
             let firstNumber = 594265372;
             var studentData = {
                 firstName: "Johnny",
                 lastName: "Test",
-                gender: 1,
+                genderInfo: testGender,
                 DOB: new Date().toISOString(),
                 photo: "/some/link",
                 registrationComments: "No comment",
@@ -381,7 +414,7 @@ describe('Students', () => {
                         if (++count == 14) {
                             // Modify data
                             studentData.number = firstNumber;
-                            studentData.gender = 0;
+                            studentData.lastName = 'Tester';
 
                             // Make request
                             chai.request(server)
@@ -394,7 +427,7 @@ describe('Students', () => {
                                     expect(res.body.student.number).to.equal(firstNumber);
                                     expect(res.body.student.firstName).to.equal(studentData.firstName);
                                     expect(res.body.student.lastName).to.equal(studentData.lastName);
-                                    expect(res.body.student.gender).to.equal(studentData.gender);
+                                    expect(res.body.student.genderInfo).to.equal(testGender._id.toString());
                                     expect(res.body.student.DOB).to.equal(studentData.DOB);
                                     expect(res.body.student.photo).to.equal(studentData.photo);
                                     expect(res.body.student.registrationComments).to.equal(studentData.registrationComments);
@@ -409,7 +442,7 @@ describe('Students', () => {
                                         expect(res.number).to.equal(firstNumber);
                                         expect(res.firstName).to.equal(studentData.firstName);
                                         expect(res.lastName).to.equal(studentData.lastName);
-                                        expect(res.gender).to.equal(studentData.gender);
+                                        expect(res.genderInfo.toString()).to.equal(testGender._id.toString());
                                         expect(res.DOB.toISOString()).to.equal(studentData.DOB);
                                         expect(res.photo).to.equal(studentData.photo);
                                         expect(res.registrationComments).to.equal(studentData.registrationComments);
@@ -434,11 +467,16 @@ describe('Students', () => {
                 if (err) throw err
             });
 
+            let testGender = new Models.Genders({name: "Male"});
+            testGender.save((err) => {
+                if (err) throw err;
+            });
+
             let firstNumber = 594265372;
             var studentData = {
                 firstName: "Johnny",
                 lastName: "Test",
-                gender: 1,
+                genderInfo: testGender,
                 DOB: new Date().toISOString(),
                 photo: "/some/link",
                 registrationComments: "No comment",
@@ -480,7 +518,7 @@ describe('Students', () => {
                                         expect(res.number).to.equal(firstNumber);
                                         expect(res.firstName).to.equal(studentData.firstName);
                                         expect(res.lastName).to.equal(studentData.lastName);
-                                        expect(res.gender).to.equal(studentData.gender);
+                                        expect(res.genderInfo.toString()).to.equal(testGender._id.toString());
                                         expect(res.DOB.toISOString()).to.equal(studentData.DOB);
                                         expect(res.photo).to.equal(studentData.photo);
                                         expect(res.registrationComments).to.equal(studentData.registrationComments);
@@ -505,11 +543,16 @@ describe('Students', () => {
                 if (err) throw err
             });
 
+            let testGender = new Models.Genders({name: "Male"});
+            testGender.save((err) => {
+                if (err) throw err;
+            });
+
             let firstNumber = 594265372;
             var studentData = {
                 firstName: "Johnny",
                 lastName: "Test",
-                gender: 1,
+                genderInfo: testGender,
                 DOB: new Date().toISOString(),
                 photo: "/some/link",
                 registrationComments: "No comment",
@@ -555,11 +598,16 @@ describe('Students', () => {
                 if (err) throw err
             });
 
+            let testGender = new Models.Genders({name: "Male"});
+            testGender.save((err) => {
+                if (err) throw err;
+            });
+
             var studentData = {
                 number: 594265372,
                 firstName: "Johnny",
                 lastName: "Test",
-                gender: 1,
+                genderInfo: testGender,
                 DOB: new Date().toISOString(),
                 photo: "/some/link",
                 registrationComments: "No comment",
@@ -580,7 +628,7 @@ describe('Students', () => {
                     expect(res.body.student.number).to.equal(studentData.number);
                     expect(res.body.student.firstName).to.equal(studentData.firstName);
                     expect(res.body.student.lastName).to.equal(studentData.lastName);
-                    expect(res.body.student.gender).to.equal(studentData.gender);
+                    expect(res.body.student.genderInfo).to.equal(testGender._id.toString());
                     expect(res.body.student.DOB).to.equal(studentData.DOB);
                     expect(res.body.student.photo).to.equal(studentData.photo);
                     expect(res.body.student.registrationComments).to.equal(studentData.registrationComments);
@@ -596,7 +644,7 @@ describe('Students', () => {
                         expect(student.number).to.equal(studentData.number);
                         expect(student.firstName).to.equal(studentData.firstName);
                         expect(student.lastName).to.equal(studentData.lastName);
-                        expect(student.gender).to.equal(studentData.gender);
+                        expect(student.genderInfo.toString()).to.equal(testGender._id.toString());
                         expect(student.DOB.toISOString()).to.equal(studentData.DOB);
                         expect(student.photo).to.equal(studentData.photo);
                         expect(student.registrationComments).to.equal(studentData.registrationComments);
@@ -618,11 +666,16 @@ describe('Students', () => {
                 if (err) throw err
             });
 
+            let testGender = new Models.Genders({name: "Male"});
+            testGender.save((err) => {
+                if (err) throw err;
+            });
+
             var studentData = {
                 number: 594265372,
                 firstName: "Johnny",
                 lastName: "Test",
-                gender: 1,
+                genderInfo: testGender,
                 DOB: new Date().toISOString(),
                 photo: "/some/link",
                 registrationComments: "No comment",
@@ -657,12 +710,17 @@ describe('Students', () => {
     describe('/DELETE a student', () => {
         it('it should DELETE successfully and delete linked awards and advanced standings', (done) => {
 
+            let testGender = new Models.Genders({name: "Male"});
+            testGender.save((err) => {
+                if (err) throw err;
+            });
+
             // Set up mock data
             var studentData = {
                 number: 594265372,
                 firstName: "Johnny",
                 lastName: "Test",
-                gender: 1,
+                genderInfo: testGender,
                 DOB: new Date().toISOString(),
                 photo: "/some/link",
                 registrationComments: "No comment",
