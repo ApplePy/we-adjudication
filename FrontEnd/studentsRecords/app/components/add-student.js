@@ -11,6 +11,7 @@ export default Ember.Component.extend({
   numBox: null,
   fNameBox: null,
   lNameBox: null,
+  isHelpShowing: false,
 
   init() {
     this._super(...arguments);
@@ -37,6 +38,10 @@ export default Ember.Component.extend({
         resInfo: res
       });
       newStudent.save();
+    },
+
+    helpMe () {
+      this.set('isHelpShowing', true);
     },
 
     addMalePhoto () {

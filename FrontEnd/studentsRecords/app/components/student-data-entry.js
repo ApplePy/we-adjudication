@@ -21,6 +21,10 @@ export default Ember.Component.extend({
   isDeleting: false,
   showHelp: false,
   showFindStudent: false,
+  showNewCourse: false,
+  showNewAward: false,
+  awardNotes: [],
+  advancedStandingArray: [],
 
   studentModel: Ember.observer('offset', function () {
     var self = this;
@@ -72,6 +76,8 @@ export default Ember.Component.extend({
 
       // Show first student data
       self.set('currentIndex', self.get('firstIndex'));
+
+      
     });
 
   },
@@ -86,7 +92,29 @@ export default Ember.Component.extend({
     //Fixes gender/residency bug.  Sets selectedResidency/selectedGender to the value
     //the student has in the database.  Before, would only set the value if it was selected
     this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
+    this.set('awardNotes', []);
+    this.set('advancedStandingArray', []);
+
     this.set('selectedGender', this.get('currentStudent').get('gender'));
+    this.get('store').query('award', {
+         filter: {
+           recipient: this.get('currentStudent').id
+         }
+       }).then((awards) => {
+        for(var i = 0; i < awards.get('length'); i++) {
+          this.get('awardNotes').pushObject(awards.objectAt(i));
+        }
+       });
+
+       this.get('store').query('advanced-standing', {
+         filter: {
+           recipient: this.get('currentStudent').id
+         }
+       }).then((standing) => {
+        for(var i = 0; i < standing.get('length'); i++) {
+          this.get('advancedStandingArray').pushObject(standing.objectAt(i));
+        }
+       });
   },
 
   didRender() {
@@ -190,5 +218,14 @@ export default Ember.Component.extend({
     help(){
       this.set('showHelp', true);
     },
+
+    addCourse() {
+     this.set('showNewCourse', true);
+     //this.set('showAddCourseButton', false);
+    },
+
+    addAward() {
+      this.set('showNewAward', true);
+    }
   }
 });

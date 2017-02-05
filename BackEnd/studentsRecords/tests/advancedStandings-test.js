@@ -164,7 +164,7 @@ describe('Advanced Standings', () => {
                                 // Make request
                                 chai.request(server)
                                     .get('/advancedStandings')
-                                    .query({filter: {student: testStudent._id.toString()}})
+                                    .query({filter: {recipient: testStudent._id.toString()}})
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
                                         expect(res).to.be.json;
@@ -238,7 +238,7 @@ describe('Advanced Standings', () => {
                                     // Make request
                                     chai.request(server)
                                         .get('/advancedStandings')
-                                        .query({filter: {student: testStudent._id.toString()}})
+                                        .query({filter: {recipient: testStudent._id.toString()}})
                                         .end((err, res) => {
                                             expect(res).to.have.status(200);
                                             expect(res).to.be.json;
