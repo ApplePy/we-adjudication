@@ -24,7 +24,7 @@ export default Ember.Component.extend({
   actions: {
     saveStudent () {
       var res = this.get('store').peekRecord('residency', this.get('selectedResidency'));
-      //var gen = this.get('store').peekRecord('gender', this.get('selectedGender'));
+      var gen = this.get('store').peekRecord('gender', this.get('selectedGender'));
       var DOB = this.get('store').peekRecord('student', this.get('selectedDate'));
       var store = this.get('store');
 
@@ -32,7 +32,7 @@ export default Ember.Component.extend({
         number: this.get('numBox'),
         firstName: this.get('fNameBox'),
         lastName: this.get('lNameBox'),
-        gender: null,
+        gender: gen,
         photo: this.get('studentPhoto'),
         DOB: new Date(this.get('selectedDate')),
         resInfo: res
