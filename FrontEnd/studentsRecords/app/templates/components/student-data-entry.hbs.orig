@@ -36,7 +36,7 @@
     <i class="search icon"></i>
     Find Record
   </a>
-  <a class="item" {{action 'help'}}>
+  <a class="item">
     Help
   </a>
 </div>
@@ -47,15 +47,23 @@
 {{else if showAllStudents}}
   <!-- Note that offset is an "in" and "out" parameter !-->
  {{all-students INDEX = currentIndex notDONE = showAllStudents offset = offset studentsModel = studentsRecords}}
+<<<<<<< HEAD
+
+
+=======
+{{else if isDeleting}}
+  {{confirm-delete notDONE = isDeleting onConfirm=(action 'confirmedDelete')}}
 {{else if showHelp}}
   {{help-page notDONE = showHelp}}
+>>>>>>> master
 {{else}}
   <!-- Show data entry form -->
 
   <div class="ui top attached tabular menu">
     <div class="active item" data-tab="basics">Basic Info</div>
     <div class="item" data-tab="program">Program Record</div>
-    <div class="item" data-tab="others">Other tabs</div>
+    <div class="item" data-tab="advancedStanding">Advanced Standing</div>
+    <div class="item" data-tab="scholarshipsAwards">Scholarships and Awards</div>
   </div>
   <div class="ui bottom attached active tab segment"data-tab="basics">
     <!-- student basic information !-->
@@ -109,16 +117,6 @@
     <br>
     <h2>{{currentStudent.number}}</h2>
       <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
-<<<<<<< Updated upstream
-    <br><br><br>
-  </div>
-  <div class="ui tab" data-tab="others">
-    <!-- Others !-->
-    <h2>Other data</h2>
-  </div>
-
-
-=======
     <br><br>
 
    <!-- <div class="ui grid"> -->
@@ -157,17 +155,18 @@
     <h2>{{currentStudent.number}}</h2>
     <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
     <br><br>
-    {{#each currentStudent.advancedStandings as |course|}}
-    {{advanced-standing course = course.course unit = course.unit description = course.description grade = course.grade from = course.from recipient = currentStudent}}
+    {{#each advancedStandingArray as |course|}}
+    {{advanced-standing standing = course}}
+    <br>
     {{/each}}
-   <!-- {{#increment-for times=showNewCourse}}
-    {{advanced-standing course}}
-    {{/increment-for}} -->
-    {{#increment-for times=2 }}
-      <div>How goes it?</div>
-    {{/increment-for}}
+
+<<<<<<< HEAD
     <br>
      <div class="ui button" {{action "addCourse"}}>Add Course</div>
+
+    {{#if showNewCourse}}
+    {{add-advanced-standing newrecipient = currentStudent}} <!-- INDEX = currentIndex notDONE = showFindStudent offset = offset studentsModel = studentsRecords -->
+    {{/if}}
   </div>
 
   <div class="ui tab" data-tab="scholarshipsAwards">
@@ -176,14 +175,19 @@
     <h2>{{currentStudent.number}}</h2>
     <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
     <br><br>
-    {{#each currentStudent.awardss as |award|}}
-    {{scholarships-awards note = award.note recipient = currentStudent}}
+    {{#each awardNotes as |award|}}
+    {{scholarships-awards award = award}}
+    <br>
     {{/each}}
     <div class="ui button" {{action "addAward"}}>Add Scholarship/Award</div>
+
+    {{#if showNewAward}}
+    {{add-award newrecipient = currentStudent studentID = currentStudent.number INDEX = currentIndex notDONE = showNewAward offset = offset studentsModel = studentsRecords}}
+    {{/if}}
   </div>
->>>>>>> Stashed changes
-
-
+=======
+  <button class="ui button" {{action 'deleteStudent'}}>Delete Record</button>
+>>>>>>> master
 
 {{/if}}
 

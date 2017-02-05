@@ -16,26 +16,25 @@ export default Ember.Component.extend({
 
  actions: {
   saveCourse() {
-      alert(this.get('newcourse'));
-     var advancedStanding = this.get('store').createRecord('advanced-standing', {
+    var advancedStanding = this.get('store').createRecord('advanced-standing', {
       course: this.get('newcourse'),
       description: this.get('newdescription'),
       units: this.get('newunit'),
       grade: this.get('newgrade'),
       from: this.get('newfrom'),
-      recipient: this.get('currentStudent')
+     recipient: this.get('newrecipient')
       });
-console.log("before");
       advancedStanding.save();
-console.log("after");
-    //this.set('notDONE', false);
-     //Ember.$('.ui.modal').modal('hide');
-     //Ember.$('.ui.modal').remove();
+
+      //var index = this.get('studentsModel').indexOf(this.get('newrecipient'));
+      //this.set('INDEX', index);
+     this.set('notDONE', false);
+     Ember.$('.ui.modal').modal('hide');
+     Ember.$('.ui.modal').remove();
   },
 
    close: function() {
      this.set('notDONE', false);
-
      Ember.$('.ui.modal').modal('hide');
      Ember.$('.ui.modal').remove();
    }

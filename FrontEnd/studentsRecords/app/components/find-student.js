@@ -17,7 +17,6 @@ export default Ember.Component.extend({
          var index = this.get('studentsModel').indexOf(result);
          this.set('INDEX', index);
          this.set('notDONE', false);
-
          Ember.$('.ui.modal').modal('hide');
          Ember.$('.ui.modal').remove();
        }
@@ -28,7 +27,6 @@ export default Ember.Component.extend({
 
    close: function() {
      this.set('notDONE', false);
-
      Ember.$('.ui.modal').modal('hide');
      Ember.$('.ui.modal').remove();
    }

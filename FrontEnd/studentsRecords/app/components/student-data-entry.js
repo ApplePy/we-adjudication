@@ -18,6 +18,7 @@ export default Ember.Component.extend({
   old_offset: null,
   pageSize: null,
   movingBackword: false,
+  isDeleting: false,
   showHelp: false,
   showFindStudent: false,
   showNewCourse: false,
@@ -78,6 +79,7 @@ export default Ember.Component.extend({
 
       
     });
+
   },
 
   showStudentData: function (index) {
@@ -87,6 +89,13 @@ export default Ember.Component.extend({
     var datestring = date.toISOString().substring(0, 10);
     this.set('selectedDate', datestring);
 
+    //Fixes gender/residency bug.  Sets selectedResidency/selectedGender to the value
+    //the student has in the database.  Before, would only set the value if it was selected
+    this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
+    this.set('awardNotes', []);
+    this.set('advancedStandingArray', []);
+
+    this.set('selectedGender', this.get('currentStudent').get('gender'));
     this.get('store').query('award', {
          filter: {
            recipient: this.get('currentStudent').id
@@ -105,7 +114,6 @@ export default Ember.Component.extend({
         for(var i = 0; i < standing.get('length'); i++) {
           this.get('advancedStandingArray').pushObject(standing.objectAt(i));
         }
-        console.log(this.get('advancedStandingArray').objectAt(0));
        });
   },
 
@@ -124,6 +132,11 @@ export default Ember.Component.extend({
       updatedStudent.save().then(() => {
         //     this.set('isStudentFormEditing', false);
       });
+    },
+
+    undoSave(){
+      //Rollback the store value to the value last saved in the database
+      this.get('currentStudent').rollbackAttributes();
     },
 
     firstStudent() {
@@ -172,6 +185,31 @@ export default Ember.Component.extend({
       this.set('selectedDate', date);
     },
 
+    //Brings up the confirm-delete component.  Will ask if sure wants to delete
+    deleteStudent(){
+      this.set('isDeleting', true);
+    },
+
+    //Called from confirmation on modal
+    confirmedDelete(){
+
+      //Delete the student from the database.  **Also need to delete advanced standing and scholarships and awards**
+      this.get('store').findRecord('student', this.get('currentStudent').id, { backgroundReload: false }).then(function(student) {
+        student.deleteRecord();
+        student.save(); // => DELETE to /student/:_id
+      });
+
+      //If this is the last student on the page, load previous.  If not, load next
+      if(this.get('currentIndex') == this.get('lastIndex')){
+        this.send('previousStudent');
+      } else {
+        this.send('nextStudent');
+      }
+
+      //Subtract 1 from the last index of this page of students to account for the missing record
+      this.set('lastIndex', this.get('lastIndex') - 1);
+    },
+    
     findStudent() {
       this.set('showFindStudent', true);
       this.set('showAllStudents', false);
