@@ -89,8 +89,8 @@ export default Ember.Component.extend({
     var datestring = date.toISOString().substring(0, 10);
     this.set('selectedDate', datestring);
 
-    //Fixes gender/residency bug
-
+    //Fixes gender/residency bug.  Sets selectedResidency/selectedGender to the value
+    //the student has in the database.  Before, would only set the value if it was selected
     this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
     this.set('awardNotes', []);
     this.set('advancedStandingArray', []);
@@ -125,24 +125,17 @@ export default Ember.Component.extend({
   actions: {
     saveStudent () {
       var updatedStudent = this.get('currentStudent');
+      var res = this.get('store').peekRecord('residency', this.get('selectedResidency'));
+      updatedStudent.set('gender', this.get('selectedGender'));
       updatedStudent.set('DOB', new Date(this.get('selectedDate')));
-      updatedStudent.set('resInfo', res);
-     // updateStudent.set('registrationComments', this.get('registrationComments'));
-
-      //updatedStudent.set('awards', this.get('awardNotes'));
       updatedStudent.save().then(() => {
         //     this.set('isStudentFormEditing', false);
       });
-
     },
 
     undoSave(){
+      //Rollback the store value to the value last saved in the database
       this.get('currentStudent').rollbackAttributes();
-      //Change the selected values so it doesn't mess with next student
-      this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
-      //WILL HAVE TO CHANGE GENDER BASED ON NEW MODEL
-      this.set('selectedGender', this.get('currentStudent').get('gender'));
-      this.set('selectedDate', this.get('currentStudent').get('DOB').toISOString().substring(0, 10));
     },
 
     firstStudent() {
@@ -181,15 +174,10 @@ export default Ember.Component.extend({
 
     selectGender (gender){
       this.set('selectedGender', gender);
-      //Set the value of this student's gender to the gender selected
-      this.get('currentStudent').set('gender', this.get('selectedGender'));
     },
 
     selectResidency (residency){
       this.set('selectedResidency', residency);
-      //Set the value of this student's residency to this one
-      var res = this.get('store').peekRecord('residency', this.get('selectedResidency'));
-      this.get('currentStudent').set('resInfo', res);
     },
 
     assignDate (date){
@@ -220,7 +208,7 @@ export default Ember.Component.extend({
       //Subtract 1 from the last index of this page of students to account for the missing record
       this.set('lastIndex', this.get('lastIndex') - 1);
     },
-
+    
     findStudent() {
       this.set('showFindStudent', true);
       this.set('showAllStudents', false);
