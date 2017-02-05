@@ -631,15 +631,22 @@ describe('Students', () => {
                 admissionComments: "None",
                 resInfo: testRes._id.toString()
             };
-
-            // Make request
-            chai.request(server)
-                .post('/students')
-                .send({student: studentData})
-                .end((err, res) => {
-                    expect(res).to.have.status(500);
-                    done();
-                });
+            let testStudent = new Models.Students(studentData);
+            testStudent.save((err) => {
+                if (err) throw err;
+                
+                // Modify data
+                studentData.firstName = "Josh";
+                
+                // Make request
+                chai.request(server)
+                    .post('/students')
+                    .send({student: studentData})
+                    .end((err, res) => {
+                        expect(res).to.have.status(500);
+                        done();
+                    });
+            });
         });
 
     });
