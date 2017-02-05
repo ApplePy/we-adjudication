@@ -52,7 +52,7 @@ var residencySchema = mongoose.Schema(
 
 var genderSchema = mongoose.Schema(
     {
-        name: String,
+        name: {type: String, index: {unique: true}},
         students: [{type: mongoose.Schema.ObjectId, ref: ('Students')}]
     }
 );

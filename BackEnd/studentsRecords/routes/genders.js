@@ -10,28 +10,28 @@ router.route('/')
         var gender = new models.Genders(request.body.gender);
         gender.save(function (error) {
             if (error) response.status(500).send(error);
-            else response.json({gender: gender});
+            else response.status(201).json({gender: gender});
         });
     })
     .get(parseUrlencoded, parseJSON, function (request, response) {
-        var Student = request.query.filter;
-        if (!Student) {
+        var Gender = request.query.filter;
+        if (!Gender) {
             models.Genders.find(function (error, genders) {
                 if (error) response.status(500).send(error);
                 else response.json({gender: genders});
             });
         } else {
-            models.Genders.find({"student": Student.student}, function (error, students) {
+            models.Genders.find({"name": Gender.name}, function (error, genders) {
                 if (error) response.status(500).send(error);
-                else response.json({gender: students});
+                else response.json({gender: genders});
             });
         }
     });
 
-router.route('/:residency_id')
+router.route('/:gender_id')
     .get(parseUrlencoded, parseJSON, function (request, response) {
         models.Genders.findById(request.params.gender_id, function (error, gender) {
-            if (error) response.status(500).send(error);
+            if (error) response.status(404).send(error);
             else response.json({gender: gender});
         })
     })
@@ -42,7 +42,7 @@ router.route('/:residency_id')
             }
             else {
                 gender.name = request.body.gender.name;
-                gender.students = request.body.gender.students;
+                gender.students = request.body.gender.students;     // TODO: Review later since this array is empty in ember? O.o
 
                 gender.save(function (error) {
                     if (error) {
@@ -54,6 +54,26 @@ router.route('/:residency_id')
                 });
             }
         })
+    })
+
+    // Delete a residency
+    .delete(parseUrlencoded, parseJSON, function (request, response) {
+
+        // Map all affected students to null
+        models.Students.update(
+            {genderInfo: request.params.gender_id},
+            {$set: {genderInfo: null}},
+            {multi: true},
+            function (error, students) {
+                if (error) response.status(500).send({error: error});
+                else {
+                    // All students mapped successfully, delete residency
+                    models.Genders.findByIdAndRemove(request.params.gender_id, function (error, gender) {
+                        if (error) response.status(500).send({error: error});
+                        else response.json({gender: gender});
+                    });
+                }
+            });
     });
 
 module.exports = router;

@@ -245,7 +245,7 @@ describe('Residencies', () => {
             var resData = {
                 name: "Johnny Test House"
             };
-            let testRes = new Models.Residencies();
+            let testRes = new Models.Residencies(resData);
             testRes.save((err) => {
                 if (err) throw err;
 
@@ -318,7 +318,7 @@ describe('Residencies', () => {
             var resData = {
                 name: "Johnny Test House"
             };
-            let testRes = new Models.Residencies();
+            let testRes = new Models.Residencies(resData);
             testRes.save((err) => {
                 if (err) throw err;
 
