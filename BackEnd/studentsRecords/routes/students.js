@@ -72,7 +72,7 @@ router.route('/:student_id')
 
                 student.save(function (error) {
                     if (error) {
-                        response.send({error: error});
+                        response.status(500).send({error: error});
                     }
                     else {
                         response.json({student: student});

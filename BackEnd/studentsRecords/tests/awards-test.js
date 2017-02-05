@@ -136,39 +136,47 @@ describe('Awards', () => {
                 testStudent.save((err) => {
                     if (err) throw err;
 
-                    var awardData = {
-                        recipient: testStudent
-                    };
+                    // Create second student
+                    studentData.number += 1;
+                    let testStudent2 = new Models.Students(studentData);
+                    testStudent.save((err) => {
+                        if (err) throw err;
 
-                    // Create 15 awards
-                    var count = 0;
-                    for (var num = 0; num < 15; num++) {
-                        awardData.note = num.toString();
-                        let testAward = new Models.Awards(awardData);
-                        testAward.save((err) => {
-                            if (err) throw err;
+                        var awardData = {
+                            recipient: testStudent
+                        };
 
-                            // Start testing once all awards are created
-                            if (++count == 15) {
-                                // Race condition here doesn't matter, as all runs will still get 15 results returned
+                        // Create 15 awards
+                        var count = 0;
+                        for (var num = 0; num < 15; num++) {
+                            awardData.note = num.toString();
+                            awardData.recipient = (num % 2 == 0) ? testStudent : testStudent2; // Test student gets even awards
+                            let testAward = new Models.Awards(awardData);
+                            testAward.save((err) => {
+                                if (err) throw err;
 
-                                // Make request
-                                chai.request(server)
-                                    .get('/awards')
-                                    .query({filter: {student: testStudent._id.toString()}})
-                                    .end((err, res) => {
-                                        expect(res).to.have.status(200);
-                                        expect(res).to.be.json;
-                                        expect(res.body).to.have.property('award');
-                                        expect(res.body.award.length).to.be.equal(15);
-                                        for (var num = 0; num < 15; num++) {
-                                            expect(res.body.award[num].recipient).to.equal(testAward.recipient.toString());
-                                        }
-                                        done();
-                                    });
-                            }
-                        });
-                    }
+                                // Start testing once all awards are created
+                                if (++count == 15) {
+                                    // Race condition here doesn't matter, as all runs will still get 15 results returned
+
+                                    // Make request
+                                    chai.request(server)
+                                        .get('/awards')
+                                        .query({filter: {recipient: testStudent._id.toString()}})
+                                        .end((err, res) => {
+                                            expect(res).to.have.status(200);
+                                            expect(res).to.be.json;
+                                            expect(res.body).to.have.property('award');
+                                            expect(res.body.award.length).to.be.equal(8);
+                                            for (var num = 0; num < 8; num++) {
+                                                expect(res.body.award[num].recipient).to.equal(testStudent._id.toString());
+                                            }
+                                            done();
+                                        });
+                                }
+                            });
+                        }
+                    });
                 });
             });
         });
@@ -222,7 +230,7 @@ describe('Awards', () => {
                                     // Make request
                                     chai.request(server)
                                         .get('/awards')
-                                        .query({filter: {student: testStudent._id.toString()}})
+                                        .query({filter: {recipient: testStudent._id.toString()}})
                                         .end((err, res) => {
                                             expect(res).to.have.status(200);
                                             expect(res).to.be.json;
@@ -434,6 +442,79 @@ describe('Awards', () => {
             });
         });
 
+        it('it should 400 on PUT an award with no recipient', (done) => {
+
+            // Set up mock data
+            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            testRes.save((err) => {
+                if (err) throw err
+            });
+
+            var studentData = {
+                number: 594265372,
+                firstName: "Johnny",
+                lastName: "Test",
+                gender: 1,
+                DOB: new Date().toISOString(),
+                photo: "/some/link",
+                registrationComments: "No comment",
+                basisOfAdmission: "Because",
+                admissionAverage: 90,
+                admissionComments: "None",
+                resInfo: testRes
+            };
+
+            let testStudent = new Models.Students(studentData);
+            testStudent.save((err) =>{
+                if (err) throw err;
+
+                var awardData = {
+                    recipient: testStudent
+                };
+
+
+                // Create first award
+                awardData.note = 0;
+                let testAward = new Models.Awards(awardData);
+                testAward.save((err) => {
+                    if (err) throw err;
+
+                    // Create 14 awards
+                    var count = 0;
+                    for (var num = 1; num < 15; num++) {
+                        awardData.note = num;
+                        let otherAwards = new Models.Awards(awardData);
+                        otherAwards.save((err) => {
+                            if (err) throw err;
+
+                            // Start testing once all awards are created
+                            if (++count == 14) {
+                                // Race condition here doesn't matter, as the modified data is being tested
+
+                                // Modify data
+                                awardData.note = "success";
+                                awardData.recipient = null;
+
+                                // Make request
+                                chai.request(server)
+                                    .put('/awards/' + testAward._id.toString())
+                                    .send({award: awardData})
+                                    .end((err, res) => {
+                                        expect(res).to.have.status(400);
+
+                                        Models.Awards.findById(testAward._id, (err, result) => {
+                                            expect(err).to.be.null;
+                                            expect(result.recipient).to.not.be.null;
+                                            done();
+                                        });
+                                    });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
         it('it should 404 on PUT a nonexistent award', (done) => {
 
             // Set up mock data
@@ -526,6 +607,32 @@ describe('Awards', () => {
             });
         });
 
+        it('it should 400 on POST with no recipient', (done) => {
+
+            // Set up mock data
+            let studentData = {
+                number: 594265372
+            };
+            let testStudent = new Models.Students(studentData);
+
+            let awardData ={
+                note: "A note"
+            };
+
+            // Save mock
+            testStudent.save((err) => {
+                if(err) throw err;
+
+                // Make request
+                chai.request(server)
+                    .post('/awards')
+                    .send({award: awardData})
+                    .end((err, res) => {
+                        expect(res).to.have.status(400);
+                        done();
+                    });
+            });
+        });
     });
 
     /*

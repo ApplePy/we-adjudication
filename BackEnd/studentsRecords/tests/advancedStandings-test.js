@@ -107,7 +107,6 @@ describe('Advanced Standings', () => {
                                             expect(res.body.advancedStanding[num].description).to.eq(standingData.description);
                                             expect(res.body.advancedStanding[num].grade).to.eq(standingData.grade);
                                             expect(res.body.advancedStanding[num].from).to.eq(standingData.from);
-                                            expect(res.body.advancedStanding[num].units).to.equal(num);
                                             expect(res.body.advancedStanding[num].recipient).to.equal(testStudent._id.toString());
                                         }
                                         done();
@@ -165,7 +164,7 @@ describe('Advanced Standings', () => {
                                 // Make request
                                 chai.request(server)
                                     .get('/advancedStandings')
-                                    .query({filter: {student: testStudent._id.toString()}})
+                                    .query({filter: {recipient: testStudent._id.toString()}})
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
                                         expect(res).to.be.json;
@@ -239,7 +238,7 @@ describe('Advanced Standings', () => {
                                     // Make request
                                     chai.request(server)
                                         .get('/advancedStandings')
-                                        .query({filter: {student: testStudent._id.toString()}})
+                                        .query({filter: {recipient: testStudent._id.toString()}})
                                         .end((err, res) => {
                                             expect(res).to.have.status(200);
                                             expect(res).to.be.json;
@@ -470,6 +469,82 @@ describe('Advanced Standings', () => {
             });
         });
 
+        it('it should 400 on PUT an advanced standing with no recipient', (done) => {
+
+            // Set up mock data
+            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            testRes.save((err) => {
+                if (err) throw err
+            });
+
+            var studentData = {
+                number: 594265372,
+                firstName: "Johnny",
+                lastName: "Test",
+                gender: 1,
+                DOB: new Date().toISOString(),
+                photo: "/some/link",
+                registrationComments: "No comment",
+                basisOfAdmission: "Because",
+                admissionAverage: 90,
+                admissionComments: "None",
+                resInfo: testRes
+            };
+
+            let testStudent = new Models.Students(studentData);
+            testStudent.save((err) => {
+                if (err) throw err;
+
+                var standingData = {
+                    course: "BASKWV 1000",
+                    description: "Basket weaving",
+                    grade: 100,
+                    from: "UBC",
+                    recipient: testStudent
+                };
+
+                // Create first advanced standing
+                standingData.units = 0;
+                let testStanding = new Models.AdvancedStandings(standingData);
+                testStanding.save((err) => {
+                    if (err) throw err;
+
+                    // Create 14 advanced standings
+                    var count = 0;
+                    for (var num = 1; num < 15; num++) {
+                        standingData.units = num;
+                        let otherStandings = new Models.AdvancedStandings(standingData);
+                        otherStandings.save((err) => {
+                            if (err) throw err;
+
+                            // Start testing once all awards are created
+                            if (++count == 14) {
+
+                                // Modify data
+                                standingData.units = 9001;
+                                standingData.recipient = null;
+
+                                // Make request
+                                chai.request(server)
+                                    .put('/advancedStandings/' + testStanding._id.toString())
+                                    .send({advancedStanding: standingData})
+                                    .end((err, res) => {
+                                        expect(res).to.have.status(400);
+
+                                        // Test mongo to ensure it was written
+                                        Models.AdvancedStandings.findById(testStanding._id, (error, res) => {
+                                            expect(error).to.be.null;
+                                            expect(res.recipient).to.not.be.null;
+                                            done();
+                                        });
+                                    });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
         it('it should 404 on PUT a nonexistent advanced standing', (done) => {
 
             // Set up mock data
@@ -582,6 +657,33 @@ describe('Advanced Standings', () => {
 
                             done();
                         });
+                    });
+            });
+        });
+
+        it('it should 400 on POST with no recipient', (done) => {
+
+            // Set up mock data
+            let studentData = {
+                number: 594265372
+            };
+            let testStudent = new Models.Students(studentData);
+
+            let awardData ={
+                note: "A note"
+            };
+
+            // Save mock
+            testStudent.save((err) => {
+                if(err) throw err;
+
+                // Make request
+                chai.request(server)
+                    .post('/awards')
+                    .send({award: awardData})
+                    .end((err, res) => {
+                        expect(res).to.have.status(400);
+                        done();
                     });
             });
         });
