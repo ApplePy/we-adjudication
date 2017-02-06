@@ -10,13 +10,14 @@
 
   <div class="ui divider"></div>
 
-  {{#each genders as |gender|}}
-    <h6 class="ui header">{{gender.name}}</h6>
+  {{#each genders as |gender index|}}
+    <br>
     <div class="ui input">
-      {{input type="text" value=gender.name}}
+      {{input type="text" value=gender.name id=gender.id class="genderInput"}}
     </div>
-    <button class="ui primary button" {{action 'modifyGender' gender.id gender.name }}>Save</button>
+    <button class="ui primary button" {{action 'modifyGender' gender.id gender.id }}>Save</button>
     <button class="negative ui button" {{action 'deleteGender' gender.id}}>Delete</button>
+    <br>
   {{/each}}
 
 </div>
@@ -33,13 +34,14 @@
 
   <div class="ui divider"></div>
 
-  {{#each residencies as |residency|}}
-    <h6 class="ui header">{{residency.name}}</h6>
+  {{#each residencies as |residency index|}}
+    <br>
     <div class="ui input">
-      {{input type="text" value=residency.name}}
+      {{input type="text" value=residency.name id=residency.id class="residencyInput"}}
     </div>
-    <button class="ui primary button" {{action 'modifyResidency' residency.id gender.name }} >Save</button>
+    <button class="ui primary button" {{action 'modifyResidency' residency.id residency.id }} >Save</button>
     <button class="negative ui button" {{action 'deleteResidency' residency.id }}>Delete</button>
+    <br>
   {{/each}}
 
 </div>
