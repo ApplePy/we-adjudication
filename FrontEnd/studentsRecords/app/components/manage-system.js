@@ -57,7 +57,7 @@ export default Ember.Component.extend({
       });
 
       gender.save().then(function() {
-        this.send('update');
+        //this.send('update');
         console.log("Added Gender");
       }, function() {
         console.log("Could not add gender");
@@ -66,10 +66,7 @@ export default Ember.Component.extend({
 
     modifyGender (genderId, index){
 
-      var newGenderName = Ember.$("#" + index + " .genderInput").val();
-      console.log("here1");
-      console.log(newGenderName);
-      console.log("here2");
+      var newGenderName = Ember.$("#" + index + ", .genderInput").val();
 
       this.get('store').findRecord('gender', genderId).then(function(gender) {
         gender.set('name', newGenderName);
@@ -107,7 +104,6 @@ export default Ember.Component.extend({
       this.get('store').findRecord('residency', residencyId).then(function(residency) {
         residency.set('name', this.get(newResidencyName));
         residency.save().then(function() {
-          this.send('update');
           console.log("Modified Residency");
         }, function() {
           console.log("Could not modify residency");
@@ -118,7 +114,6 @@ export default Ember.Component.extend({
     deleteResidency (residencyId){
       this.get('store').findRecord('residency', residencyId, { backgroundReload: false }).then(function(residency) {
         residency.destroyRecord().then(function() {
-          this.send('update');
           console.log("Deleted residency");
         });
       });
