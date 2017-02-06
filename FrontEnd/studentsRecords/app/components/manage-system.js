@@ -53,17 +53,15 @@ export default Ember.Component.extend({
 
     addGender () {
       var gender = this.get('store').createRecord('gender', {
-        gender: this.get('newGender')
+        name: this.get('newGender')
       });
-
-      console.log(this.get('newGender'));
 
       gender.save().then(function() {
         this.send('update');
         console.log("Added Gender");
       }, function() {
         console.log("Could not add gender");
-      }); // => POST to '/genders'
+      });
     },
 
     modifyGender (genderId, index){
@@ -80,7 +78,7 @@ export default Ember.Component.extend({
           console.log("Modified Gender");
         }, function() {
           console.log("Could not modify gender");
-        }); // => PATCH to '/genders/1'
+        });
       });
     },
 
@@ -89,21 +87,20 @@ export default Ember.Component.extend({
         gender.destroyRecord().then(function() {
           this.send('update');
           console.log("Deleted gender");
-        }); // => DELETE to /genders/:genderId
+        });
       });
     },
 
     addResidency () {
-      var gender = this.get('store').createRecord('residency', {
-        residency: this.get('newResidency')
+      var residency = this.get('store').createRecord('residency', {
+        name: this.get('newResidency')
       });
 
-      gender.save().then(function() {
-        this.send('update');
+      residency.save().then(function() {
         console.log("Added Residency");
       }, function() {
         console.log("Could not add residency");
-      }); // => POST to '/genders'
+      });
     },
 
     modifyResidency (residencyId, newResidencyName){
@@ -114,7 +111,7 @@ export default Ember.Component.extend({
           console.log("Modified Residency");
         }, function() {
           console.log("Could not modify residency");
-        }); // => PATCH to '/genders/1'
+        });
       });
     },
 
@@ -123,9 +120,8 @@ export default Ember.Component.extend({
         residency.destroyRecord().then(function() {
           this.send('update');
           console.log("Deleted residency");
-        }); // => DELETE to /genders/:genderId
+        });
       });
     }
   }
-
 });

@@ -391,7 +391,7 @@ describe('Awards', () => {
                 if (err) throw err;
 
                 var awardData = {
-                    recipient: testStudent
+                    recipient: null
                 };
 
 
@@ -415,6 +415,7 @@ describe('Awards', () => {
 
                                 // Modify data
                                 awardData.note = "success";
+                                awardData.recipient = testStudent;
 
                                 // Make request
                                 chai.request(server)
