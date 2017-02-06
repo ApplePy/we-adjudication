@@ -116,7 +116,7 @@ export default Ember.Component.extend({
     },
 
     deleteResidency (residencyId){
-      this.get('store').findRecord('gender', residencyId, { backgroundReload: false }).then(function(residency) {
+      this.get('store').findRecord('residency', residencyId, { backgroundReload: false }).then(function(residency) {
         residency.destroyRecord().then(function() {
           this.send('update');
           console.log("Deleted residency");
