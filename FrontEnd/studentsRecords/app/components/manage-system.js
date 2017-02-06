@@ -2,24 +2,37 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
 
+  store: Ember.inject.service(),
   genders: null,
   residencies: null,
   newGender: null,
   newResidency: null,
-  genderNames: [],
-  residencyNames: [],
+  //genderNames: [],
+  //residencyNames: [],
 
   init() {
 
-    this.get('genders') = this.get('store').findAll('gender');
-    this.get('residencies') = this.get('store').findAll('residency');
+    this._super(...arguments);
 
-    this.get('genders').forEach(function(gender) {
+    var self = this;
+
+    //this.get('genders') = this.get('store').findAll('gender');
+    //this.get('residencies') = this.get('store').findAll('residency');
+
+    /*this.get('genders').forEach(function(gender) {
       this.get('genderNames').push(gender.name);
     });
 
     this.get('residencies').forEach(function(residency) {
       this.get('residencyNames').push(residency.name);
+    });*/
+
+    this.get('store').findAll('residency').then(function (records) {
+      self.set('residencies', records);
+    });
+
+    this.get('store').findAll('gender').then(function (records) {
+      self.set('genders', records);
     });
 
   },
@@ -27,22 +40,23 @@ export default Ember.Component.extend({
   actions: {
 
     update() {
-      this.get('genders') = this.get('store').findAll('gender');
-      this.get('residencies') = this.get('store').findAll('residency');
 
-      this.get('genders').forEach(function(gender) {
-        this.get('genderNames').push(gender.name);
+      this.get('store').findAll('residency').then(function (records) {
+        self.set('residencies', records);
       });
 
-      this.get('residencies').forEach(function(residency) {
-        this.get('residencyNames').push(residency.name);
+      this.get('store').findAll('gender').then(function (records) {
+        self.set('genders', records);
       });
+
     },
 
     addGender () {
       var gender = this.get('store').createRecord('gender', {
         gender: this.get('newGender')
       });
+
+      console.log(this.get('newGender'));
 
       gender.save().then(function() {
         this.send('update');
@@ -52,9 +66,15 @@ export default Ember.Component.extend({
       }); // => POST to '/genders'
     },
 
-    modifyGender (genderId, newGenderName){
+    modifyGender (genderId, index){
+
+      var newGenderName = Ember.$("#" + index + " .genderInput").val();
+      console.log("here1");
+      console.log(newGenderName);
+      console.log("here2");
+
       this.get('store').findRecord('gender', genderId).then(function(gender) {
-        gender.set('name', this.get(newGenderName));
+        gender.set('name', newGenderName);
         gender.save().then(function() {
           this.send('update');
           console.log("Modified Gender");
