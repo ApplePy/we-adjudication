@@ -382,6 +382,11 @@ describe('Students', () => {
                 if (err) throw err;
             });
 
+            let testGender2 = new Models.Genders({name: "Female"});
+            testGender2.save((err) => {
+                if (err) throw err;
+            });
+
             let firstNumber = 594265372;
             var studentData = {
                 firstName: "Johnny",
@@ -413,8 +418,19 @@ describe('Students', () => {
                         // Start testing once all students are created
                         if (++count == 14) {
                             // Modify data
-                            studentData.number = firstNumber;
-                            studentData.lastName = 'Tester';
+                            studentData = {
+                                number: firstNumber,
+                                firstName: "Tester",
+                                lastName: "Tester",
+                                genderInfo: testGender2,
+                                DOB: new Date().toISOString(),
+                                photo: "/some/link/new",
+                                registrationComments: "No other comment",
+                                basisOfAdmission: "Because 2",
+                                admissionAverage: 91,
+                                admissionComments: "None2",
+                                resInfo: null
+                            };
 
                             // Make request
                             chai.request(server)
@@ -427,14 +443,14 @@ describe('Students', () => {
                                     expect(res.body.student.number).to.equal(firstNumber);
                                     expect(res.body.student.firstName).to.equal(studentData.firstName);
                                     expect(res.body.student.lastName).to.equal(studentData.lastName);
-                                    expect(res.body.student.genderInfo).to.equal(testGender._id.toString());
+                                    expect(res.body.student.genderInfo).to.equal(studentData.genderInfo._id.toString());
                                     expect(res.body.student.DOB).to.equal(studentData.DOB);
                                     expect(res.body.student.photo).to.equal(studentData.photo);
                                     expect(res.body.student.registrationComments).to.equal(studentData.registrationComments);
                                     expect(res.body.student.basisOfAdmission).to.equal(studentData.basisOfAdmission);
                                     expect(res.body.student.admissionAverage).to.equal(studentData.admissionAverage);
                                     expect(res.body.student.admissionComments).to.equal(studentData.admissionComments);
-                                    expect(res.body.student.resInfo).to.equal(testRes._id.toString());
+                                    expect(res.body.student.resInfo).to.be.null;
 
                                     // Test mongo to ensure it was written
                                     Models.Students.findById(testStudent._id, (error, res) => {
@@ -442,14 +458,14 @@ describe('Students', () => {
                                         expect(res.number).to.equal(firstNumber);
                                         expect(res.firstName).to.equal(studentData.firstName);
                                         expect(res.lastName).to.equal(studentData.lastName);
-                                        expect(res.genderInfo.toString()).to.equal(testGender._id.toString());
+                                        expect(res.genderInfo.toString()).to.equal(studentData.genderInfo._id.toString());
                                         expect(res.DOB.toISOString()).to.equal(studentData.DOB);
                                         expect(res.photo).to.equal(studentData.photo);
                                         expect(res.registrationComments).to.equal(studentData.registrationComments);
                                         expect(res.basisOfAdmission).to.equal(studentData.basisOfAdmission);
                                         expect(res.admissionAverage).to.equal(studentData.admissionAverage);
                                         expect(res.admissionComments).to.equal(studentData.admissionComments);
-                                        expect(res.resInfo.toString()).to.equal(testRes._id.toString());
+                                        expect(res.resInfo).to.be.null;
                                         done();
                                     });
                                 });
