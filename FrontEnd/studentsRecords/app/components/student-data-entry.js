@@ -61,6 +61,7 @@ export default Ember.Component.extend({
     this.get('store').findAll('residency').then(function (records) {
       self.set('residencyModel', records);
     });
+
     this.get('store').findAll('gender').then(function (records) {
       self.set('genderModel', records);
     });
@@ -81,7 +82,7 @@ export default Ember.Component.extend({
       // Show first student data
       self.set('currentIndex', self.get('firstIndex'));
 
-      
+
     });
 
   },
@@ -99,7 +100,8 @@ export default Ember.Component.extend({
     this.set('awardNotes', []);
     this.set('advancedStandingArray', []);
 
-    this.set('selectedGender', this.get('currentStudent').get('gender'));
+    this.set('selectedGender', this.get('currentStudent').get('genderInfo').get('id'));
+
     this.get('store').query('award', {
          filter: {
            recipient: this.get('currentStudent').id
@@ -128,16 +130,15 @@ export default Ember.Component.extend({
 
   actions: {
     saveStudent () {
+      console.log(this.get('currentStudent').get('genderInfo').get('id'));
+      console.log(this.get('selectedGender'));
       var updatedStudent = this.get('currentStudent');
       updatedStudent.set('DOB', new Date(this.get('selectedDate')));
-      updatedStudent.set('resInfo', res);
-     // updateStudent.set('registrationComments', this.get('registrationComments'));
-
-      //updatedStudent.set('awards', this.get('awardNotes'));
       updatedStudent.save().then(() => {
-        //     this.set('isStudentFormEditing', false);
-      });
 
+      });
+      console.log(this.get('currentStudent').get('genderInfo').get('id'));
+      console.log(this.get('selectedGender'));
     },
 
     undoSave(){
@@ -145,7 +146,7 @@ export default Ember.Component.extend({
       //Change the selected values so it doesn't mess with next student
       this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
       //WILL HAVE TO CHANGE GENDER BASED ON NEW MODEL
-      this.set('selectedGender', this.get('currentStudent').get('gender'));
+      this.set('selectedGender', this.get('currentStudent').get('genderInfo').get('id'));
       this.set('selectedDate', this.get('currentStudent').get('DOB').toISOString().substring(0, 10));
     },
 
@@ -186,7 +187,8 @@ export default Ember.Component.extend({
     selectGender (gender){
       this.set('selectedGender', gender);
       //Set the value of this student's gender to the gender selected
-      this.get('currentStudent').set('gender', this.get('selectedGender'));
+      var gen = this.get('store').peekRecord('gender', this.get('selectedGender'));
+      this.get('currentStudent').set('genderInfo', gen);
     },
 
     selectResidency (residency){
@@ -215,7 +217,7 @@ export default Ember.Component.extend({
       });
 
       //If this is the last student on the page, load previous.  If not, load next
-      if(this.get('currentIndex') == this.get('lastIndex')){
+      if(this.get('currentIndex') === this.get('lastIndex')){
         this.send('previousStudent');
       } else {
         this.send('nextStudent');

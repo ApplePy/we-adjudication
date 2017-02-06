@@ -32,6 +32,7 @@ export default Ember.Component.extend({
       this.set('isStudentsRecordsDataEntry', true);
       this.set('isManageSystemShowing', false);
       this.set('isAboutShowing', false);
+      this.set('isAdding', false);
     },
 
     manageSystem (){
@@ -45,9 +46,11 @@ export default Ember.Component.extend({
     addStudent (){
       this.set('isHomeShowing', false);
       this.set('isStudentsRecordsDataEntry', false);
+      this.set('isManageSystemShowing', false);
       this.set('isAboutShowing', false);
       this.set('isAdding', true);
     },
+
     about (){
       this.set('isHomeShowing', false);
       this.set('isStudentsRecordsDataEntry', false);

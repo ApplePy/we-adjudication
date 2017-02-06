@@ -1,7 +1,7 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-
+/*
   genders: null,
   residencies: null,
   newGender: null,
@@ -27,6 +27,7 @@ export default Ember.Component.extend({
   actions: {
 
     update() {
+
       this.get('genders') = this.get('store').findAll('gender');
       this.get('residencies') = this.get('store').findAll('residency');
 
@@ -37,6 +38,7 @@ export default Ember.Component.extend({
       this.get('residencies').forEach(function(residency) {
         this.get('residencyNames').push(residency.name);
       });
+
     },
 
     addGender () {
@@ -107,5 +109,5 @@ export default Ember.Component.extend({
       });
     }
   }
-
+*/
 });
