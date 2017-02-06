@@ -12,17 +12,22 @@ export default Ember.Component.extend({
     find: function () {
       var studentID = this.get('studentID');
 
-     this.get('store').queryRecord('student', {filter: {number: studentID}}).then(
+     this.get('store').query('student', {filter: {number: studentID}}).then(
        (result) => {
-         var index = this.get('studentsModel').indexOf(result);
-         this.set('INDEX', index);
-         
-         this.set('notDONE', false);
-         Ember.$('.ui.modal').modal('hide');
-         Ember.$('.ui.modal').remove();
+         if(result.get('length') > 0){
+           var index = this.get('studentsModel').indexOf(result.objectAt(0));
+           this.set('INDEX', index);
+
+           this.set('notDONE', false);
+           Ember.$('.ui.modal').modal('hide');
+           Ember.$('.ui.modal').remove();
+         } else {
+           alert("Invalid student number!");
+         }
+
        }
      ).catch((err)=>{
-      alert("Invalid student number!");
+      alert("Error!");
       this.set('notDONE', false);
       Ember.$('.ui.modal').modal('hide');
       Ember.$('.ui.modal').remove();
