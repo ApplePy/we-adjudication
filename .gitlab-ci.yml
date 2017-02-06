@@ -28,20 +28,22 @@ variables:
   MONGO_DB_HOST: "mongo"
   NODE_TLS_REJECT_UNAUTHORIZED: "0"   # To support mongodb being installed by a proxy
 
+before_script:
+ - 'echo "{ \"allow_root\": true }" > /root/.bowerrc'
+ - mongorestore -h $MONGO_DB_HOST -d studentsRecords studentsRecords/           # Restore the mongodb database
+ - npm config set proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/        # Setup proxy to stop killing bandwidth
+ - npm config set https-proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/
+ - npm config set strict-ssl false
+
+# This test ensures the back end works
 test_backend:
   stage: back_tests
-  # Restore the mongodb database
-  before_script:
-   - 'echo "{ \"allow_root\": true }" > /root/.bowerrc'
-   - mongorestore -h $MONGO_DB_HOST -d studentsRecords studentsRecords/
-   - npm config set proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/        # Setup proxy to stop killing bandwidth
-   - npm config set https-proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/
-   - npm config set strict-ssl false
   script:
    - cd BackEnd/studentsRecords
    - npm install
    - npm test
 
+# This test ensures the front end works
 test_frontend:
   stage: front_tests
   script:
