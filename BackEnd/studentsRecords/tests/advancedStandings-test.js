@@ -412,7 +412,7 @@ describe('Advanced Standings', () => {
                     description: "Basket weaving",
                     grade: 100,
                     from: "UBC",
-                    recipient: testStudent
+                    recipient: null
                 };
 
                 // Create first advanced standing
@@ -433,7 +433,14 @@ describe('Advanced Standings', () => {
                             if (++count == 14) {
 
                                 // Modify data
-                                standingData.units = 9001;
+                                standingData = {
+                                    units: 9001,
+                                    course: "BASKWV 1001",
+                                    description: "Basket weaving advanced",
+                                    grade: 99,
+                                    from: "UoT",
+                                    recipient: testStudent
+                                };
 
                                 // Make request
                                 chai.request(server)
