@@ -16,17 +16,6 @@ export default Ember.Component.extend({
 
     var self = this;
 
-    //this.get('genders') = this.get('store').findAll('gender');
-    //this.get('residencies') = this.get('store').findAll('residency');
-
-    /*this.get('genders').forEach(function(gender) {
-      this.get('genderNames').push(gender.name);
-    });
-
-    this.get('residencies').forEach(function(residency) {
-      this.get('residencyNames').push(residency.name);
-    });*/
-
     this.get('store').findAll('residency').then(function (records) {
       self.set('residencies', records);
     });
@@ -57,7 +46,6 @@ export default Ember.Component.extend({
       });
 
       gender.save().then(function() {
-        //this.send('update');
         console.log("Added Gender");
       }, function() {
         console.log("Could not add gender");
@@ -71,7 +59,6 @@ export default Ember.Component.extend({
       this.get('store').findRecord('gender', genderId).then(function(gender) {
         gender.set('name', newGenderName);
         gender.save().then(function() {
-          this.send('update');
           console.log("Modified Gender");
         }, function() {
           console.log("Could not modify gender");
@@ -82,7 +69,6 @@ export default Ember.Component.extend({
     deleteGender (genderId){
       this.get('store').findRecord('gender', genderId, { backgroundReload: false }).then(function(gender) {
         gender.destroyRecord().then(function() {
-          this.send('update');
           console.log("Deleted gender");
         });
       });
