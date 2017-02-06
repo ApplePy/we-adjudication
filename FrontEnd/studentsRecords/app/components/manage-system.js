@@ -54,7 +54,8 @@ export default Ember.Component.extend({
 
     modifyGender (genderId, index){
 
-      var newGenderName = Ember.$("#" + index + ", .genderInput").val();
+      //var newGenderName = Ember.$("#" + index + ", .genderInput").val();
+      var newGenderName = Ember.$("#" + index).val();
 
       this.get('store').findRecord('gender', genderId).then(function(gender) {
         gender.set('name', newGenderName);
@@ -86,9 +87,16 @@ export default Ember.Component.extend({
       });
     },
 
-    modifyResidency (residencyId, newResidencyName){
+    modifyResidency (residencyId, index){
+
+      //var newResidencyName = Ember.$("#" + index + ", .residencyInput").val();
+      var newResidencyName = Ember.$("#" + index).val();
+      console.log(residencyId);
+      console.log(index);
+      console.log(newResidencyName);
+
       this.get('store').findRecord('residency', residencyId).then(function(residency) {
-        residency.set('name', this.get(newResidencyName));
+        residency.set('name', newResidencyName);
         residency.save().then(function() {
           console.log("Modified Residency");
         }, function() {

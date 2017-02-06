@@ -13,9 +13,9 @@
   {{#each genders as |gender index|}}
     <br>
     <div class="ui input">
-      {{input type="text" value=gender.name id=index class="genderInput"}}
+      {{input type="text" value=gender.name id=gender.id class="genderInput"}}
     </div>
-    <button class="ui primary button" {{action 'modifyGender' gender.id index }}>Save</button>
+    <button class="ui primary button" {{action 'modifyGender' gender.id gender.id }}>Save</button>
     <button class="negative ui button" {{action 'deleteGender' gender.id}}>Delete</button>
     <br>
   {{/each}}
@@ -37,9 +37,9 @@
   {{#each residencies as |residency index|}}
     <br>
     <div class="ui input">
-      {{input type="text" value=residency.name}}
+      {{input type="text" value=residency.name id=residency.id class="residencyInput"}}
     </div>
-    <button class="ui primary button" {{action 'modifyResidency' residency.id index }} >Save</button>
+    <button class="ui primary button" {{action 'modifyResidency' residency.id residency.id }} >Save</button>
     <button class="negative ui button" {{action 'deleteResidency' residency.id }}>Delete</button>
     <br>
   {{/each}}
