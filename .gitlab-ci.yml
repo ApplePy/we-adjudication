@@ -6,31 +6,30 @@ image: incode.ca:9001/se3352a/requirements-assignment-2:latest
 # Pick zero or more services to be used on all builds.
 # Only needed when using a docker container to run your tests in.
 # Check out: http://docs.gitlab.com/ce/ci/docker/using_docker_images.html#what-is-service
-services:
-  - mongo:latest
-
-# This folder is cached between builds
-# http://docs.gitlab.com/ce/ci/yaml/README.html#cache
-cache:
-  paths:
-  - BackEnd/studentsRecords/node_modules/
-  - FrontEnd/studentsRecords/node_modules/
-  - FrontEnd/studentsRecords/bower_components/
 
 # Ensure that the back passes its tests first since the front relies on the back
 stages:
-  - back_tests
-  - front_tests
+  - test
   - build
   - deploy
 
-# Tell the backend where to find the MongoDB database, and that we're running in test mode
-variables:
-  NODE_ENV: 'test'
-  MONGO_DB_HOST: "mongo"
-  NODE_TLS_REJECT_UNAUTHORIZED: "0"   # To support mongodb being installed by a proxy
 
-.test_common: &test_before_script
+# Code common to the front- and back-end tests
+.test_common: &test_common
+  stage: test
+  # This folder is cached between builds
+  # http://docs.gitlab.com/ce/ci/yaml/README.html#cache
+  variables:
+    NODE_ENV: 'test'
+    MONGO_DB_HOST: "mongo"
+    NODE_TLS_REJECT_UNAUTHORIZED: "0"   # To support mongodb being installed by a proxy
+  cache:
+    paths:
+    - BackEnd/studentsRecords/node_modules/
+    - FrontEnd/studentsRecords/node_modules/
+    - FrontEnd/studentsRecords/bower_components/
+  services:
+      - mongo:latest
   before_script:
      - 'echo "{ \"allow_root\": true }" > /root/.bowerrc'
      - mongorestore -h $MONGO_DB_HOST -d studentsRecords mongo-seed/studentsRecords/    # Restore the mongodb database
@@ -38,19 +37,26 @@ variables:
      - npm config set https-proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/
      - npm config set strict-ssl false
 
+
+
+#################################
+#                               #
+#            TESTS              #
+#                               #
+#################################
+
 # This test ensures the back end works
 test_backend:
-  <<: *test_before_script
-  stage: back_tests
+  <<: *test_common
   script:
    - cd BackEnd/studentsRecords
    - npm install
    - npm test
 
+
 # This test ensures the front end works
 test_frontend:
-  <<: *test_before_script
-  stage: front_tests
+  <<: *test_common
   script:
    - pushd .
    - cd BackEnd/studentsRecords
@@ -65,14 +71,28 @@ test_frontend:
    - pkill node
   allow_failure: true
 
+
+
+#################################
+#                               #
+#            BUILD              #
+#                               #
+#################################
+
 # This job sets up the back, builds the front, copies the built front to the back, and saves it all for deployment
 build:
-  <<: *test_before_script
   stage: build
   artifacts:
     expire_in: 2 weeks
     paths:
      - BackEnd/studentsRecords/
+  variables:
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"   # To support the proxy
+  before_script:
+       - 'echo "{ \"allow_root\": true }" > /root/.bowerrc'
+       - npm config set proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/   # Setup proxy to stop killing bandwidth
+       - npm config set https-proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/
+       - npm config set strict-ssl false
   script:
    - pushd .
    - cd BackEnd/studentsRecords
@@ -85,20 +105,47 @@ build:
    - cp -r dist/ ../../BackEnd/studentsRecords/dist/
   only:
    - master
+   - auto_deployment
+
+
+
+#################################
+#                               #
+#            DEPLOY             #
+#                               #
+#################################
+
+# Common components to deploy jobs
+.deploy_common: &deploy_common
+  stage: deploy
+  image: incode.ca:9001/se3352a/requirements-assignment-2:compose
+  variables:
+      DOCKER_HOST: tcp://pandadocker.isolation.ad.murrayweb.ca:2375
+  only:
+     - master
+
 
 # This job takes the contents from the previous job, builds them into a docker image, then deploys everything
 deploy:
-  stage: deploy
-  image: incode.ca:9001/se3352a/requirements-assignment-2:compose
+  <<: *deploy_common
   dependencies:
    - build
-  variables:
-    DOCKER_HOST: tcp://pandadocker.isolation.ad.murrayweb.ca:2375
   script:
     - docker-compose -H $DOCKER_HOST down --volumes     # Destroy the old image
     - docker-compose -H $DOCKER_HOST up -d
   environment:
     name: staging
     url: http://digitalpanda.incode.ca/
-  only:
-   - master
+    on_stop: shutdown
+
+
+# This job stops the deployment containers
+shutdown:
+  <<: *deploy_common
+  when: manual
+  script:
+    - docker-compose -H $DOCKER_HOST down --volumes     # Destroy the old image
+  environment:
+    name: staging
+    url: http://digitalpanda.incode.ca/
+    action: stop
