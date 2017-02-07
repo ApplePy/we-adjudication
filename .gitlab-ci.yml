@@ -21,6 +21,8 @@ cache:
 stages:
   - back_tests
   - front_tests
+  - build
+  - deploy
 
 # Tell the backend where to find the MongoDB database, and that we're running in test mode
 variables:
@@ -28,15 +30,17 @@ variables:
   MONGO_DB_HOST: "mongo"
   NODE_TLS_REJECT_UNAUTHORIZED: "0"   # To support mongodb being installed by a proxy
 
-before_script:
- - 'echo "{ \"allow_root\": true }" > /root/.bowerrc'
- - mongorestore -h $MONGO_DB_HOST -d studentsRecords mongo-seed/studentsRecords/           # Restore the mongodb database
- - npm config set proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/        # Setup proxy to stop killing bandwidth
- - npm config set https-proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/
- - npm config set strict-ssl false
+.test_common: &test_before_script
+  before_script:
+     - 'echo "{ \"allow_root\": true }" > /root/.bowerrc'
+     - mongorestore -h $MONGO_DB_HOST -d studentsRecords mongo-seed/studentsRecords/    # Restore the mongodb database
+     - npm config set proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/            # Setup proxy to stop killing bandwidth
+     - npm config set https-proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/
+     - npm config set strict-ssl false
 
 # This test ensures the back end works
 test_backend:
+  <<: *test_before_script
   stage: back_tests
   script:
    - cd BackEnd/studentsRecords
@@ -45,6 +49,7 @@ test_backend:
 
 # This test ensures the front end works
 test_frontend:
+  <<: *test_before_script
   stage: front_tests
   script:
    - pushd .
@@ -59,3 +64,41 @@ test_frontend:
   after_script:
    - pkill node
   allow_failure: true
+
+# This job sets up the back, builds the front, copies the built front to the back, and saves it all for deployment
+build:
+  <<: *test_before_script
+  stage: build
+  artifacts:
+    expire_in: 2 weeks
+    paths:
+     - BackEnd/studentsRecords/
+  script:
+   - pushd .
+   - cd BackEnd/studentsRecords
+   - npm install --production
+   - popd
+   - cd FrontEnd/studentsRecords
+   - npm install                  # Don't worry about production flag
+   - bower install
+   - ember build --environment production
+   - cp -r dist/ ../../BackEnd/studentsRecords/dist/
+  only:
+   - master
+
+# This job takes the contents from the previous job, builds them into a docker image, then deploys everything
+deploy:
+  stage: deploy
+  image: incode.ca:9001/se3352a/requirements-assignment-2:compose
+  dependencies:
+   - build
+  variables:
+    DOCKER_HOST: tcp://pandadocker.isolation.ad.murrayweb.ca:2375
+  script:
+    - docker-compose -H $DOCKER_HOST down --volumes     # Destroy the old image
+    - docker-compose -H $DOCKER_HOST up -d
+  environment:
+    name: staging
+    url: http://digitalpanda.incode.ca/
+  only:
+   - master
