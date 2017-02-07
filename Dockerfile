@@ -1,56 +1,16 @@
-# Build off of ubuntu xenial 16.04
-FROM library/ubuntu:16.04
+# Install project files on top of custom docker image
+FROM incode.ca:9001/se3352a/requirements-assignment-2:latest
 
-# Update base image
-RUN apt-get update -y && \
-	apt-get dist-upgrade -y --no-install-recommends && \
-	apt-get clean
+ENV NODE_ENV="production"
 
-# Install build tools for native npm packages and mongodb client tools
-RUN apt-get update -y && \
-	apt-get install -y --no-install-recommends build-essential mongodb-clients && \
-	apt-get clean
+# The app will listen on port 80
+EXPOSE 80
 
-# Install Python2, Python3, Pip, and then update all pip packages
-RUN apt-get update -y && \
-	apt-get install -y --no-install-recommends python python3 python3-pip python-pip && \
-	pip install -U pip && \
-	pip list --outdated --format=freeze | grep -Po "(.*?)(?===)" | xargs pip install -U && \
-	pip3 install -U pip && \
-	pip3 list --outdated --format=freeze | grep -Po "(.*?)(?===)" | xargs pip3 install -U && \
-	apt-get clean
+# Copy the code into the image
+ADD BackEnd/studentsRecords /code
 
-# Install latest Git
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E1DF1F24 && \
-	echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu xenial main" | tee /etc/apt/sources.list.d/git-core-ppa.list && \
-	apt-get -y update && \
-	apt-get install -y --no-install-recommends git && \
-	apt-get clean
+# Set the working directory for npm
+WORKDIR "/code"
 
-# Install nodejs 6.x
-RUN apt-get update -y && \
-	apt-get install -y --no-install-recommends curl && \
-	curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
-	apt-get install -y nodejs libfontconfig --no-install-recommends && \
-	apt-get clean
-	
-# Install watchman
-RUN apt-get update && \
-	apt-get install -y autoconf python-setuptools python3-setuptools python-dev python3-dev && \
-	git clone https://github.com/facebook/watchman.git && \
-	cd watchman && \
-	./autogen.sh && \
-	./configure && \
-	make && \
-	make install && \
-	cd .. && \
-	rm -rf watchman && \
-	apt-get purge -y autoconf python-setuptools python3-setuptools python-dev python3-dev && \
-	apt-get autoremove --purge -y && \
-	apt-get clean
-
-# Install nodemon, express, bower, and ember
-RUN export USER=root && \
-	npm install -g nodemon express bower ember-cli phantomjs-prebuilt mocha && \
-	npm cache clean
-
+# Start box
+ENTRYPOINT [ "npm", "start" ]
