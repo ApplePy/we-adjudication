@@ -30,7 +30,7 @@ variables:
 
 before_script:
  - 'echo "{ \"allow_root\": true }" > /root/.bowerrc'
- - mongorestore -h $MONGO_DB_HOST -d studentsRecords studentsRecords/           # Restore the mongodb database
+ - mongorestore -h $MONGO_DB_HOST -d studentsRecords mongo-seed/studentsRecords/           # Restore the mongodb database
  - npm config set proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/        # Setup proxy to stop killing bandwidth
  - npm config set https-proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/
  - npm config set strict-ssl false
