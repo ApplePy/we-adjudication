@@ -41,7 +41,7 @@ describe('Awards', () => {
         it('it should GET all awards ', (done) => {
             // Request all awards
             chai.request(server)
-                .get('/awards')
+                .get('/api/awards')
                 .end((err, res) => {
                     expect(res).to.have.status(200);
                     expect(res).to.be.json;
@@ -92,7 +92,7 @@ describe('Awards', () => {
                             if (++count == 15) {
                                 // Make request
                                 chai.request(server)
-                                    .get('/awards')
+                                    .get('/api/awards')
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
                                         expect(res).to.be.json;
@@ -161,7 +161,7 @@ describe('Awards', () => {
 
                                     // Make request
                                     chai.request(server)
-                                        .get('/awards')
+                                        .get('/api/awards')
                                         .query({filter: {recipient: testStudent._id.toString()}})
                                         .end((err, res) => {
                                             expect(res).to.have.status(200);
@@ -229,7 +229,7 @@ describe('Awards', () => {
 
                                     // Make request
                                     chai.request(server)
-                                        .get('/awards')
+                                        .get('/api/awards')
                                         .query({filter: {recipient: testStudent._id.toString()}})
                                         .end((err, res) => {
                                             expect(res).to.have.status(200);
@@ -289,7 +289,7 @@ describe('Awards', () => {
 
                                 // Make request
                                 chai.request(server)
-                                    .get('/awards/' + testAward._id.toString())
+                                    .get('/api/awards/' + testAward._id.toString())
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
                                         expect(res).to.be.json;
@@ -347,7 +347,7 @@ describe('Awards', () => {
                                 // Race condition here doesn't matter, as none will have this ID
                                 // Make request
                                 chai.request(server)
-                                    .get('/awards/53425353')
+                                    .get('/api/awards/53425353')
                                     .end((err, res) => {
                                         expect(res).to.have.status(404);
                                         done();
@@ -419,7 +419,7 @@ describe('Awards', () => {
 
                                 // Make request
                                 chai.request(server)
-                                    .put('/awards/' + testAward._id.toString())
+                                    .put('/api/awards/' + testAward._id.toString())
                                     .send({award: awardData})
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
@@ -498,7 +498,7 @@ describe('Awards', () => {
 
                                 // Make request
                                 chai.request(server)
-                                    .put('/awards/' + testAward._id.toString())
+                                    .put('/api/awards/' + testAward._id.toString())
                                     .send({award: awardData})
                                     .end((err, res) => {
                                         expect(res).to.have.status(400);
@@ -551,7 +551,7 @@ describe('Awards', () => {
                         // Race condition here doesn't matter, as the queried ID will not exist
                         // Make request
                         chai.request(server)
-                            .put('/awards/' + '4534234')
+                            .put('/api/awards/' + '4534234')
                             .send({award: awardData})
                             .end((err, res) => {
                                 expect(res).to.have.status(404);
@@ -586,7 +586,7 @@ describe('Awards', () => {
 
                 // Make request
                 chai.request(server)
-                    .post('/awards')
+                    .post('/api/awards')
                     .send({award: awardData})
                     .end((err, res) => {
                         expect(res).to.have.status(201);
@@ -626,7 +626,7 @@ describe('Awards', () => {
 
                 // Make request
                 chai.request(server)
-                    .post('/awards')
+                    .post('/api/awards')
                     .send({award: awardData})
                     .end((err, res) => {
                         expect(res).to.have.status(400);
@@ -676,7 +676,7 @@ describe('Awards', () => {
 
                         // Make request
                         chai.request(server)
-                            .delete('/awards/' + testAward._id.toString())
+                            .delete('/api/awards/' + testAward._id.toString())
                             .end((err, res) => {
                                 expect(res).to.have.status(200);
 

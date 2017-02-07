@@ -35,7 +35,7 @@ describe('Genders', () => {
         it('it should GET all genders ', (done) => {
             // Request all residencies
             chai.request(server)
-                .get('/genders')
+                .get('/api/genders')
                 .end((err, res) => {
                     expect(res).to.have.status(200);
                     expect(res).to.be.json;
@@ -56,7 +56,7 @@ describe('Genders', () => {
 
                 // Make residency request
                 chai.request(server)
-                    .get('/genders')
+                    .get('/api/genders')
                     .end((err, res) => {
                         expect(res).to.have.status(200);
                         expect(res).to.be.json;
@@ -95,7 +95,7 @@ describe('Genders', () => {
         //
         //                     // Request residency
         //                     chai.request(server)
-        //                         .get('/genders?filter[student]=' + testStudent1._id.toString())
+        //                         .get('/api/genders?filter[student]=' + testStudent1._id.toString())
         //                         .end((err, res) => {
         //                             expect(res).to.have.status(200);
         //                             expect(res).to.be.json;
@@ -133,7 +133,7 @@ describe('Genders', () => {
         //
         //                     // Make request
         //                     chai.request(server)
-        //                         .get('/genders?filter[student]=' + testStudent3._id.toString())
+        //                         .get('/api/genders?filter[student]=' + testStudent3._id.toString())
         //                         .end((err, res) => {
         //                             expect(res).to.have.status(404);
         //                             done();
@@ -155,7 +155,7 @@ describe('Genders', () => {
 
                 // Make request
                 chai.request(server)
-                    .get('/genders?filter[name]=' + "Male")
+                    .get('/api/genders?filter[name]=' + "Male")
                     .end((err, res) => {
                         expect(res).to.have.status(200);
                         expect(res).to.be.json;
@@ -179,7 +179,7 @@ describe('Genders', () => {
 
                 // Make request
                 chai.request(server)
-                    .get('/genders?filter[name]=' + "Female")
+                    .get('/api/genders?filter[name]=' + "Female")
                     .end((err, res) => {
                         expect(res).to.have.status(200);
                         expect(res).to.be.json;
@@ -202,7 +202,7 @@ describe('Genders', () => {
 
                 // Make request
                 chai.request(server)
-                    .get('/genders/' + testGender._id.toString())
+                    .get('/api/genders/' + testGender._id.toString())
                     .end((err, res) => {
                         expect(res).to.have.status(200);
                         expect(res).to.be.json;
@@ -226,7 +226,7 @@ describe('Genders', () => {
 
                 // Make request
                 chai.request(server)
-                    .get('/genders/453535')
+                    .get('/api/genders/453535')
                     .end((err, res) => {
                         expect(res).to.have.status(404);
                         done();
@@ -253,7 +253,7 @@ describe('Genders', () => {
 
                 // Make request
                 chai.request(server)
-                    .put('/genders/' + testGender._id)
+                    .put('/api/genders/' + testGender._id)
                     .send({gender: genderData})
                     .end((err, res) => {
                         // Test server response
@@ -295,7 +295,7 @@ describe('Genders', () => {
 
                     // Make bad request
                     chai.request(server)
-                        .put('/genders/' + testGender._id)
+                        .put('/api/genders/' + testGender._id)
                         .send({gender: genderData})
                         .end((err, res) => {
                             // Test server response
@@ -324,7 +324,7 @@ describe('Genders', () => {
 
                 // Make request
                 chai.request(server)
-                    .put('/genders/' + '4534234')
+                    .put('/api/genders/' + '4534234')
                     .send({gender: genderData})
                     .end((err, res) => {
                         expect(res).to.have.status(404);
@@ -349,7 +349,7 @@ describe('Genders', () => {
 
             // Make request
             chai.request(server)
-                .post('/genders')
+                .post('/api/genders')
                 .send(genderData)
                 .end((err, res) => {
                     expect(res).to.have.status(201);
@@ -379,7 +379,7 @@ describe('Genders', () => {
 
                 // Make request
                 chai.request(server)
-                    .post('/genders')
+                    .post('/api/genders')
                     .send(genderData)
                     .end((err, res) => {
                         expect(res).to.have.status(500);
@@ -419,7 +419,7 @@ describe('Genders', () => {
 
                     // Make request
                     chai.request(server)
-                        .delete('/genders/' + testGender._id)
+                        .delete('/api/genders/' + testGender._id)
                         .end((err, res) => {
                             expect(res).to.have.status(200);
 

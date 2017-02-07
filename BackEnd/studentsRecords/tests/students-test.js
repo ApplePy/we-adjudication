@@ -44,7 +44,7 @@ describe('Students', () => {
         it('it should GET all students ', (done) => {
             // Request all students
             chai.request(server)
-                .get('/students')
+                .get('/api/students')
                 .end((err, res) => {
                     expect(res).to.have.status(200);
                     expect(res).to.be.json;
@@ -95,7 +95,7 @@ describe('Students', () => {
                     if (++count == 15) {
                         // Make request
                         chai.request(server)
-                            .get('/students')
+                            .get('/api/students')
                             .query({limit: 5, offset: 1})
                             .end((err, res) => {
                                 expect(res).to.have.status(200);
@@ -164,7 +164,7 @@ describe('Students', () => {
                     if (++count == 15) {
                         // Make request
                         chai.request(server)
-                            .get('/students')
+                            .get('/api/students')
                             .query({filter: {number: firstNumber + 3}})
                             .end((err, res) => {
                                 expect(res).to.have.status(200);
@@ -230,7 +230,7 @@ describe('Students', () => {
                     if (++count == 15) {
                         // Make residency request
                         chai.request(server)
-                            .get('/students')
+                            .get('/api/students')
                             .query({filter: {number: 102}})
                             .end((err, res) => {
                                 expect(res).to.have.status(200);
@@ -289,7 +289,7 @@ describe('Students', () => {
 
                             // Make request
                             chai.request(server)
-                                .get('/students/' + testStudent._id.toString())
+                                .get('/api/students/' + testStudent._id.toString())
                                 .end((err, res) => {
                                     expect(res).to.have.status(200);
                                     expect(res).to.be.json;
@@ -354,7 +354,7 @@ describe('Students', () => {
                     if (++count == 15) {
                         // Make request
                         chai.request(server)
-                            .get('/students/453535')
+                            .get('/api/students/453535')
                             .end((err, res) => {
                                 expect(res).to.have.status(404);
                                 done();
@@ -434,7 +434,7 @@ describe('Students', () => {
 
                             // Make request
                             chai.request(server)
-                                .put('/students/' + testStudent._id.toString())
+                                .put('/api/students/' + testStudent._id.toString())
                                 .send({student: studentData})
                                 .end((err, res) => {
                                     expect(res).to.have.status(200);
@@ -523,7 +523,7 @@ describe('Students', () => {
 
                             // Make request
                             chai.request(server)
-                                .put('/students/' + testStudent._id.toString())
+                                .put('/api/students/' + testStudent._id.toString())
                                 .send({student: studentData})
                                 .end((err, res) => {
                                     expect(res).to.have.status(500);
@@ -590,7 +590,7 @@ describe('Students', () => {
                     if (++count == 15) {
                         // Make request
                         chai.request(server)
-                            .put('/students/' + '4534234')
+                            .put('/api/students/' + '4534234')
                             .send({student: studentData})
                             .end((err, res) => {
                                 expect(res).to.have.status(404);
@@ -635,7 +635,7 @@ describe('Students', () => {
 
             // Make request
             chai.request(server)
-                .post('/students')
+                .post('/api/students')
                 .send({student: studentData})
                 .end((err, res) => {
                     expect(res).to.have.status(201);
@@ -709,7 +709,7 @@ describe('Students', () => {
                 
                 // Make request
                 chai.request(server)
-                    .post('/students')
+                    .post('/api/students')
                     .send({student: studentData})
                     .end((err, res) => {
                         expect(res).to.have.status(500);
@@ -769,7 +769,7 @@ describe('Students', () => {
 
                         // Make request
                         chai.request(server)
-                            .delete('/students/' + testStudent._id.toString())
+                            .delete('/api/students/' + testStudent._id.toString())
                             .end((err, res) => {
                                 expect(res).to.have.status(200);
 

@@ -41,7 +41,7 @@ describe('Advanced Standings', () => {
         it('it should GET all advanced standings ', (done) => {
             // Request all advanced standings
             chai.request(server)
-                .get('/advancedStandings')
+                .get('/api/advancedStandings')
                 .end((err, res) => {
                     expect(res).to.have.status(200);
                     expect(res).to.be.json;
@@ -96,7 +96,7 @@ describe('Advanced Standings', () => {
                             if (++count == 15) {
                                 // Make request
                                 chai.request(server)
-                                    .get('/advancedStandings')
+                                    .get('/api/advancedStandings')
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
                                         expect(res).to.be.json;
@@ -163,7 +163,7 @@ describe('Advanced Standings', () => {
                             if (++count == 15) {
                                 // Make request
                                 chai.request(server)
-                                    .get('/advancedStandings')
+                                    .get('/api/advancedStandings')
                                     .query({filter: {recipient: testStudent._id.toString()}})
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
@@ -237,7 +237,7 @@ describe('Advanced Standings', () => {
                                 if (++count == 15) {
                                     // Make request
                                     chai.request(server)
-                                        .get('/advancedStandings')
+                                        .get('/api/advancedStandings')
                                         .query({filter: {recipient: testStudent._id.toString()}})
                                         .end((err, res) => {
                                             expect(res).to.have.status(200);
@@ -299,7 +299,7 @@ describe('Advanced Standings', () => {
                             if (++count == 15) {
                                 // Make request
                                 chai.request(server)
-                                    .get('/advancedStandings/' + testStanding._id.toString())
+                                    .get('/api/advancedStandings/' + testStanding._id.toString())
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
                                         expect(res).to.be.json;
@@ -364,7 +364,7 @@ describe('Advanced Standings', () => {
                             if (++count == 15) {
                                 // Make request
                                 chai.request(server)
-                                    .get('/advancedStandings/53425353')
+                                    .get('/api/advancedStandings/53425353')
                                     .end((err, res) => {
                                         expect(res).to.have.status(404);
                                         done();
@@ -444,7 +444,7 @@ describe('Advanced Standings', () => {
 
                                 // Make request
                                 chai.request(server)
-                                    .put('/advancedStandings/' + testStanding._id.toString())
+                                    .put('/api/advancedStandings/' + testStanding._id.toString())
                                     .send({advancedStanding: standingData})
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
@@ -533,7 +533,7 @@ describe('Advanced Standings', () => {
 
                                 // Make request
                                 chai.request(server)
-                                    .put('/advancedStandings/' + testStanding._id.toString())
+                                    .put('/api/advancedStandings/' + testStanding._id.toString())
                                     .send({advancedStanding: standingData})
                                     .end((err, res) => {
                                         expect(res).to.have.status(400);
@@ -597,7 +597,7 @@ describe('Advanced Standings', () => {
                             if (++count == 15) {
                                 // Make request
                                 chai.request(server)
-                                    .get('/advancedStandings/4765437876543')
+                                    .get('/api/advancedStandings/4765437876543')
                                     .end((err, res) => {
                                         expect(res).to.have.status(404);
                                         done();
@@ -637,7 +637,7 @@ describe('Advanced Standings', () => {
 
                 // Make request
                 chai.request(server)
-                    .post('/advancedStandings')
+                    .post('/api/advancedStandings')
                     .send({advancedStanding: standingData})
                     .end((err, res) => {
                         expect(res).to.have.status(201);
@@ -686,7 +686,7 @@ describe('Advanced Standings', () => {
 
                 // Make request
                 chai.request(server)
-                    .post('/awards')
+                    .post('/api/awards')
                     .send({award: awardData})
                     .end((err, res) => {
                         expect(res).to.have.status(400);
@@ -730,7 +730,7 @@ describe('Advanced Standings', () => {
 
                     // Make request
                     chai.request(server)
-                        .delete('/advancedStandings/' + testStanding._id.toString())
+                        .delete('/api/advancedStandings/' + testStanding._id.toString())
                         .send({advancedStanding: standingData})
                         .end((err, res) => {
                             expect(res).to.have.status(200);

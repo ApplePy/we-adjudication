@@ -35,7 +35,7 @@ describe('Residencies', () => {
         it('it should GET all residencies ', (done) => {
             // Request all residencies
             chai.request(server)
-                .get('/residencies')
+                .get('/api/residencies')
                 .end((err, res) => {
                     expect(res).to.have.status(200);
                     expect(res).to.be.json;
@@ -56,7 +56,7 @@ describe('Residencies', () => {
 
                 // Make residency request
                 chai.request(server)
-                    .get('/residencies')
+                    .get('/api/residencies')
                     .end((err, res) => {
                         expect(res).to.have.status(200);
                         expect(res).to.be.json;
@@ -95,7 +95,7 @@ describe('Residencies', () => {
 
                             // Request residency
                             chai.request(server)
-                                .get('/residencies?filter[student]=' + testStudent1._id.toString())
+                                .get('/api/residencies?filter[student]=' + testStudent1._id.toString())
                                 .end((err, res) => {
                                     expect(res).to.have.status(200);
                                     expect(res).to.be.json;
@@ -133,7 +133,7 @@ describe('Residencies', () => {
 
                             // Make request
                             chai.request(server)
-                                .get('/residencies?filter[student]=' + testStudent3._id.toString())
+                                .get('/api/residencies?filter[student]=' + testStudent3._id.toString())
                                 .end((err, res) => {
                                     expect(res).to.have.status(404);
                                     done();
@@ -155,7 +155,7 @@ describe('Residencies', () => {
 
                 // Make request
                 chai.request(server)
-                    .get('/residencies?filter[name]=' + "Johnny Test House")
+                    .get('/api/residencies?filter[name]=' + "Johnny Test House")
                     .end((err, res) => {
                         expect(res).to.have.status(200);
                         expect(res).to.be.json;
@@ -179,7 +179,7 @@ describe('Residencies', () => {
 
                 // Make request
                 chai.request(server)
-                    .get('/residencies?filter[name]=' + "Johnny Test House2")
+                    .get('/api/residencies?filter[name]=' + "Johnny Test House2")
                     .end((err, res) => {
                         expect(res).to.have.status(200);
                         expect(res).to.be.json;
@@ -202,7 +202,7 @@ describe('Residencies', () => {
 
                 // Make request
                 chai.request(server)
-                    .get('/residencies/' + testRes._id.toString())
+                    .get('/api/residencies/' + testRes._id.toString())
                     .end((err, res) => {
                         expect(res).to.have.status(200);
                         expect(res).to.be.json;
@@ -226,7 +226,7 @@ describe('Residencies', () => {
 
                 // Make request
                 chai.request(server)
-                    .get('/residencies/453535')
+                    .get('/api/residencies/453535')
                     .end((err, res) => {
                         expect(res).to.have.status(404);
                         done();
@@ -253,7 +253,7 @@ describe('Residencies', () => {
 
                 // Make request
                 chai.request(server)
-                    .put('/residencies/' + testRes._id)
+                    .put('/api/residencies/' + testRes._id)
                     .send({residency: resData})
                     .end((err, res) => {
                         // Test server response
@@ -295,7 +295,7 @@ describe('Residencies', () => {
 
                     // Make bad request
                     chai.request(server)
-                        .put('/residencies/' + testRes._id)
+                        .put('/api/residencies/' + testRes._id)
                         .send({residency: resData})
                         .end((err, res) => {
                             // Test server response
@@ -324,7 +324,7 @@ describe('Residencies', () => {
 
                 // Make request
                 chai.request(server)
-                    .put('/residencies/' + '4534234')
+                    .put('/api/residencies/' + '4534234')
                     .send({residency: resData})
                     .end((err, res) => {
                         expect(res).to.have.status(404);
@@ -349,7 +349,7 @@ describe('Residencies', () => {
 
             // Make request
             chai.request(server)
-                .post('/residencies')
+                .post('/api/residencies')
                 .send(residencyData)
                 .end((err, res) => {
                     expect(res).to.have.status(201);
@@ -379,7 +379,7 @@ describe('Residencies', () => {
 
                 // Make request
                 chai.request(server)
-                    .post('/residencies')
+                    .post('/api/residencies')
                     .send(residencyData)
                     .end((err, res) => {
                         expect(res).to.have.status(500);
@@ -419,7 +419,7 @@ describe('Residencies', () => {
 
                     // Make request
                     chai.request(server)
-                        .delete('/residencies/' + testRes._id)
+                        .delete('/api/residencies/' + testRes._id)
                         .end((err, res) => {
                             expect(res).to.have.status(200);
 
