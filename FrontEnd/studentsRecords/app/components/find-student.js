@@ -26,7 +26,7 @@ export default Ember.Component.extend({
          }
 
        }
-     ).catch((err)=>{
+     ).catch(()=>{
       alert("Error!");
       this.set('notDONE', false);
       Ember.$('.ui.modal').modal('hide');

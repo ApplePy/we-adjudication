@@ -28,18 +28,6 @@ export default Ember.Component.extend({
 
   actions: {
 
-    update() {
-
-      this.get('store').findAll('residency').then(function (records) {
-        self.set('residencies', records);
-      });
-
-      this.get('store').findAll('gender').then(function (records) {
-        self.set('genders', records);
-      });
-
-    },
-
     addGender () {
       var gender = this.get('store').createRecord('gender', {
         name: this.get('newGender')

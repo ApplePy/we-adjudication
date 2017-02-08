@@ -21,6 +21,7 @@ export default Ember.Component.extend({
     this.get('store').findAll('residency').then((records) => {
       self.set('residencyModel', records);
     });
+    // load Gender data model
     this.get('store').findAll('gender').then(function (records) {
       self.set('genderModel', records);
     });
@@ -30,8 +31,6 @@ export default Ember.Component.extend({
     saveStudent () {
       var res = this.get('store').peekRecord('residency', this.get('selectedResidency'));
       var gen = this.get('store').peekRecord('gender', this.get('selectedGender'));
-      var DOB = this.get('store').peekRecord('student', this.get('selectedDate'));
-      var store = this.get('store');
 
       var newStudent = this.get('store').createRecord('student', {
         number: this.get('numBox'),
