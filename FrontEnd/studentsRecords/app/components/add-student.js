@@ -37,7 +37,7 @@ export default Ember.Component.extend({
         number: this.get('numBox'),
         firstName: this.get('fNameBox'),
         lastName: this.get('lNameBox'),
-        gender: gen,
+        genderInfo: gen,
         photo: this.get('studentPhoto'),
         DOB: new Date(this.get('selectedDate')),
         resInfo: res
@@ -59,16 +59,10 @@ export default Ember.Component.extend({
 
     selectGender (gender){
       this.set('selectedGender', gender);
-      //Set the value of this student's gender to the gender selected
-      var gen = this.get('store').peekRecord('gender', this.get('selectedGender'));
-      this.get('currentStudent').set('genderInfo', gen);
     },
 
     selectResidency (residency){
       this.set('selectedResidency', residency);
-      //Set the value of this student's residency to this one
-      var res = this.get('store').peekRecord('residency', this.get('selectedResidency'));
-      this.get('currentStudent').set('resInfo', res);
     },
 
     assignDate (date){
