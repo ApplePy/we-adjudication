@@ -2,7 +2,10 @@
 process.env.NODE_ENV = 'test';
 
 let mongoose = require("mongoose");
-let Models = require('../models/studentsRecordsDB');
+let Students = require('../models/studentsSchema');
+let Awards = require('../models/awardsSchema');
+let AdvancedStandings = require('../models/advancedStandingSchema');
+let Residencies = require('../models/residencySchema');
 
 //Require the dev-dependencies
 let chai = require('chai');
@@ -19,13 +22,13 @@ describe('Awards', () => {
     //Before each test we empty the database
     beforeEach((done) => {
         // Clear out all Residences and Students then call done
-        Models.Residencies.remove({}, (err) => {
+        Residencies.remove({}, (err) => {
             if (err) throw "Error cleaning out Residencies";
-            Models.Students.remove({}, (err) => {
+            Students.remove({}, (err) => {
                 if (err) throw "Error cleaning out Students";
-                Models.Awards.remove({}, (err) => {
+                Awards.remove({}, (err) => {
                     if (err) throw "Error cleaning out Awards";
-                    Models.AdvancedStandings.remove({}, (err) => {
+                    AdvancedStandings.remove({}, (err) => {
                         if (err) throw "Error cleaning out Advanced Standings";
                         done()
                     });
@@ -54,7 +57,7 @@ describe('Awards', () => {
         it('it should GET all awards when created', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err;
 
@@ -72,7 +75,7 @@ describe('Awards', () => {
                     admissionComments: "None",
                     resInfo: testRes
                 };
-                let testStudent = new Models.Students(studentData);
+                let testStudent = new Students(studentData);
                 testStudent.save((err) => {
                     if (err) throw err;
 
@@ -84,7 +87,7 @@ describe('Awards', () => {
                     var count = 0;
                     for (var num = 0; num < 15; num++) {
                         awardData.note = num.toString();
-                        let testAward = new Models.Awards(awardData);
+                        let testAward = new Awards(awardData);
                         testAward.save((err) => {
                             if (err) throw err;
 
@@ -114,7 +117,7 @@ describe('Awards', () => {
         it('it should GET a award by recipient', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err;
 
@@ -132,13 +135,13 @@ describe('Awards', () => {
                     admissionComments: "None",
                     resInfo: testRes
                 };
-                let testStudent = new Models.Students(studentData);
+                let testStudent = new Students(studentData);
                 testStudent.save((err) => {
                     if (err) throw err;
 
                     // Create second student
                     studentData.number += 1;
-                    let testStudent2 = new Models.Students(studentData);
+                    let testStudent2 = new Students(studentData);
                     testStudent.save((err) => {
                         if (err) throw err;
 
@@ -151,7 +154,7 @@ describe('Awards', () => {
                         for (var num = 0; num < 15; num++) {
                             awardData.note = num.toString();
                             awardData.recipient = (num % 2 == 0) ? testStudent : testStudent2; // Test student gets even awards
-                            let testAward = new Models.Awards(awardData);
+                            let testAward = new Awards(awardData);
                             testAward.save((err) => {
                                 if (err) throw err;
 
@@ -184,7 +187,7 @@ describe('Awards', () => {
         it('it should GET nothing if student has no award', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err;
 
@@ -202,12 +205,12 @@ describe('Awards', () => {
                     admissionComments: "None",
                     resInfo: testRes
                 };
-                let testStudent = new Models.Students(studentData);
+                let testStudent = new Students(studentData);
                 testStudent.save((err) => {
                     if (err) throw err;
 
                     studentData.number = 541354335;
-                    let otherStudent = new Models.Students(studentData);
+                    let otherStudent = new Students(studentData);
                     otherStudent.save((err) => {
                         if (err) throw err;
 
@@ -219,7 +222,7 @@ describe('Awards', () => {
                         var count = 0;
                         for (var num = 0; num < 15; num++) {
                             awardData.note = num.toString();
-                            let testAward = new Models.Awards(awardData);
+                            let testAward = new Awards(awardData);
                             testAward.save((err) => {
                                 if (err) throw err;
 
@@ -249,7 +252,7 @@ describe('Awards', () => {
         it('it should GET award when given ID', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err;
 
@@ -267,7 +270,7 @@ describe('Awards', () => {
                     admissionComments: "None",
                     resInfo: testRes
                 };
-                let testStudent = new Models.Students(studentData);
+                let testStudent = new Students(studentData);
                 testStudent.save((err) => {
                     if (err) throw err;
 
@@ -279,7 +282,7 @@ describe('Awards', () => {
                     var count = 0;
                     for (var num = 0; num < 15; num++) {
                         awardData.note = num.toString();
-                        let testAward = new Models.Awards(awardData);
+                        let testAward = new Awards(awardData);
                         testAward.save((err) => {
                             if (err) throw err;
 
@@ -308,7 +311,7 @@ describe('Awards', () => {
         it('it should 404 for award when given bad ID', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err;
 
@@ -326,7 +329,7 @@ describe('Awards', () => {
                     admissionComments: "None",
                     resInfo: testRes
                 };
-                let testStudent = new Models.Students(studentData);
+                let testStudent = new Students(studentData);
                 testStudent.save((err) => {
                     if (err) throw err;
 
@@ -338,7 +341,7 @@ describe('Awards', () => {
                     var count = 0;
                     for (var num = 0; num < 15; num++) {
                         awardData.note = num.toString();
-                        let testAward = new Models.Awards(awardData);
+                        let testAward = new Awards(awardData);
                         testAward.save((err) => {
                             if (err) throw err;
 
@@ -367,7 +370,7 @@ describe('Awards', () => {
         it('it should PUT an updated award', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err
             });
@@ -386,7 +389,7 @@ describe('Awards', () => {
                 resInfo: testRes
             };
 
-            let testStudent = new Models.Students(studentData);
+            let testStudent = new Students(studentData);
             testStudent.save((err) =>{
                 if (err) throw err;
 
@@ -397,7 +400,7 @@ describe('Awards', () => {
 
                 // Create first award
                 awardData.note = 0;
-                let testAward = new Models.Awards(awardData);
+                let testAward = new Awards(awardData);
                 testAward.save((err) => {
                     if (err) throw err;
 
@@ -405,7 +408,7 @@ describe('Awards', () => {
                     var count = 0;
                     for (var num = 1; num < 15; num++) {
                         awardData.note = num;
-                        let otherAwards = new Models.Awards(awardData);
+                        let otherAwards = new Awards(awardData);
                         otherAwards.save((err) => {
                             if (err) throw err;
 
@@ -429,7 +432,7 @@ describe('Awards', () => {
                                         expect(res.body.award.recipient).to.equal(testStudent._id.toString());
 
                                         // Test mongo to ensure it was written
-                                        Models.Awards.findById(testAward._id, (error, res) => {
+                                        Awards.findById(testAward._id, (error, res) => {
                                             expect(error || res.length === 0).to.be.false;
                                             expect(res.note).to.equal(awardData.note);
                                             expect(res.recipient.toString()).to.equal(testStudent._id.toString());
@@ -446,7 +449,7 @@ describe('Awards', () => {
         it('it should 400 on PUT an award with no recipient', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err
             });
@@ -465,7 +468,7 @@ describe('Awards', () => {
                 resInfo: testRes
             };
 
-            let testStudent = new Models.Students(studentData);
+            let testStudent = new Students(studentData);
             testStudent.save((err) =>{
                 if (err) throw err;
 
@@ -476,7 +479,7 @@ describe('Awards', () => {
 
                 // Create first award
                 awardData.note = 0;
-                let testAward = new Models.Awards(awardData);
+                let testAward = new Awards(awardData);
                 testAward.save((err) => {
                     if (err) throw err;
 
@@ -484,7 +487,7 @@ describe('Awards', () => {
                     var count = 0;
                     for (var num = 1; num < 15; num++) {
                         awardData.note = num;
-                        let otherAwards = new Models.Awards(awardData);
+                        let otherAwards = new Awards(awardData);
                         otherAwards.save((err) => {
                             if (err) throw err;
 
@@ -503,7 +506,7 @@ describe('Awards', () => {
                                     .end((err, res) => {
                                         expect(res).to.have.status(400);
 
-                                        Models.Awards.findById(testAward._id, (err, result) => {
+                                        Awards.findById(testAward._id, (err, result) => {
                                             expect(err).to.be.null;
                                             expect(result.recipient).to.not.be.null;
                                             done();
@@ -519,7 +522,7 @@ describe('Awards', () => {
         it('it should 404 on PUT a nonexistent award', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err
             });
@@ -542,7 +545,7 @@ describe('Awards', () => {
             var count = 0;
             for (var num = 0; num < 15; num++) {
                 awardData.number = firstNumber + num;
-                let testAward = new Models.Awards(awardData);
+                let testAward = new Awards(awardData);
                 testAward.save((err) => {
                     if (err) throw err;
 
@@ -573,7 +576,7 @@ describe('Awards', () => {
             let studentData = {
                 number: 594265372
             };
-            let testStudent = new Models.Students(studentData);
+            let testStudent = new Students(studentData);
 
             let awardData ={
                 note: "A note",
@@ -596,7 +599,7 @@ describe('Awards', () => {
                         expect(res.body.award.recipient).to.equal(testStudent._id.toString());
 
                         // Check underlying database
-                        Models.Awards.findById(res.body.award._id, function (error, award) {
+                        Awards.findById(res.body.award._id, function (error, award) {
                             expect(error).to.be.null;
                             expect(award).to.not.be.null;
                             expect(award.note).to.be.a('String');
@@ -614,7 +617,7 @@ describe('Awards', () => {
             let studentData = {
                 number: 594265372
             };
-            let testStudent = new Models.Students(studentData);
+            let testStudent = new Students(studentData);
 
             let awardData ={
                 note: "A note"
@@ -656,7 +659,7 @@ describe('Awards', () => {
                 admissionAverage: 90,
                 admissionComments: "None",
             };
-            let testStudent = new Models.Students(studentData);
+            let testStudent = new Students(studentData);
             testStudent.save((err) => {
                 if (err) throw err;
 
@@ -665,7 +668,7 @@ describe('Awards', () => {
                     note: "Test",
                     recipient: testStudent
                 };
-                let testAward = new Models.Awards(awardData);
+                let testAward = new Awards(awardData);
                 testAward.save((err) => {
                     if (err) throw err;
 
@@ -681,7 +684,7 @@ describe('Awards', () => {
                                 expect(res).to.have.status(200);
 
                                 // Check underlying database
-                                Models.Awards.findById(testAward._id, function (error, award) {
+                                Awards.findById(testAward._id, function (error, award) {
                                     expect(error).to.be.null;
                                     expect(award).to.be.null;
                                     done();

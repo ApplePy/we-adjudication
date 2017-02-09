@@ -1,15 +1,16 @@
 var express = require('express');
 var router = express.Router();
-var models = require('../models/studentsRecordsDB');
+var Students = require('../models/studentsSchema');
+var Awards = require('../models/awardsSchema');
+var AdvancedStandings = require('../models/advancedStandingSchema');
 var bodyParser = require('body-parser');
 var parseUrlencoded = bodyParser.urlencoded({extended: false});
 var parseJSON = bodyParser.json();
 
-// TODO: WARNING: PUT/POST does not check for missing data
 
 router.route('/')
     .post(parseUrlencoded, parseJSON, function (request, response) {
-        var student = new models.Students(request.body.student);
+        var student = new Students(request.body.student);
         student.save(function (error) {
             if (error) response.status(500).send(error);
             else response.status(201).json({student: student});
@@ -20,19 +21,14 @@ router.route('/')
         var o = parseInt(request.query.offset);
 
         if (!request.query.filter) {
-            //models.Students.find(function (error, students) {
-            //    if (error) response.send(error);
-            //    response.json({student: students});
-            //});
-            models.Students.paginate({}, { offset: o, limit: l },
+            Students.paginate({}, { offset: o, limit: l },
                 function (error, students) {
                     if (error) response.status(500).send(error);
                     else response.json({student: students.docs});
                 });
         } else {
             var StudentNo = request.query.filter.number;
-            // TODO: This causes a deprecation warning from Ember, should not return an array
-            models.Students.find({number: StudentNo}, function (error, students) {
+            Students.find({number: StudentNo}, function (error, students) {
                 if (error) response.status(500).send(error);
                 else response.json({student: students});
             });
@@ -41,7 +37,7 @@ router.route('/')
 
 router.route('/:student_id')
     .get(parseUrlencoded, parseJSON, function (request, response) {
-        models.Students.findById(request.params.student_id, function (error, student) {
+        Students.findById(request.params.student_id, function (error, student) {
             if (error) {
                 response.status(404).send({error: error});
             }
@@ -51,7 +47,7 @@ router.route('/:student_id')
         });
     })
     .put(parseUrlencoded, parseJSON, function (request, response) {
-        models.Students.findById(request.params.student_id, function (error, student) {
+        Students.findById(request.params.student_id, function (error, student) {
             if (error) {
                 response.status(404).send({error: error});
             }
@@ -82,13 +78,13 @@ router.route('/:student_id')
         });
     })
     .delete(parseUrlencoded, parseJSON, function (request, response) {
-        models.Students.findByIdAndRemove(request.params.student_id,
+        Students.findByIdAndRemove(request.params.student_id,
             function (error, deleted) {
                 if (!error) {
                     // Delete all awards associated with student
-                    models.Awards.remove({recipient: deleted._id}, (err, removed) => {
+                    Awards.remove({recipient: deleted._id}, (err, removed) => {
                         // Delete all advanced standings associated with student
-                        models.AdvancedStandings.remove({recipient: deleted._id}, (err2, removed2) => {
+                        AdvancedStandings.remove({recipient: deleted._id}, (err2, removed2) => {
                             response.json({student: deleted});
                         });
                     });

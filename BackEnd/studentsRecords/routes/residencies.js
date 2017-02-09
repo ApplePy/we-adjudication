@@ -1,17 +1,17 @@
 var express = require('express');
 var router = express.Router();
-var models = require('../models/studentsRecordsDB');
+var Residencies = require('../models/residencySchema');
+var Students = require('../models/studentsSchema');
 var bodyParser = require('body-parser');
 var parseUrlencoded = bodyParser.urlencoded({extended: false});
 var parseJSON = bodyParser.json();
 
-// TODO: WARNING: PUT/POST does not check for missing data
 
 router.route('/')
     // Post a new residency
     .post(parseUrlencoded, parseJSON, function (request, response) {
         // The body of the request will be { residency: {*content} }
-        var residency = new models.Residencies(request.body.residency);
+        var residency = new Residencies(request.body.residency);
 
         residency.save(function (error) {
             if (error) response.status(500).send(error);
@@ -26,7 +26,7 @@ router.route('/')
 
         // If no query, return all
         if (!filter) {
-            models.Residencies.find(function (error, residencies) {
+            Residencies.find(function (error, residencies) {
                 if (error) response.status(500).send(error);
                 else response.json({residency: residencies});
             });
@@ -34,10 +34,10 @@ router.route('/')
 
         // A query was submitted for the residency of a student
         else if (filter.student) {
-            models.Students.findById(filter.student, function (error, student) {
+            Students.findById(filter.student, function (error, student) {
                 if (error || student == null) response.status(404).send(error);
                 else {
-                    models.Residencies.findById(student.resInfo, function(error, res) {
+                    Residencies.findById(student.resInfo, function(error, res) {
                         if (error) response.status(404).send(error);
                         response.json({residency: res});
                     });
@@ -47,7 +47,7 @@ router.route('/')
 
         // A query was submitted for a specific residency name
         else if (filter.name) {
-            models.Residencies.find({"name": filter.name}, function (error, students) {
+            Residencies.find({"name": filter.name}, function (error, students) {
                 if (error) response.status(500).send(error);
                 else response.json({residency: students});
             });
@@ -59,7 +59,7 @@ router.route('/:residency_id')
 
     // Get a specific residency by Mongo id
     .get(parseUrlencoded, parseJSON, function (request, response) {
-        models.Residencies.findById(request.params.residency_id, function (error, residency) {
+        Residencies.findById(request.params.residency_id, function (error, residency) {
             if (error) response.status(404).send(error);
             else response.json({residency: residency});
         })
@@ -67,7 +67,7 @@ router.route('/:residency_id')
 
     // Update a specific residency
     .put(parseUrlencoded, parseJSON, function (request, response) {
-        models.Residencies.findById(request.params.residency_id, function (error, residency) {
+        Residencies.findById(request.params.residency_id, function (error, residency) {
             if (error) {
                 response.status(404).send({error: error});
             }
@@ -91,7 +91,7 @@ router.route('/:residency_id')
     .delete(parseUrlencoded, parseJSON, function (request, response) {
 
         // Map all affected students to null
-        models.Students.update(
+        Students.update(
             {resInfo: request.params.residency_id},
             {$set: {resInfo: null}},
             {multi: true},
@@ -99,7 +99,7 @@ router.route('/:residency_id')
                 if (error) response.status(500).send({error: error});
                 else {
                     // All students mapped successfully, delete residency
-                    models.Residencies.findByIdAndRemove(request.params.residency_id, function(error, residency) {
+                    Residencies.findByIdAndRemove(request.params.residency_id, function(error, residency) {
                        if (error) response.status(500).send({error: error});
                        else response.json({residency: residency});
                     });

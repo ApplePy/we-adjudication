@@ -1,4 +1,6 @@
-var models = require('../models/studentsRecordsDB');
+var Students = require('../models/studentsSchema');
+var Awards = require('../models/awardsSchema');
+var AdvancedStandings = require('../models/advancedStandingSchema');
 
 let doneCounter = 0;
 
@@ -57,13 +59,13 @@ var awardNames = [
 
 
 // Get all students
-models.Students.find({}).then((students) => {
+Students.find({}).then((students) => {
     // Generate 100 random awards and award to 100 random students
 
     for (let count = 0; count < 100; count++) {
         let student = students[Math.floor(Math.random() * students.length)];
 
-        let award = new models.Awards(
+        let award = new Awards(
             {
                 note: awardNames[Math.floor(Math.random() * awardNames.length)],
                 recipient: student
@@ -137,14 +139,14 @@ var fromData = [
 
 
 // Get all students
-models.Students.find({}).then((students) => {
+Students.find({}).then((students) => {
     // Generate 100 random advanced standings and award to 100 random students
 
     for (let count = 0; count < 100; count++) {
         let student = students[Math.floor(Math.random() * students.length)];
 
         let courseIndex = Math.floor(Math.random() * courses.length);
-        let standing = new models.AdvancedStandings(
+        let standing = new AdvancedStandings(
             {
                 course: courses[courseIndex].course,
                 description: courses[courseIndex].description,
