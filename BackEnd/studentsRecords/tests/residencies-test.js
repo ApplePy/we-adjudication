@@ -2,7 +2,8 @@
 process.env.NODE_ENV = 'test';
 
 let mongoose = require("mongoose");
-let Models = require('../models/studentsRecordsDB');
+let Students = require('../models/studentsSchema');
+let Residencies = require('../models/residencySchema');
 
 //Require the dev-dependencies
 let chai = require('chai');
@@ -19,9 +20,9 @@ describe('Residencies', () => {
     //Before each test we empty the database
     beforeEach((done) => {
         // Clear out all Residences and Students then call done
-        Models.Residencies.remove({}, (err) => {
+        Residencies.remove({}, (err) => {
             if (err) throw "Error cleaning out Residencies";
-            Models.Students.remove({}, (err) => {
+            Students.remove({}, (err) => {
                 if (err) throw "Error cleaning out Students";
                 done()
             });
@@ -48,7 +49,7 @@ describe('Residencies', () => {
         it('it should GET all residencies when data exists', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({
+            let testRes = new Residencies({
                 name: "Johnny Test House"
             });
             testRes.save((err) => {
@@ -73,23 +74,23 @@ describe('Residencies', () => {
 
             // Set up mock data
 
-            let testRes = new Models.Residencies({
+            let testRes = new Residencies({
                 name: "Johnny Test House"
             });
             testRes.save((err) => {
                 if (err) throw err;
 
-                let testRes2 = new Models.Residencies({
+                let testRes2 = new Residencies({
                     name: "Johnny Not House"
                 });
                 testRes2.save((err) => {
                     if (err) throw err;
 
-                    let testStudent1 = new Models.Students({number: 12345, name: "Johnny Test", resInfo: testRes});
+                    let testStudent1 = new Students({number: 12345, name: "Johnny Test", resInfo: testRes});
                     testStudent1.save((err) => {
                         if (err) throw err;
 
-                        let testStudent2 = new Models.Students({number: 12346, name: "Jane Test", resInfo: testRes2});
+                        let testStudent2 = new Students({number: 12346, name: "Jane Test", resInfo: testRes2});
                         testStudent2.save((err) => {
                             if (err) throw err;
 
@@ -113,21 +114,21 @@ describe('Residencies', () => {
         it('it should 404 if a student doesn\'t have a residence', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({
+            let testRes = new Residencies({
                 name: "Johnny Test House"
             });
             testRes.save((err) => {
                 if (err) throw err;
 
-                let testStudent1 = new Models.Students({number: 12345, name: "Johnny Test", resInfo: testRes});
+                let testStudent1 = new Students({number: 12345, name: "Johnny Test", resInfo: testRes});
                 testStudent1.save((err) => {
                     if (err) throw err;
 
-                    let testStudent2 = new Models.Students({number: 12346, name: "Jane Test", resInfo: testRes});
+                    let testStudent2 = new Students({number: 12346, name: "Jane Test", resInfo: testRes});
                     testStudent2.save((err) => {
                         if (err) throw err;
 
-                        let testStudent3 = new Models.Students({number:12347, name: "Eve Test"});
+                        let testStudent3 = new Students({number:12347, name: "Eve Test"});
                         testStudent2.save((err) => {
                             if (err) throw err;
 
@@ -147,7 +148,7 @@ describe('Residencies', () => {
         it('it should GET the residency by name', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({
+            let testRes = new Residencies({
                 name: "Johnny Test House"
             });
             testRes.save((err) => {
@@ -171,7 +172,7 @@ describe('Residencies', () => {
         it('it should GET nothing if a the name does not exist', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({
+            let testRes = new Residencies({
                 name: "Johnny Test House"
             });
             testRes.save((err) => {
@@ -193,7 +194,7 @@ describe('Residencies', () => {
         it('it should GET residency when given ID', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({
+            let testRes = new Residencies({
                     name: "Johnny Test House"
                 });
 
@@ -218,7 +219,7 @@ describe('Residencies', () => {
         it('it should 404 for residency when given bad ID', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({
+            let testRes = new Residencies({
                 name: "Johnny Test House"
             });
             testRes.save((err) => {
@@ -245,7 +246,7 @@ describe('Residencies', () => {
             var resData = {
                 name: "Johnny Test House"
             };
-            let testRes = new Models.Residencies(resData);
+            let testRes = new Residencies(resData);
             testRes.save((err) => {
                 if (err) throw err;
 
@@ -265,7 +266,7 @@ describe('Residencies', () => {
                         expect(res.body.residency.name).to.equal(resData.name);
 
                         // Test mongo for changes
-                        Models.Residencies.find(resData, (err, res) => {
+                        Residencies.find(resData, (err, res) => {
                             expect(err).to.be.null;
                             expect(res.length).to.equal(1);
                             expect(res[0].name).to.equal(resData.name);
@@ -283,13 +284,13 @@ describe('Residencies', () => {
             };
 
             // Create first residence
-            let testRes = new Models.Residencies(resData);
+            let testRes = new Residencies(resData);
             testRes.save((err) => {
                 if (err) throw err;
 
                 // Create second residence
                 resData.name = "Johnny Test Shack";
-                let testRes2 = new Models.Residencies(resData);
+                let testRes2 = new Residencies(resData);
                 testRes2.save((err) => {
                    if (err) throw err;
 
@@ -302,7 +303,7 @@ describe('Residencies', () => {
                             expect(res).to.have.status(500);
 
                             // Test mongo for changes
-                            Models.Residencies.findById(testRes._id, (err, res) => {
+                            Residencies.findById(testRes._id, (err, res) => {
                                 expect(err).to.be.null;
                                 expect(res.name).to.equal("Johnny Test House");
                                 done();
@@ -318,7 +319,7 @@ describe('Residencies', () => {
             var resData = {
                 name: "Johnny Test House"
             };
-            let testRes = new Models.Residencies(resData);
+            let testRes = new Residencies(resData);
             testRes.save((err) => {
                 if (err) throw err;
 
@@ -357,7 +358,7 @@ describe('Residencies', () => {
                     expect(res.body).to.have.property('residency');
                     expect(res.body.residency.name).to.equal(residencyData.residency.name);
 
-                    Models.Residencies.findById(res.body.residency._id, function (error, residency) {
+                    Residencies.findById(res.body.residency._id, function (error, residency) {
                         expect(error).to.be.null;
                         expect(residency.name).to.equal(residencyData.residency.name);
                         done();
@@ -373,7 +374,7 @@ describe('Residencies', () => {
                     name: "Johnny Test Residence"
                 }
             };
-            let testRes = new Models.Residencies(residencyData.residency);
+            let testRes = new Residencies(residencyData.residency);
             testRes.save((err) => {
                if (err) throw err;
 
@@ -385,7 +386,7 @@ describe('Residencies', () => {
                         expect(res).to.have.status(500);
 
                         // Ensure no new residency was created
-                        Models.Residencies.find(residencyData.residency, function (error, residency) {
+                        Residencies.find(residencyData.residency, function (error, residency) {
                             expect(error).to.be.null;
                             expect(residency.length).to.equal(1);
                             done();
@@ -405,11 +406,11 @@ describe('Residencies', () => {
             let residencyData = {
                 name: "Johnny Test Residence"
             };
-            let testRes = new Models.Residencies(residencyData);
+            let testRes = new Residencies(residencyData);
             testRes.save((err) => {
                 if (err) throw err;
 
-                let testStudent = new Models.Students(
+                let testStudent = new Students(
                     {
                         name: "Johnny Test",
                         resInfo: testRes
@@ -423,11 +424,11 @@ describe('Residencies', () => {
                         .end((err, res) => {
                             expect(res).to.have.status(200);
 
-                            Models.Residencies.findById(testRes._id, function (error, residency) {
+                            Residencies.findById(testRes._id, function (error, residency) {
                                 expect(error).to.be.null;
                                 expect(residency).to.be.null;
 
-                                Models.Students.findById(testStudent._id, function(error, student) {
+                                Students.findById(testStudent._id, function(error, student) {
                                     expect(error).to.be.null;
                                     expect(student.resInfo).to.be.null;
                                     done();

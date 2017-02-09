@@ -2,7 +2,11 @@
 process.env.NODE_ENV = 'test';
 
 let mongoose = require("mongoose");
-let Models = require('../models/studentsRecordsDB');
+let Students = require('../models/studentsSchema');
+let Awards = require('../models/awardsSchema');
+let AdvancedStandings = require('../models/advancedStandingSchema');
+let Genders = require('../models/genderSchema');
+let Residencies = require('../models/residencySchema');
 
 //Require the dev-dependencies
 let chai = require('chai');
@@ -19,15 +23,15 @@ describe('Students', () => {
     //Before each test we empty the database
     beforeEach((done) => {
         // Clear out all Genders, Residences and Students then call done
-        Models.Genders.remove({}, (err) => {
+        Genders.remove({}, (err) => {
             if (err) throw "Error cleaning out Genders";
-            Models.Residencies.remove({}, (err) => {
+            Residencies.remove({}, (err) => {
                 if (err) throw "Error cleaning out Residencies";
-                Models.Students.remove({}, (err) => {
+                Students.remove({}, (err) => {
                     if (err) throw "Error cleaning out Students";
-                    Models.Awards.remove({}, (err) => {
+                    Awards.remove({}, (err) => {
                         if (err) throw "Error cleaning out Awards";
-                        Models.AdvancedStandings.remove({}, (err) => {
+                        AdvancedStandings.remove({}, (err) => {
                             if (err) throw "Error cleaning out Advanced Standings";
                             done()
                         });
@@ -57,14 +61,14 @@ describe('Students', () => {
         it('it should GET 5 students starting with the second', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err;
 
 
             });
 
-            let testGender = new Models.Genders({name: "Male"});
+            let testGender = new Genders({name: "Male"});
             testGender.save((err) => {
                if (err) throw err;
             });
@@ -87,7 +91,7 @@ describe('Students', () => {
             var count = 0;
             for (var num = 0; num < 15; num++) {
                 studentData.number = firstNumber + num;
-                let testStudent = new Models.Students(studentData);
+                let testStudent = new Students(studentData);
                 testStudent.save((err) => {
                     if (err) throw err;
 
@@ -128,12 +132,12 @@ describe('Students', () => {
         it('it should GET a student by number', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err
             });
 
-            let testGender = new Models.Genders({name: "Male"});
+            let testGender = new Genders({name: "Male"});
             testGender.save((err) => {
                 if (err) throw err;
             });
@@ -156,7 +160,7 @@ describe('Students', () => {
             var count = 0;
             for (var num = 0; num < 15; num++) {
                 studentData.number = firstNumber + num;
-                let testStudent = new Models.Students(studentData);
+                let testStudent = new Students(studentData);
                 testStudent.save((err) => {
                     if (err) throw err;
 
@@ -194,12 +198,12 @@ describe('Students', () => {
         it('it should GET nothing if student does not exist', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err
             });
 
-            let testGender = new Models.Genders({name: "Male"});
+            let testGender = new Genders({name: "Male"});
             testGender.save((err) => {
                 if (err) throw err;
             });
@@ -222,7 +226,7 @@ describe('Students', () => {
             var count = 0;
             for (var num = 0; num < 15; num++) {
                 studentData.number = firstNumber + num;
-                let testStudent = new Models.Students(studentData);
+                let testStudent = new Students(studentData);
                 testStudent.save((err) => {
                     if (err) throw err;
 
@@ -247,12 +251,12 @@ describe('Students', () => {
         it('it should GET student when given ID', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err
             });
 
-            let testGender = new Models.Genders({name: "Male"});
+            let testGender = new Genders({name: "Male"});
             testGender.save((err) => {
                 if (err) throw err;
             });
@@ -275,7 +279,7 @@ describe('Students', () => {
             var count = 0;
             for (var num = 0; num < 14; num++) {
                 studentData.number = firstNumber + num;
-                let testStudent = new Models.Students(studentData);
+                let testStudent = new Students(studentData);
                 testStudent.save((err) => {
                     if (err) throw err;
 
@@ -283,7 +287,7 @@ describe('Students', () => {
                     if (++count == 14) {
                         // Create last student
                         studentData.number = firstNumber + 14;
-                        let testStudent = new Models.Students(studentData);
+                        let testStudent = new Students(studentData);
                         testStudent.save((err) => {
                             if (err) throw err;
 
@@ -318,12 +322,12 @@ describe('Students', () => {
         it('it should 404 for residency when given bad ID', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err
             });
 
-            let testGender = new Models.Genders({name: "Male"});
+            let testGender = new Genders({name: "Male"});
             testGender.save((err) => {
                 if (err) throw err;
             });
@@ -346,7 +350,7 @@ describe('Students', () => {
             var count = 0;
             for (var num = 0; num < 15; num++) {
                 studentData.number = firstNumber + num;
-                let testStudent = new Models.Students(studentData);
+                let testStudent = new Students(studentData);
                 testStudent.save((err) => {
                     if (err) throw err;
 
@@ -372,17 +376,17 @@ describe('Students', () => {
         it('it should PUT an updated student', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err
             });
 
-            let testGender = new Models.Genders({name: "Male"});
+            let testGender = new Genders({name: "Male"});
             testGender.save((err) => {
                 if (err) throw err;
             });
 
-            let testGender2 = new Models.Genders({name: "Female"});
+            let testGender2 = new Genders({name: "Female"});
             testGender2.save((err) => {
                 if (err) throw err;
             });
@@ -403,7 +407,7 @@ describe('Students', () => {
 
             // Create first student
             studentData.number = firstNumber;
-            let testStudent = new Models.Students(studentData);
+            let testStudent = new Students(studentData);
             testStudent.save((err) => {
                 if (err) throw err;
 
@@ -411,7 +415,7 @@ describe('Students', () => {
                 var count = 0;
                 for (var num = 1; num < 15; num++) {
                     studentData.number = firstNumber + num;
-                    let otherStudent = new Models.Students(studentData);
+                    let otherStudent = new Students(studentData);
                     otherStudent.save((err) => {
                         if (err) throw err;
 
@@ -453,7 +457,7 @@ describe('Students', () => {
                                     expect(res.body.student.resInfo).to.be.null;
 
                                     // Test mongo to ensure it was written
-                                    Models.Students.findById(testStudent._id, (error, res) => {
+                                    Students.findById(testStudent._id, (error, res) => {
                                         expect(error || res.length === 0).to.be.false;
                                         expect(res.number).to.equal(firstNumber);
                                         expect(res.firstName).to.equal(studentData.firstName);
@@ -478,12 +482,12 @@ describe('Students', () => {
         it('it should 500 on PUT a student with duplicate number', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err
             });
 
-            let testGender = new Models.Genders({name: "Male"});
+            let testGender = new Genders({name: "Male"});
             testGender.save((err) => {
                 if (err) throw err;
             });
@@ -504,7 +508,7 @@ describe('Students', () => {
 
             // Create first student
             studentData.number = firstNumber;
-            let testStudent = new Models.Students(studentData);
+            let testStudent = new Students(studentData);
             testStudent.save((err) => {
                 if (err) throw err;
 
@@ -512,7 +516,7 @@ describe('Students', () => {
                 var count = 0;
                 for (var num = 1; num < 15; num++) {
                     studentData.number = firstNumber + num;
-                    let otherStudent = new Models.Students(studentData);
+                    let otherStudent = new Students(studentData);
                     otherStudent.save((err) => {
                         if (err) throw err;
 
@@ -529,7 +533,7 @@ describe('Students', () => {
                                     expect(res).to.have.status(500);
 
                                     // Test mongo to ensure nothing was written
-                                    Models.Students.findById(testStudent._id, (error, res) => {
+                                    Students.findById(testStudent._id, (error, res) => {
                                         expect(error || res.length === 0).to.be.false;
                                         expect(res.number).to.equal(firstNumber);
                                         expect(res.firstName).to.equal(studentData.firstName);
@@ -554,12 +558,12 @@ describe('Students', () => {
         it('it should 404 on PUT a nonexistent student', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err
             });
 
-            let testGender = new Models.Genders({name: "Male"});
+            let testGender = new Genders({name: "Male"});
             testGender.save((err) => {
                 if (err) throw err;
             });
@@ -582,7 +586,7 @@ describe('Students', () => {
             var count = 0;
             for (var num = 0; num < 15; num++) {
                 studentData.number = firstNumber + num;
-                let testStudent = new Models.Students(studentData);
+                let testStudent = new Students(studentData);
                 testStudent.save((err) => {
                     if (err) throw err;
 
@@ -609,12 +613,12 @@ describe('Students', () => {
         it('it should POST successfully', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err
             });
 
-            let testGender = new Models.Genders({name: "Male"});
+            let testGender = new Genders({name: "Male"});
             testGender.save((err) => {
                 if (err) throw err;
             });
@@ -654,7 +658,7 @@ describe('Students', () => {
                     expect(res.body.student.resInfo).to.equal(testRes._id.toString());
 
                     // Check underlying database
-                    Models.Students.findById(res.body.student._id, function (error, student) {
+                    Students.findById(res.body.student._id, function (error, student) {
                         expect(error).to.be.null;
                         expect(student).to.not.be.null;
                         expect(student.number).to.equal(studentData.number);
@@ -677,12 +681,12 @@ describe('Students', () => {
         it('it should 500 on POST of student with duplicate number', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err
             });
 
-            let testGender = new Models.Genders({name: "Male"});
+            let testGender = new Genders({name: "Male"});
             testGender.save((err) => {
                 if (err) throw err;
             });
@@ -700,7 +704,7 @@ describe('Students', () => {
                 admissionComments: "None",
                 resInfo: testRes._id.toString()
             };
-            let testStudent = new Models.Students(studentData);
+            let testStudent = new Students(studentData);
             testStudent.save((err) => {
                 if (err) throw err;
                 
@@ -726,7 +730,7 @@ describe('Students', () => {
     describe('/DELETE a student', () => {
         it('it should DELETE successfully and delete linked awards and advanced standings', (done) => {
 
-            let testGender = new Models.Genders({name: "Male"});
+            let testGender = new Genders({name: "Male"});
             testGender.save((err) => {
                 if (err) throw err;
             });
@@ -744,7 +748,7 @@ describe('Students', () => {
                 admissionAverage: 90,
                 admissionComments: "None"
             };
-            let testStudent = new Models.Students(studentData);
+            let testStudent = new Students(studentData);
             testStudent.save((err) => {
                 if (err) throw err;
 
@@ -752,7 +756,7 @@ describe('Students', () => {
                     note: "test",
                     recipient: testStudent
                 };
-                let testAward = new Models.Awards(awardData);
+                let testAward = new Awards(awardData);
                 testAward.save((err) => {
                    if (err) throw err;
 
@@ -763,7 +767,7 @@ describe('Students', () => {
                         from: "UBC",
                         recipient: testStudent
                     };
-                    let testStanding = new Models.AdvancedStandings(standingData);
+                    let testStanding = new AdvancedStandings(standingData);
                     testStanding.save((err) => {
                         if (err) throw err;
 
@@ -774,15 +778,15 @@ describe('Students', () => {
                                 expect(res).to.have.status(200);
 
                                 // Check underlying database
-                                Models.Students.findById(testStudent._id, function (error, student) {
+                                Students.findById(testStudent._id, function (error, student) {
                                     expect(error).to.be.null;
                                     expect(student).to.be.null;
 
-                                    Models.Awards.findById(testAward._id, function(error, award) {
+                                    Awards.findById(testAward._id, function(error, award) {
                                        expect(error).to.be.null;
                                        expect(award).to.be.null;
 
-                                       Models.AdvancedStandings.findById(testStanding._id, function(error, standing) {
+                                       AdvancedStandings.findById(testStanding._id, function(error, standing) {
                                           expect(error).to.be.null;
                                           expect(standing).to.be.null;
 

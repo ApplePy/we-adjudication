@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var models = require('../models/studentsRecordsDB');
+var AdvancedStandings = require('../models/advancedStandingSchema');
 var bodyParser = require('body-parser');
 var parseUrlencoded = bodyParser.urlencoded({extended: false});
 var parseJSON = bodyParser.json();
@@ -9,7 +9,7 @@ router.route('/')
 
     // New advanced standing entry
     .post(parseUrlencoded, parseJSON, function (request, response) {
-        var advancedStanding = new models.AdvancedStandings(request.body.advancedStanding);
+        var advancedStanding = new AdvancedStandings(request.body.advancedStanding);
 
         if (!advancedStanding.recipient) response.status(400).json({error: {message: "Recipient must be specified."}});
         else advancedStanding.save(function (error) {
@@ -24,14 +24,14 @@ router.route('/')
 
         // Get all advanced standings
         if (!Student) {
-            models.AdvancedStandings.find(function (error, advancedStanding) {
+            AdvancedStandings.find(function (error, advancedStanding) {
                 if (error) response.status(500).send(error);
                 response.json({advancedStanding: advancedStanding});
             });
         }
         // Get advanced standings for a student
         else {
-            models.AdvancedStandings.find({"recipient": Student.recipient}, function (error, students) {
+            AdvancedStandings.find({"recipient": Student.recipient}, function (error, students) {
                 if (error) response.status(500).send(error);
                 response.json({advancedStanding: students});
             });
@@ -42,7 +42,7 @@ router.route('/:advancedStanding_id')
 
     // Get advanced standing by id
     .get(parseUrlencoded, parseJSON, function (request, response) {
-        models.AdvancedStandings.findById(request.params.advancedStanding_id, function (error, advancedStanding) {
+        AdvancedStandings.findById(request.params.advancedStanding_id, function (error, advancedStanding) {
             if (error) response.status(404).send(error);
             else response.json({advancedStanding: advancedStanding});
         })
@@ -50,7 +50,7 @@ router.route('/:advancedStanding_id')
 
     // Update advanced standing
     .put(parseUrlencoded, parseJSON, function (request, response) {
-        models.AdvancedStandings.findById(request.params.advancedStanding_id, function (error, advancedStanding) {
+        AdvancedStandings.findById(request.params.advancedStanding_id, function (error, advancedStanding) {
             if (error) {
                 response.status(404).send({error: error});
             }
@@ -78,7 +78,7 @@ router.route('/:advancedStanding_id')
 
     // Delete award
     .delete(parseUrlencoded, parseJSON, function (request, response) {
-        models.AdvancedStandings.findByIdAndRemove(request.params.advancedStanding_id,
+        AdvancedStandings.findByIdAndRemove(request.params.advancedStanding_id,
             function (error, deleted) {
                 if (error) response.status(500).send({error: error});
                 else response.json({advancedStanding: deleted});

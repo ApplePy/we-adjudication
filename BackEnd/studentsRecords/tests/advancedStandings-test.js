@@ -2,7 +2,10 @@
 process.env.NODE_ENV = 'test';
 
 let mongoose = require("mongoose");
-let Models = require('../models/studentsRecordsDB');
+let Students = require('../models/studentsSchema');
+let Awards = require('../models/awardsSchema');
+let AdvancedStandings = require('../models/advancedStandingSchema');
+let Residencies = require('../models/residencySchema');
 
 //Require the dev-dependencies
 let chai = require('chai');
@@ -19,13 +22,13 @@ describe('Advanced Standings', () => {
     //Before each test we empty the database
     beforeEach((done) => {
         // Clear out all Residences and Students then call done
-        Models.Residencies.remove({}, (err) => {
+        Residencies.remove({}, (err) => {
             if (err) throw "Error cleaning out Residencies";
-            Models.Students.remove({}, (err) => {
+            Students.remove({}, (err) => {
                 if (err) throw "Error cleaning out Students";
-                Models.Awards.remove({}, (err) => {
+                Awards.remove({}, (err) => {
                     if (err) throw "Error cleaning out Awards";
-                    Models.AdvancedStandings.remove({}, (err) => {
+                    AdvancedStandings.remove({}, (err) => {
                         if (err) throw "Error cleaning out Advanced Standings";
                         done()
                     });
@@ -54,7 +57,7 @@ describe('Advanced Standings', () => {
         it('it should GET all advanced standings when created', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err;
 
@@ -72,7 +75,7 @@ describe('Advanced Standings', () => {
                     admissionComments: "None",
                     resInfo: testRes
                 };
-                let testStudent = new Models.Students(studentData);
+                let testStudent = new Students(studentData);
                 testStudent.save((err) => {
                     if (err) throw err;
 
@@ -88,7 +91,7 @@ describe('Advanced Standings', () => {
                     var count = 0;
                     for (var num = 0; num < 15; num++) {
                         standingData.units = num.toString();
-                        let testStanding = new Models.AdvancedStandings(standingData);
+                        let testStanding = new AdvancedStandings(standingData);
                         testStanding.save((err) => {
                             if (err) throw err;
 
@@ -121,7 +124,7 @@ describe('Advanced Standings', () => {
         it('it should GET an advanced standing by recipient', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err;
 
@@ -139,7 +142,7 @@ describe('Advanced Standings', () => {
                     admissionComments: "None",
                     resInfo: testRes
                 };
-                let testStudent = new Models.Students(studentData);
+                let testStudent = new Students(studentData);
                 testStudent.save((err) => {
                     if (err) throw err;
 
@@ -155,7 +158,7 @@ describe('Advanced Standings', () => {
                     var count = 0;
                     for (var num = 0; num < 15; num++) {
                         standingData.units = num;
-                        let testStanding = new Models.AdvancedStandings(standingData);
+                        let testStanding = new AdvancedStandings(standingData);
                         testStanding.save((err) => {
                             if (err) throw err;
 
@@ -190,7 +193,7 @@ describe('Advanced Standings', () => {
         it('it should GET nothing if student has no advanced standing', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err;
 
@@ -208,12 +211,12 @@ describe('Advanced Standings', () => {
                     admissionComments: "None",
                     resInfo: testRes
                 };
-                let testStudent = new Models.Students(studentData);
+                let testStudent = new Students(studentData);
                 testStudent.save((err) => {
                     if (err) throw err;
 
                     studentData.number = 541354335;
-                    let otherStudent = new Models.Students(studentData);
+                    let otherStudent = new Students(studentData);
                     otherStudent.save((err) => {
                         if (err) throw err;
 
@@ -229,7 +232,7 @@ describe('Advanced Standings', () => {
                         var count = 0;
                         for (var num = 0; num < 15; num++) {
                             standingData.units = num;
-                            let testStanding = new Models.AdvancedStandings(standingData);
+                            let testStanding = new AdvancedStandings(standingData);
                             testStanding.save((err) => {
                                 if (err) throw err;
 
@@ -257,7 +260,7 @@ describe('Advanced Standings', () => {
         it('it should GET advanced standing when given ID', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err;
 
@@ -275,7 +278,7 @@ describe('Advanced Standings', () => {
                     admissionComments: "None",
                     resInfo: testRes
                 };
-                let testStudent = new Models.Students(studentData);
+                let testStudent = new Students(studentData);
                 testStudent.save((err) => {
                     if (err) throw err;
 
@@ -291,7 +294,7 @@ describe('Advanced Standings', () => {
                     var count = 0;
                     for (var num = 0; num < 15; num++) {
                         standingData.units = num;
-                        let testStanding = new Models.AdvancedStandings(standingData);
+                        let testStanding = new AdvancedStandings(standingData);
                         testStanding.save((err) => {
                             if (err) throw err;
 
@@ -322,7 +325,7 @@ describe('Advanced Standings', () => {
         it('it should 404 for advanced standing when given bad ID', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err;
 
@@ -340,7 +343,7 @@ describe('Advanced Standings', () => {
                     admissionComments: "None",
                     resInfo: testRes
                 };
-                let testStudent = new Models.Students(studentData);
+                let testStudent = new Students(studentData);
                 testStudent.save((err) => {
                     if (err) throw err;
 
@@ -356,7 +359,7 @@ describe('Advanced Standings', () => {
                     var count = 0;
                     for (var num = 0; num < 15; num++) {
                         standingData.units = num;
-                        let testStanding = new Models.AdvancedStandings(standingData);
+                        let testStanding = new AdvancedStandings(standingData);
                         testStanding.save((err) => {
                             if (err) throw err;
 
@@ -384,7 +387,7 @@ describe('Advanced Standings', () => {
         it('it should PUT an updated advanced standing', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err
             });
@@ -403,7 +406,7 @@ describe('Advanced Standings', () => {
                 resInfo: testRes
             };
 
-            let testStudent = new Models.Students(studentData);
+            let testStudent = new Students(studentData);
             testStudent.save((err) => {
                 if (err) throw err;
 
@@ -417,7 +420,7 @@ describe('Advanced Standings', () => {
 
                 // Create first advanced standing
                 standingData.units = 0;
-                let testStanding = new Models.AdvancedStandings(standingData);
+                let testStanding = new AdvancedStandings(standingData);
                 testStanding.save((err) => {
                     if (err) throw err;
 
@@ -425,7 +428,7 @@ describe('Advanced Standings', () => {
                     var count = 0;
                     for (var num = 1; num < 15; num++) {
                         standingData.units = num;
-                        let otherStandings = new Models.AdvancedStandings(standingData);
+                        let otherStandings = new AdvancedStandings(standingData);
                         otherStandings.save((err) => {
                             if (err) throw err;
 
@@ -458,7 +461,7 @@ describe('Advanced Standings', () => {
                                         expect(res.body.advancedStanding.recipient).to.equal(testStudent._id.toString());
 
                                         // Test mongo to ensure it was written
-                                        Models.AdvancedStandings.findById(testStanding._id, (error, res) => {
+                                        AdvancedStandings.findById(testStanding._id, (error, res) => {
                                             expect(error || res.length === 0).to.be.false;
                                             expect(res.course).to.eq(standingData.course);
                                             expect(res.description).to.eq(standingData.description);
@@ -479,7 +482,7 @@ describe('Advanced Standings', () => {
         it('it should 400 on PUT an advanced standing with no recipient', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err
             });
@@ -498,7 +501,7 @@ describe('Advanced Standings', () => {
                 resInfo: testRes
             };
 
-            let testStudent = new Models.Students(studentData);
+            let testStudent = new Students(studentData);
             testStudent.save((err) => {
                 if (err) throw err;
 
@@ -512,7 +515,7 @@ describe('Advanced Standings', () => {
 
                 // Create first advanced standing
                 standingData.units = 0;
-                let testStanding = new Models.AdvancedStandings(standingData);
+                let testStanding = new AdvancedStandings(standingData);
                 testStanding.save((err) => {
                     if (err) throw err;
 
@@ -520,7 +523,7 @@ describe('Advanced Standings', () => {
                     var count = 0;
                     for (var num = 1; num < 15; num++) {
                         standingData.units = num;
-                        let otherStandings = new Models.AdvancedStandings(standingData);
+                        let otherStandings = new AdvancedStandings(standingData);
                         otherStandings.save((err) => {
                             if (err) throw err;
 
@@ -539,7 +542,7 @@ describe('Advanced Standings', () => {
                                         expect(res).to.have.status(400);
 
                                         // Test mongo to ensure it was written
-                                        Models.AdvancedStandings.findById(testStanding._id, (error, res) => {
+                                        AdvancedStandings.findById(testStanding._id, (error, res) => {
                                             expect(error).to.be.null;
                                             expect(res.recipient).to.not.be.null;
                                             done();
@@ -555,7 +558,7 @@ describe('Advanced Standings', () => {
         it('it should 404 on PUT a nonexistent advanced standing', (done) => {
 
             // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
+            let testRes = new Residencies({name: "Johnny Test House"});
             testRes.save((err) => {
                 if (err) throw err;
 
@@ -573,7 +576,7 @@ describe('Advanced Standings', () => {
                     admissionComments: "None",
                     resInfo: testRes
                 };
-                let testStudent = new Models.Students(studentData);
+                let testStudent = new Students(studentData);
                 testStudent.save((err) => {
                     if (err) throw err;
 
@@ -589,7 +592,7 @@ describe('Advanced Standings', () => {
                     var count = 0;
                     for (var num = 0; num < 15; num++) {
                         standingData.units = num;
-                        let testStanding = new Models.AdvancedStandings(standingData);
+                        let testStanding = new AdvancedStandings(standingData);
                         testStanding.save((err) => {
                             if (err) throw err;
 
@@ -620,7 +623,7 @@ describe('Advanced Standings', () => {
             let studentData = {
                 number: 594265372
             };
-            let testStudent = new Models.Students(studentData);
+            let testStudent = new Students(studentData);
 
             let standingData = {
                 course: "BASKWV 1000",
@@ -651,7 +654,7 @@ describe('Advanced Standings', () => {
                         expect(res.body.advancedStanding.recipient).to.equal(testStudent._id.toString());
 
                         // Check underlying database
-                        Models.AdvancedStandings.findById(res.body.advancedStanding._id, function (error, standing) {
+                        AdvancedStandings.findById(res.body.advancedStanding._id, function (error, standing) {
                             expect(error).to.be.null;
                             expect(standing).to.not.be.null;
                             expect(res.body).to.have.property('advancedStanding');
@@ -674,7 +677,7 @@ describe('Advanced Standings', () => {
             let studentData = {
                 number: 594265372
             };
-            let testStudent = new Models.Students(studentData);
+            let testStudent = new Students(studentData);
 
             let awardData ={
                 note: "A note"
@@ -707,7 +710,7 @@ describe('Advanced Standings', () => {
             let studentData = {
                 number: 594265372
             };
-            let testStudent = new Models.Students(studentData);
+            let testStudent = new Students(studentData);
 
             let standingData = {
                 course: "BASKWV 1000",
@@ -723,7 +726,7 @@ describe('Advanced Standings', () => {
                 if (err) throw err;
 
                 // save advanced standing
-                let testStanding = new Models.AdvancedStandings(standingData);
+                let testStanding = new AdvancedStandings(standingData);
                 testStanding.save((err) => {
                     if (err) throw err;
 
@@ -736,7 +739,7 @@ describe('Advanced Standings', () => {
                             expect(res).to.have.status(200);
 
                             // Check underlying database
-                            Models.AdvancedStandings.findById(testStanding._id, function (error, award) {
+                            AdvancedStandings.findById(testStanding._id, function (error, award) {
                                 expect(error).to.be.null;
                                 expect(award).to.be.null;
                                 done();

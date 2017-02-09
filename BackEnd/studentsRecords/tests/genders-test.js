@@ -2,7 +2,8 @@
 process.env.NODE_ENV = 'test';
 
 let mongoose = require("mongoose");
-let Models = require('../models/studentsRecordsDB');
+let Students = require('../models/studentsSchema');
+let Genders = require('../models/genderSchema');
 
 //Require the dev-dependencies
 let chai = require('chai');
@@ -19,9 +20,9 @@ describe('Genders', () => {
     //Before each test we empty the database
     beforeEach((done) => {
         // Clear out all Residences and Students then call done
-        Models.Genders.remove({}, (err) => {
+        Genders.remove({}, (err) => {
             if (err) throw "Error cleaning out Genders";
-            Models.Students.remove({}, (err) => {
+            Students.remove({}, (err) => {
                 if (err) throw "Error cleaning out Students";
                 done()
             });
@@ -48,7 +49,7 @@ describe('Genders', () => {
         it('it should GET all genders when data exists', (done) => {
 
             // Set up mock data
-            let testGender = new Models.Genders({
+            let testGender = new Genders({
                 name: "Male"
             });
             testGender.save((err) => {
@@ -73,23 +74,23 @@ describe('Genders', () => {
         //
         //     // Set up mock data
         //
-        //     let testGender = new Models.Genders({
+        //     let testGender = new Genders({
         //         name: "Male"
         //     });
         //     testGender.save((err) => {
         //         if (err) throw err;
         //
-        //         let testGender2 = new Models.Genders({
+        //         let testGender2 = new Genders({
         //             name: "Female"
         //         });
         //         testGender2.save((err) => {
         //             if (err) throw err;
         //
-        //             let testStudent1 = new Models.Students({number: 12345, name: "Johnny Test", genderInfo: testGender});
+        //             let testStudent1 = new Students({number: 12345, name: "Johnny Test", genderInfo: testGender});
         //             testStudent1.save((err) => {
         //                 if (err) throw err;
         //
-        //                 let testStudent2 = new Models.Students({number: 12346, name: "Jane Test", genderInfo: testGender2});
+        //                 let testStudent2 = new Students({number: 12346, name: "Jane Test", genderInfo: testGender2});
         //                 testStudent2.save((err) => {
         //                     if (err) throw err;
         //
@@ -113,21 +114,21 @@ describe('Genders', () => {
         // it('it should 404 if a student doesn\'t have a gender', (done) => {
         //
         //     // Set up mock data
-        //     let testGender = new Models.Genders({
+        //     let testGender = new Genders({
         //         name: "Gender"
         //     });
         //     testGender.save((err) => {
         //         if (err) throw err;
         //
-        //         let testStudent1 = new Models.Students({number: 12345, name: "Johnny Test", genderInfo: testGender});
+        //         let testStudent1 = new Students({number: 12345, name: "Johnny Test", genderInfo: testGender});
         //         testStudent1.save((err) => {
         //             if (err) throw err;
         //
-        //             let testStudent2 = new Models.Students({number: 12346, name: "George Test", genderInfo: testGender});
+        //             let testStudent2 = new Students({number: 12346, name: "George Test", genderInfo: testGender});
         //             testStudent2.save((err) => {
         //                 if (err) throw err;
         //
-        //                 let testStudent3 = new Models.Students({number:12347, name: "Eve Test"});
+        //                 let testStudent3 = new Students({number:12347, name: "Eve Test"});
         //                 testStudent2.save((err) => {
         //                     if (err) throw err;
         //
@@ -147,7 +148,7 @@ describe('Genders', () => {
         it('it should GET the gender by name', (done) => {
 
             // Set up mock data
-            let testGender = new Models.Genders({
+            let testGender = new Genders({
                 name: "Male"
             });
             testGender.save((err) => {
@@ -171,7 +172,7 @@ describe('Genders', () => {
         it('it should GET nothing if a the name does not exist', (done) => {
 
             // Set up mock data
-            let testGender = new Models.Genders({
+            let testGender = new Genders({
                 name: "Male"
             });
             testGender.save((err) => {
@@ -193,7 +194,7 @@ describe('Genders', () => {
         it('it should GET gender when given ID', (done) => {
 
             // Set up mock data
-            let testGender = new Models.Genders({
+            let testGender = new Genders({
                     name: "Male"
                 });
 
@@ -218,7 +219,7 @@ describe('Genders', () => {
         it('it should 404 for gender when given bad ID', (done) => {
 
             // Set up mock data
-            let testGender = new Models.Genders({
+            let testGender = new Genders({
                 name: "Male"
             });
             testGender.save((err) => {
@@ -245,7 +246,7 @@ describe('Genders', () => {
             var genderData = {
                 name: "Male"
             };
-            let testGender = new Models.Genders(genderData);
+            let testGender = new Genders(genderData);
             testGender.save((err) => {
                 if (err) throw err;
 
@@ -265,7 +266,7 @@ describe('Genders', () => {
                         expect(res.body.gender.name).to.equal(genderData.name);
 
                         // Test mongo for changes
-                        Models.Genders.find(genderData, (err, res) => {
+                        Genders.find(genderData, (err, res) => {
                             expect(err).to.be.null;
                             expect(res.length).to.equal(1);
                             expect(res[0].name).to.equal(genderData.name);
@@ -283,13 +284,13 @@ describe('Genders', () => {
             };
 
             // Create first residence
-            let testGender = new Models.Genders(genderData);
+            let testGender = new Genders(genderData);
             testGender.save((err) => {
                 if (err) throw err;
 
                 // Create second residence
                 genderData.name = "Female";
-                let testGender2 = new Models.Genders(genderData);
+                let testGender2 = new Genders(genderData);
                 testGender2.save((err) => {
                    if (err) throw err;
 
@@ -302,7 +303,7 @@ describe('Genders', () => {
                             expect(res).to.have.status(500);
 
                             // Test mongo for changes
-                            Models.Genders.findById(testGender._id, (err, res) => {
+                            Genders.findById(testGender._id, (err, res) => {
                                 expect(err).to.be.null;
                                 expect(res.name).to.equal("Male");
                                 done();
@@ -318,7 +319,7 @@ describe('Genders', () => {
             var genderData = {
                 name: "Male"
             };
-            let testGender = new Models.Genders(genderData);
+            let testGender = new Genders(genderData);
             testGender.save((err) => {
                 if (err) throw err;
 
@@ -357,7 +358,7 @@ describe('Genders', () => {
                     expect(res.body).to.have.property('gender');
                     expect(res.body.gender.name).to.equal(genderData.gender.name);
 
-                    Models.Genders.findById(res.body.gender._id, function (error, gender) {
+                    Genders.findById(res.body.gender._id, function (error, gender) {
                         expect(error).to.be.null;
                         expect(gender.name).to.equal(genderData.gender.name);
                         done();
@@ -373,7 +374,7 @@ describe('Genders', () => {
                     name: "Male"
                 }
             };
-            let testGender = new Models.Genders(genderData.gender);
+            let testGender = new Genders(genderData.gender);
             testGender.save((err) => {
                if (err) throw err;
 
@@ -385,7 +386,7 @@ describe('Genders', () => {
                         expect(res).to.have.status(500);
 
                         // Ensure no new residency was created
-                        Models.Genders.find(genderData.gender, function (error, gender) {
+                        Genders.find(genderData.gender, function (error, gender) {
                             expect(error).to.be.null;
                             expect(gender.length).to.equal(1);
                             done();
@@ -405,11 +406,11 @@ describe('Genders', () => {
             let genderData = {
                 name: "Male"
             };
-            let testGender = new Models.Genders(genderData);
+            let testGender = new Genders(genderData);
             testGender.save((err) => {
                 if (err) throw err;
 
-                let testStudent = new Models.Students(
+                let testStudent = new Students(
                     {
                         name: "Johnny Test",
                         genderInfo: testGender
@@ -423,11 +424,11 @@ describe('Genders', () => {
                         .end((err, res) => {
                             expect(res).to.have.status(200);
 
-                            Models.Genders.findById(testGender._id, function (error, gender) {
+                            Genders.findById(testGender._id, function (error, gender) {
                                 expect(error).to.be.null;
                                 expect(gender).to.be.null;
 
-                                Models.Students.findById(testStudent._id, function(error, student) {
+                                Students.findById(testStudent._id, function(error, student) {
                                     expect(error).to.be.null;
                                     expect(student.genderInfo).to.be.null;
                                     done();
