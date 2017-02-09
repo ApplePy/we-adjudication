@@ -35,7 +35,8 @@ export default Ember.Component.extend({
 
       gender.save().then(function() {
         console.log("Added Gender");
-      }, function() {
+        this.set('newGender', "");
+      }.bind(this), function() {
         console.log("Could not add gender");
       });
     },
@@ -70,7 +71,8 @@ export default Ember.Component.extend({
 
       residency.save().then(function() {
         console.log("Added Residency");
-      }, function() {
+        this.set('newResidency', "");
+      }.bind(this), function() {
         console.log("Could not add residency");
       });
     },
