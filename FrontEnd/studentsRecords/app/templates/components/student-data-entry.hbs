@@ -56,7 +56,7 @@
 
   <div class="ui top attached tabular menu">
     <div class="active item" data-tab="basics">Basic Info</div>
-    <div class="item" data-tab="program">Program Record</div>
+    <div class="item" data-tab="admission">Admission Record</div>
     <div class="item" data-tab="advancedStanding">Advanced Standing</div>
     <div class="item" data-tab="scholarshipsAwards">Scholarships and Awards</div>
   </div>
@@ -115,8 +115,8 @@
     </div>
 
   </div>
-  <div class="ui tab" data-tab="program">
-    <!-- Program records, courses and grades !-->
+  <div class="ui tab" data-tab="admission">
+    <!-- admission records !-->
     <br>
     <h2>{{currentStudent.number}}</h2>
       <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
@@ -126,13 +126,13 @@
    <!--   <div class="ui right aligned  seven wide column"> -->
         <div class="ui form">
           <div class="inline field">
-            <label>Basis Of Admission</label>
-            {{input size="10" type="text" value = currentStudent.basisOfAdmission}}
+            <label>Admission Average</label>
+            {{input type="number" value = currentStudent.admissionAverage}}
           </div>
 
           <div class="inline field">
-            <label>Admission Average</label>
-            {{input type="number" value = currentStudent.admissionAverage}}
+            <label>Basis Of Admission</label>
+            {{textarea cols="1" rows="6" value = currentStudent.basisOfAdmission}}
           </div>
 
           <div class="inline field">
