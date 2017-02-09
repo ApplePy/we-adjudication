@@ -1,14 +1,12 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var MongooseVariables = require('mongoose');
 var mongoose = require('./studentsRecordsDB').mongoose;
-var mongoosePaginate = require('mongoose-paginate');
 
-var awardsSchema = MongooseVariables.Schema(
+var awardsSchema = mongoose.Schema(
     {
         note: String,
-        recipient: {type: MongooseVariables.Schema.ObjectId, ref: 'Students'}
+        recipient: {type: mongoose.Schema.ObjectId, ref: 'Students'}
     }
 );
 

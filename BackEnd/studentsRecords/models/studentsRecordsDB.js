@@ -26,5 +26,4 @@ db.on('error', function() {
 // Use native promises
 mongoose.Promise = global.Promise;
 
-exports.MongooseVariables = MongooseVariables;
 exports.mongoose = mongoose;

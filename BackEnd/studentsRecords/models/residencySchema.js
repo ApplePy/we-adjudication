@@ -1,13 +1,12 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var MongooseVariables = require('mongoose');
 var mongoose = require('./studentsRecordsDB').mongoose;
 
-var residencySchema = MongooseVariables.Schema(
+var residencySchema = mongoose.Schema(
     {
         name: {type: String, index: {unique: true}},
-        students: [{type: MongooseVariables.Schema.ObjectId, ref: ('Students')}]
+        students: [{type: mongoose.Schema.ObjectId, ref: ('Students')}]
     }
 );
 

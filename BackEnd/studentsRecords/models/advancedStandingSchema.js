@@ -1,18 +1,16 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var MongooseVariables = require('mongoose');
 var mongoose = require('./studentsRecordsDB').mongoose;
-var mongoosePaginate = require('mongoose-paginate');
 
-var advancedStandingSchema = MongooseVariables.Schema(
+var advancedStandingSchema = mongoose.Schema(
     {
         course: String,
         description: String,
         units: Number,
         grade: Number,
         from: String,
-        recipient: {type: MongooseVariables.Schema.ObjectId, ref: 'Students'}
+        recipient: {type: mongoose.Schema.ObjectId, ref: 'Students'}
     }
 );
 
