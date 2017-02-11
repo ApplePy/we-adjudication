@@ -1,12 +1,7 @@
 version: '3.0'
-
-restart_policy:
-      condition: any
-      delay: 5s
-      window: 10s
-
 services:
   webapp:
+    restart: always
     build: .
     links:
       - mongo
@@ -17,6 +12,7 @@ services:
       - MONGO_DB_HOST=mongo
   mongo:
     image: mongo:latest
+    restart: always
   mongo-seed:
     build: ./mongo-seed
     links:
