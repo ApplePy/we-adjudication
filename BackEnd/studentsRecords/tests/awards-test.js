@@ -54,7 +54,7 @@ describe('Awards', () => {
                 });
         });
 
-        it('it should GET all awards when created', (done) => {
+        it('it should GET first 5 records', (done) => {
 
             // Set up mock data
             let testRes = new Residencies({name: "Johnny Test House"});
@@ -96,15 +96,134 @@ describe('Awards', () => {
                                 // Make request
                                 chai.request(server)
                                     .get('/api/awards')
+                                    .query({limit:5, offset: 0})
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
                                         expect(res).to.be.json;
                                         expect(res.body).to.have.property('award');
-                                        expect(res.body.award.length).to.be.eq(15);
-                                        for (var num = 0; num < 15; num++) {
+                                        expect(res.body.award.length).to.be.eq(5);
+                                        for (var num = 0; num < 5; num++) {
                                             // Cannot test note value, since there's no guarantee that they're in order
                                             expect(res.body.award[num].recipient).to.equal(testStudent._id.toString());
                                         }
+                                        done();
+                                    });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
+        it('it should GET last 3 records', (done) => {
+
+            // Set up mock data
+            let testRes = new Residencies({name: "Johnny Test House"});
+            testRes.save((err) => {
+                if (err) throw err;
+
+                // Make some students, then make awards for the students, then query for all
+                var studentData = {
+                    number: 594265372,
+                    firstName: "Johnny",
+                    lastName: "Test",
+                    gender: 1,
+                    DOB: new Date().toISOString(),
+                    photo: "/some/link",
+                    registrationComments: "No comment",
+                    basisOfAdmission: "Because",
+                    admissionAverage: 90,
+                    admissionComments: "None",
+                    resInfo: testRes
+                };
+                let testStudent = new Students(studentData);
+                testStudent.save((err) => {
+                    if (err) throw err;
+
+                    var awardData = {
+                        recipient: testStudent
+                    };
+
+                    // Create 15 awards
+                    var count = 0;
+                    for (var num = 0; num < 15; num++) {
+                        awardData.note = num.toString();
+                        let testAward = new Awards(awardData);
+                        testAward.save((err) => {
+                            if (err) throw err;
+
+                            // Start testing once all awards are created
+                            if (++count == 15) {
+                                // Make request
+                                chai.request(server)
+                                    .get('/api/awards')
+                                    .query({limit: 5, offset: 12})
+                                    .end((err, res) => {
+                                        expect(res).to.have.status(200);
+                                        expect(res).to.be.json;
+                                        expect(res.body).to.have.property('award');
+                                        expect(res.body.award.length).to.be.eq(3);
+                                        for (var num = 0; num < 3; num++) {
+                                            // Cannot test note value, since there's no guarantee that they're in order
+                                            expect(res.body.award[num].recipient).to.equal(testStudent._id.toString());
+                                        }
+                                        done();
+                                    });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
+        it('it should GET nothing without a limit specified', (done) => {
+
+            // Set up mock data
+            let testRes = new Residencies({name: "Johnny Test House"});
+            testRes.save((err) => {
+                if (err) throw err;
+
+                // Make some students, then make awards for the students, then query for all
+                var studentData = {
+                    number: 594265372,
+                    firstName: "Johnny",
+                    lastName: "Test",
+                    gender: 1,
+                    DOB: new Date().toISOString(),
+                    photo: "/some/link",
+                    registrationComments: "No comment",
+                    basisOfAdmission: "Because",
+                    admissionAverage: 90,
+                    admissionComments: "None",
+                    resInfo: testRes
+                };
+                let testStudent = new Students(studentData);
+                testStudent.save((err) => {
+                    if (err) throw err;
+
+                    var awardData = {
+                        recipient: testStudent
+                    };
+
+                    // Create 15 awards
+                    var count = 0;
+                    for (var num = 0; num < 15; num++) {
+                        awardData.note = num.toString();
+                        let testAward = new Awards(awardData);
+                        testAward.save((err) => {
+                            if (err) throw err;
+
+                            // Start testing once all awards are created
+                            if (++count == 15) {
+                                // Make request
+                                chai.request(server)
+                                    .get('/api/awards')
+                                    .query({offset: 0})
+                                    .end((err, res) => {
+                                        expect(res).to.have.status(200);
+                                        expect(res).to.be.json;
+                                        expect(res.body).to.have.property('award');
+                                        expect(res.body.award.length).to.be.eq(0);
                                         done();
                                     });
                             }
