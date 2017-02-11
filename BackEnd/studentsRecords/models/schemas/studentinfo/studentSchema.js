@@ -17,6 +17,7 @@ var studentsSchema = mongoose.Schema(
         admissionComments: String,
         resInfo: {type: mongoose.Schema.ObjectId, ref: 'Residencies'},
         genderInfo: {type: mongoose.Schema.ObjectId, ref: 'Genders'},
+        hsGrades: [{type: mongoose.Schema.ObjectId, ref: 'HSGrades'}],
         awards: [{type: mongoose.Schema.ObjectId, ref: 'Awards'}],
         advancedStandings: [{type: mongoose.Schema.ObjectId, ref: 'AdvancedStandings'}]
     }
