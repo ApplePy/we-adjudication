@@ -1,4 +1,10 @@
 version: '3.0'
+
+restart_policy:
+      condition: any
+      delay: 5s
+      window: 10s
+
 services:
   webapp:
     build: .
