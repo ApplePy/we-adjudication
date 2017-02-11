@@ -24,6 +24,7 @@ stages:
     MONGO_DB_HOST: "mongo"
     NODE_TLS_REJECT_UNAUTHORIZED: "0"   # To support mongodb being installed by a proxy
   cache:
+    untracked: true
     paths:
     - BackEnd/studentsRecords/node_modules/
     - FrontEnd/studentsRecords/node_modules/
