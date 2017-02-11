@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var AdvancedStandings = require('../models/advancedStandingSchema');
+var AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
 var bodyParser = require('body-parser');
 var parseUrlencoded = bodyParser.urlencoded({extended: false});
 var parseJSON = bodyParser.json();

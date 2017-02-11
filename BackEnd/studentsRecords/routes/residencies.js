@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
-var Residencies = require('../models/residencySchema');
-var Students = require('../models/studentsSchema');
+var Residencies = require('../models/schemas/studentinfo/residencySchema');
+var Students = require('../models/schemas/studentinfo/studentSchema');
 var bodyParser = require('body-parser');
 var parseUrlencoded = bodyParser.urlencoded({extended: false});
 var parseJSON = bodyParser.json();

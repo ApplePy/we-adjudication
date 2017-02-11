@@ -1,7 +1,7 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var mongoose = require('./studentsRecordsDB').mongoose;
+var mongoose = require('./../../studentsRecordsDB').mongoose;
 
 
 var genderSchema = mongoose.Schema(
