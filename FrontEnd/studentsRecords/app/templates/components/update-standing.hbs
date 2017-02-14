@@ -1,0 +1,38 @@
+<div class="ui modal">
+  <div class="header">Update Standing</div>
+  <div class="content">
+
+<div class="ui form">
+  <div class="inline field">
+    <label>Course</label>
+      {{input size="10" type="text" value = updatestanding.course}}
+  </div>
+
+  <div class="inline field">
+    <label>Description</label>
+      {{textarea cols="6" rows="6" value = updatestanding.description}}
+  </div>
+
+  <div class="inline field">
+    <label>Units</label> 
+    {{input type="number" value = updatestanding.units}}
+  </div>
+
+  <div class="inline field">
+    <label>Grade</label>
+    {{input type="number" value = updatestanding.grade}}
+  </div>
+
+  <div class="inline field">
+    <label>From</label>
+    {{input type="text" value = updatestanding.from}}
+  </div>
+</div>
+<div class="actions">
+        <br>
+        <div class="ui positive button" {{action 'saveCourse'}}>Save</div>
+        <div class="ui negative basic button" {{action "close"}}>Cancel</div>
+</div>
+
+  </div>
+  </div>
