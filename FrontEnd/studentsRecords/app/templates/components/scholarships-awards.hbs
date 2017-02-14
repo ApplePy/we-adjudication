@@ -1,9 +1,11 @@
-<div class="ui form">
-  <div class="inline field">
-    <label>Note</label>
-      {{textarea cols="6" rows="6" value = award.note}}  
-  </div>
-  <br>
-  <div class="ui positive button" {{action "updateAward"}}>Update Scholarship/Award</div>
-  <div class="ui negative button" {{action "deleteAward"}}>Delete Scholarship/Award</div>
-</div>
+<table class="ui fixed three column table">
+  <tr>
+<td class="twelve wide">{{award.note}}</td>
+<td class="two wide"><div class="ui positive button" {{action "updateAward"}}>Update</div></td>
+<td class="two wide"><div class="ui negative button" {{action "deleteAward"}}>Delete</div></td>
+</tr>
+</table>
+
+ {{#if updateAward}} 
+   {{update-award updateaward = award notDONE = updateAward}} 
+ {{/if}}
