@@ -21,12 +21,17 @@ router.route('/')
     // Get awards
     .get(parseUrlencoded, parseJSON, function (request, response) {
         var Student = request.query.filter;
+        var l = parseInt(request.query.limit) ;
+        var o = parseInt(request.query.offset);
+
         // Get all awards
         if (!Student) {
-            Awards.find(function (error, residencies) {
-                if (error) response.status(500).send(error);
-                else response.json({award: residencies});
-            });
+            Awards.paginate({}, {offset: o, limit: l},
+                function (error, awards) {
+                    console.log(awards);
+                    if (error) response.status(500).send(error);
+                    else response.json({award: awards.docs});
+                });
         }
 
         // Get awards for a student

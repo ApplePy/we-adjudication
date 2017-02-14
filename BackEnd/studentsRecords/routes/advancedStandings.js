@@ -21,19 +21,22 @@ router.route('/')
     // Get advanced standings
     .get(parseUrlencoded, parseJSON, function (request, response) {
         var Student = request.query.filter;
+        var l = parseInt(request.query.limit);
+        var o = parseInt(request.query.offset);
 
         // Get all advanced standings
         if (!Student) {
-            AdvancedStandings.find(function (error, advancedStanding) {
-                if (error) response.status(500).send(error);
-                response.json({advancedStanding: advancedStanding});
-            });
+            AdvancedStandings.paginate({}, {offset: o, limit: l},
+                function (error, advancedStandings) {
+                    if (error) response.status(500).send(error);
+                    else response.json({advancedStanding: advancedStandings.docs});
+                });
         }
         // Get advanced standings for a student
         else {
             AdvancedStandings.find({"recipient": Student.recipient}, function (error, students) {
                 if (error) response.status(500).send(error);
-                response.json({advancedStanding: students});
+                else response.json({advancedStanding: students});
             });
         }
     });

@@ -54,7 +54,7 @@ describe('Advanced Standings', () => {
                 });
         });
 
-        it('it should GET all advanced standings when created', (done) => {
+        it('it should GET the first 5 advanced standings', (done) => {
 
             // Set up mock data
             let testRes = new Residencies({name: "Johnny Test House"});
@@ -100,11 +100,12 @@ describe('Advanced Standings', () => {
                                 // Make request
                                 chai.request(server)
                                     .get('/api/advancedStandings')
+                                    .query({limit: 5, offset: 0})
                                     .end((err, res) => {
                                         expect(res).to.have.status(200);
                                         expect(res).to.be.json;
                                         expect(res.body).to.have.property('advancedStanding');
-                                        expect(res.body.advancedStanding.length).to.eq(15);
+                                        expect(res.body.advancedStanding.length).to.eq(5);
                                         for (var num = 0; num < 5; num++) {
                                             expect(res.body.advancedStanding[num].course).to.eq(standingData.course);
                                             expect(res.body.advancedStanding[num].description).to.eq(standingData.description);
@@ -112,6 +113,135 @@ describe('Advanced Standings', () => {
                                             expect(res.body.advancedStanding[num].from).to.eq(standingData.from);
                                             expect(res.body.advancedStanding[num].recipient).to.equal(testStudent._id.toString());
                                         }
+                                        done();
+                                    });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
+        it('it should GET the last 3 advanced standings', (done) => {
+
+            // Set up mock data
+            let testRes = new Residencies({name: "Johnny Test House"});
+            testRes.save((err) => {
+                if (err) throw err;
+
+                // Make some students, then make advanced standings for the students, then query for all
+                var studentData = {
+                    number: 594265372,
+                    firstName: "Johnny",
+                    lastName: "Test",
+                    gender: 1,
+                    DOB: new Date().toISOString(),
+                    photo: "/some/link",
+                    registrationComments: "No comment",
+                    basisOfAdmission: "Because",
+                    admissionAverage: 90,
+                    admissionComments: "None",
+                    resInfo: testRes
+                };
+                let testStudent = new Students(studentData);
+                testStudent.save((err) => {
+                    if (err) throw err;
+
+                    var standingData = {
+                        course: "BASKWV 1000",
+                        description: "Basket weaving",
+                        grade: 100,
+                        from: "UBC",
+                        recipient: testStudent
+                    };
+
+                    // Create 15 advanced standings
+                    var count = 0;
+                    for (var num = 0; num < 15; num++) {
+                        standingData.units = num.toString();
+                        let testStanding = new AdvancedStandings(standingData);
+                        testStanding.save((err) => {
+                            if (err) throw err;
+
+                            // Start testing once all advanced standings are created
+                            if (++count == 15) {
+                                // Make request
+                                chai.request(server)
+                                    .get('/api/advancedStandings')
+                                    .query({limit: 5, offset: 12})
+                                    .end((err, res) => {
+                                        expect(res).to.have.status(200);
+                                        expect(res).to.be.json;
+                                        expect(res.body).to.have.property('advancedStanding');
+                                        expect(res.body.advancedStanding.length).to.eq(3);
+                                        for (var num = 0; num < 3; num++) {
+                                            expect(res.body.advancedStanding[num].course).to.eq(standingData.course);
+                                            expect(res.body.advancedStanding[num].description).to.eq(standingData.description);
+                                            expect(res.body.advancedStanding[num].grade).to.eq(standingData.grade);
+                                            expect(res.body.advancedStanding[num].from).to.eq(standingData.from);
+                                            expect(res.body.advancedStanding[num].recipient).to.equal(testStudent._id.toString());
+                                        }
+                                        done();
+                                    });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
+        it('it should GET nothing if no limit is specified', (done) => {
+
+            // Set up mock data
+            let testRes = new Residencies({name: "Johnny Test House"});
+            testRes.save((err) => {
+                if (err) throw err;
+
+                // Make some students, then make advanced standings for the students, then query for all
+                var studentData = {
+                    number: 594265372,
+                    firstName: "Johnny",
+                    lastName: "Test",
+                    gender: 1,
+                    DOB: new Date().toISOString(),
+                    photo: "/some/link",
+                    registrationComments: "No comment",
+                    basisOfAdmission: "Because",
+                    admissionAverage: 90,
+                    admissionComments: "None",
+                    resInfo: testRes
+                };
+                let testStudent = new Students(studentData);
+                testStudent.save((err) => {
+                    if (err) throw err;
+
+                    var standingData = {
+                        course: "BASKWV 1000",
+                        description: "Basket weaving",
+                        grade: 100,
+                        from: "UBC",
+                        recipient: testStudent
+                    };
+
+                    // Create 15 advanced standings
+                    var count = 0;
+                    for (var num = 0; num < 15; num++) {
+                        standingData.units = num.toString();
+                        let testStanding = new AdvancedStandings(standingData);
+                        testStanding.save((err) => {
+                            if (err) throw err;
+
+                            // Start testing once all advanced standings are created
+                            if (++count == 15) {
+                                // Make request
+                                chai.request(server)
+                                    .get('/api/advancedStandings')
+                                    .query({offset: 5})
+                                    .end((err, res) => {
+                                        expect(res).to.have.status(200);
+                                        expect(res).to.be.json;
+                                        expect(res.body).to.have.property('advancedStanding');
+                                        expect(res.body.advancedStanding.length).to.eq(0);
                                         done();
                                     });
                             }
