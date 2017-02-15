@@ -6,13 +6,13 @@ var mongoose = require('./../../studentsRecordsDB').mongoose;
 var programRecordSchema = mongoose.Schema(
     {
         name: String,
-        level: Number,
-        load: Number,
-        status: String, // TODO: is this an enumeration?
-        termCode: {type: mongoose.Schema.ObjectId, ref: 'TermCodes'},
+        level: Number,  // Student year
+        load: {type: mongoose.Schema.ObjectId, ref: 'CourseLoads'},             // Fulltime/parttime enumeration
+        status: {type: mongoose.Schema.ObjectId, ref: 'ProgramStatuses'},       // Active, completed, discontinued, etc.
+        semester: {type: mongoose.Schema.ObjectId, ref: 'TermCodes'},
         grades: [{type: mongoose.Schema.ObjectId, ref: 'Grades'}],
-        courseCodes: {type: mongoose.Schema.ObjectId, ref: 'CourseCodes'},
-        planCodes: [{type: mongoose.Schema.ObjectId, ref: 'PlanCodes'}]
+        courseInfo: {type: mongoose.Schema.ObjectId, ref: 'CourseCodes'},
+        plan: [{type: mongoose.Schema.ObjectId, ref: 'PlanCodes'}]              // NOTE: In a many-to-many relationship, this WILL store data.
     }
 );
 

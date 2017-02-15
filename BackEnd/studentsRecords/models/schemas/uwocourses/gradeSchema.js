@@ -5,9 +5,9 @@ var mongoose = require('./../../studentsRecordsDB').mongoose;
 
 var gradeSchema = mongoose.Schema(
     {
-        mark: Number,
+        mark: {type: Number, required: true},
         note: String,
-        programRecord: {type: mongoose.Schema.ObjectId, ref: 'ProgramRecords'},
+        level: {type: mongoose.Schema.ObjectId, ref: 'ProgramRecords'},
         student: {type: mongoose.Schema.ObjectId, ref: 'Students'}
     }
 );
