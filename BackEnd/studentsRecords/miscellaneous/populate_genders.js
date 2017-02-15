@@ -1,5 +1,5 @@
-var Genders = require('../models/genderSchema');
-var Students = require('../models/studentsSchema');
+var Genders = require('../models/schemas/studentinfo/genderSchema');
+var Students = require('../models/schemas/studentinfo/studentSchema');
 
 
 // Create default genders

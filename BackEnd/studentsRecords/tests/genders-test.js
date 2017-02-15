@@ -2,8 +2,8 @@
 process.env.NODE_ENV = 'test';
 
 let mongoose = require("mongoose");
-let Students = require('../models/studentsSchema');
-let Genders = require('../models/genderSchema');
+let Students = require('../models/schemas/studentinfo/studentSchema');
+let Genders = require('../models/schemas/studentinfo/genderSchema');
 
 //Require the dev-dependencies
 let chai = require('chai');

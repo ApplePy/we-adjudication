@@ -1,7 +1,7 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var mongoose = require('./studentsRecordsDB').mongoose;
+var mongoose = require('./../../studentsRecordsDB').mongoose;
 var mongoosePaginate = require('mongoose-paginate');
 
 var studentsSchema = mongoose.Schema(
@@ -15,8 +15,10 @@ var studentsSchema = mongoose.Schema(
         basisOfAdmission: String,
         admissionAverage: Number,
         admissionComments: String,
+        grades: [{type: mongoose.Schema.ObjectId, ref: 'Grades'}],
         resInfo: {type: mongoose.Schema.ObjectId, ref: 'Residencies'},
         genderInfo: {type: mongoose.Schema.ObjectId, ref: 'Genders'},
+        hsGrades: [{type: mongoose.Schema.ObjectId, ref: 'HSGrades'}],
         awards: [{type: mongoose.Schema.ObjectId, ref: 'Awards'}],
         advancedStandings: [{type: mongoose.Schema.ObjectId, ref: 'AdvancedStandings'}]
     }

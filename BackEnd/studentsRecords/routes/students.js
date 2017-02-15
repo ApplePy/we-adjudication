@@ -1,8 +1,8 @@
 var express = require('express');
 var router = express.Router();
-var Students = require('../models/studentsSchema');
-var Awards = require('../models/awardsSchema');
-var AdvancedStandings = require('../models/advancedStandingSchema');
+var Students = require('../models/schemas/studentinfo/studentSchema');
+var Awards = require('../models/schemas/studentinfo/awardSchema');
+var AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
 var bodyParser = require('body-parser');
 var parseUrlencoded = bodyParser.urlencoded({extended: false});
 var parseJSON = bodyParser.json();
