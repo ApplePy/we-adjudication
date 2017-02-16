@@ -1,6 +1,6 @@
 var Residencies = require('../../models/schemas/studentinfo/residencySchema');
 var Students = require('../../models/schemas/studentinfo/studentSchema');
-var Setup = require('./../genericRouting');
+var Setup = require('../genericRouting');
 
 
 module.exports =

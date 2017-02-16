@@ -1,5 +1,5 @@
 var AdvancedStandings = require('../../models/schemas/studentinfo/advancedStandingSchema');
-var Setup = require('./../genericRouting');
+var Setup = require('../genericRouting');
 
 
 module.exports =

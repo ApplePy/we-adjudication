@@ -3,7 +3,7 @@
  */
 
 var PlanCodes = require('../../models/schemas/uwocourses/planCodeSchema');
-var Setup = require('./../genericRouting');
+var Setup = require('../genericRouting');
 
 
 module.exports =
@@ -11,12 +11,7 @@ module.exports =
         PlanCodes,
         'planCode',
         false,
-        (req, res, mod) => {
-            if (!mod.mark)
-                return ["Mark must be specified"];
-            else
-                return 0;
-        },
+        undefined,
         undefined,
         undefined,
         undefined,

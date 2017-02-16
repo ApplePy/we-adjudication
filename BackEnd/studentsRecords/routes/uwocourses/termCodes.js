@@ -3,7 +3,7 @@
  */
 
 var TermCodes = require('../../models/schemas/uwocourses/termCodeSchema');
-var Setup = require('./../genericRouting');
+var Setup = require('../genericRouting');
 
 
 module.exports =

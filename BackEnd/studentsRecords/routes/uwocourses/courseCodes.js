@@ -4,7 +4,7 @@
 
 var CourseCodes = require('../../models/schemas/uwocourses/courseCodeSchema');
 var ProgramRecords = require('../../models/schemas/uwocourses/programRecordSchema');
-var Setup = require('./../genericRouting');
+var Setup = require('../genericRouting');
 
 
 module.exports =

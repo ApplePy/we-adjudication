@@ -4,7 +4,7 @@ var AdvancedStandings = require('../../models/schemas/studentinfo/advancedStandi
 var Grades = require('../../models/schemas/uwocourses/gradeSchema');
 var ProgramRecords = require('../../models/schemas/uwocourses/programRecordSchema');
 var HSGrades = require('../../models/schemas/highschool/hsGradeSchema');
-var Setup = require('./../genericRouting');
+var Setup = require('../genericRouting');
 
 module.exports =
     Setup(

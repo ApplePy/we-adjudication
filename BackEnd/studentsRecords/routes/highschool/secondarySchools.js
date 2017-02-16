@@ -4,7 +4,7 @@
 
 var SecondarySchools = require('../../models/schemas/highschool/secondarySchoolSchema');
 var HSCourses = require('../../models/schemas/highschool/hsCourseSchema');
-var Setup = require('./../genericRouting');
+var Setup = require('../genericRouting');
 
 
 module.exports =

@@ -1,5 +1,5 @@
 var Awards = require('../../models/schemas/studentinfo/awardSchema');
-var Setup = require('./../genericRouting');
+var Setup = require('../genericRouting');
 
 
 module.exports =
