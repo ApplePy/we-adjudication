@@ -3,11 +3,11 @@ var express = require('express');
 var logger = require('./logger');
 var app = express();
 
-var students = require('./routes/students');
-var residencies = require('./routes/residencies');
-var genders = require('./routes/genders');
-var awards = require('./routes/awards');
-var advancedStandings = require('./routes/advancedStandings');
+var students = require('./routes/studentinfo/students');
+var residencies = require('./routes/studentinfo/residencies');
+var genders = require('./routes/studentinfo/genders');
+var awards = require('./routes/studentinfo/awards');
+var advancedStandings = require('./routes/studentinfo/advancedStandings');
 
 
 app.use(function (request, response, next) {

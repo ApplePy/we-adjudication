@@ -1,7 +1,7 @@
-var Students = require('../models/schemas/studentinfo/studentSchema');
-var Awards = require('../models/schemas/studentinfo/awardSchema');
-var AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
-var Setup = require('./genericRouting');
+var Students = require('../../models/schemas/studentinfo/studentSchema');
+var Awards = require('../../models/schemas/studentinfo/awardSchema');
+var AdvancedStandings = require('../../models/schemas/studentinfo/advancedStandingSchema');
+var Setup = require('./../genericRouting');
 
 module.exports =
     Setup(

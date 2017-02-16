@@ -1,11 +1,11 @@
-var Awards = require('../models/schemas/studentinfo/awardSchema');
-var Setup = require('./genericRouting');
+var AdvancedStandings = require('../../models/schemas/studentinfo/advancedStandingSchema');
+var Setup = require('./../genericRouting');
 
 
 module.exports =
     Setup(
-        Awards,
-        'award',
+        AdvancedStandings,
+        'advancedStanding',
         false,
         (req, res, mod) => {
             if (!mod.recipient)
