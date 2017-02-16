@@ -15,6 +15,7 @@ export default Ember.Component.extend({
   isStudentsRecordsDataEntry: false,
   isManageSystemShowing: false,
   isAdding: false,
+  isImportExportShowing: false,
   isAboutShowing: false,
 
 
@@ -24,6 +25,7 @@ export default Ember.Component.extend({
       this.set('isStudentsRecordsDataEntry', false);
       this.set('isManageSystemShowing', false);
       this.set('isAboutShowing', false);
+      this.set('isImportExportShowing', false);
       this.set('isAdding', false);
     },
 
@@ -32,6 +34,7 @@ export default Ember.Component.extend({
       this.set('isStudentsRecordsDataEntry', true);
       this.set('isManageSystemShowing', false);
       this.set('isAboutShowing', false);
+      this.set('isImportExportShowing', false);
       this.set('isAdding', false);
     },
 
@@ -40,6 +43,7 @@ export default Ember.Component.extend({
       this.set('isStudentsRecordsDataEntry', false);
       this.set('isManageSystemShowing', true);
       this.set('isAboutShowing', false);
+      this.set('isImportExportShowing', false);
       this.set('isAdding', false);
     },
 
@@ -48,7 +52,17 @@ export default Ember.Component.extend({
       this.set('isStudentsRecordsDataEntry', false);
       this.set('isManageSystemShowing', false);
       this.set('isAboutShowing', false);
+      this.set('isImportExportShowing', false);
       this.set('isAdding', true);
+    },
+
+    importExport (){
+      this.set('isHomeShowing', false);
+      this.set('isStudentsRecordsDataEntry', false);
+      this.set('isManageSystemShowing', false);
+      this.set('isAboutShowing', false);
+      this.set('isImportExportShowing', true);
+      this.set('isAdding', false);
     },
 
     about (){
@@ -56,6 +70,7 @@ export default Ember.Component.extend({
       this.set('isStudentsRecordsDataEntry', false);
       this.set('isManageSystemShowing', false);
       this.set('isAboutShowing', true);
+      this.set('isImportExportShowing', false);
       this.set('isAdding', false);
     }
   }
