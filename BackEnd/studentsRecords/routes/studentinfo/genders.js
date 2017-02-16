@@ -1,6 +1,6 @@
-var Genders = require('../models/schemas/studentinfo/genderSchema');
-var Students = require('../models/schemas/studentinfo/studentSchema');
-var Setup = require('./genericRouting');
+var Genders = require('../../models/schemas/studentinfo/genderSchema');
+var Students = require('../../models/schemas/studentinfo/studentSchema');
+var Setup = require('../genericRouting');
 
 module.exports =
     Setup(
