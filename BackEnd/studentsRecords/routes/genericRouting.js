@@ -33,7 +33,7 @@ var Setup = function(model,
 
     router.route('/')
 
-    // New advanced standing entry
+    // New model entry
         .post(function (request, response) {
             // Create model
             var modelObj = new model(request.body[modelNameEmberized]);

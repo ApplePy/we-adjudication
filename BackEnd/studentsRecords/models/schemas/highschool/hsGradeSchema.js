@@ -5,7 +5,7 @@ var mongoose = require('./../../studentsRecordsDB').mongoose;
 
 var hsgradeSchema = mongoose.Schema(
     {
-        mark: Number,
+        mark: {type: Number, required: true},
         course: {type: mongoose.Schema.ObjectId, ref: 'HSCourses'},
         recipient: {type: mongoose.Schema.ObjectId, ref: 'Students'}
     }

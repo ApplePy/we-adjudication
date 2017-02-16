@@ -5,7 +5,7 @@ var mongoose = require('./../../studentsRecordsDB').mongoose;
 
 var termCodeSchema = mongoose.Schema(
     {
-        name: String,
+        name: {type: String, required: true},
         programRecords: [{type: mongoose.Schema.ObjectId, ref: 'ProgramRecords'}]
     }
 );
