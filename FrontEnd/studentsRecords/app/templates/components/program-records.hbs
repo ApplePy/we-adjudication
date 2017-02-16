@@ -1,0 +1,17 @@
+<table class="ui seven column very basic table">
+  <tr>
+    <td class="three wide"><h4></h4></td>
+    <td class="three wide"><h4></h4></td>
+    <td class="three wide"><h4></h4></td>
+    <td class="three wide"><h4></h4></td>
+    <td class="one wide"></td>
+    <td class="one wide"></td>
+    <td class="one wide"></td>
+  </tr>
+</table>
+<br><br>
+<div class="ui button" {{action "addRecord"}}>Add New Record</div>
+
+{{#if isAdding}}
+  {{add-program-record notDONE = isAdding}}
+{{/if}}

@@ -57,6 +57,7 @@
   <div class="ui top attached tabular menu">
     <div class="active item" data-tab="basics">Basic Info</div>
     <div class="item" data-tab="admission">Admission Record</div>
+    <div class="item" data-tab="programRecord">Program Records</div>
     <div class="item" data-tab="advancedStanding">Advanced Standing</div>
     <div class="item" data-tab="scholarshipsAwards">Scholarships and Awards</div>
   </div>
@@ -143,13 +144,20 @@
           </div>
         </div>
   </div>
+  <div class="ui tab" data-tab="programRecord">
+    <br>
+    <h2>{{currentStudent.number}}</h2>
+    <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
+    <!-- Display the program records for this student-->
+    {{program-records}}
+  </div>
 
   <div class="ui tab" data-tab="advancedStanding">
     <!-- Advanced standing !-->
     <br>
     <h2>{{currentStudent.number}}</h2>
     <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
-   <table class="ui seven column very basic table"> 
+   <table class="ui seven column very basic table">
   <tr>
 <td class="three wide"><h4>Course</h4></td>
 <td class="three wide"><h4>From</h4></td>
@@ -157,7 +165,7 @@
 <td class="one wide"><h4>Grade</h4></td>
 <td class="three wide"></td>
 <td class="one wide"></td>
- <td class="three wide"></td> 
+ <td class="three wide"></td>
 </tr>
 </table>
     {{#each advancedStandingArray as |course|}}
@@ -176,14 +184,14 @@
     <br>
     <h2>{{currentStudent.number}}</h2>
     <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
-   <!-- <table class="ui three column very basic table"> 
+   <!-- <table class="ui three column very basic table">
   <tr><td><h4>Note</h4></td></tr>
   </table> -->
   <h4>Note</h4>
     {{#each awardNotes as |award|}}
     {{scholarships-awards award = award}}
     <br>
-    {{/each}} 
+    {{/each}}
     <br>
     <div class="ui button" {{action "addAward"}}>Add Scholarship/Award</div>
 
@@ -191,7 +199,7 @@
     {{add-award newrecipient = currentStudent studentID = currentStudent.number INDEX = currentIndex notDONE = showNewAward offset = offset studentsModel = studentsRecords}}
     {{/if}}
   </div>
-{{/if}} 
+{{/if}}
 
 
 
