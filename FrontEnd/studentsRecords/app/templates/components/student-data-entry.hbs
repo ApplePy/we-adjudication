@@ -59,6 +59,7 @@
     <div class="item" data-tab="admission">Admission Record</div>
     <div class="item" data-tab="advancedStanding">Advanced Standing</div>
     <div class="item" data-tab="scholarshipsAwards">Scholarships and Awards</div>
+    <div class="item" data-tab="highSchool">High School</div>
   </div>
   <div class="ui bottom attached active tab segment"data-tab="basics">
     <!-- student basic information !-->
@@ -191,8 +192,41 @@
     {{add-award newrecipient = currentStudent studentID = currentStudent.number INDEX = currentIndex notDONE = showNewAward offset = offset studentsModel = studentsRecords}}
     {{/if}}
   </div>
-{{/if}} 
+ 
 
+<div class="ui tab" data-tab="highSchool">
+    <!-- High school !-->
+    <br>
+    <h2>{{currentStudent.number}}</h2>
+    <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
+    <!-- the only reason the headers are in a table is because the spacing/alignment wouldnt look good otherwise -->
+    <!-- if the headers arent linning up with whats in the table then this is what you should change -->
+    <!-- the basic layout should be correct (because thats what it is for displaying the awards and advanced standing), but if not try changing the length of the <td> -->
+   <!-- basically what worked for awards and advanced standing is if you change the table size or any column lengths in the component that shows all the info, 
+   then the table that contains the header (which is whats below) should be the same just with different content -->
+    <table class="ui six column very basic table"> 
+  <tr>
+<td class="two wide"><h4>Course</h4></td>
+<td class="one wide"><h4>Grade</h4></td>
+<td class="two wide"><h4>From</h4></td>
+<td class="three wide"></td>
+<td class="two wide"></td>
+<td class="two wide"></td>
+</tr>
+</table>
+    {{#each hsMarks as |mark|}}
+    {{high-school hsGrade = mark}}
+    <br>
+    {{/each}} 
+    <br>
+    <div class="ui button" {{action "addHS"}}>Add High School Course</div>
+
+    {{#if showNewHS}}
+    {{add-highschool newrecipient = currentStudent notDONE = showNewHS studentsModel = studentsRecords}}
+    {{/if}}
+  </div>
+
+{{/if}}
 
 
 

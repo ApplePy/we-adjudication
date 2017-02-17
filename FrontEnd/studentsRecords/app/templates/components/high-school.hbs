@@ -1,0 +1,29 @@
+<!-- the course name, course mark, and school name will be displayed in a line with three buttons: view more, update, and delete -->
+<!-- clicking view more will bring up a modal (view-highschool) with the rest of the highschool data -->
+<!-- clicking update brings up the same modal (view-highschool) but with an option to save the changes -->
+<!-- delete should just delete the record -->
+<!-- ******** THESE FUNCTIONALITIES CANT BE TESTED UNTIL ROUTES ARE IN SO IDK IF THEY 100% WORK-->
+
+<table class="ui fixed six column table">
+  <tr>
+<td class="two wide">{{hsGrade.course.subject.name}}</td>
+<td class="one wide">{{hsGrade.mark}}</td>
+<td class="two wide">{{hsGrade.course.school.name}}</td>
+<td class="three wide"><div class="ui positive button" {{action "viewMore"}}>View More</div></td>
+<td class="two wide"><div class="ui positive button" {{action "updateCourse"}}>Update</div></td>
+<td class="two wide"><div class="ui negative button" {{action "deleteCourse"}}>Delete</div></td>
+</tr>
+</table>
+
+<!-- the two if statements call the same modal, but it sets the "editCourse" variable to different values -->
+<!-- "editCourse" is a variable in the modal, when it is true, it signfies that the "update" button in high-school.hbs was clicked. This then causes the modal to have a "save" button so the user can save edits -->
+<!-- if "editCourse" is false, then the user clicked the "view more button. This then causes the modal to only have a "close" button, therefore no changes can be saved -->
+
+<!-- IF showMore IS TRUE THEN THE USER HAS CLICKED THE "view more" BUTTON AND THE MODAL WITH ALL THE COURSE info *SHOULD* BE SHOWN -->
+ {{#if showMore}} 
+{{view-highschool hsGrade = hsGrade notDONE = showMore editCourse = false}} 
+
+<!-- IF updateCourse IS TRUE THEN THE USER HAS CLICKED THE "update" BUTTON AND THE MODAL WITH ALL THE EDITABLE COURSE INFO *SHOULD* BE SHOWN -->
+{{else if updateCourse}}
+{{view-highschool hsGrade = hsGrade notDONE = updateCourse editCourse = true}}
+ {{/if}}

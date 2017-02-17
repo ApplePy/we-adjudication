@@ -1,0 +1,43 @@
+<div class="ui modal">
+  <div class="header">Add a High School Course</div>
+  <div class="content">
+      <div class="ui form">
+            <div class="inline field">
+                <label>Subject</label>
+                {{input size="10" type="text" value = newsubject}}
+            </div>
+            <div class="inline field">
+                 <label>Description</label>
+                {{textarea cols="6" rows="6" value = newdescription}}
+            </div>
+            <div class="inline field">
+                <label>Unit</label> 
+                    {{input type="number" value = newunit}}
+            </div>
+            <div class="inline field">
+                <label>Mark</label>
+                {{input type="number" value = newmark}}
+            </div>
+            <div class="inline field">
+                <label>Secondary School</label>
+                {{input type="text" value = newschool}}
+            </div>
+             <div class="inline field">
+                <label>Code</label>
+                {{input type="text" value = newsource}}
+            </div>
+            <div class="inline field">
+                <label>Level</label>
+                {{input type="text" value = newlevel}}
+            </div>
+    </div>
+<div class="actions">
+        <br>
+        <div class="ui positive button" {{action "saveHS"}}>Save</div>
+        <div class="ui negative button" {{action "close"}}>Cancel</div>
+</div>
+
+  </div>
+  </div>
+
+

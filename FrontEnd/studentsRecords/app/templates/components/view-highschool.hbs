@@ -1,0 +1,56 @@
+<!-- this modal's functionality depends on if the user clicked "view more" or "update" -->
+<!-- if the user clicked view all then the modal will show with all the highschool info and there will be a "close" button displayed-->
+<!-- if the user clicked "update" then all the highschool info will show and there will be a "close" and "update" button displayed-->
+
+<div class="ui modal">
+  <div class="header">{{hsGrade.course.subject.name}}</div> <!-- the course name is displayed at the top of the modal... no reason for this besides to make it look decent -->
+  <div class="content">
+      <div class="ui form">
+            <div class="inline field">
+                <label>Subject</label>
+                {{input size="10" type="text" value = hsGrade.course.subject.name}}
+            </div>
+            <div class="inline field">
+                 <label>Description</label>
+                {{textarea cols="6" rows="6" value = hsGrade.course.subject.description}}
+            </div>
+            <div class="inline field">
+                <label>Unit</label> 
+                    {{input type="number" value = hsGrade.course.unit}}
+            </div>
+            <div class="inline field">
+                <label>Mark</label>
+                {{input type="number" value = hsGrade.mark}}
+            </div>
+            <div class="inline field">
+                <label>Secondary School</label>
+                {{input type="text" value = hsGrade.course.school.name}}
+            </div>
+             <div class="inline field">
+                <label>Code</label>
+                <!-- this apparently needs to be a dropdown.... idk what im doing for this (unless i can test it) so idk if its right, i went off the residency drop down in the student-data-entry.hsb -->
+                 <select onchange={{action 'selectCode' value="target.value"}}>
+              {{#each courseSourceModel as |courseSourceChoice|}}
+                <option value={{courseSourceChoice.id}} selected={{eq selectedSourceID
+                                                                   hsGrade.course.source.id}}>{{courseSourceChoice.code}} </option>
+              {{/each}}
+            </select>
+            </div>
+            <div class="inline field">
+                <label>Level</label>
+                {{input type="text" value = hsGrade.course.level}}
+            </div>
+    </div>
+<div class="actions">
+        <br>
+    {{#if editCourse}} 
+<div class="ui positive button" {{action "saveCourse"}}>Update</div>
+ {{/if}}
+        <div class="ui negative button" {{action "close"}}>Close</div>
+</div>
+
+  </div>
+  </div>
+
+
+
