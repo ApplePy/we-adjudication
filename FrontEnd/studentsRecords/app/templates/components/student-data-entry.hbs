@@ -181,14 +181,14 @@
   </table> -->
   <h4>Note</h4>
     {{#each awardNotes as |award|}}
-    {{scholarships-awards award = award}}
+    {{scholarships-awards award = award awards = awardNotes}}
     <br>
     {{/each}}
     <br>
     <div class="ui button" {{action "addAward"}}>Add Scholarship/Award</div>
 
     {{#if showNewAward}}
-    {{add-award newrecipient = currentStudent studentID = currentStudent.number INDEX = currentIndex notDONE = showNewAward offset = offset studentsModel = studentsRecords}}
+    {{add-award newrecipient = currentStudent studentID = currentStudent.number notDONE = showNewAward awards = awardNotes}}
     {{/if}}
   </div>
 {{/if}}
