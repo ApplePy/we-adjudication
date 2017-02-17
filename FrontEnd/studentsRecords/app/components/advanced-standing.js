@@ -6,9 +6,11 @@ export default Ember.Component.extend({
     store: Ember.inject.service(),
     descriptionShow: null,
     updateCourse: null,
-  
+    standings: null,
+
  actions: {
   deleteStanding() {
+    this.set('standings', this.get('standings').without(this.get('standing')));
     this.get('store').findRecord('advanced-standing', this.get('standing').id, { backgroundReload: false }).then(function(standing) {
         standing.deleteRecord();
         standing.get('isDeleted');
@@ -17,11 +19,11 @@ export default Ember.Component.extend({
   },
 
   updateStanding() {
-       this.set('updateCourse', true); 
+       this.set('updateCourse', true);
   },
 
   showDescription() {
-    this.set('descriptionShow', true); 
+    this.set('descriptionShow', true);
   },
  }
 });
