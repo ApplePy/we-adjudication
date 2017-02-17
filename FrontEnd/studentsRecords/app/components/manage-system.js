@@ -27,7 +27,7 @@ export default Ember.Component.extend({
   actions: {
 
     addGender () {
-      if (this.get('newGender') != "") {
+      if (this.get('newGender') !== "") {
         var gender = this.get('store').createRecord('gender', {
           name: this.get('newGender')
         });
@@ -40,19 +40,10 @@ export default Ember.Component.extend({
       }
     },
 
-    modifyGender (genderId, index){
+    modifyGender (gender){
 
-      var newGenderName = Ember.$("#" + index).val();
-
-      if (newGenderName != "") {
-        this.get('store').findRecord('gender', genderId).then(function(gender) {
-          gender.set('name', newGenderName);
-          gender.save().then(function() {
-            console.log("Modified Gender");
-          }, function() {
-            console.log("Could not modify gender");
-          });
-        });
+      if (gender.get('id') !== "") {
+        gender.save();
       }
     },
 
@@ -65,7 +56,7 @@ export default Ember.Component.extend({
     },
 
     addResidency () {
-      if (this.get('newResidency') != "") {
+      if (this.get('newResidency') !== "") {
         var residency = this.get('store').createRecord('residency', {
           name: this.get('newResidency')
         });
@@ -78,22 +69,10 @@ export default Ember.Component.extend({
       }
     },
 
-    modifyResidency (residencyId, index){
+    modifyResidency (residency){
 
-      var newResidencyName = Ember.$("#" + index).val();
-      console.log(residencyId);
-      console.log(index);
-      console.log(newResidencyName);
-
-      if (newResidencyName != "") {
-        this.get('store').findRecord('residency', residencyId).then(function(residency) {
-          residency.set('name', newResidencyName);
-          residency.save().then(function() {
-            console.log("Modified Residency");
-          }, function() {
-            console.log("Could not modify residency");
-          });
-        });
+      if (residency.name !== "") {
+        residency.save();
       }
     },
 
