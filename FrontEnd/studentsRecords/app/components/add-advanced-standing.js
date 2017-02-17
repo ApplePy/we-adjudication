@@ -24,9 +24,12 @@ export default Ember.Component.extend({
      recipient: this.get('newrecipient')
       });
 
-    advancedStanding.save().then(function(response){
-          console.log(response.id);
-      });
+    var self = this;
+    advancedStanding.save().then(function(record){
+       self.get('standings').pushObject(record);
+    });
+
+
       //var index = this.get('studentsModel').indexOf(this.get('newrecipient'));
       //this.set('INDEX', index);
      this.set('notDONE', false);

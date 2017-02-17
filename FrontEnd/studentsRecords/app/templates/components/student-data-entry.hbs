@@ -167,7 +167,7 @@
     <br>
      <div class="ui button" {{action "addCourse"}}>Add Course</div>
     {{#if showNewCourse}}
-    {{add-advanced-standing newrecipient = currentStudent standings = advancedStandingArray}} <!-- INDEX = currentIndex notDONE = showFindStudent offset = offset studentsModel = studentsRecords -->
+    {{add-advanced-standing newrecipient = currentStudent notDONE = showNewCourse standings = advancedStandingArray}} <!-- INDEX = currentIndex notDONE = showFindStudent offset = offset studentsModel = studentsRecords -->
     {{/if}}
   </div>
 
