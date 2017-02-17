@@ -1,18 +1,17 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    newcourse: null,  
+    newcourse: null,
     newunit: null,
     newdescription: null,
     newgrade: null,
     newfrom: null,
     newrecipient: null,
+    standings: null,
     store: Ember.inject.service(),
-  studentsModel: null,
-  INDEX: null,
-  //studentID: null,
-  notDONE: null,
-  //student: null,
+    studentsModel: null,
+    INDEX: null,
+    notDONE: null,
 
  actions: {
   saveCourse() {
@@ -24,8 +23,10 @@ export default Ember.Component.extend({
       from: this.get('newfrom'),
      recipient: this.get('newrecipient')
       });
-      advancedStanding.save();
 
+    advancedStanding.save().then(function(response){
+          console.log(response.id);
+      });
       //var index = this.get('studentsModel').indexOf(this.get('newrecipient'));
       //this.set('INDEX', index);
      this.set('notDONE', false);
@@ -39,7 +40,7 @@ export default Ember.Component.extend({
      Ember.$('.ui.modal').remove();
    }
     },
- 
+
 
   didRender() {
     Ember.$('.ui.modal')
