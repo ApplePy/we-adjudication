@@ -8,32 +8,46 @@ export default Ember.Component.extend({
   plans: [],
   hasPlan: false,
 
+  init() {
+    this._super(...arguments);
+    //set the plans array to empty
+    this.set('plans', []);
+  },
+
   actions:{
-    selectRecord(){
+    selectRecord(record){
 
     },
 
-    selectCourse(){
+    selectCourse(course){
 
     },
 
-    selectTerm(){
+    selectTerm(term){
 
     },
 
-    selectPlan(){
+    selectPlan(plan){
+
+    },
+
+    saveRecord(){
 
     },
 
     deletePlanField(){
+      //pop off the last element of the plans array
       this.get('plans').popObject();
+      //
       if(this.get('plans').length === 0){
         this.set('hasPlan', false);
       }
     },
 
     newPlanField(){
+      //push the first element from the plans into the plans array
       this.get('plans').pushObject("newPlan");
+      //show the removal button
       this.set('hasPlan', true);
     },
 
