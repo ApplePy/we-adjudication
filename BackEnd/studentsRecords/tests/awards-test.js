@@ -1,700 +1,194 @@
-//During the test the env variable is set to test
-process.env.NODE_ENV = 'test';
+let DB = require('../models/studentsRecordsDB');
+let mongoose = DB.mongoose;
 
-let mongoose = require("mongoose");
-let Students = require('../models/schemas/studentinfo/studentSchema');
 let Awards = require('../models/schemas/studentinfo/awardSchema');
-let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
-let Residencies = require('../models/schemas/studentinfo/residencySchema');
 
-//Require the dev-dependencies
-let chai = require('chai');
-let chaiHttp = require('chai-http');
-let server = require('../server');
+let faker = require('faker');
+let Common = require('./genericTestFramework-helper');
+let chai = Common.chai;
 let expect = chai.expect;
 
-chai.use(chaiHttp);
 
-// Our parent block - stores the test
-describe('Awards', () => {
-    let host = "http://localhost:3700";     // This is the Node.js server
+////////
 
-    //Before each test we empty the database
-    beforeEach((done) => {
-        // Clear out all Residences and Students then call done
-        Residencies.remove({}, (err) => {
-            if (err) throw "Error cleaning out Residencies";
-            Students.remove({}, (err) => {
-                if (err) throw "Error cleaning out Students";
-                Awards.remove({}, (err) => {
-                    if (err) throw "Error cleaning out Awards";
-                    AdvancedStandings.remove({}, (err) => {
-                        if (err) throw "Error cleaning out Advanced Standings";
-                        done()
-                    });
-                });
-            });
-        });
-    });
+// NOTE: remember to not use () => {} functions inside mocha tests due to the 'this' binding - it breaks Mocha!
 
-    /*
-     * Test the /GET routes
-     */
-    describe('/GET awards', () => {
-        it('it should GET all awards ', (done) => {
-            // Request all awards
-            chai.request(server)
-                .get('/api/awards')
-                .end((err, res) => {
-                    expect(res).to.have.status(200);
-                    expect(res).to.be.json;
-                    expect(res.body).to.have.property('award');
-                    expect(res.body.award.length).to.be.eq(0);
-                    done();
-                });
-        });
+////////
 
-        it('it should GET all awards when created', (done) => {
 
-            // Set up mock data
-            let testRes = new Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err;
+describe('Awards', function() {
 
-                // Make some students, then make awards for the students, then query for all
-                var studentData = {
-                    number: 594265372,
-                    firstName: "Johnny",
-                    lastName: "Test",
-                    gender: 1,
-                    DOB: new Date().toISOString(),
-                    photo: "/some/link",
-                    registrationComments: "No comment",
-                    basisOfAdmission: "Because",
-                    admissionAverage: 90,
-                    admissionComments: "None",
-                    resInfo: testRes
-                };
-                let testStudent = new Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
+    describe('/GET functions', function() {
+        before(Common.regenAllData);
 
-                    var awardData = {
-                        recipient: testStudent
-                    };
+        Common.Tests.GetTests.getAll("award", "awards", Awards, Common.DBElements.awardList);
 
-                    // Create 15 awards
-                    var count = 0;
-                    for (var num = 0; num < 15; num++) {
-                        awardData.note = num.toString();
-                        let testAward = new Awards(awardData);
-                        testAward.save((err) => {
-                            if (err) throw err;
+        Common.Tests.GetTests.getByFilterSuccess("award", "awards", Awards, function(next) {
+            // Pick student
+            let student = Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)];
+            next([{recipient: student._id.toString()}, Common.DBElements.awardList.filter((el) => el.recipient == student._id)]);
+        }, "Search by student");
 
-                            // Start testing once all awards are created
-                            if (++count == 15) {
-                                // Make request
-                                chai.request(server)
-                                    .get('/api/awards')
-                                    .end((err, res) => {
-                                        expect(res).to.have.status(200);
-                                        expect(res).to.be.json;
-                                        expect(res.body).to.have.property('award');
-                                        expect(res.body.award.length).to.be.eq(15);
-                                        for (var num = 0; num < 15; num++) {
-                                            // Cannot test note value, since there's no guarantee that they're in order
-                                            expect(res.body.award[num].recipient).to.equal(testStudent._id.toString());
-                                        }
-                                        done();
-                                    });
-                            }
-                        });
-                    }
-                });
-            });
-        });
+        Common.Tests.GetTests.getByFilterSuccess("award", "awards", Awards, function(next) {
+            // Pick random award for data
+            let award = Common.DBElements.awardList[faker.random.number(Common.DBElements.awardList.length - 1)];
+            next([{note: award.note}, Common.DBElements.awardList.filter((el) => el.note == award.note)]);
+        }, "Search by 'note'");
 
-        it('it should GET a award by recipient', (done) => {
+        Common.Tests.GetTests.getByFilterSuccess("award", "awards", Awards, function(next) {
+            next([{grade: {$gt: 90}}, Common.DBElements.awardList.filter((el) => el.grade > 90)]);
+        }, "Search by minimum grade above 90");
 
-            // Set up mock data
-            let testRes = new Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err;
+        Common.Tests.GetTests.getByFilterSuccess("award", "awards", Awards, function(next) {
+            let awardlessStudent = Common.DBElements.studentList.find(
+                el => Common.DBElements.awardList.findIndex(el2 => el2.recipient == el._id) == -1
+            );
 
-                // Make some students, then make awards for the students, then query for all
-                var studentData = {
-                    number: 594265372,
-                    firstName: "Johnny",
-                    lastName: "Test",
-                    gender: 1,
-                    DOB: new Date().toISOString(),
-                    photo: "/some/link",
-                    registrationComments: "No comment",
-                    basisOfAdmission: "Because",
-                    admissionAverage: 90,
-                    admissionComments: "None",
-                    resInfo: testRes
-                };
-                let testStudent = new Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    // Create second student
-                    studentData.number += 1;
-                    let testStudent2 = new Students(studentData);
-                    testStudent.save((err) => {
-                        if (err) throw err;
-
-                        var awardData = {
-                            recipient: testStudent
-                        };
-
-                        // Create 15 awards
-                        var count = 0;
-                        for (var num = 0; num < 15; num++) {
-                            awardData.note = num.toString();
-                            awardData.recipient = (num % 2 == 0) ? testStudent : testStudent2; // Test student gets even awards
-                            let testAward = new Awards(awardData);
-                            testAward.save((err) => {
-                                if (err) throw err;
-
-                                // Start testing once all awards are created
-                                if (++count == 15) {
-                                    // Race condition here doesn't matter, as all runs will still get 15 results returned
-
-                                    // Make request
-                                    chai.request(server)
-                                        .get('/api/awards')
-                                        .query({filter: {recipient: testStudent._id.toString()}})
-                                        .end((err, res) => {
-                                            expect(res).to.have.status(200);
-                                            expect(res).to.be.json;
-                                            expect(res.body).to.have.property('award');
-                                            expect(res.body.award.length).to.be.equal(8);
-                                            for (var num = 0; num < 8; num++) {
-                                                expect(res.body.award[num].recipient).to.equal(testStudent._id.toString());
-                                            }
-                                            done();
-                                        });
-                                }
-                            });
-                        }
-                    });
-                });
-            });
-        });
-
-        it('it should GET nothing if student has no award', (done) => {
-
-            // Set up mock data
-            let testRes = new Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err;
-
-                // Make some students, then make awards for the students (except one), then query for all
-                var studentData = {
-                    number: 594265372,
-                    firstName: "Johnny",
-                    lastName: "Test",
-                    gender: 1,
-                    DOB: new Date().toISOString(),
-                    photo: "/some/link",
-                    registrationComments: "No comment",
-                    basisOfAdmission: "Because",
-                    admissionAverage: 90,
-                    admissionComments: "None",
-                    resInfo: testRes
-                };
-                let testStudent = new Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    studentData.number = 541354335;
-                    let otherStudent = new Students(studentData);
-                    otherStudent.save((err) => {
-                        if (err) throw err;
-
-                        var awardData = {
-                            recipient: otherStudent
-                        };
-
-                        // Create 15 awards
-                        var count = 0;
-                        for (var num = 0; num < 15; num++) {
-                            awardData.note = num.toString();
-                            let testAward = new Awards(awardData);
-                            testAward.save((err) => {
-                                if (err) throw err;
-
-                                // Start testing once all awards are created
-                                if (++count == 15) {
-                                    // Race condition here doesn't matter, as all runs will still get 0 results returned
-
-                                    // Make request
-                                    chai.request(server)
-                                        .get('/api/awards')
-                                        .query({filter: {recipient: testStudent._id.toString()}})
-                                        .end((err, res) => {
-                                            expect(res).to.have.status(200);
-                                            expect(res).to.be.json;
-                                            expect(res.body).to.have.property('award');
-                                            expect(res.body.award.length).to.be.equal(0);
-                                            done();
-                                        });
-                                }
-                            });
-                        }
-                    });
-                });
-            });
-        });
-
-        it('it should GET award when given ID', (done) => {
-
-            // Set up mock data
-            let testRes = new Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err;
-
-                // Make some students, then make awards for the students, then query for all
-                var studentData = {
-                    number: 594265372,
-                    firstName: "Johnny",
-                    lastName: "Test",
-                    gender: 1,
-                    DOB: new Date().toISOString(),
-                    photo: "/some/link",
-                    registrationComments: "No comment",
-                    basisOfAdmission: "Because",
-                    admissionAverage: 90,
-                    admissionComments: "None",
-                    resInfo: testRes
-                };
-                let testStudent = new Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    var awardData = {
-                        recipient: testStudent
-                    };
-
-                    // Create 15 awards
-                    var count = 0;
-                    for (var num = 0; num < 15; num++) {
-                        awardData.note = num.toString();
-                        let testAward = new Awards(awardData);
-                        testAward.save((err) => {
-                            if (err) throw err;
-
-                            // Start testing once all awards are created
-                            if (++count == 15) {
-                                // Race condition here doesn't matter, as we already know that the latest version of testAward saved
-
-                                // Make request
-                                chai.request(server)
-                                    .get('/api/awards/' + testAward._id.toString())
-                                    .end((err, res) => {
-                                        expect(res).to.have.status(200);
-                                        expect(res).to.be.json;
-                                        expect(res.body).to.have.property('award');
-                                        expect(res.body.award.note).to.equal(testAward.note.toString());
-                                        expect(res.body.award.recipient).to.equal(testAward.recipient.toString());
-                                        done();
-                                    });
-                            }
-                        });
-                    }
-                });
-            });
-        });
-
-        it('it should 404 for award when given bad ID', (done) => {
-
-            // Set up mock data
-            let testRes = new Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err;
-
-                // Make some students, then make awards for the students, then query for all
-                var studentData = {
-                    number: 594265372,
-                    firstName: "Johnny",
-                    lastName: "Test",
-                    gender: 1,
-                    DOB: new Date().toISOString(),
-                    photo: "/some/link",
-                    registrationComments: "No comment",
-                    basisOfAdmission: "Because",
-                    admissionAverage: 90,
-                    admissionComments: "None",
-                    resInfo: testRes
-                };
-                let testStudent = new Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    var awardData = {
-                        recipient: testStudent
-                    };
-
-                    // Create 15 awards
-                    var count = 0;
-                    for (var num = 0; num < 15; num++) {
-                        awardData.note = num.toString();
-                        let testAward = new Awards(awardData);
-                        testAward.save((err) => {
-                            if (err) throw err;
-
-                            // Start testing once all awards are created
-                            if (++count == 15) {
-                                // Race condition here doesn't matter, as none will have this ID
-                                // Make request
-                                chai.request(server)
-                                    .get('/api/awards/53425353')
-                                    .end((err, res) => {
-                                        expect(res).to.have.status(404);
-                                        done();
-                                    });
-                            }
-                        });
-                    }
-                });
-            });
-        });
-    });
-
-    /*
-     * Test the /PUT routes
-     */
-    describe('/PUT awards', () => {
-        it('it should PUT an updated award', (done) => {
-
-            // Set up mock data
-            let testRes = new Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err
-            });
-
-            var studentData = {
-                number: 594265372,
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-                resInfo: testRes
-            };
-
-            let testStudent = new Students(studentData);
-            testStudent.save((err) =>{
-                if (err) throw err;
-
-                var awardData = {
-                    recipient: null
-                };
-
-
-                // Create first award
-                awardData.note = 0;
-                let testAward = new Awards(awardData);
-                testAward.save((err) => {
-                    if (err) throw err;
-
-                    // Create 14 awards
-                    var count = 0;
-                    for (var num = 1; num < 15; num++) {
-                        awardData.note = num;
-                        let otherAwards = new Awards(awardData);
-                        otherAwards.save((err) => {
-                            if (err) throw err;
-
-                            // Start testing once all awards are created
-                            if (++count == 14) {
-                                // Race condition here doesn't matter, as the modified data is being tested
-
-                                // Modify data
-                                awardData.note = "success";
-                                awardData.recipient = testStudent;
-
-                                // Make request
-                                chai.request(server)
-                                    .put('/api/awards/' + testAward._id.toString())
-                                    .send({award: awardData})
-                                    .end((err, res) => {
-                                        expect(res).to.have.status(200);
-                                        expect(res).to.be.json;
-                                        expect(res.body).to.have.property('award');
-                                        expect(res.body.award.note).to.equal(awardData.note);
-                                        expect(res.body.award.recipient).to.equal(testStudent._id.toString());
-
-                                        // Test mongo to ensure it was written
-                                        Awards.findById(testAward._id, (error, res) => {
-                                            expect(error || res.length === 0).to.be.false;
-                                            expect(res.note).to.equal(awardData.note);
-                                            expect(res.recipient.toString()).to.equal(testStudent._id.toString());
-                                            done();
-                                        });
-                                    });
-                            }
-                        });
-                    }
-                });
-            });
-        });
-
-        it('it should 400 on PUT an award with no recipient', (done) => {
-
-            // Set up mock data
-            let testRes = new Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err
-            });
-
-            var studentData = {
-                number: 594265372,
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-                resInfo: testRes
-            };
-
-            let testStudent = new Students(studentData);
-            testStudent.save((err) =>{
-                if (err) throw err;
-
-                var awardData = {
-                    recipient: testStudent
-                };
-
-
-                // Create first award
-                awardData.note = 0;
-                let testAward = new Awards(awardData);
-                testAward.save((err) => {
-                    if (err) throw err;
-
-                    // Create 14 awards
-                    var count = 0;
-                    for (var num = 1; num < 15; num++) {
-                        awardData.note = num;
-                        let otherAwards = new Awards(awardData);
-                        otherAwards.save((err) => {
-                            if (err) throw err;
-
-                            // Start testing once all awards are created
-                            if (++count == 14) {
-                                // Race condition here doesn't matter, as the modified data is being tested
-
-                                // Modify data
-                                awardData.note = "success";
-                                awardData.recipient = null;
-
-                                // Make request
-                                chai.request(server)
-                                    .put('/api/awards/' + testAward._id.toString())
-                                    .send({award: awardData})
-                                    .end((err, res) => {
-                                        expect(res).to.have.status(400);
-
-                                        Awards.findById(testAward._id, (err, result) => {
-                                            expect(err).to.be.null;
-                                            expect(result.recipient).to.not.be.null;
-                                            done();
-                                        });
-                                    });
-                            }
-                        });
-                    }
-                });
-            });
-        });
-
-        it('it should 404 on PUT a nonexistent award', (done) => {
-
-            // Set up mock data
-            let testRes = new Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err
-            });
-
-            let firstNumber = 594265372;
-            var awardData = {
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-                resInfo: testRes
-            };
-
-            // Create 15 awards
-            var count = 0;
-            for (var num = 0; num < 15; num++) {
-                awardData.number = firstNumber + num;
-                let testAward = new Awards(awardData);
-                testAward.save((err) => {
-                    if (err) throw err;
-
-                    // Start testing once all awards are created
-                    if (++count == 15) {
-                        // Race condition here doesn't matter, as the queried ID will not exist
-                        // Make request
-                        chai.request(server)
-                            .put('/api/awards/' + '4534234')
-                            .send({award: awardData})
-                            .end((err, res) => {
-                                expect(res).to.have.status(404);
-                                done();
-                            });
-                    }
+            try {
+                // A student may not be generated without an award. Generate a new one.
+                expect(awardlessStudent).to.be.ok;
+                next([{recipient: awardlessStudent._id.toString()}, []]);
+            } catch(err) {
+                //Create a new student without an award with which to do the test
+                Common.Generators.generateStudent(0, (err, model) => {
+                    next([{recipient: model._id.toString()}, []]);
                 });
             }
+        }, "Search for a award by a student without an award");
+
+        Common.Tests.GetTests.getByID("award", "awards", Awards, function(next) {
+            next(Common.DBElements.awardList[faker.random.number(Common.DBElements.awardList.length - 1)]);
+        }, "This should succeed.");
+
+        Common.Tests.GetTests.getByID("award", "awards", Awards, function(next) {
+            next(new Awards({}));
+        }, "This ID does not exist, should 404.");
+    });
+
+    describe('/PUT functions', function() {
+        beforeEach(Common.regenAllData);
+
+        Common.Tests.PutTests.putUpdated("award", "awards", Awards, function(next) {
+            // Get a random award and make random updates
+            let award = Common.DBElements.awardList[faker.random.number(Common.DBElements.awardList.length - 1)];
+            let updates = {
+                note: faker.random.words(5),
+                recipient: Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)]._id
+            };
+
+            // Update the object with the new random values
+            Object.keys(updates).forEach(key => award[key] = updates[key]);
+
+            // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+            next([updates, award]);
+        }, ['recipient']);
+
+        Common.Tests.PutTests.putUpdated("award", "awards", Awards, function(next) {
+            // Get a random award and make random updates
+            let award = Common.DBElements.awardList[faker.random.number(Common.DBElements.awardList.length - 1)];
+            let updates = {
+                note: faker.random.words(10),
+                recipient: Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)]._id
+            };
+
+            // Update the object with the new random values
+            Object.keys(updates).forEach(key => award[key] = updates[key]);
+
+            // Try to change the id
+            updates._id = mongoose.Types.ObjectId();
+
+            // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+            next([updates, award]);
+        }, ['recipient'], "This should succeed and ignore attempted ID change.");
+
+        Common.Tests.PutTests.putUpdated("award", "awards", Awards, function(next) {
+            // Get a random award and make random updates
+            let award = Common.DBElements.awardList[faker.random.number(Common.DBElements.awardList.length - 1)];
+            let updates = {
+                course: faker.random.words(1),
+                description: faker.random.words(5),
+                units: faker.random.number(100)/50,
+                grade: faker.random.number(100),
+                from: faker.random.word()
+            };
+            // Update the object with the new random values
+            Object.keys(updates).forEach(key => award[key] = updates[key]);
+
+            // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+            next([updates, award]);
+        }, ['recipient'], "Missing recipient, this should 400.");
+
+        Common.Tests.PutTests.putUpdated("award", "awards", Awards, function(next) {
+            // Get a random award and make random updates
+            let updates = {
+                note: faker.random.words(10),
+                recipient: Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)]._id
+            };
+            let award = new Awards(updates);
+
+            // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+            next([updates, award]);
+        }, ['recipient'], "This award does not exist yet, this should 404.");
+    });
+
+    describe('/POST functions', function() {
+        beforeEach(Common.regenAllData);
+
+        Common.Tests.PostTests.postNew("award", "awards", Awards, function(next) {
+            // Get a random award and make random updates
+            let newContent = {
+                note: faker.random.words(10),
+                recipient: Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)]._id
+            };
+            let award = new Awards(newContent);
+            next([newContent, award])
+        }, ['recipient']);
+
+        Common.Tests.PostTests.postNew("award", "awards", Awards, function(next) {
+            // Get a random award and make random updates
+            let newContent = {
+                note: faker.random.words(5),
+                recipient: null
+            };
+            let award = new Awards(newContent);
+            next([newContent, award])
+        }, ['recipient'], "Missing recipient, this should 400.");
+
+        let idFerry = null;
+
+        Common.Tests.PostTests.postNew("award", "awards", Awards,function(next) {
+            let award = Common.DBElements.awardList[faker.random.number(Common.DBElements.awardList.length - 1)];
+            let awardObj = {};
+            Object.keys(Awards.schema.obj).forEach(el => awardObj[el] = award[el]);
+            awardObj.recipient = award.recipient.toString();
+            awardObj._id = award._id;
+            idFerry = award._id;
+
+            next([awardObj, award]);
+        }, ['recipient'], "POSTing a record with an ID that already exists. Should ignore the new ID.",
+            function(next, res) {
+            // Make sure the ID is different
+            expect (res.body.award._id).to.not.equal(idFerry.toString());
+
+            // Make sure the creation was successful anyways
+            Awards.findById(res.body.award._id, function (err, results) {
+                expect(err).to.be.null;
+                expect(results).to.not.be.null;
+                next();
+            });
         });
     });
 
-    /*
-     * Test the /POST routes
-     */
-    describe('/POST an award', () => {
-        it('it should POST successfully', (done) => {
+    describe('/DELETE functions', function(){
+        beforeEach(Common.regenAllData);
 
-            // Set up mock data
-            let studentData = {
-                number: 594265372
-            };
-            let testStudent = new Students(studentData);
-
-            let awardData ={
-                note: "A note",
-                recipient: testStudent
-            };
-
-            // Save mock
-            testStudent.save((err) => {
-               if(err) throw err;
-
-                // Make request
-                chai.request(server)
-                    .post('/api/awards')
-                    .send({award: awardData})
-                    .end((err, res) => {
-                        expect(res).to.have.status(201);
-                        expect(res).to.be.json;
-                        expect(res.body).to.have.property('award');
-                        expect(res.body.award.note).to.be.a('String');
-                        expect(res.body.award.recipient).to.equal(testStudent._id.toString());
-
-                        // Check underlying database
-                        Awards.findById(res.body.award._id, function (error, award) {
-                            expect(error).to.be.null;
-                            expect(award).to.not.be.null;
-                            expect(award.note).to.be.a('String');
-                           expect(award.recipient.toString()).to.equal(testStudent._id.toString());
-
-                            done();
-                        });
-                    });
-            });
+        Common.Tests.DeleteTests.deleteExisting("award", "awards", Awards, function(next){
+            next(Common.DBElements.awardList[faker.random.number(Common.DBElements.awardList.length - 1)]._id);
         });
 
-        it('it should 400 on POST with no recipient', (done) => {
-
-            // Set up mock data
-            let studentData = {
-                number: 594265372
-            };
-            let testStudent = new Students(studentData);
-
-            let awardData ={
-                note: "A note"
-            };
-
-            // Save mock
-            testStudent.save((err) => {
-                if(err) throw err;
-
-                // Make request
-                chai.request(server)
-                    .post('/api/awards')
-                    .send({award: awardData})
-                    .end((err, res) => {
-                        expect(res).to.have.status(400);
-                        done();
-                    });
-            });
+        Common.Tests.DeleteTests.deleteNonexistent("award", "awards", Awards, function(next) {
+            next(mongoose.Types.ObjectId());
         });
-    });
-
-    /*
-     * Test the /DELETE routes
-     */
-    describe('/DELETE an award', () => {
-        it('it should DELETE successfully and remove associated link from Student', (done) => {
-
-            // Set up mock data
-            // Create student
-            var studentData = {
-                number: 594265372,
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-            };
-            let testStudent = new Students(studentData);
-            testStudent.save((err) => {
-                if (err) throw err;
-
-                // Create award
-                var awardData = {
-                    note: "Test",
-                    recipient: testStudent
-                };
-                let testAward = new Awards(awardData);
-                testAward.save((err) => {
-                    if (err) throw err;
-
-                    // Link student to award
-                    testStudent.awards = [testAward];
-                    testStudent.save((err) => {
-                        if (err) throw err;
-
-                        // Make request
-                        chai.request(server)
-                            .delete('/api/awards/' + testAward._id.toString())
-                            .end((err, res) => {
-                                expect(res).to.have.status(200);
-
-                                // Check underlying database
-                                Awards.findById(testAward._id, function (error, award) {
-                                    expect(error).to.be.null;
-                                    expect(award).to.be.null;
-                                    done();
-                                });
-                            });
-                    });
-                });
-            });
-        });
-
     });
 
 });

@@ -7,7 +7,12 @@ module.exports =
         Genders,
         'gender',
         false,
-        undefined,
+        (req, res, mod) => {
+            if (!mod.name)
+                return ["name must be specified"];
+            else
+                return 0
+        },
         undefined,
         undefined,
         undefined,
@@ -18,7 +23,7 @@ module.exports =
                 {$set: {genderInfo: null}},
                 {multi: true},
                 function (error, students) {
-                    if (error) response.status(500).send({error: error});
+                    if (error) res.status(500).send({error: error});
                     else {
                         // All students mapped successfully, delete residency
                         next();

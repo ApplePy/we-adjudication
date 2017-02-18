@@ -13,9 +13,11 @@ module.exports =
         true,
         (req, res, model) => {
             let errors = [];
-            if (!model.resInfo && model.resInfo !== null)
+            if (!model.number)
+                errors.push("A number must be specified");
+            if (!model.resInfo)
                 errors.push("A residency must be specified");
-            if (!model.genderInfo && model.genderInfo !== null)
+            if (!model.genderInfo)
                 errors.push("A gender must be specified");
             if (errors.length != 0)
                 return errors;

@@ -48,11 +48,17 @@ let standingList = [];
 // Generic Tests
 let Tests = {
     GetTests: {
-        getAll: function (emberName, emberPluralized, modelType, modelArray) {
+        // Query operand can be an object or a function that resolves into an object
+        getAll: function (emberName, emberPluralized, modelType, modelArray, queryOperand = null) {
             return it('it should GET all models', function (done) {
+                // Resolve query operands
+                if (typeof queryOperand === "function")
+                    queryOperand = queryOperand();
+
                 // Request all advanced standings
                 chai.request(server)
                     .get('/api/' + emberPluralized)
+                    .query(queryOperand)
                     .end((err, res) => {
                         expect(res).to.have.status(200);
                         expect(res).to.be.json;
@@ -73,14 +79,18 @@ let Tests = {
         },
 
         // element selection calls the passed callback with argument [{... filter contents ...}, [expected data object(s)]]
-        getByFilterSuccess: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "") {
+        // Query operand can be an object or a function that resolves into an object
+        getByFilterSuccess: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "", queryOperand = null) {
             return it('it should GET a model by a filter' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selections => {
+                    // Resolve query operands
+                    if (typeof queryOperand === "function")
+                        queryOperand = queryOperand();
 
                     // Make request
                     chai.request(server)
                         .get('/api/' + emberPluralized)
-                        .query({filter: selections[0]})
+                        .query(Object.assign({filter: selections[0]}, queryOperand))
                         .end((err, res) => {
                             expect(res).to.have.status(200);
                             expect(res).to.be.json;

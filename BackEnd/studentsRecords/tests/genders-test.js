@@ -1,442 +1,201 @@
-//During the test the env variable is set to test
-process.env.NODE_ENV = 'test';
+let DB = require('../models/studentsRecordsDB');
+let mongoose = DB.mongoose;
 
-let mongoose = require("mongoose");
-let Students = require('../models/schemas/studentinfo/studentSchema');
 let Genders = require('../models/schemas/studentinfo/genderSchema');
+let Students = require('../models/schemas/studentinfo/studentSchema');
 
-//Require the dev-dependencies
-let chai = require('chai');
-let chaiHttp = require('chai-http');
-let server = require('../server');
+let faker = require('faker');
+let Common = require('./genericTestFramework-helper');
+let chai = Common.chai;
 let expect = chai.expect;
 
-chai.use(chaiHttp);
 
-// Our parent block - stores the test
-describe('Genders', () => {
-    let host = "http://localhost:3700";     // This is the Node.js server
+////////
 
-    //Before each test we empty the database
-    beforeEach((done) => {
-        // Clear out all Residences and Students then call done
-        Genders.remove({}, (err) => {
-            if (err) throw "Error cleaning out Genders";
-            Students.remove({}, (err) => {
-                if (err) throw "Error cleaning out Students";
-                done()
+// NOTE: remember to not use () => {} functions inside mocha tests due to the 'this' binding - it breaks Mocha!
+
+////////
+
+
+describe('Genders', function() {
+
+    describe('/GET functions', function() {
+        before(Common.regenAllData);
+
+        Common.Tests.GetTests.getAll("gender", "genders", Genders, Common.DBElements.genderList);
+
+        // Common.Tests.GetTests.getByFilterSuccess("gender", "genders", Genders, function(next) {
+        //     // Pick student
+        //     let student = Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)];
+        //     next([{recipient: student._id.toString()}, Common.DBElements.genderList.filter((el) => el.recipient == student._id)]);
+        // }, "Search by student");
+
+        Common.Tests.GetTests.getByFilterSuccess("gender", "genders", Genders, function(next) {
+            // Pick random gender for data
+            let gender = Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)];
+            next([{name: gender.name}, Common.DBElements.genderList.filter((el) => el.name == gender.name)]);
+        }, "Search by 'name'");
+
+        // Common.Tests.GetTests.getByFilterSuccess("gender", "genders", Genders, function(next) {
+        //     next([{grade: {$gt: 90}}, Common.DBElements.genderList.filter((el) => el.grade > 90)]);
+        // }, "Search by minimum grade above 90");
+
+        Common.Tests.GetTests.getByFilterSuccess("gender", "genders", Genders, function(next) {
+            next([{name: "NonExistent"}, []]);
+        }, "Search for a nonexistent gender");
+
+        Common.Tests.GetTests.getByID("gender", "genders", Genders, function(next) {
+            next(Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)]);
+        });
+
+        Common.Tests.GetTests.getByID("gender", "genders", Genders, function(next) {
+            next(new Genders({}));
+        }, "This ID does not exist, should 404.");
+    });
+
+    describe('/PUT functions', function() {
+        beforeEach(Common.regenAllData);
+
+        Common.Tests.PutTests.putUpdated("gender", "genders", Genders, function(next) {
+            // Get a random gender and make random updates
+            let gender = Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)];
+            let updates = {
+                name: faker.random.word(),
+            };
+
+            // Update the object with the new random values
+            Object.keys(updates).forEach(key => gender[key] = updates[key]);
+
+            // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+            next([updates, gender]);
+        }, ['name']);
+
+        Common.Tests.PutTests.putUpdated("gender", "genders", Genders, function(next) {
+            // Get a random gender and make random updates
+            let gender = Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)];
+            let updates = {
+                name: faker.random.word(),
+            };
+
+            // Update the object with the new random values
+            Object.keys(updates).forEach(key => gender[key] = updates[key]);
+
+            // Try to change the id
+            updates._id = mongoose.Types.ObjectId();
+
+            // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+            next([updates, gender]);
+        }, ['name'], "This should succeed and ignore attempted ID change.");
+
+        Common.Tests.PutTests.putNotUnique("gender", "genders", Genders, function(next) {
+            // Get a random gender and make random updates
+            let gender1 = Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)];
+            let gender2 = Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)];
+
+            // Try to update to create a duplicate gender
+            gender1.name = gender2.name;
+
+            // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+            next([gender1, gender1._id]);
+        }, ['name'], "Posting with duplicate of a unique field, should 500.");
+
+        Common.Tests.PutTests.putUpdated("gender", "genders", Genders, function(next) {
+            // Get a random gender and make random updates
+            let gender = Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)];
+            let updates = {
+                name: null
+            };
+            // Update the object with the new random values
+            Object.keys(updates).forEach(key => gender[key] = updates[key]);
+
+            // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+            next([updates, gender]);
+        }, ['name'], "Missing name, this should 400.");
+
+        Common.Tests.PutTests.putUpdated("gender", "genders", Genders, function(next) {
+            // Get a random gender and make random updates
+            let updates = {
+                name: faker.random.word(),
+            };
+            let gender = new Genders(updates);
+
+            // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+            next([updates, gender]);
+        }, ['name'], "This gender does not exist yet, this should 404.");
+    });
+
+    describe('/POST functions', function() {
+        beforeEach(Common.regenAllData);
+
+        Common.Tests.PostTests.postNew("gender", "genders", Genders, function(next) {
+            // Get a random gender and make random updates
+            let newContent = {
+                name: faker.random.word(),
+            };
+            let gender = new Genders(newContent);
+            next([newContent, gender])
+        }, ['name']);
+
+        Common.Tests.PostTests.postNew("gender", "genders", Genders, function(next) {
+            // Get a random gender and make random updates
+            let newContent = {
+                name: null
+            };
+            let gender = new Genders(newContent);
+            next([newContent, gender])
+        }, ['name'], "Missing name, this should 400.");
+
+        let idFerry = null;
+
+        Common.Tests.PostTests.postNew("gender", "genders", Genders,function(next) {
+                let gender = Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)];
+                let genderObj = {
+                    name: faker.random.word()
+                };
+                genderObj._id = gender._id;
+                idFerry = gender._id;
+
+                next([genderObj, gender]);
+            }, ['name'], "POSTing a record with an ID that already exists. Should ignore the new ID.",
+            function(next, res) {
+                // Make sure the ID is different
+                expect (res.body.gender._id).to.not.equal(idFerry.toString());
+
+                // Make sure the creation was successful anyways
+                Genders.findById(res.body.gender._id, function (err, results) {
+                    expect(err).to.be.null;
+                    expect(results).to.not.be.null;
+                    next();
+                });
             });
+
+        Common.Tests.PostTests.postNotUnique("gender", "genders", Genders,function(next) {
+                let gender = Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)];
+
+                next([gender, gender]);
+            }, ['name'], "POSTing a record with duplicate data, should 500.");
+    });
+
+    describe('/DELETE functions', function(){
+        beforeEach(Common.regenAllData);
+
+        let elementFerry = null;
+
+        Common.Tests.DeleteTests.deleteExisting("gender", "genders", Genders, function(next){
+            elementFerry = Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)];
+            next(elementFerry._id);
+        }, undefined, function(next, res) {
+            // Check that all dependent objects got deassociated
+            Students.find({genderInfo: elementFerry._id}, (err, students) => {
+                expect(err).to.be.null;
+                expect(students).to.be.empty;
+                next();
+            });
+        });
+
+        Common.Tests.DeleteTests.deleteNonexistent("gender", "genders", Genders, function(next) {
+            next(mongoose.Types.ObjectId());
         });
     });
 
-    /*
-     * Test the /GET routes
-     */
-    describe('/GET genders', () => {
-        it('it should GET all genders ', (done) => {
-            // Request all residencies
-            chai.request(server)
-                .get('/api/genders')
-                .end((err, res) => {
-                    expect(res).to.have.status(200);
-                    expect(res).to.be.json;
-                    expect(res.body).to.have.property('gender');
-                    expect(res.body.gender.length).to.be.eq(0);
-                    done();
-                });
-        });
-
-        it('it should GET all genders when data exists', (done) => {
-
-            // Set up mock data
-            let testGender = new Genders({
-                name: "Male"
-            });
-            testGender.save((err) => {
-                if (err) throw err;
-
-                // Make residency request
-                chai.request(server)
-                    .get('/api/genders')
-                    .end((err, res) => {
-                        expect(res).to.have.status(200);
-                        expect(res).to.be.json;
-                        expect(res.body).to.have.property('gender');
-                        expect(res.body.gender.length).to.be.eq(1);
-                        expect(res.body.gender[0]).to.have.property('name');
-                        expect(res.body.gender[0].name).to.equal(testGender.name);
-                        done();
-                    });
-            });
-        });
-
-        // it('it should GET the gender of a student', (done) => {
-        //
-        //     // Set up mock data
-        //
-        //     let testGender = new Genders({
-        //         name: "Male"
-        //     });
-        //     testGender.save((err) => {
-        //         if (err) throw err;
-        //
-        //         let testGender2 = new Genders({
-        //             name: "Female"
-        //         });
-        //         testGender2.save((err) => {
-        //             if (err) throw err;
-        //
-        //             let testStudent1 = new Students({number: 12345, name: "Johnny Test", genderInfo: testGender});
-        //             testStudent1.save((err) => {
-        //                 if (err) throw err;
-        //
-        //                 let testStudent2 = new Students({number: 12346, name: "Jane Test", genderInfo: testGender2});
-        //                 testStudent2.save((err) => {
-        //                     if (err) throw err;
-        //
-        //                     // Request residency
-        //                     chai.request(server)
-        //                         .get('/api/genders?filter[student]=' + testStudent1._id.toString())
-        //                         .end((err, res) => {
-        //                             expect(res).to.have.status(200);
-        //                             expect(res).to.be.json;
-        //                             expect(res.body).to.have.property('gender');
-        //                             expect(res.body.gender).to.have.property('name');
-        //                             expect(res.body.gender.name).to.equal(testGender.name);
-        //                             done();
-        //                         });
-        //                 });
-        //             });
-        //         });
-        //     });
-        // });
-        //
-        // it('it should 404 if a student doesn\'t have a gender', (done) => {
-        //
-        //     // Set up mock data
-        //     let testGender = new Genders({
-        //         name: "Gender"
-        //     });
-        //     testGender.save((err) => {
-        //         if (err) throw err;
-        //
-        //         let testStudent1 = new Students({number: 12345, name: "Johnny Test", genderInfo: testGender});
-        //         testStudent1.save((err) => {
-        //             if (err) throw err;
-        //
-        //             let testStudent2 = new Students({number: 12346, name: "George Test", genderInfo: testGender});
-        //             testStudent2.save((err) => {
-        //                 if (err) throw err;
-        //
-        //                 let testStudent3 = new Students({number:12347, name: "Eve Test"});
-        //                 testStudent2.save((err) => {
-        //                     if (err) throw err;
-        //
-        //                     // Make request
-        //                     chai.request(server)
-        //                         .get('/api/genders?filter[student]=' + testStudent3._id.toString())
-        //                         .end((err, res) => {
-        //                             expect(res).to.have.status(404);
-        //                             done();
-        //                         });
-        //                 });
-        //             });
-        //         });
-        //     });
-        // });
-
-        it('it should GET the gender by name', (done) => {
-
-            // Set up mock data
-            let testGender = new Genders({
-                name: "Male"
-            });
-            testGender.save((err) => {
-                if (err) throw err;
-
-                // Make request
-                chai.request(server)
-                    .get('/api/genders?filter[name]=' + "Male")
-                    .end((err, res) => {
-                        expect(res).to.have.status(200);
-                        expect(res).to.be.json;
-                        expect(res.body).to.have.property('gender');
-                        expect(res.body.gender.length).to.be.eq(1);
-                        expect(res.body.gender[0]).to.have.property('name');
-                        expect(res.body.gender[0].name).to.equal(testGender.name);
-                        done();
-                    });
-            });
-        });
-
-        it('it should GET nothing if a the name does not exist', (done) => {
-
-            // Set up mock data
-            let testGender = new Genders({
-                name: "Male"
-            });
-            testGender.save((err) => {
-                if (err) throw err;
-
-                // Make request
-                chai.request(server)
-                    .get('/api/genders?filter[name]=' + "Female")
-                    .end((err, res) => {
-                        expect(res).to.have.status(200);
-                        expect(res).to.be.json;
-                        expect(res.body).to.have.property('gender');
-                        expect(res.body.gender.length).to.be.eq(0);
-                        done();
-                    });
-            });
-        });
-
-        it('it should GET gender when given ID', (done) => {
-
-            // Set up mock data
-            let testGender = new Genders({
-                    name: "Male"
-                });
-
-            testGender.save((err) => {
-                if (err) throw err;
-
-                // Make request
-                chai.request(server)
-                    .get('/api/genders/' + testGender._id.toString())
-                    .end((err, res) => {
-                        expect(res).to.have.status(200);
-                        expect(res).to.be.json;
-                        expect(res.body).to.have.property('gender');
-                        expect(res.body.gender).to.be.a('object');
-                        expect(res.body.gender).to.have.property('name');
-                        expect(res.body.gender.name).to.equal(testGender.name);
-                        done();
-                    });
-            });
-        });
-
-        it('it should 404 for gender when given bad ID', (done) => {
-
-            // Set up mock data
-            let testGender = new Genders({
-                name: "Male"
-            });
-            testGender.save((err) => {
-                if (err) throw err;
-
-                // Make request
-                chai.request(server)
-                    .get('/api/genders/453535')
-                    .end((err, res) => {
-                        expect(res).to.have.status(404);
-                        done();
-                    });
-            });
-        });
-    });
-
-    /*
-     * Test the /PUT routes
-     */
-    describe('/PUT genders', () => {
-        it('it should PUT an updated gender', (done) => {
-
-            // Set up mock data
-            var genderData = {
-                name: "Male"
-            };
-            let testGender = new Genders(genderData);
-            testGender.save((err) => {
-                if (err) throw err;
-
-                genderData.name = "Female";
-
-                // Make request
-                chai.request(server)
-                    .put('/api/genders/' + testGender._id)
-                    .send({gender: genderData})
-                    .end((err, res) => {
-                        // Test server response
-                        expect(res).to.have.status(200);
-                        expect(res).to.be.json;
-                        expect(res.body).to.have.property('gender');
-                        expect(res.body.gender).to.be.a('object');
-                        expect(res.body.gender).to.have.property('name');
-                        expect(res.body.gender.name).to.equal(genderData.name);
-
-                        // Test mongo for changes
-                        Genders.find(genderData, (err, res) => {
-                            expect(err).to.be.null;
-                            expect(res.length).to.equal(1);
-                            expect(res[0].name).to.equal(genderData.name);
-                            done();
-                        });
-                    });
-            });
-        });
-
-        it('it should 500 on PUT a gender with duplicate name', (done) => {
-
-            // Set up mock data
-            var genderData = {
-                name: "Male"
-            };
-
-            // Create first residence
-            let testGender = new Genders(genderData);
-            testGender.save((err) => {
-                if (err) throw err;
-
-                // Create second residence
-                genderData.name = "Female";
-                let testGender2 = new Genders(genderData);
-                testGender2.save((err) => {
-                   if (err) throw err;
-
-                    // Make bad request
-                    chai.request(server)
-                        .put('/api/genders/' + testGender._id)
-                        .send({gender: genderData})
-                        .end((err, res) => {
-                            // Test server response
-                            expect(res).to.have.status(500);
-
-                            // Test mongo for changes
-                            Genders.findById(testGender._id, (err, res) => {
-                                expect(err).to.be.null;
-                                expect(res.name).to.equal("Male");
-                                done();
-                            });
-                        });
-                });
-            });
-        });
-
-        it('it should 404 on PUT a nonexistent gender', (done) => {
-
-            // Set up mock data
-            var genderData = {
-                name: "Male"
-            };
-            let testGender = new Genders(genderData);
-            testGender.save((err) => {
-                if (err) throw err;
-
-                // Make request
-                chai.request(server)
-                    .put('/api/genders/' + '4534234')
-                    .send({gender: genderData})
-                    .end((err, res) => {
-                        expect(res).to.have.status(404);
-                        done();
-                    });
-            });
-        });
-    });
-
-    /*
-     * Test the /POST routes
-     */
-    describe('/POST a gender', () => {
-        it('it should POST successfully', (done) => {
-
-            // Set up mock data
-            let genderData = {
-                gender: {
-                    name: "Male"
-                }
-            };
-
-            // Make request
-            chai.request(server)
-                .post('/api/genders')
-                .send(genderData)
-                .end((err, res) => {
-                    expect(res).to.have.status(201);
-                    expect(res).to.be.json;
-                    expect(res.body).to.have.property('gender');
-                    expect(res.body.gender.name).to.equal(genderData.gender.name);
-
-                    Genders.findById(res.body.gender._id, function (error, gender) {
-                        expect(error).to.be.null;
-                        expect(gender.name).to.equal(genderData.gender.name);
-                        done();
-                    });
-                });
-        });
-
-        it('it should 500 on POST with duplicate gender name', (done) => {
-
-            // Set up mock data
-            let genderData = {
-                gender: {
-                    name: "Male"
-                }
-            };
-            let testGender = new Genders(genderData.gender);
-            testGender.save((err) => {
-               if (err) throw err;
-
-                // Make request
-                chai.request(server)
-                    .post('/api/genders')
-                    .send(genderData)
-                    .end((err, res) => {
-                        expect(res).to.have.status(500);
-
-                        // Ensure no new residency was created
-                        Genders.find(genderData.gender, function (error, gender) {
-                            expect(error).to.be.null;
-                            expect(gender.length).to.equal(1);
-                            done();
-                        });
-                    });
-            });
-        });
-    });
-
-    /*
-     * Test the /DELETE routes
-     */
-    describe('/DELETE a gender', () => {
-        it('it should DELETE successfully and unlink all students', (done) => {
-
-            // Set up mock data
-            let genderData = {
-                name: "Male"
-            };
-            let testGender = new Genders(genderData);
-            testGender.save((err) => {
-                if (err) throw err;
-
-                let testStudent = new Students(
-                    {
-                        name: "Johnny Test",
-                        genderInfo: testGender
-                    });
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    // Make request
-                    chai.request(server)
-                        .delete('/api/genders/' + testGender._id)
-                        .end((err, res) => {
-                            expect(res).to.have.status(200);
-
-                            Genders.findById(testGender._id, function (error, gender) {
-                                expect(error).to.be.null;
-                                expect(gender).to.be.null;
-
-                                Students.findById(testStudent._id, function(error, student) {
-                                    expect(error).to.be.null;
-                                    expect(student.genderInfo).to.be.null;
-                                    done();
-                                });
-                            });
-                        });
-                });
-            });
-        });
-    });
 });
