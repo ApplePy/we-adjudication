@@ -7,6 +7,7 @@ process.env.NODE_ENV = 'test';
 let faker = require('faker');
 let times = require('async/times');
 let each = require('async/each');
+let eachSeries = require('async/eachSeries');
 
 let Students = require('../models/schemas/studentinfo/studentSchema');
 let Residencies = require('../models/schemas/studentinfo/residencySchema');
@@ -25,11 +26,15 @@ chai.use(chaiHttp);
 let host = "http://localhost:3700";     // This is the Node.js server
 
 // Array of DB elements
-let residencyList = [];
-let genderList = [];
-let studentList = [];
-let awardList = [];
-let standingList = [];
+let Lists = {
+    residencyList: [],
+    genderList: [],
+    studentList: [],
+    awardList: [],
+    standingList: [],
+    hsGradesList: [],
+    hsCoursesList: []
+};
 
 
 //////
@@ -403,40 +408,32 @@ let regenAllData = function(done) {
         if (err) throw err;
 
         // Wipe all model data arrays
-        residencyList.length = 0;
-        genderList.length = 0;
-        studentList.length = 0;
-        awardList.length = 0;
-        standingList.length = 0;
+        Lists.residencyList.length = 0;
+        Lists.genderList.length = 0;
+        Lists.studentList.length = 0;
+        Lists.awardList.length = 0;
+        Lists.standingList.length = 0;
 
         // Generate male and female genders
         each(["Male", "Female"], generateGender, (err) => {
             // Catch generation errors
             if (err) throw err;
 
-            // Generate residencies
-            times(15, generateResidency, (err) => {
-                // Catch generation errors
-                if (err) throw err;
-
-                // Generate random students
-                times(50, generateStudent, (err) => {
+            let executions = [
+                [5, generateResidency],
+                [15, generateStudent],
+                [50, generateAward],
+                [50, generateStanding],
+            ];
+            eachSeries (executions, (item, cb) => {
+                times(item[0], item[1], (err) => {
                     // Catch generation errors
-                    if (err) throw err;
-
-                    // Generate random awards
-                    times(200, generateAward, (err) => {
-                        // Catch generation errors
-                        if (err) throw err;
-
-                        // Generate random standings
-                        times(200, generateStanding, (err) => {
-                            // Catch generation errors
-                            if (err) throw err;
-                            done();
-                        });
-                    });
+                    if (err) cb(err);
+                    else cb();
                 });
+            }, (err) => {
+                if (err) throw err;
+                else done();
             });
         });
     });
@@ -506,13 +503,13 @@ let generateStanding = (number, callback) => {
     // Pick a random course
     let course = courses[faker.random.number(courses.length - 1)];
 
-    genBase(AdvancedStandings, standingList, {
+    genBase(AdvancedStandings, Lists.standingList, {
         course: course.course,
         description: course.description,
         units: Math.floor(Math.random() * 4) / 2 + 0.5, // Either 0, 0.5, 1, 1.5, or 2
         grade: Math.floor(Math.random() * 101), // From 0-100
         from: fromData[Math.floor(Math.random() * fromData.length)],
-        recipient: studentList[faker.random.number(studentList.length - 1)]
+        recipient: Lists.studentList[faker.random.number(Lists.studentList.length - 1)]
     })(callback);
 };
 let generateAward = (number, callback) => {
@@ -568,13 +565,13 @@ let generateAward = (number, callback) => {
         'Caught in the Act of Caring Award',
         'Made My Day Award'
     ];
-    genBase(Awards, awardList, {
+    genBase(Awards, Lists.awardList, {
         note: awardNames[faker.random.number(awardNames.length - 1)],
-        recipient: studentList[faker.random.number(studentList.length - 1)]
+        recipient: Lists.studentList[faker.random.number(Lists.studentList.length - 1)]
     })(callback);
 };
 let generateStudent = (number, callback) => {
-  genBase(Students, studentList, {
+  genBase(Students, Lists.studentList, {
       number: faker.random.number(100000000, 999999999),
       firstName: faker.name.firstName(),
       lastName: faker.name.lastName(),
@@ -583,17 +580,17 @@ let generateStudent = (number, callback) => {
       basisOfAdmission: faker.lorem.paragraph(),
       admissionAverage: faker.random.number(100),
       admissionComments: faker.lorem.paragraph(),
-      resInfo: residencyList[faker.random.number(residencyList.length - 1)],
-      genderInfo: genderList[faker.random.number(genderList.length - 1)],
+      resInfo: Lists.residencyList[faker.random.number(Lists.residencyList.length - 1)],
+      genderInfo: Lists.genderList[faker.random.number(Lists.genderList.length - 1)],
   })(callback);
 };
 let generateGender = (name, cb) => {
     // Create and save gender, then put on list
-    genBase(Genders, genderList, {name: name})(cb);
+    genBase(Genders, Lists.genderList, {name: name})(cb);
 };
 let generateResidency = (number, callback) => {
     // Create and save residency, then put on list
-    genBase(Residencies, residencyList, {name: faker.lorem.words()})(callback);
+    genBase(Residencies, Lists.residencyList, {name: faker.lorem.words()})(callback);
 };
 /**
  * Save a generic model to the database and add the object to a specified list.
@@ -621,12 +618,7 @@ exports.host = host;
 exports.chai = chai;
 exports.server = server;
 
-exports.DBElements = {};
-exports.DBElements.residencyList = residencyList;
-exports.DBElements.genderList = genderList;
-exports.DBElements.studentList = studentList;
-exports.DBElements.awardList = awardList;
-exports.DBElements.standingList = standingList;
+exports.DBElements = Lists;
 
 exports.Generators = {};
 exports.Generators.generateStanding = generateStanding;
