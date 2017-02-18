@@ -1,15 +1,16 @@
-let DB = require('../models/studentsRecordsDB');
-let mongoose = DB.mongoose;
-
-let Students = require('../models/schemas/studentinfo/studentSchema');
-let Awards = require('../models/schemas/studentinfo/awardSchema');
-let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
+process.env.NODE_ENV = 'test';
 
 let faker = require('faker');
 let Common = require('./genericTestFramework-helper');
 let chai = Common.chai;
 let expect = chai.expect;
 
+let DB = require('../models/studentsRecordsDB');
+let mongoose = DB.mongoose;
+
+let Students = require('../models/schemas/studentinfo/studentSchema');
+let Awards = require('../models/schemas/studentinfo/awardSchema');
+let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
 
 ////////
 

@@ -1,16 +1,17 @@
 /**
  * Created by darryl on 2017-02-13.
  */
-
-let DB = require('../models/studentsRecordsDB');
-var mongoose = DB.mongoose;
-
-let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
+process.env.NODE_ENV = 'test';
 
 let faker = require('faker');
 let Common = require('./genericTestFramework-helper');
 let chai = Common.chai;
 let expect = chai.expect;
+
+let DB = require('../models/studentsRecordsDB');
+var mongoose = DB.mongoose;
+
+let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
 
 
 ////////
