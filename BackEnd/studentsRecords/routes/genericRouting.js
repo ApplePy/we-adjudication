@@ -36,7 +36,8 @@ var Setup = function(model,
     // New model entry
         .post(function (request, response) {
             // Create model
-            var modelObj = new model(request.body[modelNameEmberized]);
+            delete request.body[modelNameEmberized]._id;
+            let modelObj = new model(request.body[modelNameEmberized]);
 
             // Check to ensure contents are good
             if ((verRes = verifyHook(request, response, modelObj)) !== 0)
@@ -54,9 +55,9 @@ var Setup = function(model,
 
         // Get model objects
         .get(function (request, response) {
-            var l = parseInt(request.query.limit);
-            var o = parseInt(request.query.offset);
-            var filter = request.query.filter;
+            let l = parseInt(request.query.limit);
+            let o = parseInt(request.query.offset);
+            let filter = request.query.filter;
 
             // Get all model objects
             if (!filter) {
@@ -108,7 +109,8 @@ var Setup = function(model,
     // Get model by id
         .get(function (request, response) {
             model.findById(request.params.mongo_id, function (error, modelObj) {
-                if (error) response.status(404).send(error);
+                if (error) response.status(500).send(error);
+                else if (!modelObj) response.sendStatus(404);
                 else response.json({[modelNameEmberized]: modelObj});
             })
         })
@@ -117,8 +119,9 @@ var Setup = function(model,
         .put(function (request, response) {
             model.findById(request.params.mongo_id, function (error, modelObj) {
                 if (error) {
-                    response.status(404).send({error: error});
+                    response.status(500).send({error: error});
                 }
+                else if (!modelObj) response.sendStatus(404);
                 else {
                     // Check to ensure that all fields in new version exist properly before updating
                     if ((verRes = verifyHook(request, response, request.body[modelNameEmberized])) !== 0)
@@ -157,6 +160,7 @@ var Setup = function(model,
             model.findByIdAndRemove(request.params.mongo_id,
                 function (error, deleted) {
                     if (error) response.status(500).send({error: error});
+                    else if (!deleted) response.sendStatus(404);
                     else {
                         // Send success and call cleanup hook
                         response.json({advancedStanding: deleted});
