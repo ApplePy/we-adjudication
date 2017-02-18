@@ -78,6 +78,37 @@ let Tests = {
             });
         },
 
+        getPagination: function(emberName, emberPluralized, modelType, modelArray, pageSize = 5) {
+            return it('it should GET all models, one page at a time', function(done) {
+
+                let remainingModels = new Set(modelArray.map(el => el._id.toString()));
+
+                times(Math.ceil(modelArray.length / 5), function (n, next) {
+                    // Request all advanced standings
+                    chai.request(server)
+                        .get('/api/' + emberPluralized)
+                        .query({offset: n * pageSize, limit: pageSize})
+                        .end((err, res) => {
+                            expect(res).to.have.status(200);
+                            expect(res).to.be.json;
+                            expect(res.body).to.have.property(emberName);
+                            expect(res.body[emberName]).to.have.length.at.most(pageSize);
+
+                            // Remove model from remaining models
+                            for (let num = 0; num < res.body[emberName].length; num++) {
+                                expect(remainingModels.delete(res.body[emberName][num]._id.toString())).to.be.true;
+                            }
+                            next();
+                        });
+                }, function (err, results) {
+                    if (err) throw err;
+                    expect(remainingModels.size).to.equal(0);
+                    done();
+                });
+
+            });
+        },
+
         // element selection calls the passed callback with argument [{... filter contents ...}, [expected data object(s)]]
         // Query operand can be an object or a function that resolves into an object
         getByFilterSuccess: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "", queryOperand = null) {

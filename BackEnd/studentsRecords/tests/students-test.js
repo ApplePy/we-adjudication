@@ -28,6 +28,8 @@ describe('Students', function() {
             return {offset: 0, limit: limit};
         });
 
+        Common.Tests.GetTests.getPagination("student", "students", Students, Common.DBElements.studentList);
+
         Common.Tests.GetTests.getByFilterSuccess("student", "students", Students, function(next) {
             // Pick random student for data
             let student = Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)];
