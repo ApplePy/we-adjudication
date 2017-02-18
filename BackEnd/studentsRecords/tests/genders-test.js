@@ -92,6 +92,11 @@ describe('Genders', function() {
             let gender1 = Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)];
             let gender2 = Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)];
 
+            // Loop until genders are different
+            while (gender1.name === gender2.name) {
+                gender2 = Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)];
+            }
+
             // Try to update to create a duplicate gender
             gender1.name = gender2.name;
 

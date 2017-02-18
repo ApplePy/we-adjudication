@@ -82,6 +82,11 @@ describe('Residencies', function() {
             let residency1 = Common.DBElements.residencyList[faker.random.number(Common.DBElements.residencyList.length - 1)];
             let residency2 = Common.DBElements.residencyList[faker.random.number(Common.DBElements.residencyList.length - 1)];
 
+            // Loop until residencies are different
+            while (residency1.name === residency2.name) {
+                residency2 = Common.DBElements.residencyList[faker.random.number(Common.DBElements.residencyList.length - 1)];
+            }
+
             // Try to update to create a duplicate residency
             residency1.name = residency2.name;
 

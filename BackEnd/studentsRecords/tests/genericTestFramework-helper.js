@@ -359,7 +359,10 @@ let Tests = {
  * This function wipes and regenerates new random data in the database for the next test.
  * @param done  The callback to be called when regeneration is finished.
  */
-let regenAllData = (done) => {
+let regenAllData = function(done) {
+    // This may be a slow operation
+    this.timeout(6000);
+
     // Wipe the database of all data
     each([Residencies, Students, Awards, AdvancedStandings, Genders], (mod, cb) => {
         // Delete all data from the given model, call cb(err) if something happens.
