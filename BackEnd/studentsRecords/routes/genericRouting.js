@@ -44,7 +44,7 @@ var Setup = function(model,
                 return response.status(400).json({error: {messages: [verRes]}});
 
             modelObj.save(function (error) {
-                if (error) response.status(500).send(error);
+                if (error) response.status(500).send({error: error});
                 else {
                     // Send success and call post hook
                     response.status(201).json({[modelNameEmberized]: modelObj});
@@ -59,20 +59,24 @@ var Setup = function(model,
             let o = parseInt(request.query.offset);
             let filter = request.query.filter;
 
+            // Add default limits
+            if (typeof o !== 'number' || isNaN(o)) o = 0;
+            if (typeof l !== 'number' || isNaN(l)) l = 0;
+
             // Get all model objects
             if (!filter) {
                 // Return models in pages
                 if (enablePaginate) {
                     model.paginate({}, {offset: o, limit: l},
                         function (error, modelObjs) {
-                            if (error) response.status(500).send(error);
-                            else response.json({student: modelObjs.docs});
+                            if (error) response.status(500).send({error: error});
+                            else response.json({[modelNameEmberized]: modelObjs.docs});
                         });
                 }
                 // Return all models
                 else {
                     model.find(function (error, modresults) {
-                        if (error) response.status(500).send(error);
+                        if (error) response.status(500).send({error: error});
                         else response.json({[modelNameEmberized]: modresults});
                     });
                 }
@@ -87,13 +91,13 @@ var Setup = function(model,
 
                         model.paginate(filter, {offset: o, limit: l},
                             function (error, modelObjs) {
-                                if (error) response.status(500).send(error);
+                                if (error) response.status(500).send({error: error});
                                 else response.json({student: modelObjs.docs});
                             });
                     }
                     else {
                         model.find(filter, function (error, queryResults) {
-                            if (error) response.status(500).send(error);
+                            if (error) response.status(500).send({error: error});
                             else response.json({[modelNameEmberized]: queryResults});
                         });
                     }
@@ -109,7 +113,7 @@ var Setup = function(model,
     // Get model by id
         .get(function (request, response) {
             model.findById(request.params.mongo_id, function (error, modelObj) {
-                if (error) response.status(500).send(error);
+                if (error) response.status(500).send({error: error});
                 else if (!modelObj) response.sendStatus(404);
                 else response.json({[modelNameEmberized]: modelObj});
             })
