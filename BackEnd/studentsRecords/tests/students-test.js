@@ -117,7 +117,7 @@ describe('Students', function() {
             let student2 = Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)];
 
             // Loop until students are different
-            while (student1.name === student2.name) {
+            while (student1.number === student2.number) {
                 student2 = Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)];
             }
 
