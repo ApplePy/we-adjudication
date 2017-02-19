@@ -8,7 +8,7 @@ export default DS.Model.extend({
   photo: DS.attr(),
   registrationComments: DS.attr('string'),
   basisOfAdmission: DS.attr('string'),
-  admissionAverage: DS.attr('number'),
+  admissionAverage: DS.attr('string'),
   admissionComments: DS.attr('string'),
   awards: DS.hasMany('award'),
   advancedStandings: DS.hasMany('advanced-standing'),

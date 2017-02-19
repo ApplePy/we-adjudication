@@ -13,7 +13,7 @@ var studentsSchema = mongoose.Schema(
         photo: String,
         registrationComments: String,
         basisOfAdmission: String,
-        admissionAverage: Number,
+        admissionAverage: String,
         admissionComments: String,
         hsGrades: [{type: mongoose.Schema.ObjectId, ref: 'HSGrades'}],
         resInfo: {type: mongoose.Schema.ObjectId, ref: 'Residencies'},

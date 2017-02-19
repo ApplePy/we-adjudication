@@ -765,7 +765,7 @@ let generateStudent = (number, callback) => {
       DOB: faker.date.past(),   // TODO: this is wrong format
       registrationComments: faker.lorem.paragraph(),
       basisOfAdmission: faker.lorem.paragraph(),
-      admissionAverage: faker.random.number(100),
+      admissionAverage: faker.lorem.paragraph(),
       admissionComments: faker.lorem.paragraph(),
       resInfo: Lists.residencyList[faker.random.number(Lists.residencyList.length - 1)],
       genderInfo: Lists.genderList[faker.random.number(Lists.genderList.length - 1)],
