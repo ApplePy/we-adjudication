@@ -7,8 +7,7 @@ var gradeSchema = mongoose.Schema(
     {
         mark: {type: Number, required: true},
         note: String,
-        level: {type: mongoose.Schema.ObjectId, ref: 'ProgramRecords'},
-        student: {type: mongoose.Schema.ObjectId, ref: 'Students'}
+        courses: [{type: mongoose.Schema.ObjectId, ref: 'CourseCodes'}]
     }
 );
 

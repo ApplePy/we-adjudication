@@ -15,10 +15,10 @@ var studentsSchema = mongoose.Schema(
         basisOfAdmission: String,
         admissionAverage: Number,
         admissionComments: String,
-        grades: [{type: mongoose.Schema.ObjectId, ref: 'Grades'}],
+        hsGrades: [{type: mongoose.Schema.ObjectId, ref: 'HSGrades'}],
         resInfo: {type: mongoose.Schema.ObjectId, ref: 'Residencies'},
         genderInfo: {type: mongoose.Schema.ObjectId, ref: 'Genders'},
-        hsGrades: [{type: mongoose.Schema.ObjectId, ref: 'HSGrades'}],
+        terms: [{type: mongoose.Schema.ObjectId, ref: 'TermCodes'}],
         awards: [{type: mongoose.Schema.ObjectId, ref: 'Awards'}],
         advancedStandings: [{type: mongoose.Schema.ObjectId, ref: 'AdvancedStandings'}]
     }

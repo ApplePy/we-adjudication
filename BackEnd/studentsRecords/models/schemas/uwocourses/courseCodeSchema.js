@@ -9,7 +9,8 @@ var courseCodeSchema = mongoose.Schema(
         courseNumber: Number,
         name: String,
         unit: Number,
-        programRecords: [{type: mongoose.Schema.ObjectId, ref: 'ProgramRecords'}]
+        termInfo: {type: mongoose.Schema.ObjectId, ref: 'TermCodes'},
+        gradeInfo: {type: mongoose.Schema.ObjectId, ref: 'Grades'}
     }
 );
 
