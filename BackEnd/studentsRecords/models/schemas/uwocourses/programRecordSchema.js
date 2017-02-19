@@ -2,6 +2,7 @@
  * Created by darryl on 2017-02-09.
  */
 var mongoose = require('./../../studentsRecordsDB').mongoose;
+var mongoosePaginate = require('mongoose-paginate');
 
 var programRecordSchema = mongoose.Schema(
     {
@@ -13,6 +14,7 @@ var programRecordSchema = mongoose.Schema(
         plan: [{type: mongoose.Schema.ObjectId, ref: 'PlanCodes'}]              // NOTE: In a many-to-many relationship, this WILL store data.
     }
 );
+programRecordSchema.plugin(mongoosePaginate);
 
 var ProgramRecords = mongoose.model('programRecord', programRecordSchema);
 

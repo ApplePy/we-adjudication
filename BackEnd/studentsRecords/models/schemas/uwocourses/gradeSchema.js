@@ -2,6 +2,7 @@
  * Created by darryl on 2017-02-09.
  */
 var mongoose = require('./../../studentsRecordsDB').mongoose;
+var mongoosePaginate = require('mongoose-paginate');
 
 var gradeSchema = mongoose.Schema(
     {
@@ -10,6 +11,7 @@ var gradeSchema = mongoose.Schema(
         courses: [{type: mongoose.Schema.ObjectId, ref: 'CourseCodes'}]
     }
 );
+gradeSchema.plugin(mongoosePaginate);
 
 var Grades = mongoose.model('grade', gradeSchema);
 
