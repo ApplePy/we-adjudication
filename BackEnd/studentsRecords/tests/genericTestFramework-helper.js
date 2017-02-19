@@ -61,7 +61,15 @@ let Lists = {
 // Generic Tests
 let Tests = {
     GetTests: {
-        // Query operand can be an object or a function that resolves into an object
+        /**
+         * Attempts to retrieve all models from the API endpoint and makes sure that it successfully received all data.
+         *
+         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
+         * @param emberPluralized   A string representing the name to be used in the API call route
+         * @param modelType         A model that matches the type returned by the API call
+         * @param modelArray        An array containing modelType objects that is expected from the API call
+         * @param queryOperand      Query operand can be a URL query object or a function that resolves into a URL query object
+         */
         getAll: function (emberName, emberPluralized, modelType, modelArray, queryOperand = null) {
             return it('it should GET all models', function (done) {
                 // Resolve query operands
@@ -91,6 +99,15 @@ let Tests = {
             });
         },
 
+        /**
+         * Attempts to retrieve all models from the API endpoint, one page at a time, and makes sure that it successfully received all data.
+         * 
+         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
+         * @param emberPluralized   A string representing the name to be used in the API call route
+         * @param modelType         A model that matches the type returned by the API call
+         * @param modelArray        An array containing modelType objects that is expected from the API call
+         * @param pageSize          The size of the page to use
+         */
         getPagination: function(emberName, emberPluralized, modelType, modelArray, pageSize = 5) {
             return it('it should GET all models, one page at a time', function(done) {
 
@@ -121,9 +138,17 @@ let Tests = {
 
             });
         },
-
-        // element selection calls the passed callback with argument [{... filter contents ...}, [expected data object(s)]]
-        // Query operand can be an object or a function that resolves into an object
+        
+        /**
+         * Attempts to retrieve all models from an API endpoint that match a filter query, and makes sure that it successfully received all matching data.
+         *
+         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
+         * @param emberPluralized   A string representing the name to be used in the API call route
+         * @param modelType         A model that matches the type returned by the API call
+         * @param elementSelection  A function that calls the passed callback with argument [{... filter contents ...}, [expected data object(s)]]
+         * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
+         * @param queryOperand      Query operand can be a URL query object or a function that resolves into a URL query object
+         */
         getByFilterSuccess: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "", queryOperand = null) {
             return it('it should GET a model by a filter' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selections => {
@@ -152,7 +177,15 @@ let Tests = {
             });
         },
 
-        // element selection calls the passed callback with the data object as the argument
+        /**
+         * Attempts to retrieve a specific model from an API endpoint, and makes sure that it successfully received the requested data.
+         * 
+         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
+         * @param emberPluralized   A string representing the name to be used in the API call route
+         * @param modelType         A model that matches the type returned by the API call
+         * @param elementSelection  A function that calls the passed callback with the data object as the argument
+         * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
+         */
         getByID: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "") {
             return it('it should GET a model by id' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
@@ -165,6 +198,7 @@ let Tests = {
                                 if (err) throw err;
 
                                 if (!found) {
+                                    // Sometimes a user fault causes a fail so bad that the server 500s instead. Catch both.
                                     try {
                                         expect(res).to.have.status(404);
                                     } catch(staterr) {
@@ -186,7 +220,17 @@ let Tests = {
     },
 
     PutTests: {
-        // Element selection supplies: [{updated data}, expected model]
+        /**
+         * Attempts to update a given object with new values through an API endpoint, and makes sure that the model was updated successfully, or failed in an expected manner.
+         * 
+         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
+         * @param emberPluralized   A string representing the name to be used in the API call route
+         * @param modelType         A model that matches the type returned by the API call
+         * @param elementSelection  A function that calls the passed callback with argument [{updated data}, expected model]
+         * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
+         * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
+         * @param postPutVerify     A function that receives (next, API result) to allow additional checks to be made before declaring the PUT a success
+         */
         putUpdated: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPutVerify = (cb, res) => cb()) {
             return it('it should PUT an updated model and update all fields' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
@@ -210,6 +254,7 @@ let Tests = {
                                     done();
                                 }
                                 else if (!data) {
+                                    // Sometimes a user fault causes a fail so bad that the server 500s instead. Catch both.
                                     try {
                                         expect(res).to.have.status(404);
                                     } catch(staterr) {
@@ -235,7 +280,17 @@ let Tests = {
             });
         },
 
-        // Element selection supplies: [{updated data}, id of model to update]
+        /**
+         * Attempts to update a given object with new values through an API endpoint that cause a uniqueness conflict, and makes sure that the update fails in an expected manner.
+         *
+         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
+         * @param emberPluralized   A string representing the name to be used in the API call route
+         * @param modelType         A model that matches the type returned by the API call
+         * @param elementSelection  A function that calls the passed callback with argument [{updated data}, id of model to update]
+         * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
+         * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
+         * @param postPutVerify     A function that receives (next, API result) to allow additional checks to be made before declaring the PUT a success
+         */
         putNotUnique: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPutVerify = (cb, res) => cb()) {
             return it('it should PUT an updated model and update all fields' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
@@ -259,6 +314,7 @@ let Tests = {
                                     done();
                                 }
                                 else if (!data) {
+                                    // Sometimes a user fault causes a fail so bad that the server 500s instead. Catch both.
                                     try {
                                         expect(res).to.have.status(404);
                                     } catch(staterr) {
@@ -278,7 +334,18 @@ let Tests = {
     },
 
     PostTests: {
-        // Element selection supplies: [{updated data}, expected model]
+
+        /**
+         * Attempts to create a given object with through an API endpoint, and makes sure that the model was created successfully, or failed in an expected manner.
+         *
+         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
+         * @param emberPluralized   A string representing the name to be used in the API call route
+         * @param modelType         A model that matches the type returned by the API call
+         * @param elementSelection  A function that calls the passed callback with argument [{updated data}, expected model]
+         * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
+         * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
+         * @param postPostVerify
+         */
         postNew: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPostVerify = (cb, res) => cb()) {
             return it('it should POST' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
@@ -318,7 +385,17 @@ let Tests = {
             });
         },
 
-        // Element selection supplies: {new data}
+        /**
+         * Attempts to create a given object with new values through an API endpoint that cause a uniqueness conflict, and makes sure that the creation fails in an expected manner.
+         *
+         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
+         * @param emberPluralized   A string representing the name to be used in the API call route
+         * @param modelType         A model that matches the type returned by the API call
+         * @param elementSelection  A function that calls the passed callback with argument {new data}
+         * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
+         * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
+         * @param postPostVerify    A function that receives (next, API result) to allow additional checks to be made before declaring the POST a success
+         */
         postNotUnique: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPostVerify = (cb, res) => cb()) {
             return it('it should POST' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
@@ -347,7 +424,17 @@ let Tests = {
     },
 
     DeleteTests: {
-        // Element selection supplies the id to delete
+
+        /**
+         * Attempts to delete a given object ID through an API endpoint, and makes sure that the deletion succeeded.
+         *
+         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
+         * @param emberPluralized   A string representing the name to be used in the API call route
+         * @param modelType         A model that matches the type returned by the API call
+         * @param elementSelection  A function that calls the passed callback with argument "id of object to delete"
+         * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
+         * @param postDeleteVerify  A function that receives (next, API result) to allow additional checks to be made before declaring the DELETE a success
+         */
         deleteExisting: function(emberName, emberPluralized, modelType, elementSelection, descriptionText = "", postDeleteVerify = (cb, res) => cb()) {
             return it('it should DELETE and cleanup if applicable' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
@@ -368,7 +455,16 @@ let Tests = {
             });
         },
 
-        // Element selection supplies the id to delete
+        /**
+         * Attempts to delete a non-existent object ID through an API endpoint, and makes sure that the deletion failed in an expected manner.
+         * 
+         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
+         * @param emberPluralized   A string representing the name to be used in the API call route
+         * @param modelType         A model that matches the type returned by the API call
+         * @param elementSelection  A function that calls the passed callback with argument  "id of object to delete"
+         * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
+         * @param postDeleteVerify
+         */
         deleteNonexistent: function(emberName, emberPluralized, modelType, elementSelection, descriptionText = "", postDeleteVerify = (cb, res) => cb()) {
             return it('it should fail to DELETE with error 404' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
@@ -376,6 +472,7 @@ let Tests = {
                     chai.request(server)
                         .delete(['/api', emberPluralized, selection].join('/'))
                         .end((err, res) => {
+                            // Sometimes a user fault causes a fail so bad that the server 500s instead. Catch both.
                             try {
                                 expect(res).to.have.status(404);
                             } catch(staterr) {
