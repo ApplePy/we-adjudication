@@ -6,7 +6,7 @@ module.exports =
     Setup(
         AdvancedStandings,
         'advancedStanding',
-        false,
+        true,
         (req, res, mod) => {
             if (!mod.recipient)
                 return ["Recipient must be specified"];
