@@ -13,7 +13,7 @@ module.exports =
         true,
         (req, res, mod) => {
             if (!mod.mark || !mod.recipient)
-                return ["Mark must be specified"];
+                return ["Mark and recipient must be specified"];
             else
                 return 0;
         },
