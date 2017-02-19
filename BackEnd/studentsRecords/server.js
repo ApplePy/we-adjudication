@@ -9,6 +9,7 @@ var genders = require('./routes/studentinfo/genders');
 var awards = require('./routes/studentinfo/awards');
 var advancedStandings = require('./routes/studentinfo/advancedStandings');
 var hsGrades = require('./routes/highschool/hsGrades');
+var hsCourses = require('./routes/highschool/hsCourses');
 
 
 app.use(function (request, response, next) {
@@ -38,6 +39,7 @@ api.use('/genders', genders);
 api.use('/awards', awards);
 api.use('/advancedStandings', advancedStandings);
 api.use('/hsGrades', hsGrades);
+api.use('/hsCourses', hsCourses);
 
 // Set default serve
 if (process.env.NODE_ENV === 'production') app.use(express.static('dist'));

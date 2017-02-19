@@ -2,8 +2,9 @@
  * Created by darryl on 2017-02-09.
  */
 var mongoose = require('./../../studentsRecordsDB').mongoose;
+var mongoosePaginate = require('mongoose-paginate');
 
-var hscourseSchema = mongoose.Schema(
+var hsCourseSchema = mongoose.Schema(
     {
         level: String,
         unit: Number,
@@ -13,7 +14,8 @@ var hscourseSchema = mongoose.Schema(
         hsGrades: [{type: mongoose.Schema.ObjectId, ref: 'HSGrades'}]
     }
 );
+hsCourseSchema.plugin(mongoosePaginate);
 
-var HSCourses = mongoose.model('hsCourse', hscourseSchema);
+var HSCourses = mongoose.model('hsCourse', hsCourseSchema);
 
 module.exports = HSCourses;
