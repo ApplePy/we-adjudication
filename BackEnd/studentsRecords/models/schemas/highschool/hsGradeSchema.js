@@ -2,6 +2,7 @@
  * Created by darryl on 2017-02-09.
  */
 var mongoose = require('./../../studentsRecordsDB').mongoose;
+var mongoosePaginate = require('mongoose-paginate');
 
 var hsgradeSchema = mongoose.Schema(
     {
@@ -10,6 +11,7 @@ var hsgradeSchema = mongoose.Schema(
         recipient: {type: mongoose.Schema.ObjectId, ref: 'Students'}
     }
 );
+hsgradeSchema.plugin(mongoosePaginate);
 
 var HSGrades = mongoose.model('hsGrade', hsgradeSchema);
 

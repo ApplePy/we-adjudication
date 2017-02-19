@@ -12,7 +12,7 @@ module.exports =
         'hsGrade',
         true,
         (req, res, mod) => {
-            if (!mod.mark)
+            if (!mod.mark || !mod.recipient)
                 return ["Mark must be specified"];
             else
                 return 0;

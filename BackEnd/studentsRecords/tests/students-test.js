@@ -11,6 +11,7 @@ let mongoose = DB.mongoose;
 let Students = require('../models/schemas/studentinfo/studentSchema');
 let Awards = require('../models/schemas/studentinfo/awardSchema');
 let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
+let HSGrades = require('../models/schemas/highschool/hsGradeSchema');
 
 ////////
 
@@ -355,7 +356,11 @@ describe('Students', function() {
                 AdvancedStandings.find({recipient: elementFerry._id}, (err, standings) => {
                     expect(err).to.be.null;
                     expect(standings).to.be.empty;
-                    next();
+                    HSGrades.find({recipient: elementFerry._id}, (err, grades) => {
+                        expect(err).to.be.null;
+                        expect(grades).to.be.empty;
+                        next();
+                    });
                 });
             });
         });

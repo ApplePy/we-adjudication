@@ -59,14 +59,14 @@ var Setup = function(model,
             let o = parseInt(request.query.offset);
             let filter = request.query.filter;
 
-            // Add default limits
-            if (typeof o !== 'number' || isNaN(o)) o = 0;
-            if (typeof l !== 'number' || isNaN(l)) l = 0;
-
             // Get all model objects
             if (!filter) {
                 // Return models in pages
                 if (enablePaginate) {
+                    // Add default limits
+                    if (typeof o !== 'number' || isNaN(o)) o = 0;
+                    if (typeof l !== 'number' || isNaN(l)) l = 0;
+
                     model.paginate({}, {offset: o, limit: l},
                         function (error, modelObjs) {
                             if (error) response.status(500).send({error: error});

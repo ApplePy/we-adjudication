@@ -14,6 +14,11 @@ let Residencies = require('../models/schemas/studentinfo/residencySchema');
 let Genders = require('../models/schemas/studentinfo/genderSchema');
 let Awards = require('../models/schemas/studentinfo/awardSchema');
 let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
+let HSGrades = require('../models/schemas/highschool/hsGradeSchema');
+let HSCourses = require('../models/schemas/highschool/hsCourseSchema');
+let HSCourseSources = require('../models/schemas/highschool/hsCourseSourceSchema');
+let SecondarySchools = require('../models/schemas/highschool/secondarySchoolSchema');
+let HSSubjects = require('../models/schemas/highschool/hsSubjectSchema');
 
 //Require the dev-dependencies
 let chai = require('chai');
@@ -32,8 +37,11 @@ let Lists = {
     studentList: [],
     awardList: [],
     standingList: [],
-    hsGradesList: [],
-    hsCoursesList: []
+    hsGradeList: [],
+    hsCourseList: [],
+    hsCourseSourceList: [],
+    hsSubjectList: [],
+    secondarySchoolList: []
 };
 
 
@@ -400,7 +408,7 @@ let regenAllData = function(done) {
     this.timeout(6000);
 
     // Wipe the database of all data
-    each([Residencies, Students, Awards, AdvancedStandings, Genders], (mod, cb) => {
+    each([Residencies, Students, Awards, AdvancedStandings, Genders, HSGrades, HSCourses, HSCourseSources, SecondarySchools, HSSubjects], (mod, cb) => {
         // Delete all data from the given model, call cb(err) if something happens.
         mod.remove({}, (err) => err ? cb(err) : cb());
     }, (err) => {
@@ -408,11 +416,7 @@ let regenAllData = function(done) {
         if (err) throw err;
 
         // Wipe all model data arrays
-        Lists.residencyList.length = 0;
-        Lists.genderList.length = 0;
-        Lists.studentList.length = 0;
-        Lists.awardList.length = 0;
-        Lists.standingList.length = 0;
+        Object.keys(Lists).forEach(el => Lists[el].length = 0);
 
         // Generate male and female genders
         each(["Male", "Female"], generateGender, (err) => {
@@ -421,9 +425,14 @@ let regenAllData = function(done) {
 
             let executions = [
                 [5, generateResidency],
-                [15, generateStudent],
+                [25, generateStudent],
                 [50, generateAward],
                 [50, generateStanding],
+                [5, generateSecondarySchool],
+                [2, generateHsCourseSource],
+                [5, generateHsSubject],
+                [10, generateHsCourse],
+                [50, generateHsGrade]
             ];
             eachSeries (executions, (item, cb) => {
                 times(item[0], item[1], (err) => {
@@ -442,6 +451,38 @@ let regenAllData = function(done) {
 
 /// HELPERS ///
 
+let generateSecondarySchool = (number, callback) => {
+    genBase(SecondarySchools, Lists.secondarySchoolList, {
+        name: faker.random.words(2,5)
+    })(callback);
+};
+let generateHsSubject= (number, callback) => {
+    genBase(HSSubjects, Lists.hsSubjectList, {
+        name: faker.random.word(),
+        description: faker.lorem.paragraphs(2)
+    })(callback);
+};
+let generateHsCourseSource = (number, callback) => {
+    genBase(HSCourseSources, Lists.hsCourseSourceList, {
+        code: faker.random.word()
+    })(callback);
+};
+let generateHsCourse = (number, callback) => {
+    genBase(HSCourses, Lists.hsCourseList, {
+        level: faker.random.word(),
+        unit: faker.random.number(1, 4)/2,
+        source: Lists.hsCourseSourceList[faker.random.number(Lists.hsCourseSourceList.length - 1)],
+        school: Lists.secondarySchoolList[faker.random.number(Lists.secondarySchoolList.length - 1)],
+        subject: Lists.hsSubjectList[faker.random.number(Lists.hsSubjectList.length - 1)]
+    })(callback);
+};
+let generateHsGrade = (number, callback) => {
+    genBase(HSGrades, Lists.hsGradeList, {
+        mark: faker.random.number(100),
+        course: Lists.hsCourseList[faker.random.number(Lists.hsCourseList.length - 1)],
+        recipient: Lists.studentList[faker.random.number(Lists.studentList.length - 1)]
+    })(callback);
+};
 let generateStanding = (number, callback) => {
     let courses = [
         {
