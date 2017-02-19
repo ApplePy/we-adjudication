@@ -20,8 +20,9 @@ export default Ember.Component.extend({
 		    	//Get workbook
 		    	var data = event.target.result;
 		    	var workbook = XLSX.read(data, {type: 'binary'});
-
-		    	if (fileName == "termcodes.xlsx") {
+		    	console.log("here");
+		    	//if (fileName == "termcodes.xlsx") {
+		    	if (true) {
 
 		    		//Get worksheet
 		    		var first_sheet_name = workbook.SheetNames[0];
@@ -29,7 +30,7 @@ export default Ember.Component.extend({
 
 					for(var R = 1; R <=  XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
 
-						var cellAddress = XLSX.utils.encode_cell({r: R, c: 0})
+						var cellAddress = XLSX.utils.encode_cell({r: R, c: 0});
 					    var cell = worksheet[cellAddress];
 					    var cellValue = cell.v;
 
@@ -54,7 +55,7 @@ export default Ember.Component.extend({
 
 					for(var R = 1; R <=  XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
 
-						var cellAddress = XLSX.utils.encode_cell({r: R, c: 0})
+						var cellAddress = XLSX.utils.encode_cell({r: R, c: 0});
 					    var cell = worksheet[cellAddress];
 					    var cellValue = cell.v;
 
@@ -79,7 +80,7 @@ export default Ember.Component.extend({
 
 					for(var R = 1; R <=  XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
 
-						var cellAddress = XLSX.utils.encode_cell({r: R, c: 0})
+						var cellAddress = XLSX.utils.encode_cell({r: R, c: 0});
 					    var cell = worksheet[cellAddress];
 					    var cellValue = cell.v;
 
@@ -112,7 +113,7 @@ export default Ember.Component.extend({
 						for(var C = 0; C <=  XLSX.utils.decode_range(worksheet['!ref']).e.c; ++C) {
 						
 
-							var cellAddress = XLSX.utils.encode_cell({r: R, c: C})
+							var cellAddress = XLSX.utils.encode_cell({r: R, c: C});
 						    var cell = worksheet[cellAddress];
 						    var cellValue = cell.v;
 
@@ -167,7 +168,82 @@ export default Ember.Component.extend({
 				        });*/
 
 		    		}
-		    	} 
+		    	} else if (fileName == "students.xlsx") {
+
+		    		//Get worksheet
+		    		var first_sheet_name = workbook.SheetNames[0];
+					var worksheet = workbook.Sheets[first_sheet_name];
+
+					for(var R = 1; R <=  XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
+
+						var number;
+						var firstName;
+						var lastName;
+						var DOB;
+						var gender;
+						var residency;
+
+						for(var C = 0; C <=  XLSX.utils.decode_range(worksheet['!ref']).e.c; ++C) {
+						
+
+							var cellAddress = XLSX.utils.encode_cell({r: R, c: C});
+						    var cell = worksheet[cellAddress];
+						    var cellValue = cell.v;
+
+						    console.log(cellValue);
+
+						    if (C == 0) {
+						    	number = cellValue;
+						    } else if (C == 1) {
+						    	firstName = cellValue;
+						    } else if (C == 2) {
+						    	lastName = cellValue;
+						    } else if (C == 3) {
+						    	DOB = cellValue;
+						    } else if (C == 4) {
+						    	gender = cellValue;
+						    } else if (C == 5) {
+						    	residency = cellValue;
+						    }
+
+			    		}
+
+						store.query('gender', {
+							filter: {
+								name: gender
+							}
+						}).then(function(genders) {
+
+							gender = genders.get("firstObject");
+
+							store.query('residency', {
+								filter: {
+									name: residency
+								}
+							}).then(function(residencies) {
+
+								residency = residencies.get("firstObject");
+
+								/*var student = this.get('store').createRecord('student', {
+						       		number: number,
+									firstName: firstName,
+									lastname: lastName,
+									DOB: DOB,
+									gender: gender,
+									residency: residency
+						        });
+
+						        student.save().then(function() {
+						        	console.log("Added student");
+						        }, function() {
+						        	console.log("Could not add student");
+						        });*/
+							});
+						});	    		
+			    	}
+		    	}
+		    	var test = XLSX.utils.sheet_to_json(worksheet);
+				console.log(test);
 
 		    };
 		    
