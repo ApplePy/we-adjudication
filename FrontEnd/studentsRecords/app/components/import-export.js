@@ -130,15 +130,43 @@ export default Ember.Component.extend({
 
 			    		}
 			    		/*var courseCode = this.get('store').createRecord('course-code', {
-					       		name: cellValue
+					       		courseLetter: courseLetter,
+								courseNumber: courseNumber,
+								name: name,
+								unit: unit
 					        });
 
 					        courseCode.save().then(function() {
-					        	console.log("Added.");
+					        	console.log("Added course code");
 					        }, function() {
-					        	console.log("Could not add termcode");
+					        	console.log("Could not add course code");
 					        });*/
 			    	}
+		    	} else if (fileName == "HighSchools.xlsx") {
+
+		    		//Get worksheet
+		    		var first_sheet_name = workbook.SheetNames[0];
+					var worksheet = workbook.Sheets[first_sheet_name];
+
+					for(var R = 1; R <=  XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
+
+						var cellAddress = XLSX.utils.encode_cell({r: R, c: 0})
+					    var cell = worksheet[cellAddress];
+					    var cellValue = cell.v;
+
+					    console.log(cellValue);
+
+					    /*var secondarySchool = this.get('store').createRecord('secondary-school', {
+				       		name: cellValue
+				        });
+
+				        secondarySchool.save().then(function() {
+				        	console.log("Added secondary school");
+				        }, function() {
+				        	console.log("Could not add secondary school");
+				        });*/
+
+		    		}
 		    	} 
 
 		    };
