@@ -1,5 +1,7 @@
 process.env.NODE_ENV = 'test';
 
+let each = require('async/each');
+
 let faker = require('faker');
 let Common = require('./genericTestFramework-helper');
 let chai = Common.chai;
@@ -8,13 +10,32 @@ let expect = chai.expect;
 let DB = require('../models/studentsRecordsDB');
 let mongoose = DB.mongoose;
 
-let Awards = require('../models/schemas/studentinfo/awardSchema');
-
 ////////
 
 // NOTE: remember to not use () => {} functions inside mocha tests due to the 'this' binding - it breaks Mocha!
 
 ////////
+
+///// THINGS TO CHANGE ON COPYPASTA /////
+let Awards = require('../models/schemas/studentinfo/awardSchema');
+
+let emberName = "award";
+let emberNamePluralized = "awards";
+let itemList = Common.DBElements.awardList;
+let emberModel = Awards;
+let newModel = () => {
+    return {
+        note: faker.random.words(5),
+        recipient: Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)]._id
+    }
+};
+let filterValueSearches = ['note', 'recipient'];
+let requiredValues = ['note', 'recipient'];
+let uniqueValues = [];
+
+// Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
+
+/////////////////////////////////////////
 
 
 describe('Awards', function() {
@@ -22,174 +43,306 @@ describe('Awards', function() {
     describe('/GET functions', function() {
         before(Common.regenAllData);
 
-        Common.Tests.GetTests.getAll("award", "awards", Awards, Common.DBElements.awardList);
+        // Make sure that you can retrieve all values
+        Common.Tests.GetTests.getAll(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            itemList,
+            function() {
+                let limit = itemList.length;
+                return {offset: 0, limit: limit};
+            });
 
-        Common.Tests.GetTests.getByFilterSuccess("award", "awards", Awards, function(next) {
-            // Pick student
-            let student = Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)];
-            next([{recipient: student._id.toString()}, Common.DBElements.awardList.filter((el) => el.recipient == student._id)]);
-        }, "Search by student");
+        // Make sure that you can retrieve all values one page at a time
+        Common.Tests.GetTests.getPagination(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            itemList);
 
-        Common.Tests.GetTests.getByFilterSuccess("award", "awards", Awards, function(next) {
-            // Pick random award for data
-            let award = Common.DBElements.awardList[faker.random.number(Common.DBElements.awardList.length - 1)];
-            next([{note: award.note}, Common.DBElements.awardList.filter((el) => el.note == award.note)]);
-        }, "Search by 'note'");
+        // Check that you can search by all non-array elements
+        each(
+            filterValueSearches,
+            function (element, cb) {
+                Common.Tests.GetTests.getByFilterSuccess(emberName, emberNamePluralized, emberModel, function (next) {
+                    // Pick random model for data
+                    let model = itemList[faker.random.number(itemList.length - 1)];
 
-        Common.Tests.GetTests.getByFilterSuccess("award", "awards", Awards, function(next) {
-            next([{grade: {$gt: 90}}, Common.DBElements.awardList.filter((el) => el.grade > 90)]);
-        }, "Search by minimum grade above 90");
+                    // Convert MongoID into a string before attempting search
+                    let param = (model[element] instanceof mongoose.Types.ObjectId) ? model[element].toString() : model[element];
 
-        Common.Tests.GetTests.getByFilterSuccess("award", "awards", Awards, function(next) {
-            let awardlessStudent = Common.DBElements.studentList.find(
-                el => Common.DBElements.awardList.findIndex(el2 => el2.recipient == el._id) == -1
-            );
-
-            try {
-                // A student may not be generated without an award. Generate a new one.
-                expect(awardlessStudent).to.be.ok;
-                next([{recipient: awardlessStudent._id.toString()}, []]);
-            } catch(err) {
-                //Create a new student without an award with which to do the test
-                Common.Generators.generateStudent(0, (err, model) => {
-                    next([{recipient: model._id.toString()}, []]);
+                    next([{[element]: param}, itemList.filter((el) => el[element] == model[element])]);
+                }, "Search by " + element, function () {
+                    let limit = itemList.length;
+                    return {offset: 0, limit: limit};
                 });
-            }
-        }, "Search for a award by a student without an award");
+                cb();
+            },
+            err => {});
 
-        Common.Tests.GetTests.getByID("award", "awards", Awards, function(next) {
-            next(Common.DBElements.awardList[faker.random.number(Common.DBElements.awardList.length - 1)]);
-        }, "This should succeed.");
+        // Make sure that searches for a nonexistent object returns nothing but succeeds
+        Common.Tests.GetTests.getByFilterSuccess(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                next([{name: "NonExistent"}, []]);
+            },
+            "Search for a nonexistent model",
+            function() {
+                let limit = itemList.length;
+                return {offset: 0, limit: limit};
+            });
 
-        Common.Tests.GetTests.getByID("award", "awards", Awards, function(next) {
-            next(new Awards({}));
-        }, "This ID does not exist, should 404.");
+        // Ensure you can search by ID
+        Common.Tests.GetTests.getByID(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function(next) {
+                next(itemList[faker.random.number(itemList.length - 1)]);
+            });
+
+        // Make sure that searches fail with 404 when the ID doesn't exist
+        Common.Tests.GetTests.getByID(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function(next) {
+                next(new emberModel({}));
+            },
+            "This ID does not exist, should 404.");
     });
 
     describe('/PUT functions', function() {
         beforeEach(Common.regenAllData);
 
-        Common.Tests.PutTests.putUpdated("award", "awards", Awards, function(next) {
-            // Get a random award and make random updates
-            let award = Common.DBElements.awardList[faker.random.number(Common.DBElements.awardList.length - 1)];
-            let updates = {
-                note: faker.random.words(5),
-                recipient: Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)]._id
-            };
+        // Make sure PUTs work correctly
+        Common.Tests.PutTests.putUpdated(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let model = itemList[faker.random.number(itemList.length - 1)];
+                let updates = newModel();
 
-            // Update the object with the new random values
-            Object.keys(updates).forEach(key => award[key] = updates[key]);
+                // Update the object with the new random values
+                Object.keys(updates).forEach(key => model[key] = updates[key]);
 
-            // Pass the updated object and the PUT contents to the tester to make sure the changes happen
-            next([updates, award]);
-        }, ['recipient']);
+                // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                next([updates, model]);
+            },
+            requiredValues);
 
-        Common.Tests.PutTests.putUpdated("award", "awards", Awards, function(next) {
-            // Get a random award and make random updates
-            let award = Common.DBElements.awardList[faker.random.number(Common.DBElements.awardList.length - 1)];
-            let updates = {
-                note: faker.random.words(10),
-                recipient: Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)]._id
-            };
+        // Make sure that attempted ID changes are ignored
+        Common.Tests.PutTests.putUpdated(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let model = itemList[faker.random.number(itemList.length - 1)];
+                let updates = {
+                    name: faker.random.word(),
+                };
 
-            // Update the object with the new random values
-            Object.keys(updates).forEach(key => award[key] = updates[key]);
+                // Update the object with the new random values
+                Object.keys(updates).forEach(key => model[key] = updates[key]);
 
-            // Try to change the id
-            updates._id = mongoose.Types.ObjectId();
+                // Try to change the id
+                updates._id = mongoose.Types.ObjectId();
 
-            // Pass the updated object and the PUT contents to the tester to make sure the changes happen
-            next([updates, award]);
-        }, ['recipient'], "This should succeed and ignore attempted ID change.");
+                // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                next([updates, model]);
+            },
+            requiredValues,
+            "This should succeed and ignore attempted ID change.");
 
-        Common.Tests.PutTests.putUpdated("award", "awards", Awards, function(next) {
-            // Get a random award and make random updates
-            let award = Common.DBElements.awardList[faker.random.number(Common.DBElements.awardList.length - 1)];
-            let updates = {
-                course: faker.random.words(1),
-                description: faker.random.words(5),
-                units: faker.random.number(100)/50,
-                grade: faker.random.number(100),
-                from: faker.random.word()
-            };
-            // Update the object with the new random values
-            Object.keys(updates).forEach(key => award[key] = updates[key]);
+        // Make sure that attempts to violate uniqueness fails
+        each(
+            uniqueValues,
+            function (value, cb) {
+                Common.Tests.PutTests.putNotUnique(
+                    emberName,
+                    emberNamePluralized,
+                    emberModel,
+                    function (next) {
+                        // Get a random model and make random updates
+                        let model1 = itemList[faker.random.number(itemList.length - 1)];
+                        let model2 = itemList[faker.random.number(itemList.length - 1)];
 
-            // Pass the updated object and the PUT contents to the tester to make sure the changes happen
-            next([updates, award]);
-        }, ['recipient'], "Missing recipient, this should 400.");
+                        // Loop until models are different
+                        while (model1[value] === model2[value]) {
+                            model2 = itemList[faker.random.number(itemList.length - 1)];
+                        }
 
-        Common.Tests.PutTests.putUpdated("award", "awards", Awards, function(next) {
-            // Get a random award and make random updates
-            let updates = {
-                note: faker.random.words(10),
-                recipient: Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)]._id
-            };
-            let award = new Awards(updates);
+                        // Try to update to create a duplicate value
+                        model1[value] = model2[value];
 
-            // Pass the updated object and the PUT contents to the tester to make sure the changes happen
-            next([updates, award]);
-        }, ['recipient'], "This award does not exist yet, this should 404.");
+                        // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                        next([model1, model1._id]);
+                    },
+                    requiredValues,
+                    "Posting with duplicate of unique field " + value + ", should 500.");
+                cb();
+            },
+            err => {});
+
+        // Make sure that attempts to not supply required values fails
+        each(
+            requiredValues,
+            function (value, cb) {
+                Common.Tests.PutTests.putUpdated(
+                    emberName,
+                    emberNamePluralized,
+                    emberModel,
+                    function (next) {
+                        // Get a random model and make random updates
+                        let model = itemList[faker.random.number(itemList.length - 1)];
+                        let updates = newModel();
+
+                        // Remove a required value
+                        delete updates[value];
+
+                        // Update the object with the new random values
+                        Object.keys(updates).forEach(key => model[key] = updates[key]);
+
+                        // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                        next([updates, model]);
+                    },
+                    requiredValues,
+                    "Missing " + value + ", this should 400.");
+                cb();
+            },
+            err => {});
+
+        // Make sure that attempts to push to a non-existent object fails
+        Common.Tests.PutTests.putUpdated(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let updates = newModel();
+                let model = new emberModel(updates);
+
+                // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                next([updates, model]);
+            },
+            requiredValues,
+            "This model does not exist yet, this should 404.");
     });
 
     describe('/POST functions', function() {
         beforeEach(Common.regenAllData);
 
-        Common.Tests.PostTests.postNew("award", "awards", Awards, function(next) {
-            // Get a random award and make random updates
-            let newContent = {
-                note: faker.random.words(10),
-                recipient: Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)]._id
-            };
-            let award = new Awards(newContent);
-            next([newContent, award])
-        }, ['recipient']);
-
-        Common.Tests.PostTests.postNew("award", "awards", Awards, function(next) {
-            // Get a random award and make random updates
-            let newContent = {
-                note: faker.random.words(5),
-                recipient: null
-            };
-            let award = new Awards(newContent);
-            next([newContent, award])
-        }, ['recipient'], "Missing recipient, this should 400.");
+        // Make sure POSTs work correctly
+        Common.Tests.PostTests.postNew(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let newContent = newModel();
+                let model = new emberModel(newContent);
+                next([newContent, model])
+            },
+            requiredValues);
 
         let idFerry = null;
 
-        Common.Tests.PostTests.postNew("award", "awards", Awards,function(next) {
-            let award = Common.DBElements.awardList[faker.random.number(Common.DBElements.awardList.length - 1)];
-            let awardObj = {};
-            Object.keys(Awards.schema.obj).forEach(el => awardObj[el] = award[el]);
-            awardObj.recipient = award.recipient.toString();
-            awardObj._id = award._id;
-            idFerry = award._id;
+        // Make sure that attempts to set IDs are ignored
+        Common.Tests.PostTests.postNew(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function(next) {
+                // Select a model and then attempt to set the new object's ID to the already-existing object
+                let model = itemList[faker.random.number(itemList.length - 1)];
+                let modelObj = newModel();
+                modelObj._id = model._id;
+                idFerry = model._id;
 
-            next([awardObj, award]);
-        }, ['recipient'], "POSTing a record with an ID that already exists. Should ignore the new ID.",
+                next([modelObj, model]);
+            },
+            requiredValues,
+            "POSTing a record with an ID that already exists. Should ignore the new ID.",
             function(next, res) {
-            // Make sure the ID is different
-            expect (res.body.award._id).to.not.equal(idFerry.toString());
+                // Make sure the ID is different
+                expect (res.body[emberName]._id).to.not.equal(idFerry.toString());
 
-            // Make sure the creation was successful anyways
-            Awards.findById(res.body.award._id, function (err, results) {
-                expect(err).to.be.null;
-                expect(results).to.not.be.null;
-                next();
+                // Make sure the creation was successful anyways
+                emberModel.findById(res.body[emberName]._id, function (err, results) {
+                    expect(err).to.be.null;
+                    expect(results).to.not.be.null;
+                    next();
+                });
             });
-        });
+
+        // Make sure that attempts to not supply required values fails
+        each(
+            requiredValues,
+            function (value, cb) {
+                Common.Tests.PostTests.postNew(
+                    emberName,
+                    emberNamePluralized,
+                    emberModel,
+                    function (next) {
+                        // Get a random model and make random updates
+                        let newContent = newModel();
+
+                        // Delete a required value
+                        delete newContent[value];
+
+                        let model = new emberModel(newContent);
+                        next([newContent, model])
+                    },
+                    requiredValues,
+                    "Missing name, this should 400.");
+                cb();
+            },
+            err => {});
+
+        // Make sure attempts to post duplicate data fails
+        // TODO: I'm not sure if this test is appropriate...
+        it.skip("POSTing a record with duplicate data, should 500.");
+        /*Common.Tests.PostTests.postNotUnique(
+         emberName,
+         emberNamePluralized,
+         emberModel,
+         function (next) {
+         let model = itemList[faker.random.number(itemList.length - 1)];
+
+         next([model, model]);
+         },
+         requiredValues,
+         "POSTing a record with duplicate data, should 500.");*/
     });
 
     describe('/DELETE functions', function(){
         beforeEach(Common.regenAllData);
 
-        Common.Tests.DeleteTests.deleteExisting("award", "awards", Awards, function(next){
-            next(Common.DBElements.awardList[faker.random.number(Common.DBElements.awardList.length - 1)]._id);
-        });
+        let elementFerry = null;
 
-        Common.Tests.DeleteTests.deleteNonexistent("award", "awards", Awards, function(next) {
-            next(mongoose.Types.ObjectId());
-        });
+        // Make sure that DELETEs are successful
+        Common.Tests.DeleteTests.deleteExisting(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                elementFerry = itemList[faker.random.number(itemList.length - 1)];
+                next(elementFerry._id);
+            });
+
+        // Make sure that attempts to delete a non-existent object fails
+        Common.Tests.DeleteTests.deleteNonexistent(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                next(mongoose.Types.ObjectId());
+            });
     });
-
 });

@@ -6,10 +6,10 @@ module.exports =
     Setup(
         Awards,
         'award',
-        false,
+        true,
         (req, res, mod) => {
-            if (!mod.recipient)
-                return ["Recipient must be specified"];
+            if (!mod.recipient || !mod.note)
+                return ["Recipient and note must be specified"];
             else
                 return 0
         },
