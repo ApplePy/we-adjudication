@@ -4,7 +4,8 @@
   "description": "studentsRecords server",
   "main": "index.js",
   "scripts": {
-    "test": "mocha tests/*-test.js"
+    "test": "mocha tests/*-test.js",
+    "coverage": "istanbul cover _mocha tests/*-test.js"
   },
   "author": "Ouda",
   "license": "ISC",

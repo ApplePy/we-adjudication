@@ -17,6 +17,7 @@ stages:
 # Code common to the front- and back-end tests
 .test_common: &test_common
   stage: test
+  coverage: /Lines\s*:\s*(\d*\.?\d+)%/
   # This folder is cached between builds
   # http://docs.gitlab.com/ce/ci/yaml/README.html#cache
   variables:
@@ -49,10 +50,13 @@ stages:
 # This test ensures the back end works
 test_backend:
   <<: *test_common
+  artifacts:
+    paths:
+      - BackEnd/studentsRecords/coverage/
   script:
    - cd BackEnd/studentsRecords
    - npm install
-   - npm test
+   - npm run coverage
 
 
 # This test ensures the front end works
