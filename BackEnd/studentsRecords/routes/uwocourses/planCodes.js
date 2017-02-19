@@ -3,6 +3,7 @@
  */
 
 var PlanCodes = require('../../models/schemas/uwocourses/planCodeSchema');
+var ProgramRecords = require('../../models/schemas/uwocourses/programRecordSchema');
 var Setup = require('../genericRouting');
 
 
@@ -11,7 +12,12 @@ module.exports =
         PlanCodes,
         'planCode',
         false,
-        undefined,
+        (req, res, model) => {
+            if (!name)
+                return ["A name must be specified"];
+            else
+                return 0;
+        },
         undefined,
         undefined,
         undefined,

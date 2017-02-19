@@ -1,8 +1,8 @@
 var Students = require('../../models/schemas/studentinfo/studentSchema');
 var Awards = require('../../models/schemas/studentinfo/awardSchema');
 var AdvancedStandings = require('../../models/schemas/studentinfo/advancedStandingSchema');
-var Grades = require('../../models/schemas/uwocourses/gradeSchema');
-var ProgramRecords = require('../../models/schemas/uwocourses/programRecordSchema');
+var TermCodes = require('../../models/schemas/uwocourses/termCodeSchema');
+var CourseCodes = require('../../models/schemas/uwocourses/courseCodeSchema');
 var HSGrades = require('../../models/schemas/highschool/hsGradeSchema');
 var Setup = require('../genericRouting');
 
@@ -35,16 +35,15 @@ module.exports =
                 AdvancedStandings.remove({recipient: deleted._id}, (err2, removed2) => {
                     // Remove high school grades
                     HSGrades.remove({recipient: deleted._id}, (err3, removed3) => {
-                        // Find university grades and their records to delete
-                        Grades.find({student: deleted._id}, (err4, grades) => {
+                        // Find attached terms
+                        TermCodes.find({student: deleted._id}, (err4, terms) => {
                             if (err) return;    // Just silently fail
 
-                            // Get program records
-                            let programIds = grades.map((el, idx, arr) => el.level);
+                            let termCodes = terms.map(el => el._id);
 
-                            // Delete program records and grades
-                            ProgramRecords.remove({_id: {$in: programIds}});
-                            Grades.remove({student: deleted._id});
+                            // Remove attached courses and terms
+                            CourseCodes.remove({termInfo: {$in: termCodes}}, err5 => {});
+                            TermCodes.remove({student: deleted._id}, err6 => {});
                         });
                     });
                 });

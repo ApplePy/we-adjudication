@@ -10,7 +10,7 @@ module.exports =
     Setup(
         TermCodes,
         'termCode',
-        false,
+        true,
         (req, res, mod) => {
             if (!mod.name)
                 return ["Term name must be specified"];
@@ -20,19 +20,6 @@ module.exports =
         undefined,
         undefined,
         undefined,
-        (req, res, next) => {
-            // Map all affected program records to null status
-            ProgramRecords.update(
-                {semester: req.params.mongo_id},
-                {$set: {semester: null}},
-                {multi: true},
-                function (error, records) {
-                    if (error) res.status(500).send({error: error});
-                    else {
-                        // All records mapped successfully, delete residency
-                        next();
-                    }
-                });
-        },
+        undefined,
         undefined
     );

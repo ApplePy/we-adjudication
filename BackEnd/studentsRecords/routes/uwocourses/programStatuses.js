@@ -12,7 +12,12 @@ module.exports =
         ProgramStatuses,
         'programStatus',
         false,
-        undefined,
+        (req, res, model) => {
+            if (!model.status)
+                return ["A status must be specified"];
+            else
+                return 0;
+        },
         undefined,
         undefined,
         undefined,
