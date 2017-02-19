@@ -12,7 +12,12 @@ module.exports =
         SecondarySchools,
         'secondarySchool',
         true,
-        undefined,
+        (req, res, model) => {
+            if (!model.name)
+                return ["A school name must be specified"];
+            else
+                return 0;
+        },
         undefined,
         undefined,
         undefined,
