@@ -551,18 +551,39 @@ let regenAllData = function(done) {
 let generateSecondarySchool = (number, callback) => {
     genBase(SecondarySchools, Lists.secondarySchoolList, {
         name: faker.random.words(2,5)
-    })(callback);
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            generateSecondarySchool(number - 1, callback);
+        }
+        callback();
+    });
 };
 let generateHsSubject= (number, callback) => {
     genBase(HSSubjects, Lists.hsSubjectList, {
-        name: faker.random.word(),
+        name: faker.random.words(1,2),
         description: faker.lorem.paragraphs(2)
-    })(callback);
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            generateHsSubject(number - 1, callback);
+        }
+        callback();
+    });
 };
 let generateHsCourseSource = (number, callback) => {
     genBase(HSCourseSources, Lists.hsCourseSourceList, {
         code: faker.random.word()
-    })(callback);
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            generateHsCourseSource(number - 1, callback);
+        }
+        callback();
+    });
 };
 let generateHsCourse = (number, callback) => {
     genBase(HSCourses, Lists.hsCourseList, {
@@ -571,14 +592,28 @@ let generateHsCourse = (number, callback) => {
         source: Lists.hsCourseSourceList[faker.random.number(Lists.hsCourseSourceList.length - 1)],
         school: Lists.secondarySchoolList[faker.random.number(Lists.secondarySchoolList.length - 1)],
         subject: Lists.hsSubjectList[faker.random.number(Lists.hsSubjectList.length - 1)]
-    })(callback);
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            generateHsCourse(number - 1, callback);
+        }
+        callback();
+    });
 };
 let generateHsGrade = (number, callback) => {
     genBase(HSGrades, Lists.hsGradeList, {
         mark: faker.random.number(100),
         course: Lists.hsCourseList[faker.random.number(Lists.hsCourseList.length - 1)],
         recipient: Lists.studentList[faker.random.number(Lists.studentList.length - 1)]
-    })(callback);
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            generateHsGrade(number - 1, callback);
+        }
+        callback();
+    });
 };
 let generateStanding = (number, callback) => {
     let courses = [
@@ -648,7 +683,14 @@ let generateStanding = (number, callback) => {
         grade: Math.floor(Math.random() * 101), // From 0-100
         from: fromData[Math.floor(Math.random() * fromData.length)],
         recipient: Lists.studentList[faker.random.number(Lists.studentList.length - 1)]
-    })(callback);
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            generateStanding(number - 1, callback);
+        }
+        callback();
+    });
 };
 let generateAward = (number, callback) => {
     let awardNames = [
@@ -706,7 +748,14 @@ let generateAward = (number, callback) => {
     genBase(Awards, Lists.awardList, {
         note: awardNames[faker.random.number(awardNames.length - 1)],
         recipient: Lists.studentList[faker.random.number(Lists.studentList.length - 1)]
-    })(callback);
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            generateAward(number - 1, callback);
+        }
+        callback();
+    });
 };
 let generateStudent = (number, callback) => {
   genBase(Students, Lists.studentList, {
@@ -720,7 +769,14 @@ let generateStudent = (number, callback) => {
       admissionComments: faker.lorem.paragraph(),
       resInfo: Lists.residencyList[faker.random.number(Lists.residencyList.length - 1)],
       genderInfo: Lists.genderList[faker.random.number(Lists.genderList.length - 1)],
-  })(callback);
+  })(err => {
+      // Retry a few times in case random generation causes duplicate
+      if (err) {
+          if (number < -1) callback(err);
+          generateStudent(number - 1, callback);
+      }
+      callback();
+  });
 };
 let generateGender = (name, cb) => {
     // Create and save gender, then put on list
@@ -728,7 +784,14 @@ let generateGender = (name, cb) => {
 };
 let generateResidency = (number, callback) => {
     // Create and save residency, then put on list
-    genBase(Residencies, Lists.residencyList, {name: faker.lorem.words()})(callback);
+    genBase(Residencies, Lists.residencyList, {name: faker.lorem.words(1, 5)})(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            generateResidency(number - 1, callback);
+        }
+        callback();
+    });
 };
 /**
  * Save a generic model to the database and add the object to a specified list.
