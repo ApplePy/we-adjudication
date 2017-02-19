@@ -19,6 +19,6 @@ module.exports =
         undefined,
         (req, res, deleted) => {
             // Delete associated grades
-            HSGrades.remove({course: deleted._id});
+            HSGrades.remove({course: deleted._id}, err => {});
         }
     );
