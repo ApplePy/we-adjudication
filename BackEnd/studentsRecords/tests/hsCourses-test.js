@@ -97,7 +97,7 @@ describe('HSCourses', function() {
             function (next) {
                 next([{name: "NonExistent"}, []]);
             },
-            "Search for a nonexistent hsCourse",
+            "Search for a nonexistent model",
             function() {
                 let limit = itemList.length;
                 return {offset: 0, limit: limit};
@@ -347,7 +347,7 @@ describe('HSCourses', function() {
             function (next, res) {
                 // Check that all dependent objects got deassociated
                 HSGrades.find(
-                    {resInfo: elementFerry._id},
+                    {course: elementFerry._id},
                     (err, students) => {
                         expect(err).to.be.null;
                         expect(students).to.be.empty;

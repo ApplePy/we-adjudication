@@ -94,7 +94,7 @@ describe('HSGrades', function() {
             function (next) {
                 next([{name: "NonExistent"}, []]);
             },
-            "Search for a nonexistent hsCourse",
+            "Search for a nonexistent model",
             function() {
                 let limit = itemList.length;
                 return {offset: 0, limit: limit};

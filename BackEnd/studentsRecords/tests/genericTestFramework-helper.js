@@ -463,7 +463,7 @@ let Tests = {
          * @param modelType         A model that matches the type returned by the API call
          * @param elementSelection  A function that calls the passed callback with argument  "id of object to delete"
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
-         * @param postDeleteVerify
+         * @param postDeleteVerify  A function that receives (next, API result) to allow additional checks to be made before declaring the DELETE a success
          */
         deleteNonexistent: function(emberName, emberPluralized, modelType, elementSelection, descriptionText = "", postDeleteVerify = (cb, res) => cb()) {
             return it('it should fail to DELETE with error 404' + (descriptionText ? ": " : "") + descriptionText, function (done) {
