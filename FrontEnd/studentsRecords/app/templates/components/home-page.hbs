@@ -23,8 +23,8 @@
       </a>
 
       <a class="item" {{action "importExport"}}>
-        <i class="large code icon"></i>
-        Import/Export Student's Records
+        <i class="large download icon"></i>
+        Import Student's Records
       </a>      
 
       <a class="item " {{action "about"}}>
@@ -44,6 +44,9 @@
       {{/if}}
       {{#if isManageSystemShowing}}
         {{manage-system}}
+      {{/if}}
+      {{#if isImportExportShowing}}
+        {{import-export}}
       {{/if}}
       {{#if isAboutShowing}}
         {{about-us}}
