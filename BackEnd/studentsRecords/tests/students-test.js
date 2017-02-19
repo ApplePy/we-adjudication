@@ -93,18 +93,24 @@ describe('Students', function() {
         each(
             filterValueSearches,
             function (element, cb) {
-                Common.Tests.GetTests.getByFilterSuccess(emberName, emberNamePluralized, emberModel, function (next) {
-                    // Pick random model for data
-                    let model = itemList[faker.random.number(itemList.length - 1)];
+                Common.Tests.GetTests.getByFilterSuccess(
+                    emberName,
+                    emberNamePluralized,
+                    emberModel,
+                    function (next) {
+                        // Pick random model for data
+                        let model = itemList[faker.random.number(itemList.length - 1)];
 
-                    // Convert MongoID into a string before attempting search
-                    let param = (model[element] instanceof mongoose.Types.ObjectId) ? model[element].toString() : model[element];
+                        // Convert MongoID into a string before attempting search
+                        let param = (model[element] instanceof mongoose.Types.ObjectId) ? model[element].toString() : model[element];
 
-                    next([{[element]: param}, itemList.filter((el) => el[element] == model[element])]);
-                }, "Search by " + element, function () {
-                    let limit = itemList.length;
-                    return {offset: 0, limit: limit};
-                });
+                        next([{[element]: param}, itemList.filter((el) => el[element] == model[element])]);
+                    },
+                    "Search by " + element,
+                    function () {
+                        let limit = itemList.length;
+                        return {offset: 0, limit: limit};
+                    });
                 cb();
             },
             err => {});

@@ -22,4 +22,31 @@ To extend the testing framework to cover more classes:
  along with a call in `regenAllData` to add it to the generation
 * Another array must be created to store the generated class objects for
 test access
-    * This new list must be exported under `DBElements` to access it in tests.
+    * This new list must be created under `Lists` to access it in tests
+    under `DBElements`.
+    
+## Tips
+Current tests in this folder use a _"copypasta"_ format which dynamically
+generates many useful tests dynamically at runtime. To use, copy the contents
+of an existing test into your new test file, and change the contents of
+```
+///// THINGS TO CHANGE ON COPYPASTA /////
+```
+to fit your file. Items to change:
+
+| variableName          | Description                                                                                                               |
+|-----------------------|---------------------------------------------------------------------------------------------------------------------------|
+| emberName             | A string representing the name to be expected as the content-containing key in the API call route response                |
+| emberNamePluralized   | A string representing the name to be used in the API call route                                                           |
+| itemList              | A list from DBElements that contains all the values of this model type that exist in the database                         |
+| newModel              | A function that returns an object containing the properties required to make a new object of this model type              |
+| filterValueSearches   | A list of strings that contain the model properties that can be searched for **(does not support partial-text search)**   |
+| requiredValues        | A list of strings that contain the model properties that must be present in a update/creation of an object                |
+| uniqueValues
+
+#### Notes
+* Remember to import all the models you need, and change the
+ postPut/postPost/postDelete hooks to check for proper model
+ disassociation, etc.
+* Remember to change the queryOperand function if your model does/doesn't
+ use pagination
