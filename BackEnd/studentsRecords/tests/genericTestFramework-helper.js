@@ -557,7 +557,7 @@ let generateSecondarySchool = (number, callback) => {
             if (number < -1) callback(err);
             generateSecondarySchool(number - 1, callback);
         }
-        callback();
+        else callback();
     });
 };
 let generateHsSubject= (number, callback) => {
@@ -570,7 +570,7 @@ let generateHsSubject= (number, callback) => {
             if (number < -1) callback(err);
             generateHsSubject(number - 1, callback);
         }
-        callback();
+        else callback();
     });
 };
 let generateHsCourseSource = (number, callback) => {
@@ -582,7 +582,7 @@ let generateHsCourseSource = (number, callback) => {
             if (number < -1) callback(err);
             generateHsCourseSource(number - 1, callback);
         }
-        callback();
+        else callback();
     });
 };
 let generateHsCourse = (number, callback) => {
@@ -598,7 +598,7 @@ let generateHsCourse = (number, callback) => {
             if (number < -1) callback(err);
             generateHsCourse(number - 1, callback);
         }
-        callback();
+        else callback();
     });
 };
 let generateHsGrade = (number, callback) => {
@@ -612,7 +612,7 @@ let generateHsGrade = (number, callback) => {
             if (number < -1) callback(err);
             generateHsGrade(number - 1, callback);
         }
-        callback();
+        else callback();
     });
 };
 let generateStanding = (number, callback) => {
@@ -689,7 +689,7 @@ let generateStanding = (number, callback) => {
             if (number < -1) callback(err);
             generateStanding(number - 1, callback);
         }
-        callback();
+        else callback();
     });
 };
 let generateAward = (number, callback) => {
@@ -754,7 +754,7 @@ let generateAward = (number, callback) => {
             if (number < -1) callback(err);
             generateAward(number - 1, callback);
         }
-        callback();
+        else callback();
     });
 };
 let generateStudent = (number, callback) => {
@@ -775,7 +775,7 @@ let generateStudent = (number, callback) => {
           if (number < -1) callback(err);
           generateStudent(number - 1, callback);
       }
-      callback();
+      else callback();
   });
 };
 let generateGender = (name, cb) => {
@@ -790,7 +790,7 @@ let generateResidency = (number, callback) => {
             if (number < -1) callback(err);
             generateResidency(number - 1, callback);
         }
-        callback();
+        else callback();
     });
 };
 /**
