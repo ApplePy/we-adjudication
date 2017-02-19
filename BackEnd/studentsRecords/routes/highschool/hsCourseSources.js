@@ -12,7 +12,12 @@ module.exports =
         HSCourseSources,
         'hsCourseSource',
         false,
-        undefined,
+        (req, res, model) => {
+            if (!model.code)
+                return ["Source code must be specified."];
+            else
+                return 0;
+        },
         undefined,
         undefined,
         undefined,
