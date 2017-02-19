@@ -92,7 +92,7 @@ var Setup = function(model,
                         model.paginate(filter, {offset: o, limit: l},
                             function (error, modelObjs) {
                                 if (error) response.status(500).send({error: error});
-                                else response.json({student: modelObjs.docs});
+                                else response.json({[modelNameEmberized]: modelObjs.docs});
                             });
                     }
                     else {
