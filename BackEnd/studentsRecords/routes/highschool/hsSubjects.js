@@ -12,7 +12,12 @@ module.exports =
         HSSubjects,
         'hsSubject',
         false,
-        undefined,
+        (req, res, model) => {
+            if (!model.name)
+                return ["A subject name must be specified"];
+            else
+                return 0;
+        },
         undefined,
         undefined,
         undefined,
