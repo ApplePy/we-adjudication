@@ -167,7 +167,7 @@ var Setup = function(model,
                     else if (!deleted) response.sendStatus(404);
                     else {
                         // Send success and call cleanup hook
-                        response.json({advancedStanding: deleted});
+                        response.json({[modelNameEmberized]: deleted});
                         deleteCleanupHook(request, response, deleted);
                     }
                 }
