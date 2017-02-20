@@ -63,6 +63,13 @@ let Lists = {
     planCodeList: []
 };
 
+/**
+ * Selects a random array element.
+ *
+ * @param min   The minimum index that can be used
+ * @param max   The maximum index that can be used
+ * @returns     An object from the array
+ */
 Array.prototype.randomObject = function(min = 0, max = null) {
    // Sanitize inputs
     min = parseInt(min);
