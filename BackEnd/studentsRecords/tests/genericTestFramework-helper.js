@@ -479,6 +479,7 @@ let Tests = {
                         .delete(['/api', emberPluralized, selection].join('/'))
                         .end((err, res) => {
                             expect(res).to.have.status(200);
+                            expect(res.body).to.have.property(emberName);
 
                             // Check underlying database
                             modelType.findById(selection._id, function (error, obj) {
