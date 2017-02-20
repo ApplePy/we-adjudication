@@ -9,16 +9,28 @@ let times = require('async/times');
 let each = require('async/each');
 let eachSeries = require('async/eachSeries');
 
+// StudentInfo imports
 let Students = require('../models/schemas/studentinfo/studentSchema');
 let Residencies = require('../models/schemas/studentinfo/residencySchema');
 let Genders = require('../models/schemas/studentinfo/genderSchema');
 let Awards = require('../models/schemas/studentinfo/awardSchema');
 let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
+
+// High school data imports
 let HSGrades = require('../models/schemas/highschool/hsGradeSchema');
 let HSCourses = require('../models/schemas/highschool/hsCourseSchema');
 let HSCourseSources = require('../models/schemas/highschool/hsCourseSourceSchema');
 let SecondarySchools = require('../models/schemas/highschool/secondarySchoolSchema');
 let HSSubjects = require('../models/schemas/highschool/hsSubjectSchema');
+
+// UWO courses imports
+let TermCodes = require('../models/schemas/uwocourses/termCodeSchema');
+let CourseCodes = require('../models/schemas/uwocourses/courseCodeSchema');
+let CourseLoads = require('../models/schemas/uwocourses/courseLoadSchema');
+let Grades = require('../models/schemas/uwocourses/gradeSchema');
+let ProgramRecords = require('../models/schemas/uwocourses/programRecordSchema');
+let ProgramStatuses = require('../models/schemas/uwocourses/programStatusSchema');
+let PlanCodes = require('../models/schemas/uwocourses/planCodeSchema');
 
 //Require the dev-dependencies
 let chai = require('chai');
@@ -41,9 +53,26 @@ let Lists = {
     hsCourseList: [],
     hsCourseSourceList: [],
     hsSubjectList: [],
-    secondarySchoolList: []
+    secondarySchoolList: [],
+    termCodeList: [],
+    courseCodeList: [],
+    courseLoadList: [],
+    gradeList: [],
+    programRecordList: [],
+    programStatusList: [],
+    planCodeList: []
 };
 
+Array.prototype.randomObject = function(min = 0, max = null) {
+   // Sanitize inputs
+    min = parseInt(min);
+    max = parseInt(max);
+    if (isNaN(max) || max > this.length) max = this.length;
+    if (isNaN(min) || min < 0) min = 0;
+
+    // Return object min <= index < max
+    return this[Math.floor(Math.random() * (max - min) + min)];
+};
 
 //////
 
@@ -505,7 +534,25 @@ let regenAllData = function(done) {
     this.timeout(6000);
 
     // Wipe the database of all data
-    each([Residencies, Students, Awards, AdvancedStandings, Genders, HSGrades, HSCourses, HSCourseSources, SecondarySchools, HSSubjects], (mod, cb) => {
+    each([
+        Residencies,
+        Students,
+        Awards,
+        AdvancedStandings,
+        Genders,
+        HSGrades,
+        HSCourses,
+        HSCourseSources,
+        SecondarySchools,
+        HSSubjects,
+        TermCodes,
+        CourseCodes,
+        CourseLoads,
+        Grades,
+        ProgramRecords,
+        ProgramStatuses,
+        PlanCodes
+    ], (mod, cb) => {
         // Delete all data from the given model, call cb(err) if something happens.
         mod.remove({}, (err) => err ? cb(err) : cb());
     }, (err) => {
@@ -529,7 +576,14 @@ let regenAllData = function(done) {
                 [2, generateHsCourseSource],
                 [5, generateHsSubject],
                 [10, generateHsCourse],
-                [50, generateHsGrade]
+                [50, generateHsGrade],
+                [10, generatePlanCode],
+                [50, generateGrade],
+                [2, generateCourseLoad],
+                [10, generateCourseCode],
+                [3, generateProgramStatus],
+                [3, generateProgramRecord],
+                [2, generateTermCode]
             ];
             eachSeries (executions, (item, cb) => {
                 times(item[0], item[1], (err) => {
@@ -548,6 +602,110 @@ let regenAllData = function(done) {
 
 /// HELPERS ///
 
+let generatePlanCode = (number, callback) => {
+    genBase(PlanCodes, Lists.planCodeList, {
+        name: faker.random.words(1, 3)
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            else generatePlanCode(number - 1, callback);
+        }
+        else callback();
+    });
+};
+let generateProgramStatus = (number, callback) => {
+    genBase(ProgramStatuses, Lists.programStatusList, {
+        status: faker.random.words(1, 3)
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            else generateProgramStatus(number - 1, callback);
+        }
+        else callback();
+    });
+};
+let generateProgramRecord = (number, callback) => {
+    let plans = Lists.planCodeList.filter(() => Math.random() * 10 > 8);
+    if (plans.length == 0)
+        plans.push(Lists.planCodeList.randomObject());
+
+    genBase(ProgramRecords, Lists.programRecordList, {
+        name: faker.random.words(1, 3),
+        level: faker.random.number(9),
+        load: Lists.courseLoadList.randomObject(),
+        status: Lists.programStatusList.randomObject(),
+        plan: plans
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            else generateProgramRecord(number - 1, callback);
+        }
+        else callback();
+    });
+};
+let generateGrade = (number, callback) => {
+    genBase(Grades, Lists.gradeList, {
+        mark: faker.random.number(100),
+        note: faker.lorem.paragraph()
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            else generateGrade(number - 1, callback);
+        }
+        else callback();
+    });
+};
+let generateCourseLoad = (number, callback) => {
+    genBase(CourseLoads, Lists.courseLoadList, {
+        load: faker.random.words(1, 3)
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            else generateCourseLoad(number - 1, callback);
+        }
+        else callback();
+    });
+};
+let generateCourseCode = (number, callback) => {
+    genBase(CourseCodes, Lists.courseCodeList, {
+        courseLetter: faker.random.word(),
+        courseNumber: faker.random.number(9999),
+        name: faker.random.words(2),
+        unit: faker.random.number(4) / 2,
+        termInfo: Lists.termCodeList.randomObject(),
+        gradeInfo: Lists.gradeList.randomObject()
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            else generateCourseCode(number - 1, callback);
+        }
+        else callback();
+    });
+};
+let generateTermCode = (number, callback) => {
+    let records = Lists.programRecordList.filter(() => Math.random() * 10 > 8);
+    if (records.length == 0)
+        records.push(Lists.programRecordList.randomObject());
+
+    genBase(TermCodes, Lists.termCodeList, {
+        name: faker.random.words(1, 3),
+        student: Lists.studentList.randomObject(),
+        programRecords: records
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            else generateTermCode(number - 1, callback);
+        }
+        else callback();
+    });
+};
 let generateSecondarySchool = (number, callback) => {
     genBase(SecondarySchools, Lists.secondarySchoolList, {
         name: faker.random.words(2,5)
@@ -555,7 +713,7 @@ let generateSecondarySchool = (number, callback) => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
-            generateSecondarySchool(number - 1, callback);
+            else generateSecondarySchool(number - 1, callback);
         }
         else callback();
     });
@@ -568,7 +726,7 @@ let generateHsSubject= (number, callback) => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
-            generateHsSubject(number - 1, callback);
+            else generateHsSubject(number - 1, callback);
         }
         else callback();
     });
@@ -580,7 +738,7 @@ let generateHsCourseSource = (number, callback) => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
-            generateHsCourseSource(number - 1, callback);
+            else generateHsCourseSource(number - 1, callback);
         }
         else callback();
     });
@@ -596,7 +754,7 @@ let generateHsCourse = (number, callback) => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
-            generateHsCourse(number - 1, callback);
+            else generateHsCourse(number - 1, callback);
         }
         else callback();
     });
@@ -610,7 +768,7 @@ let generateHsGrade = (number, callback) => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
-            generateHsGrade(number - 1, callback);
+            else generateHsGrade(number - 1, callback);
         }
         else callback();
     });
@@ -687,7 +845,7 @@ let generateStanding = (number, callback) => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
-            generateStanding(number - 1, callback);
+            else generateStanding(number - 1, callback);
         }
         else callback();
     });
@@ -752,7 +910,7 @@ let generateAward = (number, callback) => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
-            generateAward(number - 1, callback);
+            else generateAward(number - 1, callback);
         }
         else callback();
     });
@@ -773,7 +931,7 @@ let generateStudent = (number, callback) => {
       // Retry a few times in case random generation causes duplicate
       if (err) {
           if (number < -1) callback(err);
-          generateStudent(number - 1, callback);
+          else generateStudent(number - 1, callback);
       }
       else callback();
   });
@@ -788,7 +946,7 @@ let generateResidency = (number, callback) => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
-            generateResidency(number - 1, callback);
+            else generateResidency(number - 1, callback);
         }
         else callback();
     });
