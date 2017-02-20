@@ -16,6 +16,7 @@ var hsSubjects = require('./routes/highschool/hsSubjects');
 var termCodes = require('./routes/uwocourses/termCodes');
 var grades = require('./routes/uwocourses/grades');
 var courseCodes = require('./routes/uwocourses/courseCodes');
+var courseLoads = require('./routes/uwocourses/courseLoads');
 
 
 app.use(function (request, response, next) {
@@ -52,6 +53,7 @@ api.use('/hsSubjects', hsSubjects);
 api.use('/termCodes', termCodes);
 api.use('/grades', grades);
 api.use('/courseCodes', courseCodes);
+api.use('/courseLoads', courseLoads);
 
 // Set default serve
 if (process.env.NODE_ENV === 'production') app.use(express.static('dist'));
