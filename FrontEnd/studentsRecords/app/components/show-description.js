@@ -1,7 +1,8 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    showstanding: null,
+    title: null,
+    description: null,
     notDONE: null,
   //  store: Ember.inject.service(),
 
