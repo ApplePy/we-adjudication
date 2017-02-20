@@ -21,52 +21,28 @@ let mongoose = DB.mongoose;
 ////////
 
 ///// THINGS TO CHANGE ON COPYPASTA /////
-let Students = require('../models/schemas/studentinfo/studentSchema');
-let Grades = require('../models/schemas/uwocourses/gradeSchema');
-let HSGrades = require('../models/schemas/highschool/hsGradeSchema');
-let Awards = require('../models/schemas/studentinfo/awardSchema');
-let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
+let ProgramStatuses = require('../models/schemas/uwocourses/programStatusSchema');
+let ProgramRecords = require('../models/schemas/uwocourses/programRecordSchema');
 
-
-let emberName = "student";
-let emberNamePluralized = "students";
-let itemList = Common.DBElements.studentList;
-let emberModel = Students;
+let emberName = "programStatus";
+let emberNamePluralized = "ProgramStatuses";
+let itemList = Common.DBElements.programStatusList;
+let emberModel = ProgramStatuses;
 let newModel = () => {
     return {
-        number: faker.random.number(100000000, 999999999),
-        firstName: faker.name.firstName(),
-        lastName: faker.name.lastName(),
-        DOB: faker.date.past(),   // TODO: this is wrong format
-        registrationComments: faker.lorem.paragraph(),
-        basisOfAdmission: faker.lorem.paragraph(),
-        admissionAverage: faker.random.number(100),
-        admissionComments: faker.lorem.paragraph(),
-        resInfo: Common.DBElements.residencyList[faker.random.number(Common.DBElements.residencyList.length - 1)],
-        genderInfo: Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)],
+        status: faker.random.word()
     }
 };
-let filterValueSearches = [
-    'number',
-    'firstName',
-    'lastName',
-    'DOB',
-    'registrationComments',
-    'basisOfAdmission',
-    'admissionAverage',
-    'admissionComments',
-    'resInfo',
-    'genderInfo'
-];
-let requiredValues = ['number'];
-let uniqueValues = ['number'];
+let filterValueSearches = ['status'];
+let requiredValues = ['status'];
+let uniqueValues = ['status'];
 
 // Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
 
 /////////////////////////////////////////
 
 
-describe('Students', function() {
+describe('Program Status', function() {
 
     describe('/GET functions', function() {
         before(Common.regenAllData);
@@ -76,11 +52,7 @@ describe('Students', function() {
             emberName,
             emberNamePluralized,
             emberModel,
-            itemList,
-            function() {
-                let limit = itemList.length;
-                return {offset: 0, limit: limit};
-            });
+            itemList);
 
         // Make sure that you can retrieve all values one page at a time
         Common.Tests.GetTests.getPagination(
@@ -106,11 +78,7 @@ describe('Students', function() {
 
                         next([{[element]: param}, itemList.filter((el) => el[element] == model[element])]);
                     },
-                    "Search by " + element,
-                    function () {
-                        let limit = itemList.length;
-                        return {offset: 0, limit: limit};
-                    });
+                    "Search by " + element);
                 cb();
             },
             err => {});
@@ -123,11 +91,7 @@ describe('Students', function() {
             function (next) {
                 next([{name: "NonExistent"}, []]);
             },
-            "Search for a nonexistent model",
-            function() {
-                let limit = itemList.length;
-                return {offset: 0, limit: limit};
-            });
+            "Search for a nonexistent model");
 
         // Ensure you can search by ID
         Common.Tests.GetTests.getByID(
@@ -373,10 +337,7 @@ describe('Students', function() {
             function (next, res) {
                 // Check that all dependent objects got deassociated
                 each([
-                        [HSGrades, "course"],
-                        [Awards, "recipient"],
-                        [AdvancedStandings, "recipient"],
-                        [Grades, "student"],
+                        [ProgramRecords, "status"],
                     ],
                     function (value, next) {
                         value[0].find(

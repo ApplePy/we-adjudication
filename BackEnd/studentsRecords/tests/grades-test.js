@@ -21,52 +21,33 @@ let mongoose = DB.mongoose;
 ////////
 
 ///// THINGS TO CHANGE ON COPYPASTA /////
-let Students = require('../models/schemas/studentinfo/studentSchema');
 let Grades = require('../models/schemas/uwocourses/gradeSchema');
-let HSGrades = require('../models/schemas/highschool/hsGradeSchema');
-let Awards = require('../models/schemas/studentinfo/awardSchema');
-let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
+let CourseCodes = require('../models/schemas/uwocourses/courseCodeSchema');
 
 
-let emberName = "student";
-let emberNamePluralized = "students";
-let itemList = Common.DBElements.studentList;
-let emberModel = Students;
+let emberName = "grade";
+let emberNamePluralized = "grades";
+let itemList = Common.DBElements.gradeList;
+let emberModel = Grades;
 let newModel = () => {
     return {
-        number: faker.random.number(100000000, 999999999),
-        firstName: faker.name.firstName(),
-        lastName: faker.name.lastName(),
-        DOB: faker.date.past(),   // TODO: this is wrong format
-        registrationComments: faker.lorem.paragraph(),
-        basisOfAdmission: faker.lorem.paragraph(),
-        admissionAverage: faker.random.number(100),
-        admissionComments: faker.lorem.paragraph(),
-        resInfo: Common.DBElements.residencyList[faker.random.number(Common.DBElements.residencyList.length - 1)],
-        genderInfo: Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)],
+        mark: faker.random.number(100),
+        note: faker.lorem.paragraph(),
     }
 };
 let filterValueSearches = [
-    'number',
-    'firstName',
-    'lastName',
-    'DOB',
-    'registrationComments',
-    'basisOfAdmission',
-    'admissionAverage',
-    'admissionComments',
-    'resInfo',
-    'genderInfo'
+    'mark',
+    'note'
 ];
-let requiredValues = ['number'];
-let uniqueValues = ['number'];
+let requiredValues = ['mark'];
+let uniqueValues = [];
 
 // Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
 
 /////////////////////////////////////////
 
 
-describe('Students', function() {
+describe('Grades', function() {
 
     describe('/GET functions', function() {
         before(Common.regenAllData);
@@ -373,10 +354,7 @@ describe('Students', function() {
             function (next, res) {
                 // Check that all dependent objects got deassociated
                 each([
-                        [HSGrades, "course"],
-                        [Awards, "recipient"],
-                        [AdvancedStandings, "recipient"],
-                        [Grades, "student"],
+                        [CourseCodes, "gradeInfo"],
                     ],
                     function (value, next) {
                         value[0].find(

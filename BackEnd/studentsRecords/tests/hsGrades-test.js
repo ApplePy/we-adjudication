@@ -21,52 +21,29 @@ let mongoose = DB.mongoose;
 ////////
 
 ///// THINGS TO CHANGE ON COPYPASTA /////
-let Students = require('../models/schemas/studentinfo/studentSchema');
-let Grades = require('../models/schemas/uwocourses/gradeSchema');
 let HSGrades = require('../models/schemas/highschool/hsGradeSchema');
-let Awards = require('../models/schemas/studentinfo/awardSchema');
-let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
 
-
-let emberName = "student";
-let emberNamePluralized = "students";
-let itemList = Common.DBElements.studentList;
-let emberModel = Students;
+let emberName = "hsGrade";
+let emberNamePluralized = "hsGrades";
+let itemList = Common.DBElements.hsGradeList;
+let emberModel = HSGrades;
 let newModel = () => {
     return {
-        number: faker.random.number(100000000, 999999999),
-        firstName: faker.name.firstName(),
-        lastName: faker.name.lastName(),
-        DOB: faker.date.past(),   // TODO: this is wrong format
-        registrationComments: faker.lorem.paragraph(),
-        basisOfAdmission: faker.lorem.paragraph(),
-        admissionAverage: faker.random.number(100),
-        admissionComments: faker.lorem.paragraph(),
-        resInfo: Common.DBElements.residencyList[faker.random.number(Common.DBElements.residencyList.length - 1)],
-        genderInfo: Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)],
+        mark: faker.random.number(100),
+        note: faker.random.words(5),
+        recipient: Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)]._id
     }
 };
-let filterValueSearches = [
-    'number',
-    'firstName',
-    'lastName',
-    'DOB',
-    'registrationComments',
-    'basisOfAdmission',
-    'admissionAverage',
-    'admissionComments',
-    'resInfo',
-    'genderInfo'
-];
-let requiredValues = ['number'];
-let uniqueValues = ['number'];
+let filterValueSearches = ['mark', 'note', 'recipient'];
+let requiredValues = ['mark', 'recipient'];
+let uniqueValues = [];
 
 // Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
 
 /////////////////////////////////////////
 
 
-describe('Students', function() {
+describe('HSGrades', function() {
 
     describe('/GET functions', function() {
         before(Common.regenAllData);
@@ -93,24 +70,18 @@ describe('Students', function() {
         each(
             filterValueSearches,
             function (element, cb) {
-                Common.Tests.GetTests.getByFilterSuccess(
-                    emberName,
-                    emberNamePluralized,
-                    emberModel,
-                    function (next) {
-                        // Pick random model for data
-                        let model = itemList[faker.random.number(itemList.length - 1)];
+                Common.Tests.GetTests.getByFilterSuccess(emberName, emberNamePluralized, emberModel, function (next) {
+                    // Pick random model for data
+                    let model = itemList[faker.random.number(itemList.length - 1)];
 
-                        // Convert MongoID into a string before attempting search
-                        let param = (model[element] instanceof mongoose.Types.ObjectId) ? model[element].toString() : model[element];
+                    // Convert MongoID into a string before attempting search
+                    let param = (model[element] instanceof mongoose.Types.ObjectId) ? model[element].toString() : model[element];
 
-                        next([{[element]: param}, itemList.filter((el) => el[element] == model[element])]);
-                    },
-                    "Search by " + element,
-                    function () {
-                        let limit = itemList.length;
-                        return {offset: 0, limit: limit};
-                    });
+                    next([{[element]: param}, itemList.filter((el) => el[element] == model[element])]);
+                }, "Search by " + element, function () {
+                    let limit = itemList.length;
+                    return {offset: 0, limit: limit};
+                });
                 cb();
             },
             err => {});
@@ -334,7 +305,7 @@ describe('Students', function() {
                         next([newContent, model])
                     },
                     requiredValues,
-                    "Missing " + value + ", this should 400.");
+                    "Missing name, this should 400.");
                 cb();
             },
             err => {});
@@ -368,30 +339,6 @@ describe('Students', function() {
             function (next) {
                 elementFerry = itemList[faker.random.number(itemList.length - 1)];
                 next(elementFerry._id);
-            },
-            undefined,
-            function (next, res) {
-                // Check that all dependent objects got deassociated
-                each([
-                        [HSGrades, "course"],
-                        [Awards, "recipient"],
-                        [AdvancedStandings, "recipient"],
-                        [Grades, "student"],
-                    ],
-                    function (value, next) {
-                        value[0].find(
-                            {[value[1]]: elementFerry._id},
-                            (err, students) => {
-                                expect(err).to.be.null;
-                                expect(students).to.be.empty;
-
-                                next();
-                            });
-                    },
-                    err => {
-                        expect(err).to.be.null;
-                        next();
-                    });
             });
 
         // Make sure that attempts to delete a non-existent object fails
@@ -404,3 +351,4 @@ describe('Students', function() {
             });
     });
 });
+

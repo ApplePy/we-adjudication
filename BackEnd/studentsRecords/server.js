@@ -3,11 +3,23 @@ var express = require('express');
 var logger = require('./logger');
 var app = express();
 
-var students = require('./routes/students');
-var residencies = require('./routes/residencies');
-var genders = require('./routes/genders');
-var awards = require('./routes/awards');
-var advancedStandings = require('./routes/advancedStandings');
+var students = require('./routes/studentinfo/students');
+var residencies = require('./routes/studentinfo/residencies');
+var genders = require('./routes/studentinfo/genders');
+var awards = require('./routes/studentinfo/awards');
+var advancedStandings = require('./routes/studentinfo/advancedStandings');
+var hsGrades = require('./routes/highschool/hsGrades');
+var hsCourses = require('./routes/highschool/hsCourses');
+var hsCourseSources = require('./routes/highschool/hsCourseSources');
+var secondarySchools = require('./routes/highschool/secondarySchools');
+var hsSubjects = require('./routes/highschool/hsSubjects');
+var termCodes = require('./routes/uwocourses/termCodes');
+var grades = require('./routes/uwocourses/grades');
+var courseCodes = require('./routes/uwocourses/courseCodes');
+var courseLoads = require('./routes/uwocourses/courseLoads');
+var programStatuses = require('./routes/uwocourses/programStatuses');
+var programRecords = require('./routes/uwocourses/programRecords');
+var planCodes = require('./routes/uwocourses/planCodes');
 
 
 app.use(function (request, response, next) {
@@ -36,6 +48,18 @@ api.use('/residencies', residencies);
 api.use('/genders', genders);
 api.use('/awards', awards);
 api.use('/advancedStandings', advancedStandings);
+api.use('/hsGrades', hsGrades);
+api.use('/hsCourses', hsCourses);
+api.use('/hsCourseSources', hsCourseSources);
+api.use('/secondarySchools', secondarySchools);
+api.use('/hsSubjects', hsSubjects);
+api.use('/termCodes', termCodes);
+api.use('/grades', grades);
+api.use('/courseCodes', courseCodes);
+api.use('/courseLoads', courseLoads);
+api.use('/programStatuses', programStatuses);
+api.use('/programRecords', programRecords);
+api.use('/planCodes', planCodes);
 
 // Set default serve
 if (process.env.NODE_ENV === 'production') app.use(express.static('dist'));

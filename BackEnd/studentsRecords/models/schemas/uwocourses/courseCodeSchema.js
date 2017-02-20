@@ -2,16 +2,19 @@
  * Created by darryl on 2017-02-09.
  */
 var mongoose = require('./../../studentsRecordsDB').mongoose;
+var mongoosePaginate = require('mongoose-paginate');
 
 var courseCodeSchema = mongoose.Schema(
     {
-        courseLetter: String,
-        courseNumber: Number,
+        courseLetter: {type: String, required: true},
+        courseNumber: {type: Number, required: true},
         name: String,
         unit: Number,
-        programRecords: [{type: mongoose.Schema.ObjectId, ref: 'ProgramRecords'}]
+        termInfo: {type: mongoose.Schema.ObjectId, ref: 'TermCodes'},
+        gradeInfo: {type: mongoose.Schema.ObjectId, ref: 'Grades'}
     }
 );
+courseCodeSchema.plugin(mongoosePaginate);
 
 var CourseCodes = mongoose.model('courseCode', courseCodeSchema);
 

@@ -21,52 +21,41 @@ let mongoose = DB.mongoose;
 ////////
 
 ///// THINGS TO CHANGE ON COPYPASTA /////
-let Students = require('../models/schemas/studentinfo/studentSchema');
-let Grades = require('../models/schemas/uwocourses/gradeSchema');
-let HSGrades = require('../models/schemas/highschool/hsGradeSchema');
-let Awards = require('../models/schemas/studentinfo/awardSchema');
-let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
+let ProgramRecords = require('../models/schemas/uwocourses/programRecordSchema');
+let TermCodes = require('../models/schemas/uwocourses/termCodeSchema');
 
-
-let emberName = "student";
-let emberNamePluralized = "students";
-let itemList = Common.DBElements.studentList;
-let emberModel = Students;
+let emberName = "programRecord";
+let emberNamePluralized = "programRecords";
+let itemList = Common.DBElements.programRecordList;
+let emberModel = ProgramRecords;
 let newModel = () => {
+    let plans = Common.DBElements.planCodeList.filter(() => Math.random() * 10 > 8);
+    if (plans.length == 0)
+        plans.push(Common.DBElements.planCodeList.randomObject());
+
     return {
-        number: faker.random.number(100000000, 999999999),
-        firstName: faker.name.firstName(),
-        lastName: faker.name.lastName(),
-        DOB: faker.date.past(),   // TODO: this is wrong format
-        registrationComments: faker.lorem.paragraph(),
-        basisOfAdmission: faker.lorem.paragraph(),
-        admissionAverage: faker.random.number(100),
-        admissionComments: faker.lorem.paragraph(),
-        resInfo: Common.DBElements.residencyList[faker.random.number(Common.DBElements.residencyList.length - 1)],
-        genderInfo: Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)],
-    }
+        name: faker.random.words(1, 3),
+        level: faker.random.number(9),
+        load: Common.DBElements.courseLoadList.randomObject(),
+        status: Common.DBElements.programStatusList.randomObject(),
+        plan: plans
+    };
 };
 let filterValueSearches = [
-    'number',
-    'firstName',
-    'lastName',
-    'DOB',
-    'registrationComments',
-    'basisOfAdmission',
-    'admissionAverage',
-    'admissionComments',
-    'resInfo',
-    'genderInfo'
+    'name',
+    'level',
+    'load',
+    'status'
 ];
-let requiredValues = ['number'];
-let uniqueValues = ['number'];
+let requiredValues = [];
+let uniqueValues = [];
 
 // Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
 
 /////////////////////////////////////////
 
 
-describe('Students', function() {
+describe('Program Records', function() {
 
     describe('/GET functions', function() {
         before(Common.regenAllData);
@@ -373,17 +362,14 @@ describe('Students', function() {
             function (next, res) {
                 // Check that all dependent objects got deassociated
                 each([
-                        [HSGrades, "course"],
-                        [Awards, "recipient"],
-                        [AdvancedStandings, "recipient"],
-                        [Grades, "student"],
+                        [TermCodes, "programRecords"]
                     ],
                     function (value, next) {
                         value[0].find(
-                            {[value[1]]: elementFerry._id},
-                            (err, students) => {
+                            {[value[1]]: {$in: [elementFerry._id]}},
+                            (err, records) => {
                                 expect(err).to.be.null;
-                                expect(students).to.be.empty;
+                                expect(records).to.not.contain(elementFerry._id);
 
                                 next();
                             });
@@ -404,3 +390,4 @@ describe('Students', function() {
             });
     });
 });
+

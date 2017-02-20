@@ -21,52 +21,28 @@ let mongoose = DB.mongoose;
 ////////
 
 ///// THINGS TO CHANGE ON COPYPASTA /////
-let Students = require('../models/schemas/studentinfo/studentSchema');
-let Grades = require('../models/schemas/uwocourses/gradeSchema');
-let HSGrades = require('../models/schemas/highschool/hsGradeSchema');
-let Awards = require('../models/schemas/studentinfo/awardSchema');
-let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
+let PlanCodes = require('../models/schemas/uwocourses/planCodeSchema');
+let ProgramRecords = require('../models/schemas/uwocourses/programRecordSchema');
 
-
-let emberName = "student";
-let emberNamePluralized = "students";
-let itemList = Common.DBElements.studentList;
-let emberModel = Students;
+let emberName = "planCode";
+let emberNamePluralized = "planCodes";
+let itemList = Common.DBElements.planCodeList;
+let emberModel = PlanCodes;
 let newModel = () => {
     return {
-        number: faker.random.number(100000000, 999999999),
-        firstName: faker.name.firstName(),
-        lastName: faker.name.lastName(),
-        DOB: faker.date.past(),   // TODO: this is wrong format
-        registrationComments: faker.lorem.paragraph(),
-        basisOfAdmission: faker.lorem.paragraph(),
-        admissionAverage: faker.random.number(100),
-        admissionComments: faker.lorem.paragraph(),
-        resInfo: Common.DBElements.residencyList[faker.random.number(Common.DBElements.residencyList.length - 1)],
-        genderInfo: Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)],
-    }
+        name: faker.random.words(1, 3)
+    };
 };
-let filterValueSearches = [
-    'number',
-    'firstName',
-    'lastName',
-    'DOB',
-    'registrationComments',
-    'basisOfAdmission',
-    'admissionAverage',
-    'admissionComments',
-    'resInfo',
-    'genderInfo'
-];
-let requiredValues = ['number'];
-let uniqueValues = ['number'];
+let filterValueSearches = ['name'];
+let requiredValues = ['name'];
+let uniqueValues = ['name'];
 
 // Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
 
 /////////////////////////////////////////
 
 
-describe('Students', function() {
+describe('Plan Codes', function() {
 
     describe('/GET functions', function() {
         before(Common.regenAllData);
@@ -76,18 +52,15 @@ describe('Students', function() {
             emberName,
             emberNamePluralized,
             emberModel,
-            itemList,
-            function() {
-                let limit = itemList.length;
-                return {offset: 0, limit: limit};
-            });
+            itemList);
 
         // Make sure that you can retrieve all values one page at a time
-        Common.Tests.GetTests.getPagination(
+        it.skip('it should GET all models, one page at a time');
+        /*Common.Tests.GetTests.getPagination(
             emberName,
             emberNamePluralized,
             emberModel,
-            itemList);
+            itemList);*/
 
         // Check that you can search by all non-array elements
         each(
@@ -106,11 +79,7 @@ describe('Students', function() {
 
                         next([{[element]: param}, itemList.filter((el) => el[element] == model[element])]);
                     },
-                    "Search by " + element,
-                    function () {
-                        let limit = itemList.length;
-                        return {offset: 0, limit: limit};
-                    });
+                    "Search by " + element);
                 cb();
             },
             err => {});
@@ -123,11 +92,7 @@ describe('Students', function() {
             function (next) {
                 next([{name: "NonExistent"}, []]);
             },
-            "Search for a nonexistent model",
-            function() {
-                let limit = itemList.length;
-                return {offset: 0, limit: limit};
-            });
+            "Search for a nonexistent model");
 
         // Ensure you can search by ID
         Common.Tests.GetTests.getByID(
@@ -373,17 +338,14 @@ describe('Students', function() {
             function (next, res) {
                 // Check that all dependent objects got deassociated
                 each([
-                        [HSGrades, "course"],
-                        [Awards, "recipient"],
-                        [AdvancedStandings, "recipient"],
-                        [Grades, "student"],
+                        [ProgramRecords, "plan"]
                     ],
                     function (value, next) {
                         value[0].find(
-                            {[value[1]]: elementFerry._id},
-                            (err, students) => {
+                            {[value[1]]: {$in: [elementFerry._id]}},
+                            (err, records) => {
                                 expect(err).to.be.null;
-                                expect(students).to.be.empty;
+                                expect(records).to.not.contain(elementFerry._id);
 
                                 next();
                             });
@@ -404,3 +366,4 @@ describe('Students', function() {
             });
     });
 });
+

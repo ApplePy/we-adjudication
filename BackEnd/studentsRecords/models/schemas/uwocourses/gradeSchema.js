@@ -2,15 +2,16 @@
  * Created by darryl on 2017-02-09.
  */
 var mongoose = require('./../../studentsRecordsDB').mongoose;
+var mongoosePaginate = require('mongoose-paginate');
 
 var gradeSchema = mongoose.Schema(
     {
         mark: {type: Number, required: true},
         note: String,
-        level: {type: mongoose.Schema.ObjectId, ref: 'ProgramRecords'},
-        student: {type: mongoose.Schema.ObjectId, ref: 'Students'}
+        courses: [{type: mongoose.Schema.ObjectId, ref: 'CourseCodes'}]
     }
 );
+gradeSchema.plugin(mongoosePaginate);
 
 var Grades = mongoose.model('grade', gradeSchema);
 

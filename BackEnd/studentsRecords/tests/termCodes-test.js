@@ -21,52 +21,37 @@ let mongoose = DB.mongoose;
 ////////
 
 ///// THINGS TO CHANGE ON COPYPASTA /////
-let Students = require('../models/schemas/studentinfo/studentSchema');
-let Grades = require('../models/schemas/uwocourses/gradeSchema');
-let HSGrades = require('../models/schemas/highschool/hsGradeSchema');
-let Awards = require('../models/schemas/studentinfo/awardSchema');
-let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
+let TermCodes = require('../models/schemas/uwocourses/termCodeSchema');
+let CourseCodes = require('../models/schemas/uwocourses/courseCodeSchema');
 
 
-let emberName = "student";
-let emberNamePluralized = "students";
-let itemList = Common.DBElements.studentList;
-let emberModel = Students;
+let emberName = "termCode";
+let emberNamePluralized = "termCodes";
+let itemList = Common.DBElements.termCodeList;
+let emberModel = TermCodes;
 let newModel = () => {
+    let records = Common.DBElements.programRecordList.filter(() => Math.random() * 10 > 8);
+    if (records.length == 0)
+        records.push(Common.DBElements.programRecordList.randomObject());
     return {
-        number: faker.random.number(100000000, 999999999),
-        firstName: faker.name.firstName(),
-        lastName: faker.name.lastName(),
-        DOB: faker.date.past(),   // TODO: this is wrong format
-        registrationComments: faker.lorem.paragraph(),
-        basisOfAdmission: faker.lorem.paragraph(),
-        admissionAverage: faker.random.number(100),
-        admissionComments: faker.lorem.paragraph(),
-        resInfo: Common.DBElements.residencyList[faker.random.number(Common.DBElements.residencyList.length - 1)],
-        genderInfo: Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)],
+        name: faker.random.words(2,5),
+        student: faker.random.arrayElement(Common.DBElements.residencyList),
+        programRecords: records,  // NOTE: In a many-to-many relationship, this WILL store data.
     }
 };
 let filterValueSearches = [
-    'number',
-    'firstName',
-    'lastName',
-    'DOB',
-    'registrationComments',
-    'basisOfAdmission',
-    'admissionAverage',
-    'admissionComments',
-    'resInfo',
-    'genderInfo'
+    'name',
+    'student'
 ];
-let requiredValues = ['number'];
-let uniqueValues = ['number'];
+let requiredValues = ['name'];
+let uniqueValues = [];
 
 // Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
 
 /////////////////////////////////////////
 
 
-describe('Students', function() {
+describe('Term Codes', function() {
 
     describe('/GET functions', function() {
         before(Common.regenAllData);
@@ -373,10 +358,7 @@ describe('Students', function() {
             function (next, res) {
                 // Check that all dependent objects got deassociated
                 each([
-                        [HSGrades, "course"],
-                        [Awards, "recipient"],
-                        [AdvancedStandings, "recipient"],
-                        [Grades, "student"],
+                        [CourseCodes, "termInfo"]
                     ],
                     function (value, next) {
                         value[0].find(
@@ -404,3 +386,4 @@ describe('Students', function() {
             });
     });
 });
+
