@@ -13,7 +13,7 @@ module.exports =
         'planCode',
         false,
         (req, res, model) => {
-            if (!name)
+            if (!model.name)
                 return ["A name must be specified"];
             else
                 return 0;
@@ -24,7 +24,7 @@ module.exports =
         (req, res, next) => {
             // Remove plan from affected Program Records
             ProgramRecords.update(
-                {plan: {$in: req.params.mongo_id}},
+                {plan: {$in: [req.params.mongo_id]}},
                 {$pull: {plan: req.params.mongo_id}},
                 {multi: true},
                 function (error, records) {

@@ -21,41 +21,28 @@ let mongoose = DB.mongoose;
 ////////
 
 ///// THINGS TO CHANGE ON COPYPASTA /////
+let PlanCodes = require('../models/schemas/uwocourses/planCodeSchema');
 let ProgramRecords = require('../models/schemas/uwocourses/programRecordSchema');
-let TermCodes = require('../models/schemas/uwocourses/termCodeSchema');
 
-let emberName = "programRecord";
-let emberNamePluralized = "programRecords";
-let itemList = Common.DBElements.programRecordList;
-let emberModel = ProgramRecords;
+let emberName = "planCode";
+let emberNamePluralized = "planCodes";
+let itemList = Common.DBElements.planCodeList;
+let emberModel = PlanCodes;
 let newModel = () => {
-    let plans = Common.DBElements.planCodeList.filter(() => Math.random() * 10 > 8);
-    if (plans.length == 0)
-        plans.push(Common.DBElements.planCodeList.randomObject());
-
     return {
-        name: faker.random.words(1, 3),
-        level: faker.random.number(9),
-        load: Common.DBElements.courseLoadList.randomObject(),
-        status: Common.DBElements.programStatusList.randomObject(),
-        plan: plans
+        name: faker.random.words(1, 3)
     };
 };
-let filterValueSearches = [
-    'name',
-    'level',
-    'load',
-    'status'
-];
-let requiredValues = [];
-let uniqueValues = [];
+let filterValueSearches = ['name'];
+let requiredValues = ['name'];
+let uniqueValues = ['name'];
 
 // Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
 
 /////////////////////////////////////////
 
 
-describe('Program Records', function() {
+describe('Plan Codes', function() {
 
     describe('/GET functions', function() {
         before(Common.regenAllData);
@@ -65,18 +52,15 @@ describe('Program Records', function() {
             emberName,
             emberNamePluralized,
             emberModel,
-            itemList,
-            function() {
-                let limit = itemList.length;
-                return {offset: 0, limit: limit};
-            });
+            itemList);
 
         // Make sure that you can retrieve all values one page at a time
-        Common.Tests.GetTests.getPagination(
+        it.skip('it should GET all models, one page at a time');
+        /*Common.Tests.GetTests.getPagination(
             emberName,
             emberNamePluralized,
             emberModel,
-            itemList);
+            itemList);*/
 
         // Check that you can search by all non-array elements
         each(
@@ -95,11 +79,7 @@ describe('Program Records', function() {
 
                         next([{[element]: param}, itemList.filter((el) => el[element] == model[element])]);
                     },
-                    "Search by " + element,
-                    function () {
-                        let limit = itemList.length;
-                        return {offset: 0, limit: limit};
-                    });
+                    "Search by " + element);
                 cb();
             },
             err => {});
@@ -112,11 +92,7 @@ describe('Program Records', function() {
             function (next) {
                 next([{name: "NonExistent"}, []]);
             },
-            "Search for a nonexistent model",
-            function() {
-                let limit = itemList.length;
-                return {offset: 0, limit: limit};
-            });
+            "Search for a nonexistent model");
 
         // Ensure you can search by ID
         Common.Tests.GetTests.getByID(
@@ -362,7 +338,7 @@ describe('Program Records', function() {
             function (next, res) {
                 // Check that all dependent objects got deassociated
                 each([
-                        [TermCodes, "programRecords"]
+                        [ProgramRecords, "plan"]
                     ],
                     function (value, next) {
                         value[0].find(

@@ -19,6 +19,7 @@ var courseCodes = require('./routes/uwocourses/courseCodes');
 var courseLoads = require('./routes/uwocourses/courseLoads');
 var programStatuses = require('./routes/uwocourses/programStatuses');
 var programRecords = require('./routes/uwocourses/programRecords');
+var planCodes = require('./routes/uwocourses/planCodes');
 
 
 app.use(function (request, response, next) {
@@ -58,6 +59,7 @@ api.use('/courseCodes', courseCodes);
 api.use('/courseLoads', courseLoads);
 api.use('/programStatuses', programStatuses);
 api.use('/programRecords', programRecords);
+api.use('/planCodes', planCodes);
 
 // Set default serve
 if (process.env.NODE_ENV === 'production') app.use(express.static('dist'));
