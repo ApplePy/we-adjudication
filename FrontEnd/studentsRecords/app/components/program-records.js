@@ -167,7 +167,27 @@ export default Ember.Component.extend({
           }
         }
       ],
-      program:[]
+      program:[
+        {
+          name: "Program",
+          level: 1,
+          load: "F",
+          status: "Active in Program",
+          plan: [
+          ]
+        },
+        {
+          name: "Program",
+          level: 1,
+          load: "F",
+          status: "Active in Program",
+          plan: [
+            {
+              name: "Bio year 2"
+            }
+          ]
+        }
+      ]
     },
     {
       name: "Spring 2017",

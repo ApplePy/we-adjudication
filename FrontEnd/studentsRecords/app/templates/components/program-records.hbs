@@ -5,39 +5,37 @@
   <div class="ui raised segment">
     <h3>Program Record</h3>
     {{#if term.program}}
-      <table class="ui six column very basic table">
+      <table class="ui seven column very basic table">
         <tr>
           <td class="one wide"><h5>Program Name</h5></td>
           <td class="one wide"><h5>Level</h5></td>
           <td class="one wide"><h5>Load</h5></td>
-          <td class="three wide"><h5>Status</h5></td>
+          <td class="two wide"><h5>Status</h5></td>
+          <td class="two wide"><h5>Plan(s)</h5></td>
         </tr>
         {{#each term.program as |program|}}
           <tr>
             <td class="one wide">{{program.name}}</td>
             <td class="one wide">{{program.level}}</td>
             <td class="one wide">{{program.load}}</td>
-            <td class="three wide">{{program.status}}</td>
+            <td class="two wide">{{program.status}}</td>
+            <td class="two wide">
+              <ul>
+                {{#each program.plan as |plan|}}
+                  <li>{{plan.name}}</li>
+                {{/each}}
+              </ul>
+            </td>
           </tr>
         {{/each}}
       </table>
-      <h4>Plan(s)</h4>
-      <ul>
-        {{#each term.program as |program|}}
-          {{#each program.plan as |plan|}}
-            <li>{{plan.name}}</li>
-          {{else}}
-            <p>There is no plan associated with this record</p>
-          {{/each}}
-        {{/each}}
-      </ul>
     {{else}}
       <p> No program info to show</p>
     {{/if}}
   </div>
   <div class="ui raised segment"><h3>Grades</h3>
     {{#if term.courseInfo}}
-      <table class="ui seven column very basic table">
+      <table class="ui fixed seven column very basic table">
         <tr>
           <td class="one wide"><h5>Course Code</h5></td>
           <td class="two wide"><h5>Course Name</h5></td>
