@@ -487,18 +487,12 @@ export default Ember.Component.extend({
 
 					let studentNumber;
 					for (let row of sheetJSON) {
-						let rowContents = {
-							course: null,
-							description: null,
-							units: null,
-							grade: null,
-							from: null,
-						}
+						let note = null;
 						let keys = Object.keys(row);
 						keys.remove("__rowNum__");
 						for (let col of keys) {
 							if (column != "studentNumber") {
-								rowContents[col] = row[col];
+								note = row[col];
 							} else {
 								studentNumber = row[col];
 							}
@@ -512,19 +506,15 @@ export default Ember.Component.extend({
 
 							student = students.get("firstObject");
 
-							/*var advancedStanding = this.get('store').createRecord('advanced-standing', {
-					       		course: rowContents.course,
-								description: rowContents.description,
-								units: rowContents.units,
-								grade: rowContents.grade,
-								from: rowContents.from,
+							/*var award = this.get('store').createRecord('award', {
+					       		note: note,
 								recipient: student
 					        });
 
-					        advancedStanding.save().then(function() {
-					        	console.log("Added advanced standing");
+					        award.save().then(function() {
+					        	console.log("Added award");
 					        }, function() {
-					        	console.log("Could not add advanced standing");
+					        	console.log("Could not add award");
 					        });*/
 						});	
 					}
