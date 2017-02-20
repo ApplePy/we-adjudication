@@ -2,9 +2,6 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
 
-	//var test = XLSX.utils.sheet_to_json(worksheet);
-	//console.log(test);
-
 	actions: {
 		uploadFile() {
 
@@ -23,12 +20,16 @@ export default Ember.Component.extend({
 		    	//Get workbook
 		    	var data = event.target.result;
 		    	var workbook = XLSX.read(data, {type: 'binary'});
-		    	console.log("here");
-		    	if (fileName == "termcodes.xlsx") {
+
+		    	//if (fileName == "termcodes.xlsx") {
+		    	if (true) {
 
 		    		//Get worksheet
 		    		var first_sheet_name = workbook.SheetNames[0];
 					var worksheet = workbook.Sheets[first_sheet_name];
+
+					var sheetJSON = XLSX.utils.sheet_to_json(worksheet);
+					console.log(sheetJSON);
 
 					for(var R = 1; R <=  XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
 
@@ -423,7 +424,111 @@ export default Ember.Component.extend({
 
 						});	    		
 			    	}
-		    	} 
+		    	} else if(fileName == "AdvancedStanding.xlsx") {
+
+		    		//Get worksheet
+		    		var first_sheet_name = workbook.SheetNames[0];
+					var worksheet = workbook.Sheets[first_sheet_name];
+
+					var sheetJSON = XLSX.utils.sheet_to_json(worksheet);
+					console.log(sheetJSON);
+
+					let studentNumber;
+					for (let row of sheetJSON) {
+						let rowContents = {
+							course: null,
+							description: null,
+							units: null,
+							grade: null,
+							from: null,
+						}
+						let keys = Object.keys(row);
+						keys.remove("__rowNum__");
+						for (let col of keys) {
+							if (column != "studentNumber") {
+								rowContents[col] = row[col];
+							} else {
+								studentNumber = row[col];
+							}
+						}
+
+						store.query('student', {
+							filter: {
+								number: studentNumber
+							}
+						}).then(function(students) {
+
+							student = students.get("firstObject");
+
+							/*var advancedStanding = this.get('store').createRecord('advanced-standing', {
+					       		course: rowContents.course,
+								description: rowContents.description,
+								units: rowContents.units,
+								grade: rowContents.grade,
+								from: rowContents.from,
+								recipient: student
+					        });
+
+					        advancedStanding.save().then(function() {
+					        	console.log("Added advanced standing");
+					        }, function() {
+					        	console.log("Could not add advanced standing");
+					        });*/
+						});	
+					}
+		    	} else if (fileName == "scholarshipsAndAwards.xlsx") {
+
+		    		//Get worksheet
+		    		var first_sheet_name = workbook.SheetNames[0];
+					var worksheet = workbook.Sheets[first_sheet_name];
+
+					var sheetJSON = XLSX.utils.sheet_to_json(worksheet);
+					console.log(sheetJSON);
+
+					let studentNumber;
+					for (let row of sheetJSON) {
+						let rowContents = {
+							course: null,
+							description: null,
+							units: null,
+							grade: null,
+							from: null,
+						}
+						let keys = Object.keys(row);
+						keys.remove("__rowNum__");
+						for (let col of keys) {
+							if (column != "studentNumber") {
+								rowContents[col] = row[col];
+							} else {
+								studentNumber = row[col];
+							}
+						}
+
+						store.query('student', {
+							filter: {
+								number: studentNumber
+							}
+						}).then(function(students) {
+
+							student = students.get("firstObject");
+
+							/*var advancedStanding = this.get('store').createRecord('advanced-standing', {
+					       		course: rowContents.course,
+								description: rowContents.description,
+								units: rowContents.units,
+								grade: rowContents.grade,
+								from: rowContents.from,
+								recipient: student
+					        });
+
+					        advancedStanding.save().then(function() {
+					        	console.log("Added advanced standing");
+					        }, function() {
+					        	console.log("Could not add advanced standing");
+					        });*/
+						});	
+					}
+		    	}
 
 		    };
 		    
