@@ -1,49 +1,24 @@
-<!-- Genders -->
-
+<!-- System Code Segment -->
+{{#each codes as |codeObj|}}
 <div class="ui segment">
 
-  <h1 class="ui header">Genders</h1>
+  <h1 class="ui header">{{codeObj.name}}</h1>
   <div class="ui action input">
-    {{input type="text" placeholder="Add gender..." value=newGender}}
-    <button class="positive ui button" {{action 'addGender'}}>Add</button>
+    {{input type="text" placeholder=codeObj.placeholder id=codeObj.inputID}}
+    <button class="positive ui button" {{action 'addCode' codeObj.emberName codeObj.inputID codeObj.inputModelProp}}>Add</button>
   </div>
 
   <div class="ui divider"></div>
 
-  {{#each genders as |gender|}}
+  {{#each codeObj.list as |code|}}
     <br>
     <div class="ui input">
-      {{input type="text" value=gender.name}}
+      {{input type="text" value=code.name}}
     </div>
-    <button class="ui primary button" {{action 'modifyGender' gender}}>Save</button>
-    <button class="negative ui button" {{action 'deleteGender' gender.id}}>Delete</button>
+    <button class="ui primary button" {{action 'modifyCode' codeObj.emberName code}}>Save</button>
+    <button class="negative ui button" {{action 'deleteCode' codeObj.emberName code.id}}>Delete</button>
     <br>
   {{/each}}
 
 </div>
-
-<!-- Residencies -->
-
-<div class="ui segment">
-
-  <h1 class="ui header">Residencies</h1>
-  <div class="ui action input">
-    {{input type="text" placeholder="Add residency..." value=newResidency}}
-    <button class="positive ui button" {{action 'addResidency'}}>Add</button>
-  </div>
-
-  <div class="ui divider"></div>
-
-  {{#each residencies as |residency|}}
-    <br>
-    <div class="ui input">
-      {{input type="text" value=residency.name}}
-    </div>
-    <button class="ui primary button" {{action 'modifyResidency' residency }} >Save</button>
-    <button class="negative ui button" {{action 'deleteResidency' residency.id }}>Delete</button>
-    <br>
-  {{/each}}
-
-</div>
-
-
+{{/each}}
