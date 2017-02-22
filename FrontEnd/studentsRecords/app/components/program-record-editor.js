@@ -6,6 +6,25 @@ export default Ember.Component.extend({
   course: null,
   notDONE: null,
   planModel: ["Software Engineering", "Mechatronics Engineering", "Bio year 2"],
+  courseModel: [{
+    courseLetter: "SE",
+    courseNumber: 2500,
+    name: "Software eng",
+    unit: 0.5
+  },
+    {
+      courseLetter: "ES",
+      courseNumber: 1050,
+      name: "Design",
+      unit: 2
+    },
+    {
+      courseLetter: "Math",
+      courseNumber: 102,
+      name: "Mathematics",
+      unit: 0.5
+    }
+  ],
 
   init() {
     this._super(...arguments);
@@ -13,6 +32,10 @@ export default Ember.Component.extend({
 
   actions:{
     selectPlan(plan){
+
+    },
+
+    selectCourse(course){
 
     },
 

@@ -83,8 +83,11 @@
         <div class="inline field">
           <label>Course</label>
           <select onchange={{action 'selectCourse' value="target.value"}}>
-            <option value="1" selected=true>MATH 101</option>
-            <option value="2">ES 1050</option>
+
+            {{#each courseModel as |courseChoice|}}
+              <option value={{courseChoice}} selected={{eq course.name
+                                                         courseChoice.name}}>{{courseChoice.courseLetter}} {{courseChoice.courseNumber}}</option>
+            {{/each}}
           </select>
         </div>
       </div>

@@ -51,6 +51,7 @@ export default Ember.Component.extend({
         this.set('termToEdit', null);
         this.set('programToEdit', null);
         this.set('courseToEdit', object);
+
       }
       this.set('isEditing', true);
     },
