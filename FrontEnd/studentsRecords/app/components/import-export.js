@@ -39,7 +39,7 @@ export default Ember.Component.extend({
 
 					    console.log(cellValue);
 
-					    /*var termCode = this.get('store').createRecord('term-code', {
+					    var termCode = this.get('store').createRecord('term-code', {
 				       		name: cellValue
 				        });
 
@@ -47,7 +47,7 @@ export default Ember.Component.extend({
 				        	console.log("Added termcode");
 				        }, function() {
 				        	console.log("Could not add termcode");
-				        });*/
+				        });
 
 					}
 		    	} else if(fileName == "genders.xlsx") {
@@ -64,7 +64,7 @@ export default Ember.Component.extend({
 
 					    console.log(cellValue);
 
-					    /*var gender = this.get('store').createRecord('gender', {
+					    var gender = this.get('store').createRecord('gender', {
 				       		name: cellValue
 				        });
 
@@ -72,7 +72,7 @@ export default Ember.Component.extend({
 				        	console.log("Added gender");
 				        }, function() {
 				        	console.log("Could not add gender");
-				        });*/
+				        });
 
 		    		}
 		    	} else if (fileName == "residencies.xlsx") {
@@ -89,7 +89,7 @@ export default Ember.Component.extend({
 
 					    console.log(cellValue);
 
-					    /*var residency = this.get('store').createRecord('residency', {
+					    var residency = this.get('store').createRecord('residency', {
 				       		name: cellValue
 				        });
 
@@ -97,7 +97,7 @@ export default Ember.Component.extend({
 				        	console.log("Added residency");
 				        }, function() {
 				        	console.log("Could not add residency");
-				        });*/
+				        });
 
 		    		}
 		    	} else if (fileName == "UndergraduateCourses.xlsx") {
@@ -133,7 +133,7 @@ export default Ember.Component.extend({
 						    }
 
 			    		}
-			    		/*var courseCode = this.get('store').createRecord('course-code', {
+			    		var courseCode = this.get('store').createRecord('course-code', {
 					       		courseLetter: courseLetter,
 								courseNumber: courseNumber,
 								name: name,
@@ -144,7 +144,7 @@ export default Ember.Component.extend({
 					        	console.log("Added course code");
 					        }, function() {
 					        	console.log("Could not add course code");
-					        });*/
+					        });
 			    	}
 		    	} else if (fileName == "HighSchools.xlsx") {
 
@@ -160,7 +160,7 @@ export default Ember.Component.extend({
 
 					    console.log(cellValue);
 
-					    /*var secondarySchool = this.get('store').createRecord('secondary-school', {
+					    var secondarySchool = this.get('store').createRecord('secondary-school', {
 				       		name: cellValue
 				        });
 
@@ -168,7 +168,7 @@ export default Ember.Component.extend({
 				        	console.log("Added secondary school");
 				        }, function() {
 				        	console.log("Could not add secondary school");
-				        });*/
+				        });
 
 		    		}
 		    	} else if (fileName == "students.xlsx") {
@@ -225,9 +225,9 @@ export default Ember.Component.extend({
 								}
 							}).then(function(residencies) {
 
-								residency = residencies.get("firstObject");
+								let residency = residencies.get("firstObject");
 
-								/*var student = this.get('store').createRecord('student', {
+								var student = this.get('store').createRecord('student', {
 						       		number: number,
 									firstName: firstName,
 									lastname: lastName,
@@ -240,7 +240,7 @@ export default Ember.Component.extend({
 						        	console.log("Added student");
 						        }, function() {
 						        	console.log("Could not add student");
-						        });*/
+						        });
 							});
 						});	    		
 			    	}
@@ -280,7 +280,7 @@ export default Ember.Component.extend({
 								}
 							}).then(function(students) {
 
-								student = students.get("firstObject");
+								let student = students.get("firstObject");
 
 								student.set('admissionComments', note);
 								student.save().then(function() {
@@ -328,7 +328,7 @@ export default Ember.Component.extend({
 								}
 							}).then(function(students) {
 
-								student = students.get("firstObject");
+								let student = students.get("firstObject");
 
 								student.set('registrationComments', note);
 								student.save().then(function() {
@@ -376,7 +376,7 @@ export default Ember.Component.extend({
 								}
 							}).then(function(students) {
 
-								student = students.get("firstObject");
+								let student = students.get("firstObject");
 
 								student.set('basisOfAdmission', note);
 								student.save().then(function() {
@@ -424,7 +424,7 @@ export default Ember.Component.extend({
 								}
 							}).then(function(students) {
 
-								student = students.get("firstObject");
+								let student = students.get("firstObject");
 
 								student.set('admissionAverage', note);
 								student.save().then(function() {
@@ -472,9 +472,9 @@ export default Ember.Component.extend({
 								}
 							}).then(function(students) {
 
-								student = students.get("firstObject");
+								let student = students.get("firstObject");
 
-								/*var advancedStanding = this.get('store').createRecord('advanced-standing', {
+								var advancedStanding = this.get('store').createRecord('advanced-standing', {
 						       		course: rowContents.course,
 									description: rowContents.description,
 									units: rowContents.units,
@@ -487,7 +487,7 @@ export default Ember.Component.extend({
 						        	console.log("Added advanced standing");
 						        }, function() {
 						        	console.log("Could not add advanced standing");
-						        });*/
+						        });
 							});	
 						}
 					}
@@ -521,9 +521,9 @@ export default Ember.Component.extend({
 								}
 							}).then(function(students) {
 
-								student = students.get("firstObject");
+								let student = students.get("firstObject");
 
-								/*var award = this.get('store').createRecord('award', {
+								var award = this.get('store').createRecord('award', {
 						       		note: note,
 									recipient: student
 						        });
@@ -532,7 +532,7 @@ export default Ember.Component.extend({
 						        	console.log("Added award");
 						        }, function() {
 						        	console.log("Could not add award");
-						        });*/
+						        });
 							});
 						}	
 					}
@@ -544,6 +544,8 @@ export default Ember.Component.extend({
 
 					var sheetJSON = XLSX.utils.sheet_to_json(worksheet);
 					console.log(sheetJSON);
+
+					let rows = [];
 
 					let studentNumber;
 					let schoolName;
@@ -572,12 +574,13 @@ export default Ember.Component.extend({
 
 						if (schoolName != "NONE FOUND") {
 
+							//Save possibly new subject
 							store.query('hs-subject-schema', {
 								filter: {
 									subject: rowContents.subject,
 									description: rowContents.description
 								}
-							}).then(function(findSubjects) {
+							}).then(function(findSubjects) {	
 
 								if (findSubjects.length == 0) {
 									var hsSubject = this.get('store').createRecord('hs-subject-schema', {
@@ -590,77 +593,106 @@ export default Ember.Component.extend({
 							        }, function() {
 							        	console.log("Could not add hs subject");
 							        });
+							    } else {
+							    	subject = findSubjects.get("firstObject");
 							    }
 							});
 
+							//Save possibly new source
+							store.query('hs-course-source', {
+								filter: {
+									code: rowContents.source
+								}
+							}).then(function(sources) {
+
+								if (findSubjects.length == 0) {
+									var source = this.get('store').createRecord('hs-course-source', {
+							        	code: rowContents.source
+									});
+
+							        source.save().then(function() {
+							        	console.log("Added source");
+							        }, function() {
+							        	console.log("Could not source");
+							        });
+							    } else {
+							    	source = sources.get("firstObject");
+							    }
+							});
+
+						}
+
+						//Add row to rows
+						let fullRow = rowContents;
+						fullRow.studentNumber = studentNumber;
+						fullRow.schoolName = schoolName;
+						rows.push(fullRow);
+					}
+
+					for (row of rows) {
+
+						if (row.schoolName != "NONE FOUND") {
+
 							store.query('hs-subject-schema', {
 								filter: {
-									subject: rowContents.subject,
-									description: rowContents.description
+									subject: row.subject,
+									description: row.description
 								}
 							}).then(function(findSubjects) {
 
-								store.query('hs-course', {
+								let subject = findSubjects.get("firstObject");
+
+								store.query('hs-course-source', {
 									filter: {
-										subject: rowContents.subject,
-										description: rowContents.description
+										code: rowContents.source
 									}
-								}).then(function(findSubjects) {
+								}).then(function(courseSources) {
 
-									store.query('hs-subject-schema', {
-										filter: {
-											subject: rowContents.subject,
-											description: rowContents.description
+									let courseSource = courseSources.get("firstObject");
+
+									var hsCourse = this.get('store').createRecord('hs-course', {
+							        	level: row.level,
+										unit: row.units,
+										source: courseSource,
+										school: row.schoolName,
+										subject: subject
+									});
+
+							        hsCourse.save().then(function() {
+
+							        	console.log("Added hs course");
+
+							        	store.query('student', {
+											filter: {
+												number: row.studentNumber
+											}
+										}).then(function(students) {
+
+											let student = students.get("firstObject");
+
+											var hsGrade = this.get('store').createRecord('hs-grade-schema', {
+									       		mark: row.grade,
+												course: hsCourse,
+												recipient: student
+									        });
+											
+											hsGrade.save().then(function() {
+									        	console.log("Added hs grade");
+									        }, function() {
+									        	console.log("Could not add hs grade");
+									        });
+
 										}
-									}).then(function(findSubjects) {
 
-								subject = findSubjects.get("firstObject");
+							        }, function() {
+							        	console.log("Could not add hs course");
+							        });
 
-								var hsCourse = this.get('store').createRecord('hs-course', {
-						        	level: rowContents.level,
-									unit: rowContents.units,
-									source: DS.belongsTo('hs-course-source'),
-									school: DS.belongsTo('secondary-school'),
-									subject: subject
 								});
-
-						        hsCourse.save().then(function() {
-						        	console.log("Added hs subject");
-						        }, function() {
-						        	console.log("Could not add hs subject");
-						        });
-
-								/*var hsGrade = this.get('store').createRecord('hs-grade-schema', {
-						       		mark: DS.attr('number'),
-									course: DS.belongsTo('hs-course'),
-									recipient: DS.belongsTo('student')
-						        });
-								
-								hsGrade.save().then(function() {
-						        	console.log("Added hs grade");
-						        }, function() {
-						        	console.log("Could not add hs grade");
-						        });
-
-						        var hsCourse = this.get('store').createRecord('hs-course', {
-						        	level: DS.attr('string'),
-									unit: DS.attr('number'),
-									source: DS.belongsTo('hs-course-source'),
-									school: DS.belongsTo('secondary-school'),
-									subject: DS.belongsTo('hs-subject'),
-									hsGrades: DS.hasMany('hs-grade')
-								});
-
-						        hsCourse.save().then(function() {
-						        	console.log("Added hs subject");
-						        }, function() {
-						        	console.log("Could not add hs subject");
-						        });*/
-							});
+							}
 						}
-					}
+		    		}
 		    	}
-
 		    };
 		    
 		    //Error in file loading
