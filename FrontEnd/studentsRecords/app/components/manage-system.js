@@ -61,11 +61,10 @@ export default Ember.Component.extend({
   init() {
 
     this._super(...arguments);
-
-    var self = this;
-
+    
     // Populate each type of system code with it's list
     for (let entry of this.codes) {
+      /*jshint loopfunc: true */  // Shuts up jshint, since this dynamic function generation in a loop is needed
       this.get('store').findAll(entry.emberName).then(function(records) {
         Ember.set(entry, 'list', records);
       });
@@ -74,8 +73,13 @@ export default Ember.Component.extend({
 
   actions: {
     addCode(emberName, DOMID, propName) {
+      // Get the value of the text box
       var domval = this.$("#" + DOMID).val();
+
+      // If the text box isn't empty...
       if (domval !== "") {
+
+        // Create new record, and then save
         var newObj = this.get('store').createRecord(emberName, {
           [propName]: domval
         });
@@ -90,12 +94,14 @@ export default Ember.Component.extend({
 
     modifyCode (emberName, obj){
 
+      // If the object exists, save the new update to DB
       if (obj.get('id') !== "") {
         obj.save();
       }
     },
 
     deleteCode (emberName, genderId){
+      // Find the given record, then destroy it
       this.get('store').findRecord(emberName, genderId, { backgroundReload: false }).then(function(obj) {
         obj.destroyRecord().then(function() {
           console.log("Deleted " + emberName);

@@ -8,7 +8,9 @@
     <button class="positive ui button" {{action 'addCode' codeObj.emberName codeObj.inputID codeObj.inputModelProp}}>Add</button>
   </div>
 
+{{#if (gt codeObj.list.length 0)}}
   <div class="ui divider"></div>
+{{/if}}
 
   {{#each codeObj.list as |code|}}
     <br>
