@@ -6,7 +6,7 @@ var mongoosePaginate = require('mongoose-paginate');
 
 var awardsSchema = mongoose.Schema(
     {
-        note: String,
+        note: {type: String, required: true},
         recipient: {type: mongoose.Schema.ObjectId, ref: 'Students'}
     }
 );

@@ -5,7 +5,7 @@ var mongoose = require('./../../studentsRecordsDB').mongoose;
 
 var programStatusSchema = mongoose.Schema(
     {
-        status: String, // Active, completed, discontinued, active with conditions, etc.
+        status: {type: String, unique: true}, // Active, completed, discontinued, active with conditions, etc.
         levels: [{type: mongoose.Schema.ObjectId, ref: 'ProgramRecords'}]
     }
 );

@@ -169,13 +169,13 @@
 </tr>
 </table>
     {{#each advancedStandingArray as |course|}}
-    {{advanced-standing standing = course}}
+    {{advanced-standing standing = course standings = advancedStandingArray}}
     <br>
     {{/each}}
     <br>
      <div class="ui button" {{action "addCourse"}}>Add Course</div>
     {{#if showNewCourse}}
-    {{add-advanced-standing newrecipient = currentStudent}} <!-- INDEX = currentIndex notDONE = showFindStudent offset = offset studentsModel = studentsRecords -->
+    {{add-advanced-standing newrecipient = currentStudent notDONE = showNewCourse standings = advancedStandingArray}} <!-- INDEX = currentIndex notDONE = showFindStudent offset = offset studentsModel = studentsRecords -->
     {{/if}}
   </div>
 
@@ -189,14 +189,14 @@
   </table> -->
   <h4>Note</h4>
     {{#each awardNotes as |award|}}
-    {{scholarships-awards award = award}}
+    {{scholarships-awards award = award awards = awardNotes}}
     <br>
     {{/each}}
     <br>
     <div class="ui button" {{action "addAward"}}>Add Scholarship/Award</div>
 
     {{#if showNewAward}}
-    {{add-award newrecipient = currentStudent studentID = currentStudent.number INDEX = currentIndex notDONE = showNewAward offset = offset studentsModel = studentsRecords}}
+    {{add-award newrecipient = currentStudent studentID = currentStudent.number notDONE = showNewAward awards = awardNotes}}
     {{/if}}
   </div>
 {{/if}}
