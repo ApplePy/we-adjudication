@@ -3,14 +3,6 @@
   <div class="content">
     <div class="ui form">
       <div class="inline field">
-        <label>Grade</label>
-        {{input type="text" value = newMark }}
-      </div>
-      <div class="inline field">
-        <label>Note</label>
-        {{textarea cols="5" rows="5" value = newnote }}
-      </div>
-      <div class="inline field">
         <label>Program</label>
         <select onchange={{action 'selectRecord' value="target.value"}}>
           <option value="1" selected=true>B.E.Sc. Engineering Sc DEG</option>
@@ -18,28 +10,14 @@
         </select>
       </div>
       <div class="inline field">
-        <label>Course</label>
-        <select onchange={{action 'selectCourse' value="target.value"}}>
-          <option value="1" selected=true>MATH 101</option>
-          <option value="2">ES 1050</option>
+        <label>Plan</label>
+        <select onchange={{action 'selectPlan' value="target.value"}}>
+          {{#each planModel as |planChoice|}}
+            <option value={{planChoice}} selected={{eq plan.name
+                                                       planChoice}}>{{planChoice}} </option>
+          {{/each}}
         </select>
       </div>
-      <div class="inline field">
-        <label>Term</label>
-        <select onchange={{action 'selectTerm' value="target.value"}}>
-          <option value="1" selected=true>2010 Fall/Winter</option>
-          <option value="2">2013 Fall/Winter</option>
-        </select>
-      </div>
-      {{#each plans as |plan|}}
-        <div class="inline field">
-          <label>Plan</label>
-          <select onchange={{action 'selectPlan' value="target.value"}}>
-            <option value="1" selected=true>Software Engineering</option>
-            <option value="2">Mechatronics Engineering</option>
-          </select>
-        </div>
-      {{/each}}
       <div class="inline field">
         <label>Add a plan</label>
         <button class="ui icon button" {{action 'newPlanField'}} title="Add another plan">

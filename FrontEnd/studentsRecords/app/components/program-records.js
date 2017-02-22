@@ -4,7 +4,8 @@ export default Ember.Component.extend({
   store: Ember.inject.service(),
   studentGrades: null,
   progRecs: null,
-  isAdding: false,
+  isAddingProgram: false,
+  isAddingTerm: false,
   isEditing: false,
   termToEdit: null,
   programToEdit: null,
@@ -21,15 +22,16 @@ export default Ember.Component.extend({
 
   actions:{
     addTerm(){
-      this.set('isAdding', true);
+      this.set('isAddingTerm', true);
     },
 
     addRecord(term){
-        console.log(term.name);
+      this.set('isAddingProgram', true);
+
     },
 
     addGrade(term){
-      console.log(term.name);
+
     },
 
     updateRecord(_model, object){

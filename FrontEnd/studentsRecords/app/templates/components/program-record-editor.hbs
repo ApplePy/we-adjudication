@@ -89,8 +89,41 @@
                                                          courseChoice.name}}>{{courseChoice.courseLetter}} {{courseChoice.courseNumber}}</option>
             {{/each}}
           </select>
+          <button class="ui button" {{action 'editCourse'}} title="Edit this course">Edit</button>
+          <button class="ui icon button" {{action 'newCourse'}} title="Add a different course">
+            <i class="plus icon"></i>
+          </button>
+          <button class="ui icon button" {{action 'deleteCourse' course}} title="Delete this course">
+            <i class="minus icon"></i>
+          </button>
         </div>
       </div>
+      {{#if courseToEdit}}
+        <div class="ui tertiary grey segment">
+          <div class="ui form">
+            <div class="inline field">
+              <label>Course Letter</label>
+              {{input size="5" type="text" value = courseToEdit.courseLetter}}
+            </div>
+            <div class="inline field">
+              <label>Course Number</label>
+              {{input size="10" type="text" value = courseToEdit.courseNumber}}
+            </div>
+            <div class="inline field">
+              <label>Course Name</label>
+              {{input size="20" type="text" value = courseToEdit.name}}
+            </div>
+            <div class="inline field">
+              <label>Units</label>
+              {{input size="3" type="number" value = courseToEdit.unit}}
+            </div>
+            <div class="inline field">
+              <button class="ui green button" {{action 'saveCourseToEdit'}}>Save</button>
+              <button class="ui red button" {{action 'cancelCourseEdit'}}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      {{/if}}
       <br>
       <div class="actions">
         <br>

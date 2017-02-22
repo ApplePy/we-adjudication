@@ -5,6 +5,9 @@ export default Ember.Component.extend({
   program: null,
   course: null,
   notDONE: null,
+  courseToEdit: null,
+  selectedCourse: null,
+  selectedPlan: null,
   planModel: ["Software Engineering", "Mechatronics Engineering", "Bio year 2"],
   courseModel: [{
     courseLetter: "SE",
@@ -28,15 +31,40 @@ export default Ember.Component.extend({
 
   init() {
     this._super(...arguments);
+
+    this.set('selectedCourse', this.get('courseModel').objectAt(0));
+    this.set('selectedPlan', this.get('planModel').objectAt(0));
+
   },
 
   actions:{
     selectPlan(plan){
-
+      this.set('selectedPlan', plan);
     },
 
     selectCourse(course){
 
+      this.set('selectedCourse', c);
+    },
+
+    newCourse(){
+
+    },
+
+    editCourse(){
+      this.set('courseToEdit', this.get('selectedCourse'));
+    },
+
+    deleteCourse(course){
+
+    },
+
+    saveCourseToEdit(){
+      //this.get('courseToEdit').save();
+    },
+
+    cancelCourseEdit(){
+      this.set('courseToEdit', null);
     },
 
     deletePlanField(){

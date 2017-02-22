@@ -91,8 +91,11 @@
 {{/each}}
 <br>
 <div class="ui green basic button" {{action "addTerm"}}>Add Term</div>
-{{#if isAdding}}
-  {{add-program-record notDONE = isAdding}}
+{{#if isAddingProgram}}
+  {{add-program-record notDONE = isAddingProgram}}
+{{/if}}
+{{#if isAddingTerm}}
+  {{add-term notDONE = isAddingTerm}}
 {{/if}}
 {{#if descriptionShow}}
   {{show-description title = "Grade" description = description notDONE = descriptionShow}}
