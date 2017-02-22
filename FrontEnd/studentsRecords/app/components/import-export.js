@@ -548,9 +548,8 @@ export default Ember.Component.extend({
 					let studentNumber;
 					let schoolName;
 
-					let subjects = [];
-
 					for (let row of sheetJSON) {
+
 						let rowContents = {
 							level: null,
 							subject: null,
@@ -571,55 +570,94 @@ export default Ember.Component.extend({
 							}
 						}
 
-						for (subject of subjects)
+						if (schoolName != "NONE FOUND") {
 
-						store.query('student', {
-							filter: {
-								number: studentNumber
-							}
-						}).then(function(students) {
+							store.query('hs-subject-schema', {
+								filter: {
+									subject: rowContents.subject,
+									description: rowContents.description
+								}
+							}).then(function(findSubjects) {
 
-							student = students.get("firstObject");
+								if (findSubjects.length == 0) {
+									var hsSubject = this.get('store').createRecord('hs-subject-schema', {
+							        	name: rowContents.subject,
+										description: rowContents.description
+									});
 
-							/*var hsGrade = this.get('store').createRecord('hs-grade-schema', {
-					       		mark: DS.attr('number'),
-								course: DS.belongsTo('hs-course'),
-								recipient: DS.belongsTo('student')
-					        });
-							
-							hsGrade.save().then(function() {
-					        	console.log("Added hs grade");
-					        }, function() {
-					        	console.log("Could not add hs grade");
-					        });
-
-							var hsSubject = this.get('store').createRecord('hs-subject-schema', {
-					        	name: DS.attr('string'),
-								description: DS.attr('string'),
-								courses: DS.hasMany('hs-course')
+							        hsSubject.save().then(function() {
+							        	console.log("Added hs subject");
+							        }, function() {
+							        	console.log("Could not add hs subject");
+							        });
+							    }
 							});
 
-					        hsSubject.save().then(function() {
-					        	console.log("Added hs subject");
-					        }, function() {
-					        	console.log("Could not add hs subject");
-					        });
+							store.query('hs-subject-schema', {
+								filter: {
+									subject: rowContents.subject,
+									description: rowContents.description
+								}
+							}).then(function(findSubjects) {
 
-					        var hsCourse = this.get('store').createRecord('hs-course', {
-					        	level: DS.attr('string'),
-								unit: DS.attr('number'),
-								source: DS.belongsTo('hs-course-source'),
-								school: DS.belongsTo('secondary-school'),
-								subject: DS.belongsTo('hs-subject'),
-								hsGrades: DS.hasMany('hs-grade')
+								store.query('hs-course', {
+									filter: {
+										subject: rowContents.subject,
+										description: rowContents.description
+									}
+								}).then(function(findSubjects) {
+
+									store.query('hs-subject-schema', {
+										filter: {
+											subject: rowContents.subject,
+											description: rowContents.description
+										}
+									}).then(function(findSubjects) {
+
+								subject = findSubjects.get("firstObject");
+
+								var hsCourse = this.get('store').createRecord('hs-course', {
+						        	level: rowContents.level,
+									unit: rowContents.units,
+									source: DS.belongsTo('hs-course-source'),
+									school: DS.belongsTo('secondary-school'),
+									subject: subject
+								});
+
+						        hsCourse.save().then(function() {
+						        	console.log("Added hs subject");
+						        }, function() {
+						        	console.log("Could not add hs subject");
+						        });
+
+								/*var hsGrade = this.get('store').createRecord('hs-grade-schema', {
+						       		mark: DS.attr('number'),
+									course: DS.belongsTo('hs-course'),
+									recipient: DS.belongsTo('student')
+						        });
+								
+								hsGrade.save().then(function() {
+						        	console.log("Added hs grade");
+						        }, function() {
+						        	console.log("Could not add hs grade");
+						        });
+
+						        var hsCourse = this.get('store').createRecord('hs-course', {
+						        	level: DS.attr('string'),
+									unit: DS.attr('number'),
+									source: DS.belongsTo('hs-course-source'),
+									school: DS.belongsTo('secondary-school'),
+									subject: DS.belongsTo('hs-subject'),
+									hsGrades: DS.hasMany('hs-grade')
+								});
+
+						        hsCourse.save().then(function() {
+						        	console.log("Added hs subject");
+						        }, function() {
+						        	console.log("Could not add hs subject");
+						        });*/
 							});
-
-					        hsCourse.save().then(function() {
-					        	console.log("Added hs subject");
-					        }, function() {
-					        	console.log("Could not add hs subject");
-					        });*/
-						});	
+						}
 					}
 		    	}
 
