@@ -13,7 +13,7 @@
   {{#each codeObj.list as |code|}}
     <br>
     <div class="ui input">
-      {{input type="text" value=code.name}}
+      {{input type="text" value=(mut (get code codeObj.inputModelProp))}}
     </div>
     <button class="ui primary button" {{action 'modifyCode' codeObj.emberName code}}>Save</button>
     <button class="negative ui button" {{action 'deleteCode' codeObj.emberName code.id}}>Delete</button>
