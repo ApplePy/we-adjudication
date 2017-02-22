@@ -1,0 +1,99 @@
+<div class="ui modal">
+  {{#if term}}
+    <div class="header">Edit Term Information</div>
+    <div class="content">
+      <div class="ui form">
+        <div class="inline field">
+          <label>Term Name</label>
+          {{input size="20" type="text"  value = term.name}}
+        </div>
+      </div>
+      <br>
+      <div class="actions">
+        <br>
+        <div class="ui green button" {{action 'saveRecord' term}}>Save</div>
+        <div class="ui red basic button" {{action "close"}}>Cancel</div>
+      </div>
+    </div>
+  {{/if}}
+  {{#if program}}
+    <div class="header">Edit Program Information</div>
+    <div class="content">
+      <div class="ui form">
+        <div class="inline field">
+          <label>Program Name</label>
+          {{input size="20" type="text" value = program.name}}
+        </div>
+        <div class="inline field">
+          <label>Program Level</label>
+          {{input size="20" type="text" value = program.level}}
+        </div>
+        <div class="inline field">
+          <label>Program Load</label>
+          {{input size="20" type="text" value = program.load}}
+        </div>
+        <div class="inline field">
+          <label>Program Status</label>
+          {{input size="20" type="text" value = program.status}}
+        </div>
+        {{#each program.plan as |plan|}}
+          <div class="inline field">
+            <label>Plan</label>
+            <select onchange={{action 'selectPlan' value="target.value"}}>
+              {{#each planModel as |planChoice|}}
+                <option value={{planChoice}} selected={{eq plan.name
+                                                                planChoice}}>{{planChoice}} </option>
+              {{/each}}
+            </select>
+          </div>
+        {{/each}}
+        <div class="inline field">
+          <label>Add a plan</label>
+          <button class="ui icon button" {{action 'newPlanField'}} title="Add another plan">
+            <i class="plus icon"></i>
+          </button>
+          {{#if hasPlan}}
+            <label>Remove Plan</label>
+            <button class="ui icon button" {{action 'deletePlanField'}} title="Remove last plan">
+              <i class="minus icon"></i>
+            </button>
+          {{/if}}
+        </div>
+      </div>
+      <br>
+      <div class="actions">
+        <br>
+        <div class="ui green button" {{action 'saveRecord' program}}>Save</div>
+        <div class="ui red basic button" {{action "close"}}>Cancel</div>
+      </div>
+    </div>
+  {{/if}}
+  {{#if course}}
+    <div class="header">Edit Course Information</div>
+    <div class="content">
+      <div class="ui form">
+        <div class="inline field">
+          <label>Grade</label>
+          {{input size="10" type="text" value = course.grade.mark}}
+        </div>
+        <div class="inline field">
+          <label>Note</label>
+          {{textarea cols="5" rows="5" value = course.grade.note }}
+        </div>
+        <div class="inline field">
+          <label>Course</label>
+          <select onchange={{action 'selectCourse' value="target.value"}}>
+            <option value="1" selected=true>MATH 101</option>
+            <option value="2">ES 1050</option>
+          </select>
+        </div>
+      </div>
+      <br>
+      <div class="actions">
+        <br>
+        <div class="ui green button" {{action 'saveRecord' program}}>Save</div>
+        <div class="ui red basic button" {{action "close"}}>Cancel</div>
+      </div>
+    </div>
+  {{/if}}
+</div>

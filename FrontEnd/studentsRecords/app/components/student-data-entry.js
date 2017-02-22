@@ -26,6 +26,7 @@ export default Ember.Component.extend({
   showNewAward: false,
   awardNotes: [],
   advancedStandingArray: [],
+  termModel: null,
 
   studentModel: Ember.observer('offset', function () {
     var self = this;
@@ -112,7 +113,7 @@ export default Ember.Component.extend({
         }
        });
 
-       this.get('store').query('advanced-standing', {
+    this.get('store').query('advanced-standing', {
          filter: {
            recipient: this.get('currentStudent').id
          }
@@ -121,6 +122,18 @@ export default Ember.Component.extend({
           this.get('advancedStandingArray').pushObject(standing.objectAt(i));
         }
        });
+
+    //For when the term model and route is set
+    /*
+    this.get('store').query('term', {
+        filter: {
+          student: this.get('currentStudent').id
+        }
+      }).then((terms) => {
+        this.set('termModel', terms);
+    });
+    */
+
   },
 
   didRender() {

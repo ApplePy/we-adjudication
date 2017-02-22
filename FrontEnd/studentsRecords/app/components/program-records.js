@@ -1,28 +1,75 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-  didInsertElement() {
-    Ember.$(document).ready(function(){
-      Ember.$('.ui .title').on('click', function() {
-        Ember.$('.ui .title').removeClass('active');
-        Ember.$('.ui .content').removeClass('active');
-        Ember.$(this).addClass('active');
-        Ember.$(this > '.content').addClass('active');
-        Ember.$(this).children().addClass('active');
-      });
-    });
-  },
   store: Ember.inject.service(),
   studentGrades: null,
   progRecs: null,
   isAdding: false,
+  isEditing: false,
+  termToEdit: null,
+  programToEdit: null,
+  courseToEdit: null,
   descriptionShow: false,
   description: null,
+  //Will need to change this to terms and change the variable on student-data-entry.hbs when the component is set
+  terms1: null,
   //Get the terms
   //Get the courses from those terms
   //Get the grades from those courses
   //Get the program records from the terms
   //Get the plan codes from the program records
+
+  actions:{
+    addTerm(){
+      this.set('isAdding', true);
+    },
+
+    addRecord(term){
+        console.log(term.name);
+    },
+
+    addGrade(term){
+      console.log(term.name);
+    },
+
+    updateRecord(_model, object){
+
+      if(_model === 'term'){
+
+        this.set('termToEdit', object);
+        this.set('programToEdit', null);
+        this.set('courseToEdit', null);
+
+      } else if(_model === 'program'){
+
+        this.set('termToEdit', null);
+        this.set('programToEdit', object);
+        this.set('courseToEdit', null);
+
+      } else if(_model === 'course'){
+
+        this.set('termToEdit', null);
+        this.set('programToEdit', null);
+        this.set('courseToEdit', object);
+      }
+      this.set('isEditing', true);
+    },
+
+    deleteRecord(_model, object){
+      /*
+      this.get('store').findRecord(_model, object, { backgroundReload: false }).then(function(obj) {
+        obj.destroyRecord().then(function() {
+          console.log("Deleted " + emberName);
+        });
+      });
+      */
+    },
+
+    showNote(note){
+      this.set('descriptionShow', true);
+      this.set('description', note);
+    },
+  },
 
   terms: [
     {
@@ -228,15 +275,4 @@ export default Ember.Component.extend({
       ]
     }
   ],
-
-  actions:{
-    addRecord(){
-        this.set('isAdding', true);
-    },
-
-    showNote(note){
-      this.set('descriptionShow', true);
-      this.set('description', note);
-    }
-  }
 });
