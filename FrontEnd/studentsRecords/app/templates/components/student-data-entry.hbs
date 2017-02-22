@@ -149,7 +149,7 @@
     <h2>{{currentStudent.number}}</h2>
     <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
     <!-- Display the program records for this student-->
-    {{program-records terms = termModel}}
+    {{program-records terms = termModel student = currentStudent}}
   </div>
 
   <div class="ui tab" data-tab="advancedStanding">

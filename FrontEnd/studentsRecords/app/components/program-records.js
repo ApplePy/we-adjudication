@@ -14,6 +14,7 @@ export default Ember.Component.extend({
   descriptionShow: false,
   description: null,
   terms: null,
+  student: null,
 
   actions:{
     addTerm(){

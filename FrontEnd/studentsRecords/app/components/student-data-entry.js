@@ -123,17 +123,13 @@ export default Ember.Component.extend({
         }
        });
 
-    //For when the term model and route is set
-    /*
-    this.get('store').query('term', {
+    this.get('store').query('term-code', {
         filter: {
           student: this.get('currentStudent').id
         }
       }).then((terms) => {
         this.set('termModel', terms);
     });
-    */
-
   },
 
   didRender() {
