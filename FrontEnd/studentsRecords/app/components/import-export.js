@@ -272,22 +272,25 @@ export default Ember.Component.extend({
 
 			    		}
 
-						store.query('student', {
-							filter: {
-								number: number
-							}
-						}).then(function(students) {
+			    		if (note != "NONE FOUND") {
 
-							student = students.get("firstObject");
+							store.query('student', {
+								filter: {
+									number: number
+								}
+							}).then(function(students) {
 
-							student.set('admissionComments', note);
-							student.save().then(function() {
-				        		console.log("Added admission comment");
-				        	}, function() {
-				            	console.log("Could not add admission comment");
-				          	});
+								student = students.get("firstObject");
 
-						});	    		
+								student.set('admissionComments', note);
+								student.save().then(function() {
+					        		console.log("Added admission comment");
+					        	}, function() {
+					            	console.log("Could not add admission comment");
+					          	});
+
+							});
+						}	    		
 			    	}
 		    	} else if (fileName == "RegistrationComments.xlsx") {
 
@@ -317,22 +320,25 @@ export default Ember.Component.extend({
 
 			    		}
 
-						store.query('student', {
-							filter: {
-								number: number
-							}
-						}).then(function(students) {
+			    		if (note != "NONE FOUND") {
 
-							student = students.get("firstObject");
+							store.query('student', {
+								filter: {
+									number: number
+								}
+							}).then(function(students) {
 
-							student.set('registrationComments', note);
-							student.save().then(function() {
-				        		console.log("Added registration comment");
-				        	}, function() {
-				            	console.log("Could not add registration comment");
-				          	});
+								student = students.get("firstObject");
 
-						});	    		
+								student.set('registrationComments', note);
+								student.save().then(function() {
+					        		console.log("Added registration comment");
+					        	}, function() {
+					            	console.log("Could not add registration comment");
+					          	});
+
+							});
+						}	    		
 			    	}
 		    	} else if (fileName == "BasisOfAdmission.xlsx") {
 
@@ -362,22 +368,25 @@ export default Ember.Component.extend({
 
 			    		}
 
-						store.query('student', {
-							filter: {
-								number: number
-							}
-						}).then(function(students) {
+			    		if (note != "NONE FOUND") {
 
-							student = students.get("firstObject");
+							store.query('student', {
+								filter: {
+									number: number
+								}
+							}).then(function(students) {
 
-							student.set('basisOfAdmission', note);
-							student.save().then(function() {
-				        		console.log("Added basis of admission");
-				        	}, function() {
-				            	console.log("Could not add basis of admission");
-				          	});
+								student = students.get("firstObject");
 
-						});	    		
+								student.set('basisOfAdmission', note);
+								student.save().then(function() {
+					        		console.log("Added basis of admission");
+					        	}, function() {
+					            	console.log("Could not add basis of admission");
+					          	});
+
+							});
+						}  		
 			    	}
 		    	} else if (fileName == "AdmissionAverages.xlsx") {
 
@@ -407,22 +416,25 @@ export default Ember.Component.extend({
 
 			    		}
 
-						store.query('student', {
-							filter: {
-								number: number
-							}
-						}).then(function(students) {
+			    		if (note != "NONE FOUND") {
 
-							student = students.get("firstObject");
+							store.query('student', {
+								filter: {
+									number: number
+								}
+							}).then(function(students) {
 
-							student.set('admissionAverage', note);
-							student.save().then(function() {
-				        		console.log("Added admission comment");
-				        	}, function() {
-				            	console.log("Could not add admission comment");
-				          	});
+								student = students.get("firstObject");
 
-						});	    		
+								student.set('admissionAverage', note);
+								student.save().then(function() {
+					        		console.log("Added admission comment");
+					        	}, function() {
+					            	console.log("Could not add admission comment");
+					          	});
+
+							});
+						}	    		
 			    	}
 		    	} else if(fileName == "AdvancedStanding.xlsx") {
 
@@ -452,29 +464,32 @@ export default Ember.Component.extend({
 							}
 						}
 
-						store.query('student', {
-							filter: {
-								number: studentNumber
-							}
-						}).then(function(students) {
+						if (rowContents[course] != "NONE FOUND") {
 
-							student = students.get("firstObject");
+							store.query('student', {
+								filter: {
+									number: studentNumber
+								}
+							}).then(function(students) {
 
-							/*var advancedStanding = this.get('store').createRecord('advanced-standing', {
-					       		course: rowContents.course,
-								description: rowContents.description,
-								units: rowContents.units,
-								grade: rowContents.grade,
-								from: rowContents.from,
-								recipient: student
-					        });
+								student = students.get("firstObject");
 
-					        advancedStanding.save().then(function() {
-					        	console.log("Added advanced standing");
-					        }, function() {
-					        	console.log("Could not add advanced standing");
-					        });*/
-						});	
+								/*var advancedStanding = this.get('store').createRecord('advanced-standing', {
+						       		course: rowContents.course,
+									description: rowContents.description,
+									units: rowContents.units,
+									grade: rowContents.grade,
+									from: rowContents.from,
+									recipient: student
+						        });
+
+						        advancedStanding.save().then(function() {
+						        	console.log("Added advanced standing");
+						        }, function() {
+						        	console.log("Could not add advanced standing");
+						        });*/
+							});	
+						}
 					}
 		    	} else if (fileName == "scholarshipsAndAwards.xlsx") {
 
@@ -498,6 +513,66 @@ export default Ember.Component.extend({
 							}
 						}
 
+						if (note != "NONE FOUND") {
+
+							store.query('student', {
+								filter: {
+									number: studentNumber
+								}
+							}).then(function(students) {
+
+								student = students.get("firstObject");
+
+								/*var award = this.get('store').createRecord('award', {
+						       		note: note,
+									recipient: student
+						        });
+
+						        award.save().then(function() {
+						        	console.log("Added award");
+						        }, function() {
+						        	console.log("Could not add award");
+						        });*/
+							});
+						}	
+					}
+		    	} else if (fileName == "HighSchoolCourseInformation.xlsx") {
+
+		    		//Get worksheet
+		    		var first_sheet_name = workbook.SheetNames[0];
+					var worksheet = workbook.Sheets[first_sheet_name];
+
+					var sheetJSON = XLSX.utils.sheet_to_json(worksheet);
+					console.log(sheetJSON);
+
+					let studentNumber;
+					let schoolName;
+
+					let subjects = [];
+
+					for (let row of sheetJSON) {
+						let rowContents = {
+							level: null,
+							subject: null,
+							description: null,
+							source: null,
+							units: null,
+							grade: null
+						}
+						let keys = Object.keys(row);
+						keys.remove("__rowNum__");
+						for (let col of keys) {
+							if (column == "studentNumber") {
+								studentNumber = row[col];
+							} else if (column == "schoolName") {
+								schoolName = row[col];
+							} else {
+								rowContents[col] = row[col];
+							}
+						}
+
+						for (subject of subjects)
+
 						store.query('student', {
 							filter: {
 								number: studentNumber
@@ -506,15 +581,43 @@ export default Ember.Component.extend({
 
 							student = students.get("firstObject");
 
-							/*var award = this.get('store').createRecord('award', {
-					       		note: note,
-								recipient: student
+							/*var hsGrade = this.get('store').createRecord('hs-grade-schema', {
+					       		mark: DS.attr('number'),
+								course: DS.belongsTo('hs-course'),
+								recipient: DS.belongsTo('student')
+					        });
+							
+							hsGrade.save().then(function() {
+					        	console.log("Added hs grade");
+					        }, function() {
+					        	console.log("Could not add hs grade");
 					        });
 
-					        award.save().then(function() {
-					        	console.log("Added award");
+							var hsSubject = this.get('store').createRecord('hs-subject-schema', {
+					        	name: DS.attr('string'),
+								description: DS.attr('string'),
+								courses: DS.hasMany('hs-course')
+							});
+
+					        hsSubject.save().then(function() {
+					        	console.log("Added hs subject");
 					        }, function() {
-					        	console.log("Could not add award");
+					        	console.log("Could not add hs subject");
+					        });
+
+					        var hsCourse = this.get('store').createRecord('hs-course', {
+					        	level: DS.attr('string'),
+								unit: DS.attr('number'),
+								source: DS.belongsTo('hs-course-source'),
+								school: DS.belongsTo('secondary-school'),
+								subject: DS.belongsTo('hs-subject'),
+								hsGrades: DS.hasMany('hs-grade')
+							});
+
+					        hsCourse.save().then(function() {
+					        	console.log("Added hs subject");
+					        }, function() {
+					        	console.log("Could not add hs subject");
 					        });*/
 						});	
 					}
