@@ -97,6 +97,9 @@
 {{#if isAddingTerm}}
   {{add-term notDONE = isAddingTerm}}
 {{/if}}
+{{#if isAddingGrade}}
+  {{add-grade notDONE = isAddingGrade}}
+{{/if}}
 {{#if descriptionShow}}
   {{show-description title = "Grade" description = description notDONE = descriptionShow}}
 {{/if}}

@@ -6,6 +6,7 @@ export default Ember.Component.extend({
   progRecs: null,
   isAddingProgram: false,
   isAddingTerm: false,
+  isAddingGrade: false,
   isEditing: false,
   termToEdit: null,
   programToEdit: null,
@@ -31,6 +32,7 @@ export default Ember.Component.extend({
     },
 
     addGrade(term){
+      this.set('isAddingGrade', true);
 
     },
 

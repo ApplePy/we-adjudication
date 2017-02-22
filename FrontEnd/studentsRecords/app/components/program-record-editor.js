@@ -5,66 +5,20 @@ export default Ember.Component.extend({
   program: null,
   course: null,
   notDONE: null,
-  courseToEdit: null,
-  selectedCourse: null,
   selectedPlan: null,
   planModel: ["Software Engineering", "Mechatronics Engineering", "Bio year 2"],
-  courseModel: [{
-    courseLetter: "SE",
-    courseNumber: 2500,
-    name: "Software eng",
-    unit: 0.5
-  },
-    {
-      courseLetter: "ES",
-      courseNumber: 1050,
-      name: "Design",
-      unit: 2
-    },
-    {
-      courseLetter: "Math",
-      courseNumber: 102,
-      name: "Mathematics",
-      unit: 0.5
-    }
-  ],
 
   init() {
     this._super(...arguments);
 
-    this.set('selectedCourse', this.get('courseModel').objectAt(0));
-    this.set('selectedPlan', this.get('planModel').objectAt(0));
+    var self = this;
+    self.set('selectedPlan', self.get('planModel').objectAt(0));
 
   },
 
   actions:{
     selectPlan(plan){
       this.set('selectedPlan', plan);
-    },
-
-    selectCourse(course){
-
-      this.set('selectedCourse', c);
-    },
-
-    newCourse(){
-
-    },
-
-    editCourse(){
-      this.set('courseToEdit', this.get('selectedCourse'));
-    },
-
-    deleteCourse(course){
-
-    },
-
-    saveCourseToEdit(){
-      //this.get('courseToEdit').save();
-    },
-
-    cancelCourseEdit(){
-      this.set('courseToEdit', null);
     },
 
     deletePlanField(){

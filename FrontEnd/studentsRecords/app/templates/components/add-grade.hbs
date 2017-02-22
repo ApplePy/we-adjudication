@@ -1,0 +1,24 @@
+<div class="ui modal">
+    <div class="header">Edit Course Information</div>
+    <div class="content">
+      <div class="ui form">
+        <div class="inline field">
+          <label>Grade</label>
+          {{input size="10" type="text" value = newMark}}
+        </div>
+        <div class="inline field">
+          <label>Note</label>
+          {{textarea cols="5" rows="5" value = newNote}}
+        </div>
+        {{manage-courses}}
+      <br>
+      <div class="actions">
+        <br>
+        <div class="ui green button" {{action 'saveRecord' program}}>Save</div>
+        <div class="ui red basic button" {{action "close"}}>Cancel</div>
+      </div>
+    </div>
+    </div>
+</div>
+
+
