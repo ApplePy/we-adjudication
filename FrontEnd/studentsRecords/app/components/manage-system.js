@@ -3,10 +3,6 @@ import Ember from 'ember';
 export default Ember.Component.extend({
 
   store: Ember.inject.service(),
-  genders: null,
-  residencies: null,
-  newGender: null,
-  newResidency: null,
   codes: [
     {
       name: "Genders",
