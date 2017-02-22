@@ -1,6 +1,6 @@
 import { moduleForModel, test } from 'ember-qunit';
 
-moduleForModel('hs-subject-schema', 'Unit | Model | hs subject schema', {
+moduleForModel('hs-grade', 'Unit | Model | hs grade', {
   // Specify the other units that are required for this test.
   needs: []
 });
