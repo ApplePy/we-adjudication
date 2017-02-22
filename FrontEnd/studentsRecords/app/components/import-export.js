@@ -574,7 +574,7 @@ export default Ember.Component.extend({
 						if (schoolName != "NONE FOUND") {
 
 							//Save possibly new subject
-							store.query('hs-subject-schema', {
+							store.query('hs-subject', {
 								filter: {
 									subject: rowContents.subject,
 									description: rowContents.description
@@ -582,7 +582,7 @@ export default Ember.Component.extend({
 							}).then(function(findSubjects) {	
 
 								if (findSubjects.length == 0) {
-									var hsSubject = this.get('store').createRecord('hs-subject-schema', {
+									var hsSubject = this.get('store').createRecord('hs-subject', {
 							        	name: rowContents.subject,
 										description: rowContents.description
 									});
@@ -632,7 +632,7 @@ export default Ember.Component.extend({
 
 						if (row.schoolName != "NONE FOUND") {
 
-							store.query('hs-subject-schema', {
+							store.query('hs-subject', {
 								filter: {
 									subject: row.subject,
 									description: row.description
@@ -669,7 +669,7 @@ export default Ember.Component.extend({
 
 											let student = students.get("firstObject");
 
-											var hsGrade = this.get('store').createRecord('hs-grade-schema', {
+											var hsGrade = this.get('store').createRecord('hs-grade', {
 									       		mark: row.grade,
 												course: hsCourse,
 												recipient: student
@@ -681,16 +681,103 @@ export default Ember.Component.extend({
 									        	console.log("Could not add hs grade");
 									        });
 
-										}
-
-							        }, function() {
-							        	console.log("Could not add hs course");
-							        });
-
+								        }, function() {
+								        	console.log("Could not add hs course");
+								        });
+									});
 								});
-							}
+							});
 						}
 		    		}
+
+		    	} else if (fileName == "UndergraduateRecordCourses.xlsx") {
+
+		    		//Get worksheet
+		    		var first_sheet_name = workbook.SheetNames[0];
+					var worksheet = workbook.Sheets[first_sheet_name];
+
+					var sheetJSON = XLSX.utils.sheet_to_json(worksheet);
+					console.log(sheetJSON);
+
+					let studentNumber;
+					let term;
+
+					for (let row of sheetJSON) {
+
+						let rowContents = {
+							courseLetter: null,
+							courseNumber: null,
+							section: null,
+							grade: null,
+							note: null
+						}
+
+						let keys = Object.keys(row);
+						keys.remove("__rowNum__");
+						for (let col of keys) {
+							if (column == "studentNumber") {
+								studentNumber = row[col];
+							} else if (column == "term") {
+								term = row[col];
+							} else {
+								rowContents[col] = row[col];
+							}
+						}
+					}
+
+					var grade = this.get('store').createRecord('grade', {
+			       		mark: rowContents.grade,
+						note: rowContents.note
+			        });
+					
+					grade.save().then(function() {
+
+			        	console.log("Added grade");
+
+			        	store.query('student', {
+							filter: {
+								number: studentNumber
+							}
+						}).then(function(students) {
+
+							let student = students.get("firstObject");
+
+							var termCode = this.get('store').createRecord('term-code', {
+					       		name: term,
+					       		student: student
+					        });
+
+					        termCode.save().then(function() {
+
+					        	console.log("Added termcode");
+
+					        	var courseCode = this.get('store').createRecord('course-code', {
+						       		courseLetter: DS.attr('string'),
+									  courseNumber: DS.attr('number'),
+									  name: DS.attr('string'),
+									  unit: DS.attr('number'),
+									  termInfo: DS.belongsTo('term-code'),
+									  gradeInfo: DS.belongsTo('grade')
+						        });
+
+						        courseCode.save().then(function() {
+						        	console.log("Added coursecode");   	
+						        }, function() {
+						        	console.log("Could not add coursecode");
+						        });
+
+					        }, function() {
+					        	console.log("Could not add termcode");
+					        });
+
+						});   	
+
+			        }, function() {
+			        	console.log("Could not add grade");
+			        });
+
+		    	} else if (fileName == "UndergraduateRecordPlans.xlsx") {
+
 		    	}
 		    };
 		    
