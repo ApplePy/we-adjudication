@@ -5,7 +5,7 @@ var mongoose = require('./../../studentsRecordsDB').mongoose;
 
 var planCodeSchema = mongoose.Schema(
     {
-        name: String,
+        name: {type: String, unique: true},
         programRecords: [{type: mongoose.Schema.ObjectId, ref: 'ProgramRecords'}]
     }
 );

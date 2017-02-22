@@ -6,7 +6,7 @@ var mongoose = require('./../../studentsRecordsDB').mongoose;
 
 var courseLoadSchema = mongoose.Schema(
     {
-        load: String,   // Fulltime/parttime enumeration
+        load: {type: String, unique: true},   // Fulltime/parttime enumeration
         levels: [{type: mongoose.Schema.ObjectId, ref: 'ProgramRecords'}]   // In a many-to-many relation; ProgramRecords stores connections
     }
 );

@@ -126,7 +126,7 @@ export default Ember.Component.extend({
        //*********************** POPULATE hsMarks[] **************************************
        //you do this so the student-data-entry.hsb file knows whats up and can use the array to loop
        //this is the same logic as awards and advanced standing so it should work (but of course it hasnt been tested yet)
-       this.get('store').query('hs-grade-schema', {
+       this.get('store').query('hs-grade', {
          filter: {
            recipient: this.get('currentStudent').id
          }

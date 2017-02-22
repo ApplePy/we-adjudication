@@ -150,7 +150,7 @@
     <br>
     <h2>{{currentStudent.number}}</h2>
     <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
-   <table class="ui seven column very basic table"> 
+   <table class="ui seven column very basic table">
   <tr>
 <td class="three wide"><h4>Course</h4></td>
 <td class="three wide"><h4>From</h4></td>
@@ -158,17 +158,17 @@
 <td class="one wide"><h4>Grade</h4></td>
 <td class="three wide"></td>
 <td class="one wide"></td>
- <td class="three wide"></td> 
+ <td class="three wide"></td>
 </tr>
 </table>
     {{#each advancedStandingArray as |course|}}
-    {{advanced-standing standing = course}}
+    {{advanced-standing standing = course standings = advancedStandingArray}}
     <br>
     {{/each}}
     <br>
      <div class="ui button" {{action "addCourse"}}>Add Course</div>
     {{#if showNewCourse}}
-    {{add-advanced-standing newrecipient = currentStudent}} <!-- INDEX = currentIndex notDONE = showFindStudent offset = offset studentsModel = studentsRecords -->
+    {{add-advanced-standing newrecipient = currentStudent notDONE = showNewCourse standings = advancedStandingArray}} <!-- INDEX = currentIndex notDONE = showFindStudent offset = offset studentsModel = studentsRecords -->
     {{/if}}
   </div>
 
@@ -177,19 +177,19 @@
     <br>
     <h2>{{currentStudent.number}}</h2>
     <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
-   <!-- <table class="ui three column very basic table"> 
+   <!-- <table class="ui three column very basic table">
   <tr><td><h4>Note</h4></td></tr>
   </table> -->
   <h4>Note</h4>
     {{#each awardNotes as |award|}}
-    {{scholarships-awards award = award}}
+    {{scholarships-awards award = award awards = awardNotes}}
     <br>
-    {{/each}} 
+    {{/each}}
     <br>
     <div class="ui button" {{action "addAward"}}>Add Scholarship/Award</div>
 
     {{#if showNewAward}}
-    {{add-award newrecipient = currentStudent studentID = currentStudent.number INDEX = currentIndex notDONE = showNewAward offset = offset studentsModel = studentsRecords}}
+    {{add-award newrecipient = currentStudent studentID = currentStudent.number notDONE = showNewAward awards = awardNotes}}
     {{/if}}
   </div>
  

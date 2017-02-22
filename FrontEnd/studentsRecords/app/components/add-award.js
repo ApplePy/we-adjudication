@@ -7,7 +7,7 @@ export default Ember.Component.extend({
   INDEX: null,
   studentID: null,
   notDONE: null,
-  //student: null,
+  awards: null,
 
  actions: {
   saveAward() {
@@ -16,27 +16,15 @@ export default Ember.Component.extend({
       recipient: this.get('newrecipient')
       });
 
-      award.save();
-/*
-   var index = this.get('studentsModel').indexOf(newrecipient);
-     this.set('INDEX', index);
+     var self = this;
+      award.save().then(function(record){
+        self.get('awards').pushObject(record);
+      });
 
     this.set('notDONE', false);
-     Ember.$('.ui.modal').modal('hide');
-     Ember.$('.ui.modal').remove();
+    Ember.$('.ui.modal').modal('hide');
+    Ember.$('.ui.modal').remove();
 
-      this.get('store').query('student', {filter: {number: this.get('studentID')}}).then(
-       (result) => {
-         var index = this.get('studentsModel').indexOf(result);
-         this.set('INDEX', index);
-         this.set('notDONE', false);
-         Ember.$('.ui.modal').modal('hide');
-         Ember.$('.ui.modal').remove();
-       }
-     ).catch((err)=>{
-       alert("Invalid student number!");
-     }); */
-    
   },
 
    close: function() {
@@ -45,7 +33,7 @@ export default Ember.Component.extend({
      Ember.$('.ui.modal').remove();
    }
     },
- 
+
 
   didRender() {
     Ember.$('.ui.modal')
