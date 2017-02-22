@@ -21,8 +21,7 @@ export default Ember.Component.extend({
 		    	var data = event.target.result;
 		    	var workbook = XLSX.read(data, {type: 'binary'});
 
-		    	//if (fileName == "termcodes.xlsx") {
-		    	if (true) {
+		    	if (fileName == "termcodes.xlsx") {
 
 		    		//Get worksheet
 		    		var first_sheet_name = workbook.SheetNames[0];
