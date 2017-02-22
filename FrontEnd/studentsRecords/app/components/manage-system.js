@@ -74,7 +74,8 @@ export default Ember.Component.extend({
   actions: {
     addCode(emberName, DOMID, propName) {
       // Get the value of the text box
-      var domval = this.$("#" + DOMID).val();
+      var domjquery = this.$("#" + DOMID);
+      var domval = domjquery.val();
 
       // If the text box isn't empty...
       if (domval !== "") {
@@ -85,6 +86,7 @@ export default Ember.Component.extend({
         });
 
         newObj.save().then(function() {
+          domjquery.val("");  // Clear input box on success
           console.log("Added " + emberName);
         }, function() {
           console.log("Could not add " + emberName);
