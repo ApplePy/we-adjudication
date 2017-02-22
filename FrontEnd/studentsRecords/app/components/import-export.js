@@ -133,17 +133,17 @@ export default Ember.Component.extend({
 
 			    		}
 			    		var courseCode = this.get('store').createRecord('course-code', {
-					       		courseLetter: courseLetter,
-								courseNumber: courseNumber,
-								name: name,
-								unit: unit
-					        });
+				       		courseLetter: courseLetter,
+							courseNumber: courseNumber,
+							name: name,
+							unit: unit
+				        });
 
-					        courseCode.save().then(function() {
-					        	console.log("Added course code");
-					        }, function() {
-					        	console.log("Could not add course code");
-					        });
+				        courseCode.save().then(function() {
+				        	console.log("Added course code");
+				        }, function() {
+				        	console.log("Could not add course code");
+				        });
 			    	}
 		    	} else if (fileName == "HighSchools.xlsx") {
 
@@ -751,20 +751,24 @@ export default Ember.Component.extend({
 
 					        	console.log("Added termcode");
 
-					        	var courseCode = this.get('store').createRecord('course-code', {
-						       		courseLetter: DS.attr('string'),
-									  courseNumber: DS.attr('number'),
-									  name: DS.attr('string'),
-									  unit: DS.attr('number'),
-									  termInfo: DS.belongsTo('term-code'),
-									  gradeInfo: DS.belongsTo('grade')
-						        });
+					        	store.query('course-code', {
+									filter: {
+										courseLetter: rowContents.courseLetter,
+										courseNumber: rowContents.courseNumber,
+									}
+								}).then(function(courseCodes) {
 
-						        courseCode.save().then(function() {
-						        	console.log("Added coursecode");   	
-						        }, function() {
-						        	console.log("Could not add coursecode");
-						        });
+									let courseCode = courseCodes.get("firstObject");
+
+									courseCode.set('termInfo', termCode);
+									courseCode.set('gradeInfo', grade);
+							        courseCode.save().then(function() {
+							        	console.log("Added course code");
+							        }, function() {
+							        	console.log("Could not add course code");
+							        });
+
+								});
 
 					        }, function() {
 					        	console.log("Could not add termcode");
