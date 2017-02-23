@@ -13,7 +13,7 @@
   <h3>Program Record</h3>
   <div class="ui segment">
     {{#if term.programRecords}}
-      <table class="ui nine column very basic table">
+      <table class="ui ten column very basic table">
         <tr>
           <td class="one wide"><h5>Program Name</h5></td>
           <td class="one wide"><h5>Level</h5></td>
@@ -27,12 +27,16 @@
             <td class="one wide">{{program.level}}</td>
             <td class="one wide">{{program.load.load}}</td>
             <td class="two wide">{{program.status.status}}</td>
-            <td class="two wide">
-              <ul>
-                {{#each program.plan as |plan|}}
-                  <li>{{plan.name}}</li>
-                {{/each}}
-              </ul>
+            <td class="three wide">
+              {{#each program.plan as |plan|}}
+                <p>{{plan.name}}
+                  <button class="ui tiny red basic right floated icon button" {{action 'deletePlan' program plan}}>
+
+                  <i class="x icon"></i>
+                  </button>
+                </p>
+              {{/each}}
+              {{plan-dropdown program = program}}
             </td>
             <td class="two wide">
               <button class="ui right floated red basic icon button" {{action 'deleteRecord' "program-record" program}}>

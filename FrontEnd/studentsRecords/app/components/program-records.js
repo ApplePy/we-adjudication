@@ -79,6 +79,11 @@ export default Ember.Component.extend({
       });
     },
 
+    deletePlan(program, plan){
+      program.get('plan').removeObject(plan);
+      program.save();
+    },
+
     showNote(note){
       this.set('descriptionShow', true);
       this.set('description', note);

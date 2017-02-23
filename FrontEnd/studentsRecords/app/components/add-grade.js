@@ -40,6 +40,7 @@ export default Ember.Component.extend({
 
       var self = this;
       grade.save().then(function(record){
+        console.log('saved grade');
         for(var i = 0; i < self.get('courses').length; i++) {
           var course = self.get('store').createRecord('course-code', {
             courseLetter: self.get('courses').objectAt(i).courseLetter,
@@ -50,10 +51,10 @@ export default Ember.Component.extend({
             gradeInfo: record
           });
           course.save().then(function (rec) {
+            console.log('saved course');
           });
         }
       });
-
       this.send('close');
     },
 

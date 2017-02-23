@@ -26,21 +26,6 @@
           {{/each}}
         </select>
       </div>
-      {{#each plans as |currentPlan|}}
-        {{plan-dropdown plan = currentPlan planModel = planModel}}
-      {{/each}}
-      <div class="inline field">
-        <label>Add a plan</label>
-        <button class="ui icon button" {{action 'newPlanField'}} title="Add another plan">
-          <i class="plus icon"></i>
-        </button>
-        {{#if plans}}
-          <label>Remove Plan</label>
-          <button class="ui icon button" {{action 'deletePlanField'}} title="Remove last plan">
-            <i class="minus icon"></i>
-          </button>
-        {{/if}}
-      </div>
     </div>
   </div>
     <br><br>
@@ -49,44 +34,4 @@
       <div class="ui positive button" {{action 'saveNewRecord'}}>Save</div>
       <div class="ui negative basic button" {{action "close"}}>Cancel</div>
     </div>
-  {{#if programModel}}
-    <div class="header">Or Add an Existing Program Record</div>
-    <div class="content">
-      <div class="ui form">
-        <div class="inline field">
-          <label>Program</label>
-          <select onchange={{action 'selectRecord' value="target.value"}}>
-            {{#each programModel as |programChoice|}}
-              <option value={{programChoice.id}}>{{programChoice.name}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <div class="inline field">
-          <label>Description</label>
-        </div>
-        <div class="inline field">
-          <label>Name</label>
-          <p>{{sampleProgram.name}}</p>
-        </div>
-        <div class="inline field">
-          <label>Level</label>
-          {{sampleProgram.level}}
-        </div>
-        <div class="inline field">
-          <label>Load</label>
-          {{sampleProgram.load.load}}
-        </div>
-        <div class="inline field">
-          <label>Status</label>
-          {{sampleProgram.status.status}}
-        </div>
-      </div>
-    </div>
-    <br><br>
-    <div class="actions">
-      <br>
-      <div class="ui positive button" {{action 'saveRecord'}}>Save</div>
-      <div class="ui negative basic button" {{action "close"}}>Cancel</div>
-    </div>
-  {{/if}}
 </div>
