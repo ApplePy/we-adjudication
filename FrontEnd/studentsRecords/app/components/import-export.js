@@ -580,8 +580,6 @@ export default Ember.Component.extend({
 								}
 							}).then(function(findSubjects) {
 
-								let subject = findSubjects.get("firstObject");
-
 								if (findSubjects.length == 0) {
 									var subject = this.get('store').createRecord('hs-subject', {
 							        	name: rowContents.subject,
@@ -594,7 +592,7 @@ export default Ember.Component.extend({
 							        	console.log("Could not add hs subject");
 							        });
 							    } else {
-							    	subject = findSubjects.get("firstObject");
+							    	let subject = findSubjects.get("firstObject");
 							    }
 
 								store.query('hs-course-source', {
@@ -614,7 +612,7 @@ export default Ember.Component.extend({
 								        	console.log("Could not source");
 								        });
 								    } else {
-								    	courseSource = sources.get("firstObject");
+								    	let courseSource = sources.get("firstObject");
 								    }
 
 								    var hsCourse = this.get('store').createRecord('hs-course', {
@@ -656,7 +654,6 @@ export default Ember.Component.extend({
 								});
 							});
 						}
-
 					}
 
 		    	} else if (fileName == "UndergraduateRecordCourses.xlsx") {
@@ -692,62 +689,74 @@ export default Ember.Component.extend({
 								rowContents[col] = row[col];
 							}
 						}
-					}
 
-					var grade = this.get('store').createRecord('grade', {
-			       		mark: rowContents.grade,
-						note: rowContents.note
-			        });
-					
-					grade.save().then(function() {
+						var grade = this.get('store').createRecord('grade', {
+				       		mark: rowContents.grade,
+							note: rowContents.note
+				        });
+						
+						grade.save().then(function() {
 
-			        	console.log("Added grade");
+				        	console.log("Added grade");
 
-			        	store.query('student', {
-							filter: {
-								number: studentNumber
-							}
-						}).then(function(students) {
+				        	store.query('student', {
+								filter: {
+									number: studentNumber
+								}
+							}).then(function(students) {
 
-							let student = students.get("firstObject");
+								let student = students.get("firstObject");
 
-							var termCode = this.get('store').createRecord('term-code', {
-					       		name: term,
-					       		student: student
-					        });
-
-					        termCode.save().then(function() {
-
-					        	console.log("Added termcode");
-
-					        	store.query('course-code', {
+								store.query('term-code', {
 									filter: {
-										courseLetter: rowContents.courseLetter,
-										courseNumber: rowContents.courseNumber,
+										name: term,
+										number: studentNumber
 									}
-								}).then(function(courseCodes) {
+								}).then(function(termCodes) {
 
-									let courseCode = courseCodes.get("firstObject");
+									if (termCodes.length == 0) {
+										var termCode = this.get('store').createRecord('term-code', {
+								       		name: term,
+								       		student: student
+								        });
 
-									courseCode.set('termInfo', termCode);
-									courseCode.set('gradeInfo', grade);
-							        courseCode.save().then(function() {
-							        	console.log("Added course code");
-							        }, function() {
-							        	console.log("Could not add course code");
-							        });
+								        termCode.save().then(function() {
+								        	console.log("Added term code");
+								        }, function() {
+								        	console.log("Could not add term code");
+								        });
+								    } else {
+								    	let termCode = termCodes.get("firstObject");
+								    }
+
+								    store.query('course-code', {
+										filter: {
+											courseLetter: rowContents.courseLetter,
+											courseNumber: rowContents.courseNumber,
+										}
+									}).then(function(courseCodes) {
+
+										let courseCode = courseCodes.get("firstObject");
+
+										courseCode.set('termInfo', termCode);
+										courseCode.set('gradeInfo', grade);
+								        courseCode.save().then(function() {
+								        	console.log("Added course code");
+								        }, function() {
+								        	console.log("Could not add course code");
+								        });
+
+									});
 
 								});
 
-					        }, function() {
-					        	console.log("Could not add termcode");
-					        });
+							});   	
 
-						});   	
+				        }, function() {
+				        	console.log("Could not add grade");
+				        });
 
-			        }, function() {
-			        	console.log("Could not add grade");
-			        });
+					}
 
 		    	} else if (fileName == "UndergraduateRecordPlans.xlsx") {
 
