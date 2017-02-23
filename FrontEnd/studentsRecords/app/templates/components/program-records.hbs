@@ -104,6 +104,5 @@
   {{show-description title = "Grade" description = description notDONE = descriptionShow}}
 {{/if}}
 {{#if isEditing}}
-  {{program-record-editor notDONE = isEditing term = termToEdit program = programToEdit course = courseToEdit planModel = planModel
-  statusModel = statusModel loadModel = loadModel}}
+  {{program-record-editor notDONE = isEditing term = termToEdit program = programToEdit course = courseToEdit plans = programToEdit.plan}}
 {{/if}}
