@@ -793,103 +793,129 @@ export default Ember.Component.extend({
 								plan = row[col];
 							}
 						}
-					}
 
-					store.query('student', {
-						filter: {
-							number: studentNumber
-						}
-					}).then(function(students) {
+						store.query('student', {
+							filter: {
+								number: studentNumber
+							}
+						}).then(function(students) {
 
-						let student = students.get("firstObject");
+							let student = students.get("firstObject");
 
-			        	var planCode = this.get('store').createRecord('plan-code', {
-				       		name: plan
-				        });
-						
-						planCode.save().then(function() {
-
-				        	console.log("Added plan code");    
-
-				        	var status = this.get('store').createRecord('program-status', {
-					       		status: "Active"
+				        	var planCode = this.get('store').createRecord('plan-code', {
+					       		name: plan
 					        });
 							
-							status.save().then(function() {
+							planCode.save().then(function() {
 
-					        	console.log("Added status");
+					        	console.log("Added plan code");    
 
-								var load = this.get('store').createRecord('course-load', {
-						       		load: load
+					        	var status = this.get('store').createRecord('program-status', {
+						       		status: "Active"
 						        });
 								
-								load.save().then(function() {
+								status.save().then(function() {
 
-						        	console.log("Added load");
+						        	console.log("Added status");
 
-						        	var programRecord = this.get('store').createRecord('program-record', {
-							       		name: program,
-										level: level,
-										load: load,
-										status: status
-										plan: [planCode]
+									var load = this.get('store').createRecord('course-load', {
+							       		load: load
 							        });
 									
-									programRecord.save().then(function() {
+									load.save().then(function() {
 
-										console.log("Added program record.");
+							        	console.log("Added load");
 
-										store.query('term-code', {
+							        	store.query('program-record', {
 											filter: {
-												name: term,
-												number: studentNumber
+												name: program,
+												level: level,
+												load: load,
+												status: status
 											}
-										}).then(function(termCodes) {
+										}).then(function(programRecords) {
 
-											if (termCodes.length == 0) {
-												var termCode = this.get('store').createRecord('term-code', {
-										       		name: term,
-										       		student: student,
+											if (programRecords.length == 0) {
+
+												var programRecord = this.get('store').createRecord('program-record', {
+										       		name: program,
+													level: level,
+													load: load,
+													status: status
+													plan: [planCode]
 										        });
 
-										        termCode.save().then(function() {
-										        	console.log("Added term code");
+										        programRecord.save().then(function() {
+										        	console.log("Added program record");
 										        }, function() {
-										        	console.log("Could not add term code");
+										        	console.log("Could not add program record");
 										        });
 										    } else {
 
-										    	let termCode = termCodes.get("firstObject");
+										    	let programRecord = programRecords.get("firstObject");
 
-										    	let programRecords = termCode.get('programRecords');
-										    	programRecords.push(programRecord);
+										    	let plans = programRecord.get('plan');
+										    	plans.push(planCode);
 
-										    	termCode.set('programRecords', programRecords);
-										        termCode.save().then(function() {
-										        	console.log("Added term code");
+										    	programRecord.set('plan', plans);
+										        programRecord.save().then(function() {
+										        	console.log("Added program record");
 										        }, function() {
-										        	console.log("Could not add term code");
+										        	console.log("Could not add program record");
 										        });
 
 										    }
-										});
 
-									}, function() {
-							        	console.log("Could not add program record");
-						        	});
-						        	
+										    store.query('term-code', {
+												filter: {
+													name: term,
+													number: studentNumber
+												}
+											}).then(function(termCodes) {
+
+												if (termCodes.length == 0) {
+													var termCode = this.get('store').createRecord('term-code', {
+											       		name: term,
+											       		student: student,
+											       		programRecords: [programRecord]
+											        });
+
+											        termCode.save().then(function() {
+											        	console.log("Added term code");
+											        }, function() {
+											        	console.log("Could not add term code");
+											        });
+											    } else {
+
+											    	let termCode = termCodes.get("firstObject");
+
+											    	let programRecords = termCode.get('programRecords');
+											    	programRecords.push(programRecord);
+
+											    	termCode.set('programRecords', programRecords);
+											        termCode.save().then(function() {
+											        	console.log("Added term code");
+											        }, function() {
+											        	console.log("Could not add term code");
+											        });
+											    }
+											});
+
+										});
+							        	
+							        }, function() {
+							        	console.log("Could not add load");
+							        });				        	
+
 						        }, function() {
-						        	console.log("Could not add load");
-						        });				        	
+						        	console.log("Could not add status");
+						        });
 
 					        }, function() {
-					        	console.log("Could not add status");
+					        	console.log("Could not add plan code");
 					        });
-
-				        }, function() {
-				        	console.log("Could not add plan code");
-				        });
-				    });
+					    });	
+					}
 		    	}
 		    };
 		    
