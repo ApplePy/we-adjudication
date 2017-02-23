@@ -21,35 +21,7 @@ export default Ember.Component.extend({
 		    	var data = event.target.result;
 		    	var workbook = XLSX.read(data, {type: 'binary'});
 
-		    	if (fileName == "termcodes.xlsx") {
-
-		    		//Get worksheet
-		    		var first_sheet_name = workbook.SheetNames[0];
-					var worksheet = workbook.Sheets[first_sheet_name];
-
-					var sheetJSON = XLSX.utils.sheet_to_json(worksheet);
-					console.log(sheetJSON);
-
-					for(var R = 1; R <=  XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
-
-						var cellAddress = XLSX.utils.encode_cell({r: R, c: 0});
-					    var cell = worksheet[cellAddress];
-					    var cellValue = cell.v;
-
-					    console.log(cellValue);
-
-					    var termCode = this.get('store').createRecord('term-code', {
-				       		name: cellValue
-				        });
-
-				        termCode.save().then(function() {
-				        	console.log("Added termcode");
-				        }, function() {
-				        	console.log("Could not add termcode");
-				        });
-
-					}
-		    	} else if(fileName == "genders.xlsx") {
+		    	if(fileName == "genders.xlsx") {
 
 		    		//Get worksheet
 		    		var first_sheet_name = workbook.SheetNames[0];
@@ -841,7 +813,7 @@ export default Ember.Component.extend({
 										       		name: program,
 													level: level,
 													load: load,
-													status: status
+													status: status,
 													plan: [planCode]
 										        });
 
