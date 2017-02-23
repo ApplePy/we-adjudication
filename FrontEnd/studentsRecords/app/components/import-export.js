@@ -184,7 +184,7 @@ export default Ember.Component.extend({
 
 			    		}
 
-						store.query('gender', {
+						this.get('store').query('gender', {
 							filter: {
 								name: gender
 							}
@@ -200,7 +200,7 @@ export default Ember.Component.extend({
 
 								let residency = residencies.get("firstObject");
 
-								var student = this.get('store').createRecord('student', {
+								var student = this.get('this.get('store')').createRecord('student', {
 						       		number: number,
 									firstName: firstName,
 									lastname: lastName,
@@ -247,7 +247,7 @@ export default Ember.Component.extend({
 
 			    		if (note != "NONE FOUND") {
 
-							store.query('student', {
+							this.get('store').query('student', {
 								filter: {
 									number: number
 								}
@@ -295,7 +295,7 @@ export default Ember.Component.extend({
 
 			    		if (note != "NONE FOUND") {
 
-							store.query('student', {
+							this.get('store').query('student', {
 								filter: {
 									number: number
 								}
@@ -343,7 +343,7 @@ export default Ember.Component.extend({
 
 			    		if (note != "NONE FOUND") {
 
-							store.query('student', {
+							this.get('store').query('student', {
 								filter: {
 									number: number
 								}
@@ -391,7 +391,7 @@ export default Ember.Component.extend({
 
 			    		if (note != "NONE FOUND") {
 
-							store.query('student', {
+							this.get('store').query('student', {
 								filter: {
 									number: number
 								}
@@ -439,7 +439,7 @@ export default Ember.Component.extend({
 
 						if (rowContents[course] != "NONE FOUND") {
 
-							store.query('student', {
+							this.get('store').query('student', {
 								filter: {
 									number: studentNumber
 								}
@@ -488,7 +488,7 @@ export default Ember.Component.extend({
 
 						if (note != "NONE FOUND") {
 
-							store.query('student', {
+							this.get('store').query('student', {
 								filter: {
 									number: studentNumber
 								}
@@ -547,7 +547,7 @@ export default Ember.Component.extend({
 
 						if (row.schoolName != "NONE FOUND") {
 
-							store.query('hs-subject', {
+							this.get('store').query('hs-subject', {
 								filter: {
 									subject: rowContents.subject,
 									description: rowContents.description
@@ -569,7 +569,7 @@ export default Ember.Component.extend({
 							    	let subject = findSubjects.get("firstObject");
 							    }
 
-								store.query('hs-course-source', {
+								this.get('store').query('hs-course-source', {
 									filter: {
 										code: rowContents.source
 									}
@@ -601,7 +601,7 @@ export default Ember.Component.extend({
 
 							        	console.log("Added hs course");
 
-							        	store.query('student', {
+							        	this.get('store').query('student', {
 											filter: {
 												number: studentNumber
 											}
@@ -673,7 +673,7 @@ export default Ember.Component.extend({
 
 				        	console.log("Added grade");
 
-				        	store.query('student', {
+				        	this.get('store').query('student', {
 								filter: {
 									number: studentNumber
 								}
@@ -681,7 +681,7 @@ export default Ember.Component.extend({
 
 								let student = students.get("firstObject");
 
-								store.query('term-code', {
+								this.get('store').query('term-code', {
 									filter: {
 										name: term,
 										number: studentNumber
@@ -703,7 +703,7 @@ export default Ember.Component.extend({
 								    	let termCode = termCodes.get("firstObject");
 								    }
 
-								    store.query('course-code', {
+								    this.get('store').query('course-code', {
 										filter: {
 											courseLetter: rowContents.courseLetter,
 											courseNumber: rowContents.courseNumber,
@@ -768,7 +768,7 @@ export default Ember.Component.extend({
 							}
 						}
 
-						store.query('student', {
+						this.get('store').query('student', {
 							filter: {
 								number: studentNumber
 							}
@@ -800,7 +800,7 @@ export default Ember.Component.extend({
 
 							        	console.log("Added load");
 
-							        	store.query('program-record', {
+							        	this.get('store').query('program-record', {
 											filter: {
 												name: program,
 												level: level,
@@ -840,7 +840,7 @@ export default Ember.Component.extend({
 
 										    }
 
-										    store.query('term-code', {
+										    this.get('store').query('term-code', {
 												filter: {
 													name: term,
 													number: studentNumber
