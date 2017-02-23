@@ -2,6 +2,8 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
 
+	store: Ember.inject.service(),
+
 	actions: {
 		uploadFile() {
 
@@ -15,7 +17,7 @@ export default Ember.Component.extend({
 			var reader = new FileReader();
     		
 		    //File loads
-		    reader.onload = function(event) {
+		    reader.onload = (event) => {
 
 		    	//Get workbook
 		    	var data = event.target.result;
@@ -39,9 +41,9 @@ export default Ember.Component.extend({
 				       		name: cellValue
 				        });
 
-				        gender.save().then(function() {
+				        gender.save().then(() => {
 				        	console.log("Added gender");
-				        }, function() {
+				        }, () => {
 				        	console.log("Could not add gender");
 				        });
 
@@ -64,9 +66,9 @@ export default Ember.Component.extend({
 				       		name: cellValue
 				        });
 
-				        residency.save().then(function() {
+				        residency.save().then(() => {
 				        	console.log("Added residency");
-				        }, function() {
+				        }, () => {
 				        	console.log("Could not add residency");
 				        });
 
@@ -111,9 +113,9 @@ export default Ember.Component.extend({
 							unit: unit
 				        });
 
-				        courseCode.save().then(function() {
+				        courseCode.save().then(() => {
 				        	console.log("Added course code");
-				        }, function() {
+				        }, () => {
 				        	console.log("Could not add course code");
 				        });
 			    	}
@@ -135,9 +137,9 @@ export default Ember.Component.extend({
 				       		name: cellValue
 				        });
 
-				        secondarySchool.save().then(function() {
+				        secondarySchool.save().then(() => {
 				        	console.log("Added secondary school");
-				        }, function() {
+				        }, () => {
 				        	console.log("Could not add secondary school");
 				        });
 
@@ -186,7 +188,7 @@ export default Ember.Component.extend({
 							filter: {
 								name: gender
 							}
-						}).then(function(genders) {
+						}).then((genders) => {
 
 							gender = genders.get("firstObject");
 
@@ -194,7 +196,7 @@ export default Ember.Component.extend({
 								filter: {
 									name: residency
 								}
-							}).then(function(residencies) {
+							}).then((residencies) => {
 
 								let residency = residencies.get("firstObject");
 
@@ -207,9 +209,9 @@ export default Ember.Component.extend({
 									residency: residency
 						        });
 
-						        student.save().then(function() {
+						        student.save().then(() => {
 						        	console.log("Added student");
-						        }, function() {
+						        }, () => {
 						        	console.log("Could not add student");
 						        });
 							});
@@ -249,14 +251,14 @@ export default Ember.Component.extend({
 								filter: {
 									number: number
 								}
-							}).then(function(students) {
+							}).then((students) => {
 
 								let student = students.get("firstObject");
 
 								student.set('admissionComments', note);
-								student.save().then(function() {
+								student.save().then(() => {
 					        		console.log("Added admission comment");
-					        	}, function() {
+					        	}, () => {
 					            	console.log("Could not add admission comment");
 					          	});
 
@@ -297,14 +299,14 @@ export default Ember.Component.extend({
 								filter: {
 									number: number
 								}
-							}).then(function(students) {
+							}).then((students) => {
 
 								let student = students.get("firstObject");
 
 								student.set('registrationComments', note);
-								student.save().then(function() {
+								student.save().then(() => {
 					        		console.log("Added registration comment");
-					        	}, function() {
+					        	}, () => {
 					            	console.log("Could not add registration comment");
 					          	});
 
@@ -345,14 +347,14 @@ export default Ember.Component.extend({
 								filter: {
 									number: number
 								}
-							}).then(function(students) {
+							}).then((students) => {
 
 								let student = students.get("firstObject");
 
 								student.set('basisOfAdmission', note);
-								student.save().then(function() {
+								student.save().then(() => {
 					        		console.log("Added basis of admission");
-					        	}, function() {
+					        	}, () => {
 					            	console.log("Could not add basis of admission");
 					          	});
 
@@ -393,14 +395,14 @@ export default Ember.Component.extend({
 								filter: {
 									number: number
 								}
-							}).then(function(students) {
+							}).then((students) => {
 
 								let student = students.get("firstObject");
 
 								student.set('admissionAverage', note);
-								student.save().then(function() {
+								student.save().then(() => {
 					        		console.log("Added admission comment");
-					        	}, function() {
+					        	}, () => {
 					            	console.log("Could not add admission comment");
 					          	});
 
@@ -441,7 +443,7 @@ export default Ember.Component.extend({
 								filter: {
 									number: studentNumber
 								}
-							}).then(function(students) {
+							}).then((students) => {
 
 								let student = students.get("firstObject");
 
@@ -454,9 +456,9 @@ export default Ember.Component.extend({
 									recipient: student
 						        });
 
-						        advancedStanding.save().then(function() {
+						        advancedStanding.save().then(() => {
 						        	console.log("Added advanced standing");
-						        }, function() {
+						        }, () => {
 						        	console.log("Could not add advanced standing");
 						        });
 							});	
@@ -490,7 +492,7 @@ export default Ember.Component.extend({
 								filter: {
 									number: studentNumber
 								}
-							}).then(function(students) {
+							}).then((students) => {
 
 								let student = students.get("firstObject");
 
@@ -499,9 +501,9 @@ export default Ember.Component.extend({
 									recipient: student
 						        });
 
-						        award.save().then(function() {
+						        award.save().then(() => {
 						        	console.log("Added award");
-						        }, function() {
+						        }, () => {
 						        	console.log("Could not add award");
 						        });
 							});
@@ -550,7 +552,7 @@ export default Ember.Component.extend({
 									subject: rowContents.subject,
 									description: rowContents.description
 								}
-							}).then(function(findSubjects) {
+							}).then((findSubjects) => {
 
 								if (findSubjects.length == 0) {
 									var subject = this.get('store').createRecord('hs-subject', {
@@ -558,9 +560,9 @@ export default Ember.Component.extend({
 										description: rowContents.description
 									});
 
-							        subject.save().then(function() {
+							        subject.save().then(() => {
 							        	console.log("Added hs subject");
-							        }, function() {
+							        }, () => {
 							        	console.log("Could not add hs subject");
 							        });
 							    } else {
@@ -571,16 +573,16 @@ export default Ember.Component.extend({
 									filter: {
 										code: rowContents.source
 									}
-								}).then(function(sources) {
+								}).then((sources) => {
 
 									if (sources.length == 0) {
 										var courseSource = this.get('store').createRecord('hs-course-source', {
 								        	code: rowContents.source
 										});
 
-								        courseSource.save().then(function() {
+								        courseSource.save().then(() => {
 								        	console.log("Added source");
-								        }, function() {
+								        }, () => {
 								        	console.log("Could not source");
 								        });
 								    } else {
@@ -595,7 +597,7 @@ export default Ember.Component.extend({
 										subject: subject
 									});
 
-							        hsCourse.save().then(function() {
+							        hsCourse.save().then(() => {
 
 							        	console.log("Added hs course");
 
@@ -603,7 +605,7 @@ export default Ember.Component.extend({
 											filter: {
 												number: studentNumber
 											}
-										}).then(function(students) {
+										}).then((students) => {
 
 											let student = students.get("firstObject");
 
@@ -613,13 +615,13 @@ export default Ember.Component.extend({
 												recipient: student
 									        });
 											
-											hsGrade.save().then(function() {
+											hsGrade.save().then(() => {
 									        	console.log("Added hs grade");
-									        }, function() {
+									        }, () => {
 									        	console.log("Could not add hs grade");
 									        });
 
-								        }, function() {
+								        }, () => {
 								        	console.log("Could not add hs course");
 								        });
 									});
@@ -667,7 +669,7 @@ export default Ember.Component.extend({
 							note: rowContents.note
 				        });
 						
-						grade.save().then(function() {
+						grade.save().then(() => {
 
 				        	console.log("Added grade");
 
@@ -675,7 +677,7 @@ export default Ember.Component.extend({
 								filter: {
 									number: studentNumber
 								}
-							}).then(function(students) {
+							}).then((students) => {
 
 								let student = students.get("firstObject");
 
@@ -684,7 +686,7 @@ export default Ember.Component.extend({
 										name: term,
 										number: studentNumber
 									}
-								}).then(function(termCodes) {
+								}).then((termCodes) => {
 
 									if (termCodes.length == 0) {
 										var termCode = this.get('store').createRecord('term-code', {
@@ -692,9 +694,9 @@ export default Ember.Component.extend({
 								       		student: student
 								        });
 
-								        termCode.save().then(function() {
+								        termCode.save().then(() => {
 								        	console.log("Added term code");
-								        }, function() {
+								        }, () => {
 								        	console.log("Could not add term code");
 								        });
 								    } else {
@@ -706,15 +708,15 @@ export default Ember.Component.extend({
 											courseLetter: rowContents.courseLetter,
 											courseNumber: rowContents.courseNumber,
 										}
-									}).then(function(courseCodes) {
+									}).then((courseCodes) => {
 
 										let courseCode = courseCodes.get("firstObject");
 
 										courseCode.set('termInfo', termCode);
 										courseCode.set('gradeInfo', grade);
-								        courseCode.save().then(function() {
+								        courseCode.save().then(() => {
 								        	console.log("Added course code");
-								        }, function() {
+								        }, () => {
 								        	console.log("Could not add course code");
 								        });
 
@@ -724,7 +726,7 @@ export default Ember.Component.extend({
 
 							});   	
 
-				        }, function() {
+				        }, () => {
 				        	console.log("Could not add grade");
 				        });
 
@@ -770,7 +772,7 @@ export default Ember.Component.extend({
 							filter: {
 								number: studentNumber
 							}
-						}).then(function(students) {
+						}).then((students) => {
 
 							let student = students.get("firstObject");
 
@@ -778,7 +780,7 @@ export default Ember.Component.extend({
 					       		name: plan
 					        });
 							
-							planCode.save().then(function() {
+							planCode.save().then(() => {
 
 					        	console.log("Added plan code");    
 
@@ -786,7 +788,7 @@ export default Ember.Component.extend({
 						       		status: "Active"
 						        });
 								
-								status.save().then(function() {
+								status.save().then(() => {
 
 						        	console.log("Added status");
 
@@ -794,7 +796,7 @@ export default Ember.Component.extend({
 							       		load: load
 							        });
 									
-									load.save().then(function() {
+									load.save().then(() => {
 
 							        	console.log("Added load");
 
@@ -805,7 +807,7 @@ export default Ember.Component.extend({
 												load: load,
 												status: status
 											}
-										}).then(function(programRecords) {
+										}).then((programRecords) => {
 
 											if (programRecords.length == 0) {
 
@@ -817,9 +819,9 @@ export default Ember.Component.extend({
 													plan: [planCode]
 										        });
 
-										        programRecord.save().then(function() {
+										        programRecord.save().then(() => {
 										        	console.log("Added program record");
-										        }, function() {
+										        }, () => {
 										        	console.log("Could not add program record");
 										        });
 										    } else {
@@ -830,9 +832,9 @@ export default Ember.Component.extend({
 										    	plans.push(planCode);
 
 										    	programRecord.set('plan', plans);
-										        programRecord.save().then(function() {
+										        programRecord.save().then(() => {
 										        	console.log("Added program record");
-										        }, function() {
+										        }, () => {
 										        	console.log("Could not add program record");
 										        });
 
@@ -843,7 +845,7 @@ export default Ember.Component.extend({
 													name: term,
 													number: studentNumber
 												}
-											}).then(function(termCodes) {
+											}).then((termCodes) => {
 
 												if (termCodes.length == 0) {
 													var termCode = this.get('store').createRecord('term-code', {
@@ -852,9 +854,9 @@ export default Ember.Component.extend({
 											       		programRecords: [programRecord]
 											        });
 
-											        termCode.save().then(function() {
+											        termCode.save().then(() => {
 											        	console.log("Added term code");
-											        }, function() {
+											        }, () => {
 											        	console.log("Could not add term code");
 											        });
 											    } else {
@@ -865,9 +867,9 @@ export default Ember.Component.extend({
 											    	programRecords.push(programRecord);
 
 											    	termCode.set('programRecords', programRecords);
-											        termCode.save().then(function() {
+											        termCode.save().then(() => {
 											        	console.log("Added term code");
-											        }, function() {
+											        }, () => {
 											        	console.log("Could not add term code");
 											        });
 											    }
@@ -875,15 +877,15 @@ export default Ember.Component.extend({
 
 										});
 							        	
-							        }, function() {
+							        }, () => {
 							        	console.log("Could not add load");
 							        });				        	
 
-						        }, function() {
+						        }, () => {
 						        	console.log("Could not add status");
 						        });
 
-					        }, function() {
+					        }, () => {
 					        	console.log("Could not add plan code");
 					        });
 					    });	
@@ -892,7 +894,7 @@ export default Ember.Component.extend({
 		    };
 		    
 		    //Error in file loading
-		    reader.onerror = function (event) {
+		    reader.onerror = (event) => {
 		        alert("Error in loading file.");
 		    };
 
