@@ -243,6 +243,6 @@ export default Ember.Component.extend({
 
     addAward() {
       this.set('showNewAward', true);
-    }
+    },
   }
 });

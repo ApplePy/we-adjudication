@@ -4,9 +4,13 @@ export default Ember.Component.extend({
     recipient: null,
     standing: null,
     store: Ember.inject.service(),
-  
+    descriptionShow: null,
+    updateCourse: null,
+    standings: null,
+
  actions: {
   deleteStanding() {
+    this.set('standings', this.get('standings').without(this.get('standing')));
     this.get('store').findRecord('advanced-standing', this.get('standing').id, { backgroundReload: false }).then(function(standing) {
         standing.deleteRecord();
         standing.get('isDeleted');
@@ -15,16 +19,11 @@ export default Ember.Component.extend({
   },
 
   updateStanding() {
-   // alert("1 "+ this.get('standing.course'));
-    this.get('store').findRecord('advanced-standing', this.get('standing').id).then((standing) => {
-        standing.set('course', this.get('standing.course'));
-        standing.set('description', this.get('standing.description'));
-        standing.set('units', this.get('standing.units'));
-        standing.set('grade', this.get('standing.grade'));
-        standing.set('from', this.get('standing.from'));
-        standing.save();
-      });
-      
-  }
+       this.set('updateCourse', true);
+  },
+
+  showDescription() {
+    this.set('descriptionShow', true);
+  },
  }
 });

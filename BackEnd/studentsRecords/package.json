@@ -4,13 +4,15 @@
   "description": "studentsRecords server",
   "main": "index.js",
   "scripts": {
-    "test": "mocha tests/*"
+    "test": "mocha tests/*-test.js"
   },
   "author": "Ouda",
   "license": "ISC",
   "devDependencies": {
+    "async": "^2.1.4",
     "chai": "^3.5.0",
     "chai-http": "^3.0.0",
+    "faker": "^3.1.0",
     "mocha": "^3.2.0",
     "mockgoose": "^6.0.8"
   },

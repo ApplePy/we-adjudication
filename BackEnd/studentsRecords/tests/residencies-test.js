@@ -1,442 +1,358 @@
-//During the test the env variable is set to test
+/**
+ * Created by darryl on 2017-02-19.
+ */
+
 process.env.NODE_ENV = 'test';
 
-let mongoose = require("mongoose");
-let Students = require('../models/studentsSchema');
-let Residencies = require('../models/residencySchema');
+let each = require('async/each');
 
-//Require the dev-dependencies
-let chai = require('chai');
-let chaiHttp = require('chai-http');
-let server = require('../server');
+let faker = require('faker');
+let Common = require('./genericTestFramework-helper');
+let chai = Common.chai;
 let expect = chai.expect;
 
-chai.use(chaiHttp);
+let DB = require('../models/studentsRecordsDB');
+let mongoose = DB.mongoose;
 
-// Our parent block - stores the test
-describe('Residencies', () => {
-    let host = "http://localhost:3700";     // This is the Node.js server
+////////
 
-    //Before each test we empty the database
-    beforeEach((done) => {
-        // Clear out all Residences and Students then call done
-        Residencies.remove({}, (err) => {
-            if (err) throw "Error cleaning out Residencies";
-            Students.remove({}, (err) => {
-                if (err) throw "Error cleaning out Students";
-                done()
+// NOTE: remember to not use () => {} functions inside mocha tests due to the 'this' binding - it breaks Mocha!
+
+////////
+
+///// THINGS TO CHANGE ON COPYPASTA /////
+let Residencies = require('../models/schemas/studentinfo/residencySchema');
+let Students = require('../models/schemas/studentinfo/studentSchema');
+
+let emberName = "residency";
+let emberNamePluralized = "residencies";
+let itemList = Common.DBElements.residencyList;
+let emberModel = Residencies;
+let newModel = () => {
+    return {
+        name: faker.lorem.words()
+    }
+};
+let filterValueSearches = ['name'];
+let requiredValues = ['name'];
+let uniqueValues = ['name'];
+
+// Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
+
+/////////////////////////////////////////
+
+
+describe('Residencies', function() {
+
+    describe('/GET functions', function() {
+        before(Common.regenAllData);
+
+        // Make sure that you can retrieve all values
+        Common.Tests.GetTests.getAll(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            itemList);
+
+        // Make sure that you can retrieve all values one page at a time
+        it.skip("it should GET all models, one page at a time");
+        /*Common.Tests.GetTests.getPagination(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            itemList);*/
+
+        // Check that you can search by all non-array elements
+        each(
+            filterValueSearches,
+            function (element, cb) {
+                Common.Tests.GetTests.getByFilterSuccess(
+                    emberName,
+                    emberNamePluralized,
+                    emberModel,
+                    function (next) {
+                        // Pick random model for data
+                        let model = itemList[faker.random.number(itemList.length - 1)];
+
+                        // Convert MongoID into a string before attempting search
+                        let param = (model[element] instanceof mongoose.Types.ObjectId) ? model[element].toString() : model[element];
+
+                        next([{[element]: param}, itemList.filter((el) => el[element] == model[element])]);
+                    },
+                    "Search by " + element);
+                cb();
+            },
+            err => {});
+
+        // Make sure that searches for a nonexistent object returns nothing but succeeds
+        Common.Tests.GetTests.getByFilterSuccess(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                next([{name: "NonExistent"}, []]);
+            },
+            "Search for a nonexistent model");
+
+        // Ensure you can search by ID
+        Common.Tests.GetTests.getByID(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function(next) {
+                next(itemList[faker.random.number(itemList.length - 1)]);
             });
-        });
+
+        // Make sure that searches fail with 404 when the ID doesn't exist
+        Common.Tests.GetTests.getByID(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function(next) {
+                next(new emberModel({}));
+            },
+            "This ID does not exist, should 404.");
     });
 
-    /*
-     * Test the /GET routes
-     */
-    describe('/GET residencies', () => {
-        it('it should GET all residencies ', (done) => {
-            // Request all residencies
-            chai.request(server)
-                .get('/api/residencies')
-                .end((err, res) => {
-                    expect(res).to.have.status(200);
-                    expect(res).to.be.json;
-                    expect(res.body).to.have.property('residency');
-                    expect(res.body.residency.length).to.be.eq(0);
-                    done();
-                });
-        });
+    describe('/PUT functions', function() {
+        beforeEach(Common.regenAllData);
 
-        it('it should GET all residencies when data exists', (done) => {
+        // Make sure PUTs work correctly
+        Common.Tests.PutTests.putUpdated(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let model = itemList[faker.random.number(itemList.length - 1)];
+                let updates = newModel();
 
-            // Set up mock data
-            let testRes = new Residencies({
-                name: "Johnny Test House"
-            });
-            testRes.save((err) => {
-                if (err) throw err;
+                // Update the object with the new random values
+                Object.keys(updates).forEach(key => model[key] = updates[key]);
 
-                // Make residency request
-                chai.request(server)
-                    .get('/api/residencies')
-                    .end((err, res) => {
-                        expect(res).to.have.status(200);
-                        expect(res).to.be.json;
-                        expect(res.body).to.have.property('residency');
-                        expect(res.body.residency.length).to.be.eq(1);
-                        expect(res.body.residency[0]).to.have.property('name');
-                        expect(res.body.residency[0].name).to.equal(testRes.name);
-                        done();
-                    });
-            });
-        });
+                // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                next([updates, model]);
+            },
+            requiredValues);
 
-        it('it should GET the residency of a student', (done) => {
+        // Make sure that attempted ID changes are ignored
+        Common.Tests.PutTests.putUpdated(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let model = itemList[faker.random.number(itemList.length - 1)];
+                let updates = {
+                    name: faker.random.word(),
+                };
 
-            // Set up mock data
+                // Update the object with the new random values
+                Object.keys(updates).forEach(key => model[key] = updates[key]);
 
-            let testRes = new Residencies({
-                name: "Johnny Test House"
-            });
-            testRes.save((err) => {
-                if (err) throw err;
+                // Try to change the id
+                updates._id = mongoose.Types.ObjectId();
 
-                let testRes2 = new Residencies({
-                    name: "Johnny Not House"
-                });
-                testRes2.save((err) => {
-                    if (err) throw err;
+                // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                next([updates, model]);
+            },
+            requiredValues,
+            "This should succeed and ignore attempted ID change.");
 
-                    let testStudent1 = new Students({number: 12345, name: "Johnny Test", resInfo: testRes});
-                    testStudent1.save((err) => {
-                        if (err) throw err;
+        // Make sure that attempts to violate uniqueness fails
+        each(
+            uniqueValues,
+            function (value, cb) {
+                Common.Tests.PutTests.putNotUnique(
+                    emberName,
+                    emberNamePluralized,
+                    emberModel,
+                    function (next) {
+                        // Get a random model and make random updates
+                        let model1 = itemList[faker.random.number(itemList.length - 1)];
+                        let model2 = itemList[faker.random.number(itemList.length - 1)];
 
-                        let testStudent2 = new Students({number: 12346, name: "Jane Test", resInfo: testRes2});
-                        testStudent2.save((err) => {
-                            if (err) throw err;
+                        // Loop until models are different
+                        while (model1[value] === model2[value]) {
+                            model2 = itemList[faker.random.number(itemList.length - 1)];
+                        }
 
-                            // Request residency
-                            chai.request(server)
-                                .get('/api/residencies?filter[student]=' + testStudent1._id.toString())
-                                .end((err, res) => {
-                                    expect(res).to.have.status(200);
-                                    expect(res).to.be.json;
-                                    expect(res.body).to.have.property('residency');
-                                    expect(res.body.residency).to.have.property('name');
-                                    expect(res.body.residency.name).to.equal(testRes.name);
-                                    done();
-                                });
-                        });
-                    });
-                });
-            });
-        });
+                        // Try to update to create a duplicate value
+                        model1[value] = model2[value];
 
-        it('it should 404 if a student doesn\'t have a residence', (done) => {
+                        // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                        next([model1, model1._id]);
+                    },
+                    requiredValues,
+                    "Posting with duplicate of unique field " + value + ", should 500.");
+                cb();
+            },
+            err => {});
 
-            // Set up mock data
-            let testRes = new Residencies({
-                name: "Johnny Test House"
-            });
-            testRes.save((err) => {
-                if (err) throw err;
+        // Make sure that attempts to not supply required values fails
+        each(
+            requiredValues,
+            function (value, cb) {
+                Common.Tests.PutTests.putUpdated(
+                    emberName,
+                    emberNamePluralized,
+                    emberModel,
+                    function (next) {
+                        // Get a random model and make random updates
+                        let model = itemList[faker.random.number(itemList.length - 1)];
+                        let updates = newModel();
 
-                let testStudent1 = new Students({number: 12345, name: "Johnny Test", resInfo: testRes});
-                testStudent1.save((err) => {
-                    if (err) throw err;
+                        // Remove a required value
+                        delete updates[value];
 
-                    let testStudent2 = new Students({number: 12346, name: "Jane Test", resInfo: testRes});
-                    testStudent2.save((err) => {
-                        if (err) throw err;
+                        // Update the object with the new random values
+                        Object.keys(updates).forEach(key => model[key] = updates[key]);
 
-                        let testStudent3 = new Students({number:12347, name: "Eve Test"});
-                        testStudent2.save((err) => {
-                            if (err) throw err;
+                        // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                        next([updates, model]);
+                    },
+                    requiredValues,
+                    "Missing " + value + ", this should 400.");
+                cb();
+            },
+            err => {});
 
-                            // Make request
-                            chai.request(server)
-                                .get('/api/residencies?filter[student]=' + testStudent3._id.toString())
-                                .end((err, res) => {
-                                    expect(res).to.have.status(404);
-                                    done();
-                                });
-                        });
-                    });
-                });
-            });
-        });
+        // Make sure that attempts to push to a non-existent object fails
+        Common.Tests.PutTests.putUpdated(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let updates = newModel();
+                let model = new emberModel(updates);
 
-        it('it should GET the residency by name', (done) => {
-
-            // Set up mock data
-            let testRes = new Residencies({
-                name: "Johnny Test House"
-            });
-            testRes.save((err) => {
-                if (err) throw err;
-
-                // Make request
-                chai.request(server)
-                    .get('/api/residencies?filter[name]=' + "Johnny Test House")
-                    .end((err, res) => {
-                        expect(res).to.have.status(200);
-                        expect(res).to.be.json;
-                        expect(res.body).to.have.property('residency');
-                        expect(res.body.residency.length).to.be.eq(1);
-                        expect(res.body.residency[0]).to.have.property('name');
-                        expect(res.body.residency[0].name).to.equal(testRes.name);
-                        done();
-                    });
-            });
-        });
-
-        it('it should GET nothing if a the name does not exist', (done) => {
-
-            // Set up mock data
-            let testRes = new Residencies({
-                name: "Johnny Test House"
-            });
-            testRes.save((err) => {
-                if (err) throw err;
-
-                // Make request
-                chai.request(server)
-                    .get('/api/residencies?filter[name]=' + "Johnny Test House2")
-                    .end((err, res) => {
-                        expect(res).to.have.status(200);
-                        expect(res).to.be.json;
-                        expect(res.body).to.have.property('residency');
-                        expect(res.body.residency.length).to.be.eq(0);
-                        done();
-                    });
-            });
-        });
-
-        it('it should GET residency when given ID', (done) => {
-
-            // Set up mock data
-            let testRes = new Residencies({
-                    name: "Johnny Test House"
-                });
-
-            testRes.save((err) => {
-                if (err) throw err;
-
-                // Make request
-                chai.request(server)
-                    .get('/api/residencies/' + testRes._id.toString())
-                    .end((err, res) => {
-                        expect(res).to.have.status(200);
-                        expect(res).to.be.json;
-                        expect(res.body).to.have.property('residency');
-                        expect(res.body.residency).to.be.a('object');
-                        expect(res.body.residency).to.have.property('name');
-                        expect(res.body.residency.name).to.equal(testRes.name);
-                        done();
-                    });
-            });
-        });
-
-        it('it should 404 for residency when given bad ID', (done) => {
-
-            // Set up mock data
-            let testRes = new Residencies({
-                name: "Johnny Test House"
-            });
-            testRes.save((err) => {
-                if (err) throw err;
-
-                // Make request
-                chai.request(server)
-                    .get('/api/residencies/453535')
-                    .end((err, res) => {
-                        expect(res).to.have.status(404);
-                        done();
-                    });
-            });
-        });
+                // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                next([updates, model]);
+            },
+            requiredValues,
+            "This model does not exist yet, this should 404.");
     });
 
-    /*
-     * Test the /PUT routes
-     */
-    describe('/PUT residencies', () => {
-        it('it should PUT an updated residency', (done) => {
+    describe('/POST functions', function() {
+        beforeEach(Common.regenAllData);
 
-            // Set up mock data
-            var resData = {
-                name: "Johnny Test House"
-            };
-            let testRes = new Residencies(resData);
-            testRes.save((err) => {
-                if (err) throw err;
+        // Make sure POSTs work correctly
+        Common.Tests.PostTests.postNew(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let newContent = newModel();
+                let model = new emberModel(newContent);
+                next([newContent, model])
+            },
+            requiredValues);
 
-                resData.name = "Johnny Test Shack";
+        let idFerry = null;
 
-                // Make request
-                chai.request(server)
-                    .put('/api/residencies/' + testRes._id)
-                    .send({residency: resData})
-                    .end((err, res) => {
-                        // Test server response
-                        expect(res).to.have.status(200);
-                        expect(res).to.be.json;
-                        expect(res.body).to.have.property('residency');
-                        expect(res.body.residency).to.be.a('object');
-                        expect(res.body.residency).to.have.property('name');
-                        expect(res.body.residency.name).to.equal(resData.name);
+        // Make sure that attempts to set IDs are ignored
+        Common.Tests.PostTests.postNew(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function(next) {
+                // Select a model and then attempt to set the new object's ID to the already-existing object
+                let model = itemList[faker.random.number(itemList.length - 1)];
+                let modelObj = newModel();
+                modelObj._id = model._id;
+                idFerry = model._id;
 
-                        // Test mongo for changes
-                        Residencies.find(resData, (err, res) => {
-                            expect(err).to.be.null;
-                            expect(res.length).to.equal(1);
-                            expect(res[0].name).to.equal(resData.name);
-                            done();
-                        });
-                    });
-            });
-        });
+                next([modelObj, model]);
+            },
+            requiredValues,
+            "POSTing a record with an ID that already exists. Should ignore the new ID.",
+            function(next, res) {
+                // Make sure the ID is different
+                expect (res.body[emberName]._id).to.not.equal(idFerry.toString());
 
-        it('it should 500 on PUT a residency with duplicate name', (done) => {
-
-            // Set up mock data
-            var resData = {
-                name: "Johnny Test House"
-            };
-
-            // Create first residence
-            let testRes = new Residencies(resData);
-            testRes.save((err) => {
-                if (err) throw err;
-
-                // Create second residence
-                resData.name = "Johnny Test Shack";
-                let testRes2 = new Residencies(resData);
-                testRes2.save((err) => {
-                   if (err) throw err;
-
-                    // Make bad request
-                    chai.request(server)
-                        .put('/api/residencies/' + testRes._id)
-                        .send({residency: resData})
-                        .end((err, res) => {
-                            // Test server response
-                            expect(res).to.have.status(500);
-
-                            // Test mongo for changes
-                            Residencies.findById(testRes._id, (err, res) => {
-                                expect(err).to.be.null;
-                                expect(res.name).to.equal("Johnny Test House");
-                                done();
-                            });
-                        });
+                // Make sure the creation was successful anyways
+                emberModel.findById(res.body[emberName]._id, function (err, results) {
+                    expect(err).to.be.null;
+                    expect(results).to.not.be.null;
+                    next();
                 });
             });
-        });
 
-        it('it should 404 on PUT a nonexistent residency', (done) => {
+        // Make sure that attempts to not supply required values fails
+        each(
+            requiredValues,
+            function (value, cb) {
+                Common.Tests.PostTests.postNew(
+                    emberName,
+                    emberNamePluralized,
+                    emberModel,
+                    function (next) {
+                        // Get a random model and make random updates
+                        let newContent = newModel();
 
-            // Set up mock data
-            var resData = {
-                name: "Johnny Test House"
-            };
-            let testRes = new Residencies(resData);
-            testRes.save((err) => {
-                if (err) throw err;
+                        // Delete a required value
+                        delete newContent[value];
 
-                // Make request
-                chai.request(server)
-                    .put('/api/residencies/' + '4534234')
-                    .send({residency: resData})
-                    .end((err, res) => {
-                        expect(res).to.have.status(404);
-                        done();
-                    });
-            });
-        });
+                        let model = new emberModel(newContent);
+                        next([newContent, model])
+                    },
+                    requiredValues,
+                    "Missing " + value + ", this should 400.");
+                cb();
+            },
+            err => {});
+
+        // Make sure attempts to post duplicate data fails
+        // TODO: I'm not sure if this test is appropriate...
+        it.skip("POSTing a record with duplicate data, should 500.");
+        /*Common.Tests.PostTests.postNotUnique(
+         emberName,
+         emberNamePluralized,
+         emberModel,
+         function (next) {
+         let model = itemList[faker.random.number(itemList.length - 1)];
+
+         next([model, model]);
+         },
+         requiredValues,
+         "POSTing a record with duplicate data, should 500.");*/
     });
 
-    /*
-     * Test the /POST routes
-     */
-    describe('/POST a residency', () => {
-        it('it should POST successfully', (done) => {
+    describe('/DELETE functions', function(){
+        beforeEach(Common.regenAllData);
 
-            // Set up mock data
-            let residencyData = {
-                residency: {
-                    name: "Johnny Test Residence"
-                }
-            };
+        let elementFerry = null;
 
-            // Make request
-            chai.request(server)
-                .post('/api/residencies')
-                .send(residencyData)
-                .end((err, res) => {
-                    expect(res).to.have.status(201);
-                    expect(res).to.be.json;
-                    expect(res.body).to.have.property('residency');
-                    expect(res.body.residency.name).to.equal(residencyData.residency.name);
-
-                    Residencies.findById(res.body.residency._id, function (error, residency) {
-                        expect(error).to.be.null;
-                        expect(residency.name).to.equal(residencyData.residency.name);
-                        done();
-                    });
-                });
-        });
-
-        it('it should 500 on POST with duplicate residency name', (done) => {
-
-            // Set up mock data
-            let residencyData = {
-                residency: {
-                    name: "Johnny Test Residence"
-                }
-            };
-            let testRes = new Residencies(residencyData.residency);
-            testRes.save((err) => {
-               if (err) throw err;
-
-                // Make request
-                chai.request(server)
-                    .post('/api/residencies')
-                    .send(residencyData)
-                    .end((err, res) => {
-                        expect(res).to.have.status(500);
-
-                        // Ensure no new residency was created
-                        Residencies.find(residencyData.residency, function (error, residency) {
-                            expect(error).to.be.null;
-                            expect(residency.length).to.equal(1);
-                            done();
-                        });
+        // Make sure that DELETEs are successful
+        Common.Tests.DeleteTests.deleteExisting(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                elementFerry = itemList[faker.random.number(itemList.length - 1)];
+                next(elementFerry._id);
+            },
+            undefined,
+            function (next, res) {
+                // Check that all dependent objects got deassociated
+                Students.find(
+                    {resInfo: elementFerry._id},
+                    (err, students) => {
+                        expect(err).to.be.null;
+                        expect(students).to.be.empty;
+                        next();
                     });
             });
-        });
-    });
 
-    /*
-     * Test the /DELETE routes
-     */
-    describe('/DELETE a residency', () => {
-        it('it should DELETE successfully and unlink all students', (done) => {
-
-            // Set up mock data
-            let residencyData = {
-                name: "Johnny Test Residence"
-            };
-            let testRes = new Residencies(residencyData);
-            testRes.save((err) => {
-                if (err) throw err;
-
-                let testStudent = new Students(
-                    {
-                        name: "Johnny Test",
-                        resInfo: testRes
-                    });
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    // Make request
-                    chai.request(server)
-                        .delete('/api/residencies/' + testRes._id)
-                        .end((err, res) => {
-                            expect(res).to.have.status(200);
-
-                            Residencies.findById(testRes._id, function (error, residency) {
-                                expect(error).to.be.null;
-                                expect(residency).to.be.null;
-
-                                Students.findById(testStudent._id, function(error, student) {
-                                    expect(error).to.be.null;
-                                    expect(student.resInfo).to.be.null;
-                                    done();
-                                });
-                            });
-                        });
-                });
+        // Make sure that attempts to delete a non-existent object fails
+        Common.Tests.DeleteTests.deleteNonexistent(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                next(mongoose.Types.ObjectId());
             });
-        });
     });
 });
