@@ -133,7 +133,7 @@ deploy:
    - build
   script:
     - docker-compose -H $DOCKER_HOST down --volumes     # Destroy the old image
-    - docker-compose -H $DOCKER_HOST up -d
+    - docker-compose -H $DOCKER_HOST up -d --build --force-recreate
   environment:
     name: staging
     url: http://digitalpanda.incode.ca/
