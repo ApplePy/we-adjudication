@@ -782,6 +782,115 @@ export default Ember.Component.extend({
 
 		    	} else if (fileName == "UndergraduateRecordPlans.xlsx") {
 
+		    		//Get worksheet
+		    		var first_sheet_name = workbook.SheetNames[0];
+					var worksheet = workbook.Sheets[first_sheet_name];
+
+					var sheetJSON = XLSX.utils.sheet_to_json(worksheet);
+					console.log(sheetJSON);
+
+					let studentNumber;
+					let term;
+					let program;
+					let level;
+					let load;
+					let plan = null;
+
+					for (let row of sheetJSON) {
+
+						let keys = Object.keys(row);
+						keys.remove("__rowNum__");
+						for (let col of keys) {
+							if (column == "studentNumber") {
+								studentNumber = row[col];
+							} else if (column == "term") {
+								term = row[col];
+							} else if (column == "program") {
+								program = row[col];
+							} else if (column == "level") {
+								level = row[col];
+							} else if (column == "load") {
+								load = row[col];
+							} else if (column == "plan") {
+								plan = row[col];
+							}
+						}
+					}
+
+					store.query('student', {
+						filter: {
+							number: studentNumber
+						}
+					}).then(function(students) {
+
+						let student = students.get("firstObject");
+
+						var termCode = this.get('store').createRecord('term-code', {
+				       		name: term,
+				       		student: student
+				        });
+
+				        termCode.save().then(function() {
+
+				        	console.log("Added termcode");
+
+				        	var status = this.get('store').createRecord('program-status', {
+					       		status: "ACTIVE"
+					        });
+							
+							status.save().then(function() {
+
+					        	console.log("Added status");
+
+								var load = this.get('store').createRecord('course-load', {
+						       		load: load
+						        });
+								
+								load.save().then(function() {
+
+						        	console.log("Added load");
+
+						        	var programRecord = this.get('store').createRecord('program-record', {
+							       		name: program,
+										level: level,
+										load: load,
+										status: status,
+										semester: termCode
+							        });
+									
+									programRecord.save().then(function() {
+
+							        	console.log("Added program record");
+
+							        	var planCode = this.get('store').createRecord('plan-code', {
+								       		name: plan,
+											programRecords: [programRecord]
+								        });
+										
+										planCode.save().then(function() {
+
+								        	console.log("Added plan code");	
+
+								        }, function() {
+								        	console.log("Could not add plan code");
+								        });
+
+							        }, function() {
+							        	console.log("Could not add program record");
+							        });
+						        	
+						        }, function() {
+						        	console.log("Could not add load");
+						        });				        	
+
+					        }, function() {
+					        	console.log("Could not add status");
+					        });
+
+				        }, function() {
+				        	console.log("Could not add termcode");
+				        });
+					});
 		    	}
 		    };
 		    
