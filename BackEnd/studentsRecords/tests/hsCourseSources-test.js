@@ -42,7 +42,7 @@ let uniqueValues = ['code'];
 /////////////////////////////////////////
 
 
-describe('Residencies', function() {
+describe('HS Course Sources', function() {
 
     describe('/GET functions', function() {
         before(Common.regenAllData);
