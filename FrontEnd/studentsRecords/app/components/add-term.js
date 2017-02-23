@@ -5,6 +5,7 @@ export default Ember.Component.extend({
   notDONE: null,
   newTermName: null,
   student: null,
+  terms: null,
 
   actions: {
     saveRecord(){
@@ -15,7 +16,7 @@ export default Ember.Component.extend({
 
       var self = this;
       term.save().then(function(record){
-
+        self.get('terms').pushObject(record);
       });
 
       this.set('notDONE', false);

@@ -2,8 +2,6 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
   store: Ember.inject.service(),
-  studentGrades: null,
-  progRecs: null,
   isAddingProgram: false,
   isAddingTerm: false,
   isAddingGrade: false,
@@ -22,6 +20,7 @@ export default Ember.Component.extend({
     },
 
     addRecord(term){
+      this.set('termToEdit', term);
       this.set('isAddingProgram', true);
 
     },
@@ -56,13 +55,12 @@ export default Ember.Component.extend({
     },
 
     deleteRecord(_model, object){
-      /*
-      this.get('store').findRecord(_model, object, { backgroundReload: false }).then(function(obj) {
+      this.set('terms', this.get('terms').without(object));
+      this.get('store').findRecord(_model, object.id, { backgroundReload: false }).then(function(obj) {
         obj.destroyRecord().then(function() {
-          console.log("Deleted " + emberName);
+          console.log("Deleted " + _model);
         });
       });
-      */
     },
 
     showNote(note){

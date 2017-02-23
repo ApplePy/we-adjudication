@@ -5,7 +5,7 @@
       <h3>{{term.name}}</h3>
     </div>
     <div class="ui column">
-      <button class="ui right floated red basic button" {{action 'deleteRecord' "term" term}}>Delete {{term.name}}</button>
+      <button class="ui right floated red basic button" {{action 'deleteRecord' "term-code" term}}>Delete {{term.name}}</button>
       <button class="ui right floated blue basic button" {{action 'updateRecord' "term" term}}>Update</button>
     </div>
   </div>
@@ -92,10 +92,10 @@
 <br>
 <div class="ui green basic button" {{action "addTerm"}}>Add Term</div>
 {{#if isAddingProgram}}
-  {{add-program-record notDONE = isAddingProgram}}
+  {{add-program-record notDONE = isAddingProgram term = termToEdit}}
 {{/if}}
 {{#if isAddingTerm}}
-  {{add-term notDONE = isAddingTerm student = student}}
+  {{add-term notDONE = isAddingTerm student = student terms = terms}}
 {{/if}}
 {{#if isAddingGrade}}
   {{add-grade notDONE = isAddingGrade}}

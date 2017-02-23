@@ -38,7 +38,8 @@ export default Ember.Component.extend({
     },
 
     saveRecord(object){
-      //object.save();
+      object.save();
+      this.send('close');
     },
 
     close(){

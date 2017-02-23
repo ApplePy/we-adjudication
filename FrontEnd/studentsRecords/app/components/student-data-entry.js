@@ -26,7 +26,7 @@ export default Ember.Component.extend({
   showNewAward: false,
   awardNotes: [],
   advancedStandingArray: [],
-  termModel: null,
+  termModel: [],
 
   studentModel: Ember.observer('offset', function () {
     var self = this;
@@ -100,6 +100,7 @@ export default Ember.Component.extend({
     this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
     this.set('awardNotes', []);
     this.set('advancedStandingArray', []);
+    this.set('termModel',[]);
 
     this.set('selectedGender', this.get('currentStudent').get('genderInfo').get('id'));
 
@@ -124,11 +125,14 @@ export default Ember.Component.extend({
        });
 
     this.get('store').query('term-code', {
+        limit: 50,
         filter: {
           student: this.get('currentStudent').id
         }
       }).then((terms) => {
-        this.set('termModel', terms);
+      for(var i = 0; i < terms.get('length'); i++) {
+        this.get('termModel').pushObject(terms.objectAt(i));
+      }
     });
   },
 

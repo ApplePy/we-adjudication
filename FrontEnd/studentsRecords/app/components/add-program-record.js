@@ -1,26 +1,36 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
+  store: Ember.inject.service(),
   notDONE: null,
   newNote: null,
-  plans: [],
-  hasPlan: false,
-  planModel: ["Software Engineering", "Mechatronics Engineering", "Bio year 2"],
+  plans: null,
+  term: null,
+  planModel: null,
+  selectedPlan: null,
+
   programModel: [],
 
   init() {
     this._super(...arguments);
     //set the plans array to empty
-    this.set('plans', []);
+    var self = this;
+    this.set('plans',[]);
+    this.get('store').findAll('plan-code').then(function (records) {
+      self.set('planModel', records);
+      self.set('selectedPlan', records.objectAt(0).id);
+    });
   },
 
   actions:{
     selectRecord(record){
-
+      console.log(this.get('selectedPlan'));
     },
 
     selectPlan(plan){
-
+      console.log(this.get('selectedPlan'));
+      this.set('selectedPlan', plan);
+      console.log(this.get('selectedPlan'));
     },
 
     saveRecord(){
@@ -30,17 +40,11 @@ export default Ember.Component.extend({
     deletePlanField(){
       //pop off the last element of the plans array
       this.get('program').plan.popObject();
-      //
-      if(this.get('program').plan.length === 0){
-        this.set('hasPlan', false);
-      }
     },
 
     newPlanField(){
       //push the first element from the plans into the plans array
-      this.get('program').plan.pushObject("Software Engineering");
-      //show the removal button
-      this.set('hasPlan', true);
+      this.get('program').plan.pushObject(this.get('planModel').objectAt(0));
     },
 
     close(){
