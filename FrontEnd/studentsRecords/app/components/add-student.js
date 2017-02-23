@@ -32,7 +32,7 @@ export default Ember.Component.extend({
         number: this.get('numBox'),
         firstName: this.get('fNameBox'),
         lastName: this.get('lNameBox'),
-        gender: null,
+        gender: null, //gen,
         photo: this.get('studentPhoto'),
         DOB: new Date(this.get('selectedDate')),
         resInfo: res
