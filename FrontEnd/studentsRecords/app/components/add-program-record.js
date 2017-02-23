@@ -24,13 +24,12 @@ export default Ember.Component.extend({
 
   actions:{
     selectRecord(record){
-      console.log(this.get('selectedPlan'));
+
     },
 
-    selectPlan(plan){
-      console.log(this.get('selectedPlan'));
-      this.set('selectedPlan', plan);
-      console.log(this.get('selectedPlan'));
+    selectPlan(plan, index){
+      console.log(plan);
+      console.log(index);
     },
 
     saveRecord(){
@@ -39,12 +38,12 @@ export default Ember.Component.extend({
 
     deletePlanField(){
       //pop off the last element of the plans array
-      this.get('program').plan.popObject();
+      this.get('plans').popObject();
     },
 
     newPlanField(){
       //push the first element from the plans into the plans array
-      this.get('program').plan.pushObject(this.get('planModel').objectAt(0));
+      this.get('plans').pushObject(this.get('planModel').objectAt(0));
     },
 
     close(){

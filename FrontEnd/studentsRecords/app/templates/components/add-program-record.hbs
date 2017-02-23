@@ -9,7 +9,7 @@
           <option value="2">Concurrent Studies CNC</option>
         </select>
       </div>
-      {{#each plans as |currentPlan|}}
+      {{#each plans as |currentPlan index|}}
         <div class="inline field">
           <label>Plan</label>
           <select onchange={{action 'selectPlan' value="target.value"}}>

@@ -1,17 +1,36 @@
-<div class="ui modal">
+<div class="ui modal scrolling">
+
     <div class="header">Edit Course Information</div>
     <div class="content">
       <div class="ui form">
         <div class="inline field">
           <label>Grade</label>
-          {{input size="10" type="text" value = newMark}}
+          {{input size="10" type="number" value = newMark}}
         </div>
         <div class="inline field">
           <label>Note</label>
           {{textarea cols="5" rows="5" value = newNote}}
         </div>
-        {{manage-courses}}
+        {{#each courses as |currentCourse|}}
+          {{manage-courses course = currentCourse}}
+        {{/each}}
+        <div class="inline field">
+          <label>Add a course to this grade</label>
+          <button class="ui icon button" {{action 'newCourseField'}} title="Add a course">
+            <i class="plus icon"></i>
+          </button>
+          {{#if courses}}
+            <label>Remove Course</label>
+            <button class="ui icon button" {{action 'deleteCourseField'}} title="Remove last course">
+              <i class="minus icon"></i>
+            </button>
+          {{/if}}
+        </div>
       <br>
+        <p>
+          Note: A course must be associated with a grade to be recognized by the system.  A grade must be
+          associated with a course to be viewed in the student record
+        </p>
       <div class="actions">
         <br>
         <div class="ui green button" {{action 'saveRecord' program}}>Save</div>

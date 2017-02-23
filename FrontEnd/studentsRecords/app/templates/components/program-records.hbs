@@ -46,11 +46,11 @@
     {{else}}
       <p> No program info to show</p>
     {{/if}}
-    <div class="ui green basic button" {{action "addRecord" term}}>Add Program</div>
+    <div class="ui button" {{action "addRecord" term}}>Add Program</div>
   </div>
   <h3>Grades</h3>
   <div class="ui segment">
-    {{#if term.courseInfo}}
+    {{#if term.courses}}
       <table class="ui eight column very basic table">
         <tr>
           <td class="one wide"><h5>Course Code</h5></td>
@@ -60,7 +60,7 @@
           <td class="one wide"></td>
           <td class="two wide"></td>
         </tr>
-        {{#each term.courseInfo as |course|}}
+        {{#each term.courses as |course|}}
           <tr>
             <td class="one wide">{{course.courseLetter}} {{course.courseNumber}}</td>
             <td class="two wide">{{course.name}}</td>
@@ -72,7 +72,7 @@
               {{/if}}
             </td>
             <td class="two wide">
-              <button class="ui right floated red basic icon button" {{action "deleteRecord" "course" course}}>
+              <button class="ui right floated red basic icon button" {{action "deleteRecord" "course-code" course}}>
                 <i class="trash icon"></i>
               </button>
               <button class="ui right floated blue basic button" {{action "updateRecord" "course" course}}>Update</button>
@@ -83,14 +83,14 @@
     {{else}}
       <p>No grade info to show</p>
     {{/if}}
-    <div class="ui green basic button" {{action "addGrade" term}}>Add Grade</div>
+    <div class="ui button" {{action "addGrade" term}}>Add Grade</div>
   </div>
   <br>
 {{else}}
   <h5>No information to show</h5>
 {{/each}}
 <br>
-<div class="ui green basic button" {{action "addTerm"}}>Add Term</div>
+<div class="ui button" {{action "addTerm"}}>Add Term</div>
 {{#if isAddingProgram}}
   {{add-program-record notDONE = isAddingProgram term = termToEdit}}
 {{/if}}
@@ -98,7 +98,7 @@
   {{add-term notDONE = isAddingTerm student = student terms = terms}}
 {{/if}}
 {{#if isAddingGrade}}
-  {{add-grade notDONE = isAddingGrade}}
+  {{add-grade notDONE = isAddingGrade term = termToEdit}}
 {{/if}}
 {{#if descriptionShow}}
   {{show-description title = "Grade" description = description notDONE = descriptionShow}}

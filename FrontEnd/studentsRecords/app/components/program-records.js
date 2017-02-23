@@ -26,6 +26,7 @@ export default Ember.Component.extend({
     },
 
     addGrade(term){
+      this.set('termToEdit', term);
       this.set('isAddingGrade', true);
 
     },
@@ -55,7 +56,19 @@ export default Ember.Component.extend({
     },
 
     deleteRecord(_model, object){
-      this.set('terms', this.get('terms').without(object));
+      if(_model === 'term-code'){
+        this.set('terms', this.get('terms').without(object));
+      }
+
+      if(_model === 'course-code'){
+        this.get('store').findRecord('grade', object.belongsTo('gradeInfo').id(), { backgroundReload: false }).then(function(obj) {
+          obj.destroyRecord().then(function() {
+            console.log("Deleted grade");
+          });
+        });
+      }
+
+      console.log(object.get('gradeInfo').id);
       this.get('store').findRecord(_model, object.id, { backgroundReload: false }).then(function(obj) {
         obj.destroyRecord().then(function() {
           console.log("Deleted " + _model);
