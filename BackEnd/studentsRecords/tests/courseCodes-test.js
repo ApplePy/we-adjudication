@@ -308,7 +308,7 @@ describe('Course Codes', function() {
                         next([newContent, model])
                     },
                     requiredValues,
-                    "Missing name, this should 400.");
+                    "Missing "+ value + ", this should 400.");
                 cb();
             },
             err => {});
