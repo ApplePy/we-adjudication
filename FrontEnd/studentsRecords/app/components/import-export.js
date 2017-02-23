@@ -812,7 +812,7 @@ export default Ember.Component.extend({
 				        	console.log("Added plan code");    
 
 				        	var status = this.get('store').createRecord('program-status', {
-					       		status: "ACTIVE"
+					       		status: "Active"
 					        });
 							
 							status.save().then(function() {
@@ -839,17 +839,40 @@ export default Ember.Component.extend({
 
 										console.log("Added program record.");
 
-										var termCode = this.get('store').createRecord('term-code', {
-								       		name: term,
-								       		student: student,
-								       		programRecords: [programRecord]
-								        });
+										store.query('term-code', {
+											filter: {
+												name: term,
+												number: studentNumber
+											}
+										}).then(function(termCodes) {
 
-								        termCode.save().then(function() {
-								        	console.log("Added termcode");
-							        	}, function() {
-								        	console.log("Could not add termcode");
-								        });
+											if (termCodes.length == 0) {
+												var termCode = this.get('store').createRecord('term-code', {
+										       		name: term,
+										       		student: student,
+										        });
+
+										        termCode.save().then(function() {
+										        	console.log("Added term code");
+										        }, function() {
+										        	console.log("Could not add term code");
+										        });
+										    } else {
+
+										    	let termCode = termCodes.get("firstObject");
+
+										    	let programRecords = termCode.get('programRecords');
+										    	programRecords.push(programRecord);
+
+										    	termCode.set('programRecords', programRecords);
+										        termCode.save().then(function() {
+										        	console.log("Added term code");
+										        }, function() {
+										        	console.log("Could not add term code");
+										        });
+
+										    }
+										});
 
 									}, function() {
 							        	console.log("Could not add program record");
