@@ -571,23 +571,24 @@ export default Ember.Component.extend({
 							}
 						}
 
-						if (schoolName != "NONE FOUND") {
+						if (row.schoolName != "NONE FOUND") {
 
-							//Save possibly new subject
 							store.query('hs-subject', {
 								filter: {
 									subject: rowContents.subject,
 									description: rowContents.description
 								}
-							}).then(function(findSubjects) {	
+							}).then(function(findSubjects) {
+
+								let subject = findSubjects.get("firstObject");
 
 								if (findSubjects.length == 0) {
-									var hsSubject = this.get('store').createRecord('hs-subject', {
+									var subject = this.get('store').createRecord('hs-subject', {
 							        	name: rowContents.subject,
 										description: rowContents.description
 									});
 
-							        hsSubject.save().then(function() {
+							        subject.save().then(function() {
 							        	console.log("Added hs subject");
 							        }, function() {
 							        	console.log("Could not add hs subject");
@@ -595,65 +596,32 @@ export default Ember.Component.extend({
 							    } else {
 							    	subject = findSubjects.get("firstObject");
 							    }
-							});
-
-							//Save possibly new source
-							store.query('hs-course-source', {
-								filter: {
-									code: rowContents.source
-								}
-							}).then(function(sources) {
-
-								if (findSubjects.length == 0) {
-									var source = this.get('store').createRecord('hs-course-source', {
-							        	code: rowContents.source
-									});
-
-							        source.save().then(function() {
-							        	console.log("Added source");
-							        }, function() {
-							        	console.log("Could not source");
-							        });
-							    } else {
-							    	source = sources.get("firstObject");
-							    }
-							});
-
-						}
-
-						//Add row to rows
-						let fullRow = rowContents;
-						fullRow.studentNumber = studentNumber;
-						fullRow.schoolName = schoolName;
-						rows.push(fullRow);
-					}
-
-					for (row of rows) {
-
-						if (row.schoolName != "NONE FOUND") {
-
-							store.query('hs-subject', {
-								filter: {
-									subject: row.subject,
-									description: row.description
-								}
-							}).then(function(findSubjects) {
-
-								let subject = findSubjects.get("firstObject");
 
 								store.query('hs-course-source', {
 									filter: {
 										code: rowContents.source
 									}
-								}).then(function(courseSources) {
+								}).then(function(sources) {
 
-									let courseSource = courseSources.get("firstObject");
+									if (sources.length == 0) {
+										var courseSource = this.get('store').createRecord('hs-course-source', {
+								        	code: rowContents.source
+										});
 
-									var hsCourse = this.get('store').createRecord('hs-course', {
-							        	level: row.level,
-										unit: row.units,
+								        courseSource.save().then(function() {
+								        	console.log("Added source");
+								        }, function() {
+								        	console.log("Could not source");
+								        });
+								    } else {
+								    	courseSource = sources.get("firstObject");
+								    }
+
+								    var hsCourse = this.get('store').createRecord('hs-course', {
+							        	level: rowContents.level,
+										unit: rowContents.units,
 										source: courseSource,
-										school: row.schoolName,
+										school: schoolName,
 										subject: subject
 									});
 
@@ -663,7 +631,7 @@ export default Ember.Component.extend({
 
 							        	store.query('student', {
 											filter: {
-												number: row.studentNumber
+												number: studentNumber
 											}
 										}).then(function(students) {
 
@@ -688,7 +656,8 @@ export default Ember.Component.extend({
 								});
 							});
 						}
-		    		}
+
+					}
 
 		    	} else if (fileName == "UndergraduateRecordCourses.xlsx") {
 
