@@ -46,7 +46,7 @@ let uniqueValues = [];
 /////////////////////////////////////////
 
 
-describe('Grades', function() {
+describe('Course Codes', function() {
 
     describe('/GET functions', function() {
         before(Common.regenAllData);
