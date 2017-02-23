@@ -825,14 +825,13 @@ export default Ember.Component.extend({
 
 						let student = students.get("firstObject");
 
-						var termCode = this.get('store').createRecord('term-code', {
-				       		name: term,
-				       		student: student
+			        	var planCode = this.get('store').createRecord('plan-code', {
+				       		name: plan
 				        });
+						
+						planCode.save().then(function() {
 
-				        termCode.save().then(function() {
-
-				        	console.log("Added termcode");
+				        	console.log("Added plan code");    
 
 				        	var status = this.get('store').createRecord('program-status', {
 					       		status: "ACTIVE"
@@ -854,30 +853,29 @@ export default Ember.Component.extend({
 							       		name: program,
 										level: level,
 										load: load,
-										status: status,
-										semester: termCode
+										status: status
+										plan: [planCode]
 							        });
 									
 									programRecord.save().then(function() {
 
-							        	console.log("Added program record");
+										console.log("Added program record.");
 
-							        	var planCode = this.get('store').createRecord('plan-code', {
-								       		name: plan,
-											programRecords: [programRecord]
-								        });
-										
-										planCode.save().then(function() {
-
-								        	console.log("Added plan code");	
-
-								        }, function() {
-								        	console.log("Could not add plan code");
+										var termCode = this.get('store').createRecord('term-code', {
+								       		name: term,
+								       		student: student,
+								       		programRecords: [programRecord]
 								        });
 
-							        }, function() {
+								        termCode.save().then(function() {
+								        	console.log("Added termcode");
+							        	}, function() {
+								        	console.log("Could not add termcode");
+								        });
+
+									}, function() {
 							        	console.log("Could not add program record");
-							        });
+						        	});
 						        	
 						        }, function() {
 						        	console.log("Could not add load");
@@ -888,9 +886,9 @@ export default Ember.Component.extend({
 					        });
 
 				        }, function() {
-				        	console.log("Could not add termcode");
+				        	console.log("Could not add plan code");
 				        });
-					});
+				    });
 		    	}
 		    };
 		    
