@@ -10,6 +10,7 @@ export default Ember.Component.extend({
   selectedLoad: null,
   selectedStatus: null,
   statusModel: null,
+  planModel: null,
   loadModel: null,
   courses: null,
   plans: null,
@@ -47,7 +48,8 @@ export default Ember.Component.extend({
 
     newPlanField(){
       //push the first element from the plans into the plans array
-      this.get('program').pushObject(this.get('planModel').objectAt(0).id);
+
+      this.get('program').get('plan').pushObject(this.get('planModel').objectAt(0));
 
     },
 
