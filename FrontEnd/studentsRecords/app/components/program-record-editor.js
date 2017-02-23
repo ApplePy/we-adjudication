@@ -7,6 +7,7 @@ export default Ember.Component.extend({
   notDONE: null,
   selectedPlan: null,
   planModel: ["Software Engineering", "Mechatronics Engineering", "Bio year 2"],
+  courses: null,
 
   init() {
     this._super(...arguments);
