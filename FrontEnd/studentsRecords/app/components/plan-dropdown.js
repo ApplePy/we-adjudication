@@ -7,6 +7,7 @@ export default Ember.Component.extend({
   actions:{
     selectPlan(_plan){
       this.set('plan', _plan);
+      console.log(this.get('plan'));
     }
   }
 });

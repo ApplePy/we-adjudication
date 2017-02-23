@@ -29,30 +29,30 @@
           {{input size="20" type="text" value = program.level}}
         </div>
         <div class="inline field">
-          <label>Program Load</label>
-          {{input size="20" type="text" value = program.load}}
+          <label>Load</label>
+          <select onchange={{action 'selectLoad' value="target.value"}}>
+            {{#each loadModel as |loadChoice|}}
+              <option value={{loadChoice.id}} selected={{eq program.load.id loadChoice.id}}>{{loadChoice.load}}</option>
+            {{/each}}
+          </select>
         </div>
         <div class="inline field">
-          <label>Program Status</label>
-          {{input size="20" type="text" value = program.status}}
+          <label>Status</label>
+          <select onchange={{action 'selectStatus' value="target.value"}}>
+            {{#each statusModel as |statusChoice|}}
+              <option value={{statusChoice.id}} selected={{eq program.status.id statusChoice.id}}>{{statusChoice.status}}</option>
+            {{/each}}
+          </select>
         </div>
-        {{#each program.plan as |plan|}}
-          <div class="inline field">
-            <label>Plan</label>
-            <select onchange={{action 'selectPlan' value="target.value"}}>
-              {{#each planModel as |planChoice|}}
-                <option value={{planChoice}} selected={{eq plan.name
-                                                                planChoice}}>{{planChoice}} </option>
-              {{/each}}
-            </select>
-          </div>
+        {{#each program.plan as |currentPlan|}}
+          {{plan-dropdown plan = currentPlan.id planModel = planModel}}
         {{/each}}
         <div class="inline field">
           <label>Add a plan</label>
           <button class="ui icon button" {{action 'newPlanField'}} title="Add another plan">
             <i class="plus icon"></i>
           </button>
-          {{#if hasPlan}}
+          {{#if program.plan}}
             <label>Remove Plan</label>
             <button class="ui icon button" {{action 'deletePlanField'}} title="Remove last plan">
               <i class="minus icon"></i>
@@ -60,13 +60,13 @@
           {{/if}}
         </div>
       </div>
+    </div>
       <br>
       <div class="actions">
         <br>
         <div class="ui green button" {{action 'saveRecord' program}}>Save</div>
         <div class="ui red basic button" {{action "close"}}>Cancel</div>
       </div>
-    </div>
   {{/if}}
   {{#if course}}
     <div class="header">Edit Course Information</div>

@@ -6,20 +6,23 @@ export default Ember.Component.extend({
   course: null,
   notDONE: null,
   selectedPlan: null,
-  planModel: ["Software Engineering", "Mechatronics Engineering", "Bio year 2"],
+  planModel: null,
+  statusModel: null,
+  loadModel: null,
   courses: null,
 
   init() {
     this._super(...arguments);
 
-    var self = this;
-    self.set('selectedPlan', self.get('planModel').objectAt(0));
-
   },
 
   actions:{
-    selectPlan(plan){
-      this.set('selectedPlan', plan);
+    selectLoad(load){
+
+    },
+
+    selectStatus(status){
+
     },
 
     deletePlanField(){
