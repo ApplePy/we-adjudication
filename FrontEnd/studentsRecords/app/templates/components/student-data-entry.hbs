@@ -57,6 +57,7 @@
   <div class="ui top attached tabular menu">
     <div class="active item" data-tab="basics">Basic Info</div>
     <div class="item" data-tab="admission">Admission Record</div>
+    <div class="item" data-tab="programRecord">Program Records</div>
     <div class="item" data-tab="advancedStanding">Advanced Standing</div>
     <div class="item" data-tab="scholarshipsAwards">Scholarships and Awards</div>
   </div>
@@ -142,6 +143,13 @@
             {{textarea cols="1" rows="6" value = currentStudent.registrationComments}}
           </div>
         </div>
+  </div>
+  <div class="ui tab" data-tab="programRecord">
+    <br>
+    <h2>{{currentStudent.number}}</h2>
+    <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
+    <!-- Display the program records for this student-->
+    {{program-records terms = termModel student = currentStudent}}
   </div>
 
   <div class="ui tab" data-tab="advancedStanding">

@@ -1,0 +1,17 @@
+<div class="ui modal">
+    <div class="header">Add New Term</div>
+    <div class="content">
+      <div class="ui form">
+        <div class="inline field">
+          <label>Term Name</label>
+          {{input size="20" type="text"  value = newTermName}}
+        </div>
+      </div>
+      <br>
+      <div class="actions">
+        <br>
+        <div class="ui green button" {{action 'saveRecord'}}>Save</div>
+        <div class="ui red basic button" {{action "close"}}>Cancel</div>
+      </div>
+    </div>
+</div>
