@@ -6,6 +6,7 @@ export default Ember.Component.extend({
   newMark: null,
   newNote: null,
   term: null,
+  grades: [],
 
   init() {
     this._super(...arguments);
@@ -38,22 +39,27 @@ export default Ember.Component.extend({
         note: this.get('newNote'),
       });
 
+      var t = this.get('store').peekRecord('term-code', this.get('term').id);
       var self = this;
+
       grade.save().then(function(record){
-        console.log('saved grade');
         for(var i = 0; i < self.get('courses').length; i++) {
           var course = self.get('store').createRecord('course-code', {
             courseLetter: self.get('courses').objectAt(i).courseLetter,
             courseNumber: self.get('courses').objectAt(i).courseNumber,
             name: self.get('courses').objectAt(i).name,
             unit: self.get('courses').objectAt(i).unit,
-            termInfo: self.get('term'),
+            termInfo: t,
             gradeInfo: record
           });
           course.save().then(function (rec) {
             console.log('saved course');
+          }).catch(function(){
+            console.log("courseSave failed");
           });
         }
+      }).catch(function(){
+        console.log("grade save failed");
       });
       this.send('close');
     },

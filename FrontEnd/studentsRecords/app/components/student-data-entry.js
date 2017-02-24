@@ -125,15 +125,26 @@ export default Ember.Component.extend({
        });
 
     this.get('store').query('term-code', {
-        limit: 50,
-        filter: {
-          student: this.get('currentStudent').id
-        }
-      }).then((terms) => {
+      limit: 500,
+      filter: {
+        student: this.get('currentStudent').id
+      }
+    }).then((terms) => {
       for(var i = 0; i < terms.get('length'); i++) {
+        var term = terms.objectAt(i);
+        this.get('store').query('course-code', {limit: 500, filter: {termInfo: term.id}}).then((courses) => {
+          for(var j = 0; j < courses.get('length'); j++) {
+            var course = courses.objectAt(j);
+            this.get('store').query('grade', {limit: 500}).then();
+          }
+        });
+        this.get('store').query('program-record', {limit: 500}).then((records) => {
+
+        });
         this.get('termModel').pushObject(terms.objectAt(i));
       }
     });
+
   },
 
   didRender() {

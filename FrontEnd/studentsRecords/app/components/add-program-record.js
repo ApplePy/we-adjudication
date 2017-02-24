@@ -43,14 +43,14 @@ export default Ember.Component.extend({
       if(status === null){
         status = this.get('statusModel').objectAt(0);
       }
+      var t = this.get('store').peekRecord('term-code', this.get('term').id);
       var prog = this.get('store').createRecord('program-record', {
         name: this.get('newName'),
         level: this.get('newLevel'),
       });
       prog.set('load', load);
       prog.set('status', status);
-      prog.get('semester').pushObject(this.get('term'));
-
+      prog.get('semester').pushObject(t);
       prog.save().then(function(record){
 
       });

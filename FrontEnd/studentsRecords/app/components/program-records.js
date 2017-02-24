@@ -13,6 +13,7 @@ export default Ember.Component.extend({
   description: null,
   terms: null,
   student: null,
+  courses: null,
 
   actions:{
     addTerm(){

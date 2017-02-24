@@ -44,21 +44,15 @@
             {{/each}}
           </select>
         </div>
-        {{#each program.plan as |currentPlan|}}
-          {{plan-dropdown plan = currentPlan.id planModel = planModel}}
-        {{/each}}
-        <div class="inline field">
-          <label>Add a plan</label>
-          <button class="ui icon button" {{action 'newPlanField'}} title="Add another plan">
-            <i class="plus icon"></i>
-          </button>
-          {{#if program.plan}}
-            <label>Remove Plan</label>
-            <button class="ui icon button" {{action 'deletePlanField'}} title="Remove last plan">
-              <i class="minus icon"></i>
+        {{#each program.plan as |plan|}}
+          <div class="inline field">
+            {{plan.name}}
+            <button class="ui tiny red basic right floated icon button" {{action 'deletePlan' program plan}}>
+              <i class="x icon"></i>
             </button>
-          {{/if}}
-        </div>
+          </div>
+        {{/each}}
+        {{plan-dropdown program = program}}
       </div>
     </div>
       <br>

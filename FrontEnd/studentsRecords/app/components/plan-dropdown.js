@@ -35,6 +35,7 @@ export default Ember.Component.extend({
       updatedProgram.get('plan').pushObject(this.get('selectedPlan'));
       updatedProgram.save();
       this.set('isAdding', false);
+      this.set('selectedPlan', null);
     },
 
     cancelAdd(){

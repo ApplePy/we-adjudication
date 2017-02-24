@@ -41,18 +41,6 @@ export default Ember.Component.extend({
       this.set('selectedStatus', status);
     },
 
-    deletePlanField(){
-      //pop off the last element of the plans array
-      this.get('program').get('plan').popObject();
-    },
-
-    newPlanField(){
-      //push the first element from the plans into the plans array
-
-      this.get('program').get('plan').pushObject(this.get('planModel').objectAt(0));
-
-    },
-
     saveRecord(object){
       object.save();
       this.send('close');
