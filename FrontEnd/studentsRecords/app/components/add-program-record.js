@@ -49,9 +49,9 @@ export default Ember.Component.extend({
       var prog = this.get('store').createRecord('program-record', {
         name: this.get('newName'),
         level: this.get('newLevel'),
+        load: load,
+        status: status
       });
-      prog.set('load', load);
-      prog.set('status', status);
       prog.get('semester').pushObject(t);
       prog.save().then(function(record){
 
