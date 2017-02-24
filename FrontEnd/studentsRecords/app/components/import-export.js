@@ -192,7 +192,7 @@ export default Ember.Component.extend({
 
 							gender = genders.get("firstObject");
 
-							store.query('residency', {
+							this.get('store').query('residency', {
 								filter: {
 									name: residency
 								}
@@ -223,17 +223,20 @@ export default Ember.Component.extend({
 		    		var first_sheet_name = workbook.SheetNames[0];
 					var worksheet = workbook.Sheets[first_sheet_name];
 
+					var number;
+					var note;
+
 					for(var R = 1; R <=  XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
 
-						var number;
-						var note;
-
 						for(var C = 0; C <=  XLSX.utils.decode_range(worksheet['!ref']).e.c; ++C) {
-						
 
 							var cellAddress = XLSX.utils.encode_cell({r: R, c: C});
 						    var cell = worksheet[cellAddress];
-						    var cellValue = cell.v;
+						    try {
+						    	var cellValue = cell.v;
+						    } catch (e) {
+						    	var cellValue = number;
+						    }
 
 						    console.log(cellValue);
 
@@ -271,17 +274,21 @@ export default Ember.Component.extend({
 		    		var first_sheet_name = workbook.SheetNames[0];
 					var worksheet = workbook.Sheets[first_sheet_name];
 
-					for(var R = 1; R <=  XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
+					var number;
+					var note;
 
-						var number;
-						var note;
+					for(var R = 1; R <=  XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
 
 						for(var C = 0; C <=  XLSX.utils.decode_range(worksheet['!ref']).e.c; ++C) {
 						
 
 							var cellAddress = XLSX.utils.encode_cell({r: R, c: C});
 						    var cell = worksheet[cellAddress];
-						    var cellValue = cell.v;
+						    try {
+						    	var cellValue = cell.v;
+						    } catch (e) {
+						    	var cellValue = number;
+						    }
 
 						    console.log(cellValue);
 
@@ -319,17 +326,21 @@ export default Ember.Component.extend({
 		    		var first_sheet_name = workbook.SheetNames[0];
 					var worksheet = workbook.Sheets[first_sheet_name];
 
-					for(var R = 1; R <=  XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
+					var number;
+					var note;
 
-						var number;
-						var note;
+					for(var R = 1; R <=  XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
 
 						for(var C = 0; C <=  XLSX.utils.decode_range(worksheet['!ref']).e.c; ++C) {
 						
 
 							var cellAddress = XLSX.utils.encode_cell({r: R, c: C});
 						    var cell = worksheet[cellAddress];
-						    var cellValue = cell.v;
+						    try {
+						    	var cellValue = cell.v;
+						    } catch (e) {
+						    	var cellValue = number;
+						    }
 
 						    console.log(cellValue);
 
@@ -367,17 +378,21 @@ export default Ember.Component.extend({
 		    		var first_sheet_name = workbook.SheetNames[0];
 					var worksheet = workbook.Sheets[first_sheet_name];
 
-					for(var R = 1; R <=  XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
+					var number;
+					var note;
 
-						var number;
-						var note;
+					for(var R = 1; R <=  XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
 
 						for(var C = 0; C <=  XLSX.utils.decode_range(worksheet['!ref']).e.c; ++C) {
 						
 
 							var cellAddress = XLSX.utils.encode_cell({r: R, c: C});
 						    var cell = worksheet[cellAddress];
-						    var cellValue = cell.v;
+						    try {
+						    	var cellValue = cell.v;
+						    } catch (e) {
+						    	var cellValue = number;
+						    }
 
 						    console.log(cellValue);
 
