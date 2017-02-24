@@ -107,6 +107,7 @@ build:
   only:
    - master
    - auto_deployment
+   - lab-3-develop
 
 
 
