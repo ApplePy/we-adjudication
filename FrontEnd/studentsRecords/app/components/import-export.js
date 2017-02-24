@@ -200,7 +200,7 @@ export default Ember.Component.extend({
 
 								let residency = residencies.get("firstObject");
 
-								var student = this.get('this.get('store')').createRecord('student', {
+								var student = this.get('store').createRecord('student', {
 						       		number: number,
 									firstName: firstName,
 									lastname: lastName,
