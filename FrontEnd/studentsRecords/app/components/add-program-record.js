@@ -35,14 +35,16 @@ export default Ember.Component.extend({
     },
 
     saveNewRecord(){
-      var load = this.get('store').peekRecord('course-load', this.get('selectedLoad'));
-      var status = this.get('store').peekRecord('program-status', this.get('selectedStatus'));
-      if(load === null){
-        load = this.get('loadModel').objectAt(0);
+      var sLoad = this.get('selectedLoad');
+      if(sLoad === null){
+        sLoad = this.get('loadModel').objectAt(0).id;
       }
-      if(status === null){
-        status = this.get('statusModel').objectAt(0);
+      var sStatus = this.get('selectedStatus');
+      if(sStatus === null){
+        sStatus = this.get('statusModel').objectAt(0).id;
       }
+      var load = this.get('store').peekRecord('course-load', sLoad);
+      var status = this.get('store').peekRecord('program-status', sStatus);
       var t = this.get('store').peekRecord('term-code', this.get('term').id);
       var prog = this.get('store').createRecord('program-record', {
         name: this.get('newName'),
