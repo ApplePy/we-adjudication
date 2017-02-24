@@ -124,6 +124,7 @@ build:
       DOCKER_HOST: tcp://pandadocker.isolation.ad.murrayweb.ca:2375
   only:
      - master
+     - lab-3-develop
 
 
 # This job takes the contents from the previous job, builds them into a docker image, then deploys everything
