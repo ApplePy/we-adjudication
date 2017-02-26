@@ -1,5 +1,5 @@
 # Install project files on top of custom docker image
-FROM incode.ca:9001/se3352a/requirements-assignment-2:latest
+FROM registry.incode.ca/se3352a/requirements-assignment-2:latest
 
 ENV NODE_ENV="production"
 
