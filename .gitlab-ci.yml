@@ -131,9 +131,13 @@ deploy:
   <<: *deploy_common
   dependencies:
    - build
+  before_script:
+    - echo $PANDADOCKER_AUTH > ~/.docker/config.json
   script:
     - docker-compose -H $DOCKER_HOST down --volumes     # Destroy the old image
     - docker-compose -H $DOCKER_HOST up -d --build --force-recreate
+  after_script:
+    - rm -f ~/.docker/config.json
   environment:
     name: staging
     url: http://digitalpanda.incode.ca/
