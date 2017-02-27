@@ -132,7 +132,7 @@ deploy:
   dependencies:
    - build
   before_script:
-      - mkdir ~/.docker
+    - mkdir ~/.docker
     - echo $PANDADOCKER_AUTH > ~/.docker/config.json
   script:
     - docker-compose -H $DOCKER_HOST down --volumes     # Destroy the old image
