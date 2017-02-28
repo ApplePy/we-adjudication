@@ -13,4 +13,4 @@ ADD BackEnd/studentsRecords /code
 WORKDIR "/code"
 
 # Start box
-ENTRYPOINT [ "npm", "start" ]
+ENTRYPOINT [ "node", "--max-executable-size=96", "--max-old-space-size=128", "--max-semi-space-size=1", "server.js" ]
