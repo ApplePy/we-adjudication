@@ -67,6 +67,18 @@ export default Ember.Component.extend({
       self.set('genderModel', records);
     });
 
+    this.get('store').findAll('program-status').then(function (records) {
+
+    });
+
+    this.get('store').findAll('plan-code').then(function (records) {
+      self.set('residencyModel', records);
+    });
+
+    this.get('store').findAll('course-load').then(function (records) {
+      self.set('residencyModel', records);
+    });
+
     // load first page of the students records
     this.set('limit', 10);
     this.set('offset', 0);
@@ -130,14 +142,14 @@ export default Ember.Component.extend({
         student: this.get('currentStudent').id
       }
     }).then((terms) => {
+      this.get('store').query('grade', {limit: 500}).then();
       for(var i = 0; i < terms.get('length'); i++) {
         var term = terms.objectAt(i);
+
         this.get('store').query('course-code', {limit: 500, filter: {termInfo: term.id}}).then((courses) => {
-          for(var j = 0; j < courses.get('length'); j++) {
-            var course = courses.objectAt(j);
-            this.get('store').query('grade', {limit: 500}).then();
-          }
+
         });
+
         this.get('store').query('program-record', {limit: 500}).then((records) => {
 
         });

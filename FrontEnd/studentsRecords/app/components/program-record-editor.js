@@ -60,10 +60,13 @@ export default Ember.Component.extend({
       program.set('status', status);
       program.save();
 
-      this.send('close');
+      this.set('notDONE', false);
+      Ember.$('.ui.modal').modal('hide');
+      Ember.$('.ui.modal').remove();
     },
 
-    close(){
+    close(object){
+      object.rollbackAttributes();
       this.set('notDONE', false);
       Ember.$('.ui.modal').modal('hide');
       Ember.$('.ui.modal').remove();

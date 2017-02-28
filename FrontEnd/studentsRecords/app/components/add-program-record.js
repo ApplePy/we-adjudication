@@ -52,9 +52,10 @@ export default Ember.Component.extend({
         load: load,
         status: status
       });
-      prog.get('semester').pushObject(t);
-      prog.save().then(function(record){
 
+      prog.save().then(function(record){
+        t.get('programRecords').pushObject(record);
+        t.save().then(function(record){});
       });
 
       this.send('close');
