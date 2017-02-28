@@ -656,7 +656,7 @@ let generateProgramRecord = (number, callback) => {
 };
 let generateGrade = (number, callback) => {
     genBase(Grades, Lists.gradeList, {
-        mark: faker.random.number(100),
+        mark: faker.random.number(100).toString(),
         note: faker.lorem.paragraph()
     })(err => {
         // Retry a few times in case random generation causes duplicate
@@ -682,7 +682,7 @@ let generateCourseLoad = (number, callback) => {
 let generateCourseCode = (number, callback) => {
     genBase(CourseCodes, Lists.courseCodeList, {
         courseLetter: faker.random.word(),
-        courseNumber: faker.random.number(9999),
+        courseNumber: faker.random.word(),
         name: faker.random.words(2),
         unit: faker.random.number(4) / 2,
         termInfo: Lists.termCodeList.randomObject(),
@@ -753,7 +753,7 @@ let generateHsCourseSource = (number, callback) => {
 };
 let generateHsCourse = (number, callback) => {
     genBase(HSCourses, Lists.hsCourseList, {
-        level: faker.random.word(),
+        level: faker.random.number(9, 12),
         unit: faker.random.number(1, 4)/2,
         source: Lists.hsCourseSourceList[faker.random.number(Lists.hsCourseSourceList.length - 1)],
         school: Lists.secondarySchoolList[faker.random.number(Lists.secondarySchoolList.length - 1)],
@@ -769,7 +769,7 @@ let generateHsCourse = (number, callback) => {
 };
 let generateHsGrade = (number, callback) => {
     genBase(HSGrades, Lists.hsGradeList, {
-        mark: faker.random.number(100),
+        mark: faker.random.number(100).toString(),
         course: Lists.hsCourseList[faker.random.number(Lists.hsCourseList.length - 1)],
         recipient: Lists.studentList[faker.random.number(Lists.studentList.length - 1)]
     })(err => {

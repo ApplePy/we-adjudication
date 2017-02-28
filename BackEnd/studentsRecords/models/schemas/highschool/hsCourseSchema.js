@@ -6,8 +6,8 @@ var mongoosePaginate = require('mongoose-paginate');
 
 var hsCourseSchema = mongoose.Schema(
     {
-        level: String,
-        unit: Number,
+        level: {type: Number, required: true},
+        unit: {type: Number, required: true},
         source: {type: mongoose.Schema.ObjectId, ref: 'HSCourseSources'},
         school: {type: mongoose.Schema.ObjectId, ref: 'SecondarySchools'},
         subject: {type: mongoose.Schema.ObjectId, ref: 'HSSubjects'},
