@@ -44,7 +44,7 @@
             {{/each}}
           </select>
         </div>
-        {{#each program.plan as |plan|}}
+        {{#each plans as |plan|}}
           <div class="inline field">
             {{plan.name}}
             <button class="ui tiny red basic right floated icon button" {{action 'deletePlan' program plan}}>
@@ -84,6 +84,7 @@
           <br>
           <div class="ui green button" {{action 'saveRecord' course}}>Save</div>
           <div class="ui red basic button" {{action "close" course}}>Cancel</div>
+
         </div>
       </div>
     </div>

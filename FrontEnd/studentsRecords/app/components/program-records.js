@@ -62,15 +62,17 @@ export default Ember.Component.extend({
 
       //Deletes the grade as well if it is a course code.  Causes an issue if it is the grade associated with more than
       //one course
-      /*
+
       if(_model === 'course-code'){
         this.get('store').findRecord('grade', object.belongsTo('gradeInfo').id(), { backgroundReload: false }).then(function(obj) {
-          obj.destroyRecord().then(function() {
-            console.log("Deleted grade");
-          });
+          if(obj.hasMany('courses').ids().length === 1){
+            obj.destroyRecord().then(function() {
+              console.log("Deleted grade");
+            });
+          }
         });
       }
-      */
+
 
       this.get('store').findRecord(_model, object.id, { backgroundReload: false }).then(function(obj) {
         obj.destroyRecord().then(function() {

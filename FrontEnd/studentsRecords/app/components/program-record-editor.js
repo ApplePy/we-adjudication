@@ -43,7 +43,9 @@ export default Ember.Component.extend({
 
     saveRecord(object){
       object.save();
-      this.send('close');
+      this.set('notDONE', false);
+      Ember.$('.ui.modal').modal('hide');
+      Ember.$('.ui.modal').remove();
     },
 
     saveProgram(program){

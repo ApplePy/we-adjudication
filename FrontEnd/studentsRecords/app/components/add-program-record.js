@@ -55,7 +55,7 @@ export default Ember.Component.extend({
 
       prog.save().then(function(record){
         t.get('programRecords').pushObject(record);
-        t.save().then(function(record){});
+        t.save().then();
       });
 
       this.send('close');

@@ -7,6 +7,7 @@ export default Ember.Component.extend({
   newNote: null,
   term: null,
   grades: [],
+  courses: null,
 
   init() {
     this._super(...arguments);
