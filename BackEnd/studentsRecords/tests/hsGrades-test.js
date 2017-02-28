@@ -29,7 +29,7 @@ let itemList = Common.DBElements.hsGradeList;
 let emberModel = HSGrades;
 let newModel = () => {
     return {
-        mark: faker.random.number(100),
+        mark: faker.random.number(100).toString(),
         note: faker.random.words(5),
         recipient: Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)]._id
     }

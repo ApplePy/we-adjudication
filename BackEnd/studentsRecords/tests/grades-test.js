@@ -31,7 +31,7 @@ let itemList = Common.DBElements.gradeList;
 let emberModel = Grades;
 let newModel = () => {
     return {
-        mark: faker.random.number(100),
+        mark: faker.random.number(100).toString(),
         note: faker.lorem.paragraph(),
     }
 };
