@@ -1,7 +1,7 @@
 import DS from 'ember-data';
 
 export default DS.Model.extend({
-  level: DS.attr('string'),
+  level: DS.attr('number'),
   unit: DS.attr('number'),
   source: DS.belongsTo('hs-course-source'),
   school: DS.belongsTo('secondary-school'),

@@ -30,7 +30,7 @@ let itemList = Common.DBElements.hsCourseList;
 let emberModel = HSCourses;
 let newModel = () => {
     return {
-        level: faker.random.word(),
+        level: faker.random.number(9, 12),
         unit: (faker.random.number(5) + 1) / 2,
         source: Common.DBElements.hsCourseSourceList[faker.random.number(Common.DBElements.hsCourseSourceList.length - 1)],
         school: Common.DBElements.secondarySchoolList[faker.random.number(Common.DBElements.secondarySchoolList.length - 1)],
@@ -38,7 +38,7 @@ let newModel = () => {
     }
 };
 let filterValueSearches = ['level', 'unit', 'source', 'school', 'subject'];
-let requiredValues = [];
+let requiredValues = ['level', 'unit'];
 let uniqueValues = [];
 
 // Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate

@@ -30,7 +30,7 @@ let emberModel = CourseCodes;
 let newModel = () => {
     return {
         courseLetter: faker.random.word(),
-        courseNumber: faker.random.number(9999),
+        courseNumber: faker.random.word(),
         name: faker.random.words(5,10),
         unit: faker.random.number(4)/2,
         termInfo: Common.DBElements.termCodeList.randomObject(),

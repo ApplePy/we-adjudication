@@ -6,7 +6,7 @@ var mongoosePaginate = require('mongoose-paginate');
 
 var hsGradeSchema = mongoose.Schema(
     {
-        mark: {type: Number, required: true},
+        mark: {type: String, required: true},
         course: {type: mongoose.Schema.ObjectId, ref: 'HSCourses'},
         recipient: {type: mongoose.Schema.ObjectId, ref: 'Students'}
     }
