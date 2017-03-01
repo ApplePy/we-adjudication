@@ -145,7 +145,7 @@ let Tests = {
          * @param pageSize          The size of the page to use
          */
         getPagination: function(emberName, emberPluralized, modelType, modelArray, pageSize = 5) {
-            return it('it should GET all models, one page at a time', function(done) {
+            it('it should GET all models, one page at a time', function(done) {
 
                 let remainingModels = new Set(modelArray.map(el => el._id.toString()));
 
@@ -158,6 +158,10 @@ let Tests = {
                             expect(res).to.have.status(200);
                             expect(res).to.be.json;
                             expect(res.body).to.have.property(emberName);
+                            expect(res.body).to.have.property("meta");
+                            expect(res.body.meta.total).to.equal(modelArray.length);
+                            expect(res.body.meta.limit).to.equal(pageSize);
+                            expect(res.body.meta.offset).to.equal(n * pageSize);
                             expect(res.body[emberName]).to.have.length.at.most(pageSize);
 
                             // Remove model from remaining models
@@ -172,6 +176,25 @@ let Tests = {
                     done();
                 });
 
+            });
+
+            return it('it should GET nothing when the offset is too large', function(done) {
+                // Request all advanced standings
+                chai.request(server)
+                    .get('/api/' + emberPluralized)
+                    .query({offset: modelArray.length, limit: pageSize})
+                    .end((err, res) => {
+                        expect(res).to.have.status(200);
+                        expect(res).to.be.json;
+                        expect(res.body).to.have.property(emberName);
+                        expect(res.body).to.have.property("meta");
+                        expect(res.body.meta.total).to.equal(modelArray.length);
+                        expect(res.body.meta.limit).to.equal(pageSize);
+                        expect(res.body.meta.offset).to.equal(modelArray.length);
+                        expect(res.body[emberName]).to.have.length(0);
+
+                        done();
+                    });
             });
         },
         

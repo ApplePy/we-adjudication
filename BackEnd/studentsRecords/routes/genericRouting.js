@@ -70,7 +70,15 @@ var Setup = function(model,
                     model.paginate({}, {offset: o, limit: l},
                         function (error, modelObjs) {
                             if (error) response.status(500).send({error: error});
-                            else response.json({[modelNameEmberized]: modelObjs.docs});
+                            else response.json({
+                                [modelNameEmberized]: modelObjs.docs,
+                                 meta:
+                                 {
+                                     total: modelObjs.total,
+                                     limit: modelObjs.limit,
+                                     offset: modelObjs.offset
+                                 }
+                            });
                         });
                 }
                 // Return all models
@@ -92,7 +100,15 @@ var Setup = function(model,
                         model.paginate(filter, {offset: o, limit: l},
                             function (error, modelObjs) {
                                 if (error) response.status(500).send({error: error});
-                                else response.json({[modelNameEmberized]: modelObjs.docs});
+                                else response.json({
+                                    [modelNameEmberized]: modelObjs.docs,
+                                    meta:
+                                    {
+                                        total: modelObjs.total,
+                                        limit: modelObjs.limit,
+                                        offset: modelObjs.offset
+                                    }
+                                });
                             });
                     }
                     else {
