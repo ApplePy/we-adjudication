@@ -48,9 +48,9 @@ let uniqueValues = ['name'];
 /////////////////////////////////////////
 
 
-describe('HSSubjects', function() {
+describe('HSSubjects', function () {
 
-    describe('/GET functions', function() {
+    describe('/GET functions', function () {
         before(Common.regenAllData);
 
         // Make sure that you can retrieve all values
@@ -61,12 +61,13 @@ describe('HSSubjects', function() {
             itemList);
 
         // Make sure that you can retrieve all values one page at a time
-        it.skip("it should GET all models, one page at a time");
-        /*Common.Tests.GetTests.getPagination(
+        Common.Tests.GetTests.getPagination(
             emberName,
             emberNamePluralized,
             emberModel,
-            itemList);*/
+            itemList,
+            undefined,
+            it.skip);
 
         // Check that you can search by all non-array elements
         each(
@@ -83,12 +84,12 @@ describe('HSSubjects', function() {
                         // Convert MongoID into a string before attempting search
                         let param = (model[element] instanceof mongoose.Types.ObjectId) ? model[element].toString() : model[element];
 
-                        next([{[element]: param}, itemList.filter((el) => el[element] == model[element])]);
+                        next([{ [element]: param }, itemList.filter((el) => el[element] == model[element])]);
                     },
                     "Search by " + element);
                 cb();
             },
-            err => {});
+            err => { });
 
         // Make sure that searches for a nonexistent object returns nothing but succeeds
         Common.Tests.GetTests.getByFilterSuccess(
@@ -96,7 +97,7 @@ describe('HSSubjects', function() {
             emberNamePluralized,
             emberModel,
             function (next) {
-                next([{name: "NonExistent"}, []]);
+                next([{ name: "NonExistent" }, []]);
             },
             "Search for a nonexistent model");
 
@@ -105,7 +106,7 @@ describe('HSSubjects', function() {
             emberName,
             emberNamePluralized,
             emberModel,
-            function(next) {
+            function (next) {
                 next(itemList[faker.random.number(itemList.length - 1)]);
             });
 
@@ -114,13 +115,13 @@ describe('HSSubjects', function() {
             emberName,
             emberNamePluralized,
             emberModel,
-            function(next) {
+            function (next) {
                 next(new emberModel({}));
             },
             "This ID does not exist, should 404.");
     });
 
-    describe('/PUT functions', function() {
+    describe('/PUT functions', function () {
         beforeEach(Common.regenAllData);
 
         // Make sure PUTs work correctly
@@ -193,7 +194,7 @@ describe('HSSubjects', function() {
                     "Posting with duplicate of unique field " + value + ", should 500.");
                 cb();
             },
-            err => {});
+            err => { });
 
         // Make sure that attempts to not supply required values fails
         each(
@@ -221,7 +222,7 @@ describe('HSSubjects', function() {
                     "Missing " + value + ", this should 400.");
                 cb();
             },
-            err => {});
+            err => { });
 
         // Make sure that attempts to push to a non-existent object fails
         Common.Tests.PutTests.putUpdated(
@@ -240,7 +241,7 @@ describe('HSSubjects', function() {
             "This model does not exist yet, this should 404.");
     });
 
-    describe('/POST functions', function() {
+    describe('/POST functions', function () {
         beforeEach(Common.regenAllData);
 
         // Make sure POSTs work correctly
@@ -263,7 +264,7 @@ describe('HSSubjects', function() {
             emberName,
             emberNamePluralized,
             emberModel,
-            function(next) {
+            function (next) {
                 // Select a model and then attempt to set the new object's ID to the already-existing object
                 let model = itemList[faker.random.number(itemList.length - 1)];
                 let modelObj = newModel();
@@ -274,9 +275,9 @@ describe('HSSubjects', function() {
             },
             requiredValues,
             "POSTing a record with an ID that already exists. Should ignore the new ID.",
-            function(next, res) {
+            function (next, res) {
                 // Make sure the ID is different
-                expect (res.body[emberName]._id).to.not.equal(idFerry.toString());
+                expect(res.body[emberName]._id).to.not.equal(idFerry.toString());
 
                 // Make sure the creation was successful anyways
                 emberModel.findById(res.body[emberName]._id, function (err, results) {
@@ -308,25 +309,26 @@ describe('HSSubjects', function() {
                     "Missing " + value + ", this should 400.");
                 cb();
             },
-            err => {});
+            err => { });
 
         // Make sure attempts to post duplicate data fails
         // TODO: I'm not sure if this test is appropriate...
-        it.skip("POSTing a record with duplicate data, should 500.");
-        /*Common.Tests.PostTests.postNotUnique(
-         emberName,
-         emberNamePluralized,
-         emberModel,
-         function (next) {
-         let model = itemList[faker.random.number(itemList.length - 1)];
+        Common.Tests.PostTests.postNotUnique(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                let model = itemList[faker.random.number(itemList.length - 1)];
 
-         next([model, model]);
-         },
-         requiredValues,
-         "POSTing a record with duplicate data, should 500.");*/
+                next([model, model]);
+            },
+            requiredValues,
+            "POSTing a record with duplicate data, should 500.",
+            undefined,
+            it.skip);
     });
 
-    describe('/DELETE functions', function(){
+    describe('/DELETE functions', function () {
         beforeEach(Common.regenAllData);
 
         let elementFerry = null;
@@ -344,11 +346,11 @@ describe('HSSubjects', function() {
             function (next, res) {
                 // Check that all dependent objects got deassociated
                 each([
-                        [HSCourses, "subject"]
-                    ],
+                    [HSCourses, "subject"]
+                ],
                     function (value, next) {
                         value[0].find(
-                            {[value[1]]: elementFerry._id},
+                            { [value[1]]: elementFerry._id },
                             (err, students) => {
                                 expect(err).to.be.null;
                                 expect(students).to.be.empty;
