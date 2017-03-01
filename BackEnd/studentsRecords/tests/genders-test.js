@@ -55,12 +55,13 @@ describe('Genders', function() {
             itemList);
 
         // Make sure that you can retrieve all values one page at a time
-        it.skip("it should GET all models, one page at a time");
-        /*Common.Tests.GetTests.getPagination(
+        Common.Tests.GetTests.getPagination(
          emberName,
          emberNamePluralized,
          emberModel,
-         itemList);*/
+         itemList,
+         undefined,
+         it.skip);
 
         // Check that you can search by all non-array elements
         each(

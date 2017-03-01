@@ -105,9 +105,11 @@ let Tests = {
          * @param modelType         A model that matches the type returned by the API call
          * @param modelArray        An array containing modelType objects that is expected from the API call
          * @param queryOperand      Query operand can be a URL query object or a function that resolves into a URL query object
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        getAll: function (emberName, emberPluralized, modelType, modelArray, queryOperand = null) {
-            return it('it should GET all models', function (done) {
+        getAll: function (emberName, emberPluralized, modelType, modelArray, queryOperand = null, itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            return itWrap('it should GET all models', function (done) {
                 // Resolve query operands
                 if (typeof queryOperand === "function")
                     queryOperand = queryOperand();
@@ -143,9 +145,11 @@ let Tests = {
          * @param modelType         A model that matches the type returned by the API call
          * @param modelArray        An array containing modelType objects that is expected from the API call
          * @param pageSize          The size of the page to use
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        getPagination: function(emberName, emberPluralized, modelType, modelArray, pageSize = 5) {
-            it('it should GET all models, one page at a time', function(done) {
+        getPagination: function(emberName, emberPluralized, modelType, modelArray, pageSize = 5, itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            itWrap('it should GET all models, one page at a time', function(done) {
 
                 let remainingModels = new Set(modelArray.map(el => el._id.toString()));
 
@@ -178,7 +182,7 @@ let Tests = {
 
             });
 
-            return it('it should GET nothing when the offset is too large', function(done) {
+            return itWrap('it should GET nothing when the offset is too large', function(done) {
                 // Request all advanced standings
                 chai.request(server)
                     .get('/api/' + emberPluralized)
@@ -207,9 +211,11 @@ let Tests = {
          * @param elementSelection  A function that calls the passed callback with argument [{... filter contents ...}, [expected data object(s)]]
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param queryOperand      Query operand can be a URL query object or a function that resolves into a URL query object
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        getByFilterSuccess: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "", queryOperand = null) {
-            return it('it should GET a model by a filter' + (descriptionText ? ": " : "") + descriptionText, function (done) {
+        getByFilterSuccess: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "", queryOperand = null, itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            return itWrap('it should GET a model by a filter' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selections => {
                     // Resolve query operands
                     if (typeof queryOperand === "function")
@@ -244,9 +250,11 @@ let Tests = {
          * @param modelType         A model that matches the type returned by the API call
          * @param elementSelection  A function that calls the passed callback with the data object as the argument
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        getByID: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "") {
-            return it('it should GET a model by id' + (descriptionText ? ": " : "") + descriptionText, function (done) {
+        getByID: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "", itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            return itWrap('it should GET a model by id' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
                     // Make request
                     chai.request(server)
@@ -289,9 +297,11 @@ let Tests = {
          * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param postPutVerify     A function that receives (next, API result) to allow additional checks to be made before declaring the PUT a success
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        putUpdated: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPutVerify = (cb, res) => cb()) {
-            return it('it should PUT an updated model and update all fields' + (descriptionText ? ": " : "") + descriptionText, function (done) {
+        putUpdated: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPutVerify = (cb, res) => cb(), itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            return itWrap('it should PUT an updated model and update all fields' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
 
                     // Make request
@@ -349,9 +359,11 @@ let Tests = {
          * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param postPutVerify     A function that receives (next, API result) to allow additional checks to be made before declaring the PUT a success
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        putNotUnique: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPutVerify = (cb, res) => cb()) {
-            return it('it should PUT an updated model and update all fields' + (descriptionText ? ": " : "") + descriptionText, function (done) {
+        putNotUnique: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPutVerify = (cb, res) => cb(), itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            return itWrap('it should PUT an updated model and update all fields' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
 
                     // Make request
@@ -403,10 +415,12 @@ let Tests = {
          * @param elementSelection  A function that calls the passed callback with argument [{updated data}, expected model]
          * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
-         * @param postPostVerify
+         * @param postPostVerify    A function that receives (next, API result) to allow additional checks to be made before declaring the POST a success
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        postNew: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPostVerify = (cb, res) => cb()) {
-            return it('it should POST' + (descriptionText ? ": " : "") + descriptionText, function (done) {
+        postNew: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPostVerify = (cb, res) => cb(), itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            return itWrap('it should POST' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
                     // Make request
                     chai.request(server)
@@ -454,9 +468,11 @@ let Tests = {
          * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param postPostVerify    A function that receives (next, API result) to allow additional checks to be made before declaring the POST a success
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        postNotUnique: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPostVerify = (cb, res) => cb()) {
-            return it('it should POST' + (descriptionText ? ": " : "") + descriptionText, function (done) {
+        postNotUnique: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPostVerify = (cb, res) => cb(), itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            return itWrap('it should POST' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
                     // Make request
                     chai.request(server)
@@ -493,9 +509,11 @@ let Tests = {
          * @param elementSelection  A function that calls the passed callback with argument "id of object to delete"
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param postDeleteVerify  A function that receives (next, API result) to allow additional checks to be made before declaring the DELETE a success
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        deleteExisting: function(emberName, emberPluralized, modelType, elementSelection, descriptionText = "", postDeleteVerify = (cb, res) => cb()) {
-            return it('it should DELETE and cleanup if applicable' + (descriptionText ? ": " : "") + descriptionText, function (done) {
+        deleteExisting: function(emberName, emberPluralized, modelType, elementSelection, descriptionText = "", postDeleteVerify = (cb, res) => cb(), itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            return itWrap('it should DELETE and cleanup if applicable' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
                     // Make request
                     chai.request(server)
@@ -524,9 +542,11 @@ let Tests = {
          * @param elementSelection  A function that calls the passed callback with argument  "id of object to delete"
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param postDeleteVerify  A function that receives (next, API result) to allow additional checks to be made before declaring the DELETE a success
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        deleteNonexistent: function(emberName, emberPluralized, modelType, elementSelection, descriptionText = "", postDeleteVerify = (cb, res) => cb()) {
-            return it('it should fail to DELETE with error 404' + (descriptionText ? ": " : "") + descriptionText, function (done) {
+        deleteNonexistent: function(emberName, emberPluralized, modelType, elementSelection, descriptionText = "", postDeleteVerify = (cb, res) => cb(), itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            return itWrap('it should fail to DELETE with error 404' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
                     // Make request
                     chai.request(server)

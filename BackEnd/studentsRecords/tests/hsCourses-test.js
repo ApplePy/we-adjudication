@@ -315,8 +315,7 @@ describe('HSCourses', function() {
 
         // Make sure attempts to post duplicate data fails
         // TODO: I'm not sure if this test is appropriate...
-        it.skip("POSTing a record with duplicate data, should 500.");
-        /*Common.Tests.PostTests.postNotUnique(
+        Common.Tests.PostTests.postNotUnique(
             emberName,
             emberNamePluralized,
             emberModel,
@@ -326,7 +325,9 @@ describe('HSCourses', function() {
                 next([model, model]);
             },
             requiredValues,
-            "POSTing a record with duplicate data, should 500.");*/
+            "POSTing a record with duplicate data, should 500.",
+            undefined,
+            it.skip);
     });
 
     describe('/DELETE functions', function(){

@@ -55,12 +55,13 @@ describe('Residencies', function() {
             itemList);
 
         // Make sure that you can retrieve all values one page at a time
-        it.skip("it should GET all models, one page at a time");
-        /*Common.Tests.GetTests.getPagination(
+        Common.Tests.GetTests.getPagination(
             emberName,
             emberNamePluralized,
             emberModel,
-            itemList);*/
+            itemList,
+            undefined,
+            it.skip);
 
         // Check that you can search by all non-array elements
         each(
@@ -306,8 +307,7 @@ describe('Residencies', function() {
 
         // Make sure attempts to post duplicate data fails
         // TODO: I'm not sure if this test is appropriate...
-        it.skip("POSTing a record with duplicate data, should 500.");
-        /*Common.Tests.PostTests.postNotUnique(
+        Common.Tests.PostTests.postNotUnique(
          emberName,
          emberNamePluralized,
          emberModel,
@@ -317,7 +317,9 @@ describe('Residencies', function() {
          next([model, model]);
          },
          requiredValues,
-         "POSTing a record with duplicate data, should 500.");*/
+         "POSTing a record with duplicate data, should 500.",
+         undefined,
+         it.skip);
     });
 
     describe('/DELETE functions', function(){
