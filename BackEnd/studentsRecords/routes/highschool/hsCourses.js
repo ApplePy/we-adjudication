@@ -12,7 +12,17 @@ module.exports =
         HSCourses,
         'hsCourse',
         true,
-        undefined,
+        (req, res, model) => {
+            let list = [];
+            if (!model.level)
+                list.push("Course level must be specified.");
+            if (!model.unit)
+                list.push("Course unit must be specified.");
+            if (list.length > 0)
+                return list;
+            else
+                return 0;
+        },
         undefined,
         undefined,
         undefined,

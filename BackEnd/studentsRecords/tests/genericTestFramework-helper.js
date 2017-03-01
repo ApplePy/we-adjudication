@@ -70,8 +70,8 @@ let Lists = {
  * @param max   The maximum index that can be used
  * @returns     An object from the array
  */
-Array.prototype.randomObject = function(min = 0, max = null) {
-   // Sanitize inputs
+Array.prototype.randomObject = function (min = 0, max = null) {
+    // Sanitize inputs
     min = parseInt(min);
     max = parseInt(max);
     if (isNaN(max) || max > this.length) max = this.length;
@@ -105,9 +105,11 @@ let Tests = {
          * @param modelType         A model that matches the type returned by the API call
          * @param modelArray        An array containing modelType objects that is expected from the API call
          * @param queryOperand      Query operand can be a URL query object or a function that resolves into a URL query object
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        getAll: function (emberName, emberPluralized, modelType, modelArray, queryOperand = null) {
-            return it('it should GET all models', function (done) {
+        getAll: function (emberName, emberPluralized, modelType, modelArray, queryOperand = null, itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            return itWrap('it should GET all models', function (done) {
                 // Resolve query operands
                 if (typeof queryOperand === "function")
                     queryOperand = queryOperand();
@@ -143,9 +145,11 @@ let Tests = {
          * @param modelType         A model that matches the type returned by the API call
          * @param modelArray        An array containing modelType objects that is expected from the API call
          * @param pageSize          The size of the page to use
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        getPagination: function(emberName, emberPluralized, modelType, modelArray, pageSize = 5) {
-            return it('it should GET all models, one page at a time', function(done) {
+        getPagination: function (emberName, emberPluralized, modelType, modelArray, pageSize = 5, itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            itWrap('it should GET all models, one page at a time', function (done) {
 
                 let remainingModels = new Set(modelArray.map(el => el._id.toString()));
 
@@ -153,11 +157,15 @@ let Tests = {
                     // Request all advanced standings
                     chai.request(server)
                         .get('/api/' + emberPluralized)
-                        .query({offset: n * pageSize, limit: pageSize})
+                        .query({ offset: n * pageSize, limit: pageSize })
                         .end((err, res) => {
                             expect(res).to.have.status(200);
                             expect(res).to.be.json;
                             expect(res.body).to.have.property(emberName);
+                            expect(res.body).to.have.property("meta");
+                            expect(res.body.meta.total).to.equal(modelArray.length);
+                            expect(res.body.meta.limit).to.equal(pageSize);
+                            expect(res.body.meta.offset).to.equal(n * pageSize);
                             expect(res.body[emberName]).to.have.length.at.most(pageSize);
 
                             // Remove model from remaining models
@@ -173,8 +181,27 @@ let Tests = {
                 });
 
             });
+
+            return itWrap('it should GET nothing when the offset is too large', function (done) {
+                // Request all advanced standings
+                chai.request(server)
+                    .get('/api/' + emberPluralized)
+                    .query({ offset: modelArray.length, limit: pageSize })
+                    .end((err, res) => {
+                        expect(res).to.have.status(200);
+                        expect(res).to.be.json;
+                        expect(res.body).to.have.property(emberName);
+                        expect(res.body).to.have.property("meta");
+                        expect(res.body.meta.total).to.equal(modelArray.length);
+                        expect(res.body.meta.limit).to.equal(pageSize);
+                        expect(res.body.meta.offset).to.equal(modelArray.length);
+                        expect(res.body[emberName]).to.have.length(0);
+
+                        done();
+                    });
+            });
         },
-        
+
         /**
          * Attempts to retrieve all models from an API endpoint that match a filter query, and makes sure that it successfully received all matching data.
          *
@@ -184,9 +211,11 @@ let Tests = {
          * @param elementSelection  A function that calls the passed callback with argument [{... filter contents ...}, [expected data object(s)]]
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param queryOperand      Query operand can be a URL query object or a function that resolves into a URL query object
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        getByFilterSuccess: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "", queryOperand = null) {
-            return it('it should GET a model by a filter' + (descriptionText ? ": " : "") + descriptionText, function (done) {
+        getByFilterSuccess: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "", queryOperand = null, itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            return itWrap('it should GET a model by a filter' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selections => {
                     // Resolve query operands
                     if (typeof queryOperand === "function")
@@ -195,7 +224,7 @@ let Tests = {
                     // Make request
                     chai.request(server)
                         .get('/api/' + emberPluralized)
-                        .query(Object.assign({filter: selections[0]}, queryOperand))
+                        .query(Object.assign({ filter: selections[0] }, queryOperand))
                         .end((err, res) => {
                             expect(res).to.have.status(200);
                             expect(res).to.be.json;
@@ -221,9 +250,11 @@ let Tests = {
          * @param modelType         A model that matches the type returned by the API call
          * @param elementSelection  A function that calls the passed callback with the data object as the argument
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        getByID: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "") {
-            return it('it should GET a model by id' + (descriptionText ? ": " : "") + descriptionText, function (done) {
+        getByID: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "", itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            return itWrap('it should GET a model by id' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
                     // Make request
                     chai.request(server)
@@ -237,7 +268,7 @@ let Tests = {
                                     // Sometimes a user fault causes a fail so bad that the server 500s instead. Catch both.
                                     try {
                                         expect(res).to.have.status(404);
-                                    } catch(staterr) {
+                                    } catch (staterr) {
                                         expect(res).to.have.status(500);
                                     }
                                 }
@@ -266,15 +297,17 @@ let Tests = {
          * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param postPutVerify     A function that receives (next, API result) to allow additional checks to be made before declaring the PUT a success
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        putUpdated: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPutVerify = (cb, res) => cb()) {
-            return it('it should PUT an updated model and update all fields' + (descriptionText ? ": " : "") + descriptionText, function (done) {
+        putUpdated: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPutVerify = (cb, res) => cb(), itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            return itWrap('it should PUT an updated model and update all fields' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
 
                     // Make request
                     chai.request(server)
                         .put(['/api', emberPluralized, selection[1]._id.toString()].join('/'))
-                        .send({[emberName]: selection[0]})
+                        .send({ [emberName]: selection[0] })
                         .end((err, res) => {
                             modelType.findById(selection[1]._id, function (err, data) {
                                 if (err) throw err;
@@ -293,7 +326,7 @@ let Tests = {
                                     // Sometimes a user fault causes a fail so bad that the server 500s instead. Catch both.
                                     try {
                                         expect(res).to.have.status(404);
-                                    } catch(staterr) {
+                                    } catch (staterr) {
                                         expect(res).to.have.status(500);
                                     }
                                     done();
@@ -326,15 +359,17 @@ let Tests = {
          * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param postPutVerify     A function that receives (next, API result) to allow additional checks to be made before declaring the PUT a success
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        putNotUnique: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPutVerify = (cb, res) => cb()) {
-            return it('it should PUT an updated model and update all fields' + (descriptionText ? ": " : "") + descriptionText, function (done) {
+        putNotUnique: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPutVerify = (cb, res) => cb(), itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            return itWrap('it should PUT an updated model and update all fields' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
 
                     // Make request
                     chai.request(server)
                         .put(['/api', emberPluralized, selection[1].toString()].join('/'))
-                        .send({[emberName]: selection[0]})
+                        .send({ [emberName]: selection[0] })
                         .end((err, res) => {
                             modelType.findById(selection[1], function (err, data) {
                                 if (err) throw err;
@@ -353,7 +388,7 @@ let Tests = {
                                     // Sometimes a user fault causes a fail so bad that the server 500s instead. Catch both.
                                     try {
                                         expect(res).to.have.status(404);
-                                    } catch(staterr) {
+                                    } catch (staterr) {
                                         expect(res).to.have.status(500);
                                     }
                                     done();
@@ -380,15 +415,17 @@ let Tests = {
          * @param elementSelection  A function that calls the passed callback with argument [{updated data}, expected model]
          * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
-         * @param postPostVerify
+         * @param postPostVerify    A function that receives (next, API result) to allow additional checks to be made before declaring the POST a success
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        postNew: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPostVerify = (cb, res) => cb()) {
-            return it('it should POST' + (descriptionText ? ": " : "") + descriptionText, function (done) {
+        postNew: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPostVerify = (cb, res) => cb(), itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            return itWrap('it should POST' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
                     // Make request
                     chai.request(server)
                         .post(['/api', emberPluralized].join('/'))
-                        .send({[emberName]: selection[0]})
+                        .send({ [emberName]: selection[0] })
                         .end((err, res) => {
                             // Check to make sure all required elements are present
                             let expect400 = false;
@@ -431,14 +468,16 @@ let Tests = {
          * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param postPostVerify    A function that receives (next, API result) to allow additional checks to be made before declaring the POST a success
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        postNotUnique: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPostVerify = (cb, res) => cb()) {
-            return it('it should POST' + (descriptionText ? ": " : "") + descriptionText, function (done) {
+        postNotUnique: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPostVerify = (cb, res) => cb(), itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            return itWrap('it should POST' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
                     // Make request
                     chai.request(server)
                         .post(['/api', emberPluralized].join('/'))
-                        .send({[emberName]: selection})
+                        .send({ [emberName]: selection })
                         .end((err, res) => {
                             // Check to make sure all required elements are present
                             let expect400 = false;
@@ -470,9 +509,11 @@ let Tests = {
          * @param elementSelection  A function that calls the passed callback with argument "id of object to delete"
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param postDeleteVerify  A function that receives (next, API result) to allow additional checks to be made before declaring the DELETE a success
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        deleteExisting: function(emberName, emberPluralized, modelType, elementSelection, descriptionText = "", postDeleteVerify = (cb, res) => cb()) {
-            return it('it should DELETE and cleanup if applicable' + (descriptionText ? ": " : "") + descriptionText, function (done) {
+        deleteExisting: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "", postDeleteVerify = (cb, res) => cb(), itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            return itWrap('it should DELETE and cleanup if applicable' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
                     // Make request
                     chai.request(server)
@@ -501,9 +542,11 @@ let Tests = {
          * @param elementSelection  A function that calls the passed callback with argument  "id of object to delete"
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param postDeleteVerify  A function that receives (next, API result) to allow additional checks to be made before declaring the DELETE a success
+         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        deleteNonexistent: function(emberName, emberPluralized, modelType, elementSelection, descriptionText = "", postDeleteVerify = (cb, res) => cb()) {
-            return it('it should fail to DELETE with error 404' + (descriptionText ? ": " : "") + descriptionText, function (done) {
+        deleteNonexistent: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "", postDeleteVerify = (cb, res) => cb(), itWrap = null) {
+            if (itWrap == null) itWrap = it;
+            return itWrap('it should fail to DELETE with error 404' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
                     // Make request
                     chai.request(server)
@@ -512,7 +555,7 @@ let Tests = {
                             // Sometimes a user fault causes a fail so bad that the server 500s instead. Catch both.
                             try {
                                 expect(res).to.have.status(404);
-                            } catch(staterr) {
+                            } catch (staterr) {
                                 expect(res).to.have.status(500);
                             }
 
@@ -537,7 +580,7 @@ let Tests = {
  * This function wipes and regenerates new random data in the database for the next test.
  * @param done  The callback to be called when regeneration is finished.
  */
-let regenAllData = function(done) {
+let regenAllData = function (done) {
     // This may be a slow operation
     this.timeout(6000);
 
@@ -593,7 +636,7 @@ let regenAllData = function(done) {
                 [3, generateProgramRecord],
                 [2, generateTermCode]
             ];
-            eachSeries (executions, (item, cb) => {
+            eachSeries(executions, (item, cb) => {
                 times(item[0], item[1], (err) => {
                     // Catch generation errors
                     if (err) cb(err);
@@ -656,7 +699,7 @@ let generateProgramRecord = (number, callback) => {
 };
 let generateGrade = (number, callback) => {
     genBase(Grades, Lists.gradeList, {
-        mark: faker.random.number(100),
+        mark: faker.random.number(100).toString(),
         note: faker.lorem.paragraph()
     })(err => {
         // Retry a few times in case random generation causes duplicate
@@ -682,7 +725,7 @@ let generateCourseLoad = (number, callback) => {
 let generateCourseCode = (number, callback) => {
     genBase(CourseCodes, Lists.courseCodeList, {
         courseLetter: faker.random.word(),
-        courseNumber: faker.random.number(9999),
+        courseNumber: faker.random.word(),
         name: faker.random.words(2),
         unit: faker.random.number(4) / 2,
         termInfo: Lists.termCodeList.randomObject(),
@@ -716,7 +759,7 @@ let generateTermCode = (number, callback) => {
 };
 let generateSecondarySchool = (number, callback) => {
     genBase(SecondarySchools, Lists.secondarySchoolList, {
-        name: faker.random.words(2,5)
+        name: faker.random.words(2, 5)
     })(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
@@ -726,9 +769,9 @@ let generateSecondarySchool = (number, callback) => {
         else callback();
     });
 };
-let generateHsSubject= (number, callback) => {
+let generateHsSubject = (number, callback) => {
     genBase(HSSubjects, Lists.hsSubjectList, {
-        name: faker.random.words(1,2),
+        name: faker.random.words(1, 2),
         description: faker.lorem.paragraphs(2)
     })(err => {
         // Retry a few times in case random generation causes duplicate
@@ -753,8 +796,8 @@ let generateHsCourseSource = (number, callback) => {
 };
 let generateHsCourse = (number, callback) => {
     genBase(HSCourses, Lists.hsCourseList, {
-        level: faker.random.word(),
-        unit: faker.random.number(1, 4)/2,
+        level: faker.random.number(9, 12),
+        unit: faker.random.number(1, 4) / 2,
         source: Lists.hsCourseSourceList[faker.random.number(Lists.hsCourseSourceList.length - 1)],
         school: Lists.secondarySchoolList[faker.random.number(Lists.secondarySchoolList.length - 1)],
         subject: Lists.hsSubjectList[faker.random.number(Lists.hsSubjectList.length - 1)]
@@ -769,7 +812,7 @@ let generateHsCourse = (number, callback) => {
 };
 let generateHsGrade = (number, callback) => {
     genBase(HSGrades, Lists.hsGradeList, {
-        mark: faker.random.number(100),
+        mark: faker.random.number(100).toString(),
         course: Lists.hsCourseList[faker.random.number(Lists.hsCourseList.length - 1)],
         recipient: Lists.studentList[faker.random.number(Lists.studentList.length - 1)]
     })(err => {
@@ -924,33 +967,33 @@ let generateAward = (number, callback) => {
     });
 };
 let generateStudent = (number, callback) => {
-  genBase(Students, Lists.studentList, {
-      number: faker.random.number(100000000, 999999999),
-      firstName: faker.name.firstName(),
-      lastName: faker.name.lastName(),
-      DOB: faker.date.past(),   // TODO: this is wrong format
-      registrationComments: faker.lorem.paragraph(),
-      basisOfAdmission: faker.lorem.paragraph(),
-      admissionAverage: faker.lorem.paragraph(),
-      admissionComments: faker.lorem.paragraph(),
-      resInfo: Lists.residencyList[faker.random.number(Lists.residencyList.length - 1)],
-      genderInfo: Lists.genderList[faker.random.number(Lists.genderList.length - 1)],
-  })(err => {
-      // Retry a few times in case random generation causes duplicate
-      if (err) {
-          if (number < -1) callback(err);
-          else generateStudent(number - 1, callback);
-      }
-      else callback();
-  });
+    genBase(Students, Lists.studentList, {
+        number: faker.random.number(100000000, 999999999),
+        firstName: faker.name.firstName(),
+        lastName: faker.name.lastName(),
+        DOB: faker.date.past(),   // TODO: this is wrong format
+        registrationComments: faker.lorem.paragraph(),
+        basisOfAdmission: faker.lorem.paragraph(),
+        admissionAverage: faker.lorem.paragraph(),
+        admissionComments: faker.lorem.paragraph(),
+        resInfo: Lists.residencyList[faker.random.number(Lists.residencyList.length - 1)],
+        genderInfo: Lists.genderList[faker.random.number(Lists.genderList.length - 1)],
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            else generateStudent(number - 1, callback);
+        }
+        else callback();
+    });
 };
 let generateGender = (name, cb) => {
     // Create and save gender, then put on list
-    genBase(Genders, Lists.genderList, {name: name})(cb);
+    genBase(Genders, Lists.genderList, { name: name })(cb);
 };
 let generateResidency = (number, callback) => {
     // Create and save residency, then put on list
-    genBase(Residencies, Lists.residencyList, {name: faker.lorem.words(1, 5)})(err => {
+    genBase(Residencies, Lists.residencyList, { name: faker.lorem.words(1, 5) })(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);

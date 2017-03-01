@@ -1,5 +1,5 @@
 # Install project files on top of custom docker image
-FROM incode.ca:9001/se3352a/requirements-assignment-2:latest
+FROM registry.incode.ca/se3352a/requirements-assignment-2:latest
 
 ENV NODE_ENV="production"
 
@@ -13,4 +13,4 @@ ADD BackEnd/studentsRecords /code
 WORKDIR "/code"
 
 # Start box
-ENTRYPOINT [ "npm", "start" ]
+ENTRYPOINT [ "node", "--max-executable-size=96", "--max-old-space-size=128", "--max-semi-space-size=1", "server.js" ]
