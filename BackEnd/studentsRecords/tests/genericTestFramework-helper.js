@@ -70,8 +70,8 @@ let Lists = {
  * @param max   The maximum index that can be used
  * @returns     An object from the array
  */
-Array.prototype.randomObject = function(min = 0, max = null) {
-   // Sanitize inputs
+Array.prototype.randomObject = function (min = 0, max = null) {
+    // Sanitize inputs
     min = parseInt(min);
     max = parseInt(max);
     if (isNaN(max) || max > this.length) max = this.length;
@@ -147,9 +147,9 @@ let Tests = {
          * @param pageSize          The size of the page to use
          * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        getPagination: function(emberName, emberPluralized, modelType, modelArray, pageSize = 5, itWrap = null) {
+        getPagination: function (emberName, emberPluralized, modelType, modelArray, pageSize = 5, itWrap = null) {
             if (itWrap == null) itWrap = it;
-            itWrap('it should GET all models, one page at a time', function(done) {
+            itWrap('it should GET all models, one page at a time', function (done) {
 
                 let remainingModels = new Set(modelArray.map(el => el._id.toString()));
 
@@ -157,7 +157,7 @@ let Tests = {
                     // Request all advanced standings
                     chai.request(server)
                         .get('/api/' + emberPluralized)
-                        .query({offset: n * pageSize, limit: pageSize})
+                        .query({ offset: n * pageSize, limit: pageSize })
                         .end((err, res) => {
                             expect(res).to.have.status(200);
                             expect(res).to.be.json;
@@ -182,11 +182,11 @@ let Tests = {
 
             });
 
-            return itWrap('it should GET nothing when the offset is too large', function(done) {
+            return itWrap('it should GET nothing when the offset is too large', function (done) {
                 // Request all advanced standings
                 chai.request(server)
                     .get('/api/' + emberPluralized)
-                    .query({offset: modelArray.length, limit: pageSize})
+                    .query({ offset: modelArray.length, limit: pageSize })
                     .end((err, res) => {
                         expect(res).to.have.status(200);
                         expect(res).to.be.json;
@@ -201,7 +201,7 @@ let Tests = {
                     });
             });
         },
-        
+
         /**
          * Attempts to retrieve all models from an API endpoint that match a filter query, and makes sure that it successfully received all matching data.
          *
@@ -224,7 +224,7 @@ let Tests = {
                     // Make request
                     chai.request(server)
                         .get('/api/' + emberPluralized)
-                        .query(Object.assign({filter: selections[0]}, queryOperand))
+                        .query(Object.assign({ filter: selections[0] }, queryOperand))
                         .end((err, res) => {
                             expect(res).to.have.status(200);
                             expect(res).to.be.json;
@@ -268,7 +268,7 @@ let Tests = {
                                     // Sometimes a user fault causes a fail so bad that the server 500s instead. Catch both.
                                     try {
                                         expect(res).to.have.status(404);
-                                    } catch(staterr) {
+                                    } catch (staterr) {
                                         expect(res).to.have.status(500);
                                     }
                                 }
@@ -307,7 +307,7 @@ let Tests = {
                     // Make request
                     chai.request(server)
                         .put(['/api', emberPluralized, selection[1]._id.toString()].join('/'))
-                        .send({[emberName]: selection[0]})
+                        .send({ [emberName]: selection[0] })
                         .end((err, res) => {
                             modelType.findById(selection[1]._id, function (err, data) {
                                 if (err) throw err;
@@ -326,7 +326,7 @@ let Tests = {
                                     // Sometimes a user fault causes a fail so bad that the server 500s instead. Catch both.
                                     try {
                                         expect(res).to.have.status(404);
-                                    } catch(staterr) {
+                                    } catch (staterr) {
                                         expect(res).to.have.status(500);
                                     }
                                     done();
@@ -369,7 +369,7 @@ let Tests = {
                     // Make request
                     chai.request(server)
                         .put(['/api', emberPluralized, selection[1].toString()].join('/'))
-                        .send({[emberName]: selection[0]})
+                        .send({ [emberName]: selection[0] })
                         .end((err, res) => {
                             modelType.findById(selection[1], function (err, data) {
                                 if (err) throw err;
@@ -388,7 +388,7 @@ let Tests = {
                                     // Sometimes a user fault causes a fail so bad that the server 500s instead. Catch both.
                                     try {
                                         expect(res).to.have.status(404);
-                                    } catch(staterr) {
+                                    } catch (staterr) {
                                         expect(res).to.have.status(500);
                                     }
                                     done();
@@ -425,7 +425,7 @@ let Tests = {
                     // Make request
                     chai.request(server)
                         .post(['/api', emberPluralized].join('/'))
-                        .send({[emberName]: selection[0]})
+                        .send({ [emberName]: selection[0] })
                         .end((err, res) => {
                             // Check to make sure all required elements are present
                             let expect400 = false;
@@ -477,7 +477,7 @@ let Tests = {
                     // Make request
                     chai.request(server)
                         .post(['/api', emberPluralized].join('/'))
-                        .send({[emberName]: selection})
+                        .send({ [emberName]: selection })
                         .end((err, res) => {
                             // Check to make sure all required elements are present
                             let expect400 = false;
@@ -511,7 +511,7 @@ let Tests = {
          * @param postDeleteVerify  A function that receives (next, API result) to allow additional checks to be made before declaring the DELETE a success
          * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        deleteExisting: function(emberName, emberPluralized, modelType, elementSelection, descriptionText = "", postDeleteVerify = (cb, res) => cb(), itWrap = null) {
+        deleteExisting: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "", postDeleteVerify = (cb, res) => cb(), itWrap = null) {
             if (itWrap == null) itWrap = it;
             return itWrap('it should DELETE and cleanup if applicable' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
@@ -544,7 +544,7 @@ let Tests = {
          * @param postDeleteVerify  A function that receives (next, API result) to allow additional checks to be made before declaring the DELETE a success
          * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        deleteNonexistent: function(emberName, emberPluralized, modelType, elementSelection, descriptionText = "", postDeleteVerify = (cb, res) => cb(), itWrap = null) {
+        deleteNonexistent: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "", postDeleteVerify = (cb, res) => cb(), itWrap = null) {
             if (itWrap == null) itWrap = it;
             return itWrap('it should fail to DELETE with error 404' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
@@ -555,7 +555,7 @@ let Tests = {
                             // Sometimes a user fault causes a fail so bad that the server 500s instead. Catch both.
                             try {
                                 expect(res).to.have.status(404);
-                            } catch(staterr) {
+                            } catch (staterr) {
                                 expect(res).to.have.status(500);
                             }
 
@@ -580,7 +580,7 @@ let Tests = {
  * This function wipes and regenerates new random data in the database for the next test.
  * @param done  The callback to be called when regeneration is finished.
  */
-let regenAllData = function(done) {
+let regenAllData = function (done) {
     // This may be a slow operation
     this.timeout(6000);
 
@@ -636,7 +636,7 @@ let regenAllData = function(done) {
                 [3, generateProgramRecord],
                 [2, generateTermCode]
             ];
-            eachSeries (executions, (item, cb) => {
+            eachSeries(executions, (item, cb) => {
                 times(item[0], item[1], (err) => {
                     // Catch generation errors
                     if (err) cb(err);
@@ -759,7 +759,7 @@ let generateTermCode = (number, callback) => {
 };
 let generateSecondarySchool = (number, callback) => {
     genBase(SecondarySchools, Lists.secondarySchoolList, {
-        name: faker.random.words(2,5)
+        name: faker.random.words(2, 5)
     })(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
@@ -769,9 +769,9 @@ let generateSecondarySchool = (number, callback) => {
         else callback();
     });
 };
-let generateHsSubject= (number, callback) => {
+let generateHsSubject = (number, callback) => {
     genBase(HSSubjects, Lists.hsSubjectList, {
-        name: faker.random.words(1,2),
+        name: faker.random.words(1, 2),
         description: faker.lorem.paragraphs(2)
     })(err => {
         // Retry a few times in case random generation causes duplicate
@@ -797,7 +797,7 @@ let generateHsCourseSource = (number, callback) => {
 let generateHsCourse = (number, callback) => {
     genBase(HSCourses, Lists.hsCourseList, {
         level: faker.random.number(9, 12),
-        unit: faker.random.number(1, 4)/2,
+        unit: faker.random.number(1, 4) / 2,
         source: Lists.hsCourseSourceList[faker.random.number(Lists.hsCourseSourceList.length - 1)],
         school: Lists.secondarySchoolList[faker.random.number(Lists.secondarySchoolList.length - 1)],
         subject: Lists.hsSubjectList[faker.random.number(Lists.hsSubjectList.length - 1)]
@@ -967,33 +967,33 @@ let generateAward = (number, callback) => {
     });
 };
 let generateStudent = (number, callback) => {
-  genBase(Students, Lists.studentList, {
-      number: faker.random.number(100000000, 999999999),
-      firstName: faker.name.firstName(),
-      lastName: faker.name.lastName(),
-      DOB: faker.date.past(),   // TODO: this is wrong format
-      registrationComments: faker.lorem.paragraph(),
-      basisOfAdmission: faker.lorem.paragraph(),
-      admissionAverage: faker.lorem.paragraph(),
-      admissionComments: faker.lorem.paragraph(),
-      resInfo: Lists.residencyList[faker.random.number(Lists.residencyList.length - 1)],
-      genderInfo: Lists.genderList[faker.random.number(Lists.genderList.length - 1)],
-  })(err => {
-      // Retry a few times in case random generation causes duplicate
-      if (err) {
-          if (number < -1) callback(err);
-          else generateStudent(number - 1, callback);
-      }
-      else callback();
-  });
+    genBase(Students, Lists.studentList, {
+        number: faker.random.number(100000000, 999999999),
+        firstName: faker.name.firstName(),
+        lastName: faker.name.lastName(),
+        DOB: faker.date.past(),   // TODO: this is wrong format
+        registrationComments: faker.lorem.paragraph(),
+        basisOfAdmission: faker.lorem.paragraph(),
+        admissionAverage: faker.lorem.paragraph(),
+        admissionComments: faker.lorem.paragraph(),
+        resInfo: Lists.residencyList[faker.random.number(Lists.residencyList.length - 1)],
+        genderInfo: Lists.genderList[faker.random.number(Lists.genderList.length - 1)],
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            else generateStudent(number - 1, callback);
+        }
+        else callback();
+    });
 };
 let generateGender = (name, cb) => {
     // Create and save gender, then put on list
-    genBase(Genders, Lists.genderList, {name: name})(cb);
+    genBase(Genders, Lists.genderList, { name: name })(cb);
 };
 let generateResidency = (number, callback) => {
     // Create and save residency, then put on list
-    genBase(Residencies, Lists.residencyList, {name: faker.lorem.words(1, 5)})(err => {
+    genBase(Residencies, Lists.residencyList, { name: faker.lorem.words(1, 5) })(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
