@@ -1,0 +1,35 @@
+<div class="ui modal">
+  <div class="header">Update Admission</div>
+  <div class="content">
+      <div class="ui form">
+        <div class="inline field">
+            <label>Admission Average</label>
+            {{input type="text" value = student.admissionAverage}}
+          </div>
+
+          <div class="inline field">
+            <label>Basis Of Admission</label>
+            {{textarea cols="1" rows="6" value = student.basisOfAdmission}}
+          </div>
+
+          <div class="inline field">
+            <label>Admission Comments</label>
+            {{textarea cols="1" rows="6" value = student.admissionComments}}
+          </div>
+
+          <div class="inline field">
+            <label>Registration Comments</label>
+            {{textarea cols="1" rows="6" value = student.registrationComments}}
+          </div>
+     </div>         
+  <!--  </div> -->
+    <div class="actions">
+        <br>
+        <div class="ui positive button" {{action 'saveAdmission'}}>Save</div>
+        <div class="ui negative basic button" {{action "close"}}>Cancel</div>
+</div>
+
+   </div>
+  </div> 
+
+
