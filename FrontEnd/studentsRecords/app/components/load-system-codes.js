@@ -9,7 +9,7 @@ export default Ember.Component.extend({
     this._super(...arguments);
     
     // List population
-    let GetAll = emberName => {
+    let getAll = emberName => {
       // Make sure that the ember name hasn't already been populated
       if (typeof this.get('lists')[emberName] === "undefined") {
         // Set the value now, so that a duplicate isn't sent
@@ -24,22 +24,25 @@ export default Ember.Component.extend({
             if (typeof records.get("meta").total !== "undefined" && records.get('meta').limit < records.get('meta').total) {
               this.get('store')
                 .query(emberName, { limit: records.get("meta").total })
-                .then(records => Ember.set(this.get('lists'), emberName, this.get('store').peekAll(emberName)));
+                .then(() => Ember.set(this.get('lists'), emberName, this.get('store').peekAll(emberName)));
             }
-            else Ember.set(this.get('lists'), emberName, this.get('store').peekAll(emberName));
+            else {
+              Ember.set(this.get('lists'), emberName, this.get('store').peekAll(emberName));
+            }
           });
       }
-    }
+    };
 
     // Populate each type of system code with it's list
     for (let entry of this.codes) {
       /*jshint loopfunc: true */  // Shuts up jshint, since this dynamic function generation in a loop is needed
-      GetAll(entry.emberName);
+      getAll(entry.emberName);
 
       // Make sure all models that depend on other models are loaded
       for (let prop of entry.inputModelProp) {
-        if (prop.type === "model")
-          GetAll(prop.modelName);
+        if (prop.type === "model") {
+          getAll(prop.modelName);
+        }
       }
     }
   },
@@ -55,20 +58,23 @@ export default Ember.Component.extend({
         let domjquery = this.$("#" + codeObj.emberName + index);
 
         // Check that the element was found
-        if (domjquery.length == 0) {
+        if (domjquery.length === 0) {
           domvalsGood = false;
           return;
         }
 
         let domval = domjquery.val();               // Retrieve value
 
-        if (domval == "" || domval == undefined)    // Make sure it is not empty
+        if (domval === "" || domval === undefined) {    // Make sure it is not empty
           domvalsGood = false;
+        }
         else {
-          if (element.type !== "model")
+          if (element.type !== "model") {
             domvals[element.name] = domval;           // Add to new object
-          else
+          }
+          else {
             domvals[element.name] = this.get('store').peekRecord(element.modelName, domval);  // Add the ember object corresponding to the ID
+          }
         }
       });
 
@@ -79,7 +85,7 @@ export default Ember.Component.extend({
         // Create the new object
         var newObj = this.get('store').createRecord(codeObj.emberName, domvals);
 
-        newObj.save().then((obj) => {
+        newObj.save().then(() => {
           // codeObj.list.pushObject(obj);
 
           // Clear input box on success
@@ -87,13 +93,17 @@ export default Ember.Component.extend({
             let domjquery = this.$("#" + codeObj.emberName + index);
 
             // Check that the elemnt was found
-            if (domjquery.length == 0) return;
+            if (domjquery.length === 0) {
+              return;
+            }
 
             // Set text box value
-            if (domjquery[0].nodeName.toLowerCase() == "input")
+            if (domjquery[0].nodeName.toLowerCase() === "input") {
               domjquery.val("");
-            else if (domjquery[0].nodeName.toLowerCase() == "select")
+            }
+            else if (domjquery[0].nodeName.toLowerCase() === "select") {
               domjquery.val(this.$("#" + codeObj.emberName + index + " option").val());
+            }
           });
           console.log("Added " + codeObj.emberName);
         }, function () {
