@@ -1,5 +1,6 @@
 import Ember from 'ember';
-//import async from 'async';
+import async from 'npm:async';
+import XLSX from "npm:xlsx-browserify-shim";
 
 export default Ember.Component.extend({
 
