@@ -68,7 +68,7 @@
         <div class="ui form">
           <div class="inline field">
             <label>Student Number</label>
-            {{input size="10" type="text"  value = currentStudent.number}}
+            {{input size="10" type="text" readonly = true value = currentStudent.number}}
           </div>
           <div class="inline field">
             <label>First Name</label>
@@ -124,22 +124,22 @@
         <div class="ui form">
           <div class="inline field">
             <label>Admission Average</label>
-            {{input type="input" disabled = true value = currentStudent.admissionAverage}}
+            {{input type="input" readonly = true value = currentStudent.admissionAverage}}
           </div>
 
           <div class="inline field">
             <label>Basis Of Admission</label>
-            {{textarea cols="1" rows="6" disabled = true value = currentStudent.basisOfAdmission}}
+            {{textarea cols="1" rows="6" readonly = true value = currentStudent.basisOfAdmission}}
           </div>
 
           <div class="inline field">
             <label>Admission Comments</label>
-            {{textarea cols="1" rows="6" disabled = true value = currentStudent.admissionComments}}
+            {{textarea cols="1" rows="6" readonly = true value = currentStudent.admissionComments}}
           </div>
 
           <div class="inline field">
             <label>Registration Comments</label>
-            {{textarea cols="1" rows="6" disabled = true value = currentStudent.registrationComments}}
+            {{textarea cols="1" rows="6" readonly = true value = currentStudent.registrationComments}}
           </div>
 
           <div class="inline field">
