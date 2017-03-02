@@ -1,26 +1,3 @@
-<!-- System Code Segment -->
-{{#each codes as |codeObj|}}
-<div class="ui segment">
+<h1>System Codes</h1>
 
-  <h1 class="ui header">{{codeObj.name}}</h1>
-  <div class="ui action input">
-    {{input type="text" placeholder=codeObj.placeholder id=codeObj.inputID}}
-    <button class="positive ui button" {{action 'addCode' codeObj.emberName codeObj.inputID codeObj.inputModelProp}}>Add</button>
-  </div>
-
-{{#if (gt codeObj.list.length 0)}}
-  <div class="ui divider"></div>
-{{/if}}
-
-  {{#each codeObj.list as |code|}}
-    <br>
-    <div class="ui input">
-      {{input type="text" value=(mut (get code codeObj.inputModelProp))}}
-    </div>
-    <button class="ui primary button" {{action 'modifyCode' codeObj.emberName code}}>Save</button>
-    <button class="negative ui button" {{action 'deleteCode' codeObj.emberName code.id}}>Delete</button>
-    <br>
-  {{/each}}
-
-</div>
-{{/each}}
+{{load-system-codes codes=syscodes}}
