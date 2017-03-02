@@ -1,751 +1,407 @@
-//During the test the env variable is set to test
+/**
+ * Created by darryl on 2017-02-19.
+ */
+
 process.env.NODE_ENV = 'test';
 
-let mongoose = require("mongoose");
-let Models = require('../models/studentsRecordsDB');
+let each = require('async/each');
 
-//Require the dev-dependencies
-let chai = require('chai');
-let chaiHttp = require('chai-http');
-let server = require('../server');
+let faker = require('faker');
+let Common = require('./genericTestFramework-helper');
+let chai = Common.chai;
 let expect = chai.expect;
 
-chai.use(chaiHttp);
+let DB = require('../models/studentsRecordsDB');
+let mongoose = DB.mongoose;
 
-// Our parent block - stores the test
-describe('Students', () => {
-    let host = "http://localhost:3700";     // This is the Node.js server
+////////
 
-    //Before each test we empty the database
-    beforeEach((done) => {
-        // Clear out all Residences and Students then call done
-        Models.Residencies.remove({}, (err) => {
-            if (err) throw "Error cleaning out Residencies";
-            Models.Students.remove({}, (err) => {
-                if (err) throw "Error cleaning out Students";
-                Models.Awards.remove({}, (err) => {
-                    if (err) throw "Error cleaning out Awards";
-                    Models.AdvancedStandings.remove({}, (err) => {
-                        if (err) throw "Error cleaning out Advanced Standings";
-                        done()
-                    });
-                });
+// NOTE: remember to not use () => {} functions inside mocha tests due to the 'this' binding - it breaks Mocha!
+
+////////
+
+///// THINGS TO CHANGE ON COPYPASTA /////
+let Students = require('../models/schemas/studentinfo/studentSchema');
+let Grades = require('../models/schemas/uwocourses/gradeSchema');
+let HSGrades = require('../models/schemas/highschool/hsGradeSchema');
+let Awards = require('../models/schemas/studentinfo/awardSchema');
+let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
+
+
+let emberName = "student";
+let emberNamePluralized = "students";
+let itemList = Common.DBElements.studentList;
+let emberModel = Students;
+let newModel = () => {
+    return {
+        number: faker.random.number(100000000, 999999999),
+        firstName: faker.name.firstName(),
+        lastName: faker.name.lastName(),
+        DOB: faker.date.past(),   // TODO: this is wrong format
+        registrationComments: faker.lorem.paragraph(),
+        basisOfAdmission: faker.lorem.paragraph(),
+        admissionAverage: faker.random.number(100),
+        admissionComments: faker.lorem.paragraph(),
+        resInfo: Common.DBElements.residencyList[faker.random.number(Common.DBElements.residencyList.length - 1)],
+        genderInfo: Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)],
+    }
+};
+let filterValueSearches = [
+    'number',
+    'firstName',
+    'lastName',
+    'DOB',
+    'registrationComments',
+    'basisOfAdmission',
+    'admissionAverage',
+    'admissionComments',
+    'resInfo',
+    'genderInfo'
+];
+let requiredValues = ['number'];
+let uniqueValues = ['number'];
+
+// Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
+
+/////////////////////////////////////////
+
+
+describe('Students', function () {
+
+    describe('/GET functions', function () {
+        before(Common.regenAllData);
+
+        // Make sure that you can retrieve all values
+        Common.Tests.GetTests.getAll(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            itemList,
+            function () {
+                let limit = itemList.length;
+                return { offset: 0, limit: limit };
             });
-        });
+
+        // Make sure that you can retrieve all values one page at a time
+        Common.Tests.GetTests.getPagination(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            itemList);
+
+        // Check that you can search by all non-array elements
+        each(
+            filterValueSearches,
+            function (element, cb) {
+                Common.Tests.GetTests.getByFilterSuccess(
+                    emberName,
+                    emberNamePluralized,
+                    emberModel,
+                    function (next) {
+                        // Pick random model for data
+                        let model = itemList[faker.random.number(itemList.length - 1)];
+
+                        // Convert MongoID into a string before attempting search
+                        let param = (model[element] instanceof mongoose.Types.ObjectId) ? model[element].toString() : model[element];
+
+                        next([{ [element]: param }, itemList.filter((el) => el[element] == model[element])]);
+                    },
+                    "Search by " + element,
+                    function () {
+                        let limit = itemList.length;
+                        return { offset: 0, limit: limit };
+                    });
+                cb();
+            },
+            err => { });
+
+        // Make sure that searches for a nonexistent object returns nothing but succeeds
+        Common.Tests.GetTests.getByFilterSuccess(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                next([{ name: "NonExistent" }, []]);
+            },
+            "Search for a nonexistent model",
+            function () {
+                let limit = itemList.length;
+                return { offset: 0, limit: limit };
+            });
+
+        // Ensure you can search by ID
+        Common.Tests.GetTests.getByID(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                next(itemList[faker.random.number(itemList.length - 1)]);
+            });
+
+        // Make sure that searches fail with 404 when the ID doesn't exist
+        Common.Tests.GetTests.getByID(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                next(new emberModel({}));
+            },
+            "This ID does not exist, should 404.");
     });
 
-    /*
-     * Test the /GET routes
-     */
-    describe('/GET students', () => {
-        it('it should GET all students ', (done) => {
-            // Request all students
-            chai.request(server)
-                .get('/students')
-                .end((err, res) => {
-                    expect(res).to.have.status(200);
-                    expect(res).to.be.json;
-                    expect(res.body).to.have.property('student');
-                    expect(res.body.student.length).to.be.eq(0);
-                    done();
-                });
-        });
-
-        it('it should GET 5 students starting with the second', (done) => {
-
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err;
-
-
-            });
-
-            let firstNumber = 594265372;
-            var studentData = {
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-                resInfo: testRes
-            };
-
-            // Create 15 students
-            var count = 0;
-            for (var num = 0; num < 15; num++) {
-                studentData.number = firstNumber + num;
-                let testStudent = new Models.Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    // Start testing once all students are created
-                    if (++count == 15) {
-                        // Make request
-                        chai.request(server)
-                            .get('/students')
-                            .query({limit: 5, offset: 1})
-                            .end((err, res) => {
-                                expect(res).to.have.status(200);
-                                expect(res).to.be.json;
-                                expect(res.body).to.have.property('student');
-                                expect(res.body.student.length).to.be.eq(5);
-                                for (var num = 0; num < 5; num++) {
-                                    // Can't test student number, since order is not assured.
-                                    //expect(res.body.student[num].number).to.equal(firstNumber + num + 1);
-                                    expect(res.body.student[num].firstName).to.equal(studentData.firstName);
-                                    expect(res.body.student[num].lastName).to.equal(studentData.lastName);
-                                    expect(res.body.student[num].gender).to.equal(studentData.gender);
-                                    expect(res.body.student[num].DOB).to.equal(studentData.DOB);
-                                    expect(res.body.student[num].photo).to.equal(studentData.photo);
-                                    expect(res.body.student[num].registrationComments).to.equal(studentData.registrationComments);
-                                    expect(res.body.student[num].basisOfAdmission).to.equal(studentData.basisOfAdmission);
-                                    expect(res.body.student[num].admissionAverage).to.equal(studentData.admissionAverage);
-                                    expect(res.body.student[num].admissionComments).to.equal(studentData.admissionComments);
-                                    expect(res.body.student[num].resInfo).to.equal(testRes._id.toString());
-                                    expect(res.body.student[num].awards.length).to.be.eq(0);
-                                    expect(res.body.student[num].advancedStandings.length).to.be.eq(0);
-                                }
-                                done();
-                            });
-                    }
-                });
-            }
-        });
-
-        it('it should GET a student by number', (done) => {
-
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err
-            });
-
-            let firstNumber = 594265372;
-            var studentData = {
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-                resInfo: testRes
-            };
-
-            // Create 15 students
-            var count = 0;
-            for (var num = 0; num < 15; num++) {
-                studentData.number = firstNumber + num;
-                let testStudent = new Models.Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    // Start testing once all students are created
-                    if (++count == 15) {
-                        // Make request
-                        chai.request(server)
-                            .get('/students')
-                            .query({filter: {number: firstNumber + 3}})
-                            .end((err, res) => {
-                                expect(res).to.have.status(200);
-                                expect(res).to.be.json;
-                                expect(res.body).to.have.property('student');
-                                expect(res.body.student.length).to.be.eq(1);
-                                expect(res.body.student[0].number).to.equal(firstNumber + 3);
-                                expect(res.body.student[0].firstName).to.equal(studentData.firstName);
-                                expect(res.body.student[0].lastName).to.equal(studentData.lastName);
-                                expect(res.body.student[0].gender).to.equal(studentData.gender);
-                                expect(res.body.student[0].DOB).to.equal(studentData.DOB);
-                                expect(res.body.student[0].photo).to.equal(studentData.photo);
-                                expect(res.body.student[0].registrationComments).to.equal(studentData.registrationComments);
-                                expect(res.body.student[0].basisOfAdmission).to.equal(studentData.basisOfAdmission);
-                                expect(res.body.student[0].admissionAverage).to.equal(studentData.admissionAverage);
-                                expect(res.body.student[0].admissionComments).to.equal(studentData.admissionComments);
-                                expect(res.body.student[0].resInfo).to.equal(testRes._id.toString());
-                                expect(res.body.student[0].awards.length).to.be.eq(0);
-                                expect(res.body.student[0].advancedStandings.length).to.be.eq(0);
-                                done();
-                            });
-                    }
-                });
-            }
-        });
-
-        it('it should GET nothing if student does not exist', (done) => {
-
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err
-            });
-
-            let firstNumber = 594265372;
-            var studentData = {
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-                resInfo: testRes
-            };
-
-            // Create 15 students
-            var count = 0;
-            for (var num = 0; num < 15; num++) {
-                studentData.number = firstNumber + num;
-                let testStudent = new Models.Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    // Start testing once all students are created
-                    if (++count == 15) {
-                        // Make residency request
-                        chai.request(server)
-                            .get('/students')
-                            .query({filter: {number: 102}})
-                            .end((err, res) => {
-                                expect(res).to.have.status(200);
-                                expect(res).to.be.json;
-                                expect(res.body).to.have.property('student');
-                                expect(res.body.student.length).to.be.eq(0);
-                                done();
-                            });
-                    }
-                });
-            }
-        });
-
-        it('it should GET student when given ID', (done) => {
-
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err
-            });
-
-            let firstNumber = 594265372;
-            var studentData = {
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-                resInfo: testRes
-            };
-
-            // Create 14 students
-            var count = 0;
-            for (var num = 0; num < 14; num++) {
-                studentData.number = firstNumber + num;
-                let testStudent = new Models.Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    // Start testing once all students are created
-                    if (++count == 14) {
-                        // Create last student
-                        studentData.number = firstNumber + 14;
-                        let testStudent = new Models.Students(studentData);
-                        testStudent.save((err) => {
-                            if (err) throw err;
-
-                            // Make request
-                            chai.request(server)
-                                .get('/students/' + testStudent._id.toString())
-                                .end((err, res) => {
-                                    expect(res).to.have.status(200);
-                                    expect(res).to.be.json;
-                                    expect(res.body).to.have.property('student');
-                                    expect(res.body.student.number).to.equal(firstNumber + 14);
-                                    expect(res.body.student.firstName).to.equal(studentData.firstName);
-                                    expect(res.body.student.lastName).to.equal(studentData.lastName);
-                                    expect(res.body.student.gender).to.equal(studentData.gender);
-                                    expect(res.body.student.DOB).to.equal(studentData.DOB);
-                                    expect(res.body.student.photo).to.equal(studentData.photo);
-                                    expect(res.body.student.registrationComments).to.equal(studentData.registrationComments);
-                                    expect(res.body.student.basisOfAdmission).to.equal(studentData.basisOfAdmission);
-                                    expect(res.body.student.admissionAverage).to.equal(studentData.admissionAverage);
-                                    expect(res.body.student.admissionComments).to.equal(studentData.admissionComments);
-                                    expect(res.body.student.resInfo).to.equal(testRes._id.toString());
-                                    expect(res.body.student.awards.length).to.be.eq(0);
-                                    expect(res.body.student.advancedStandings.length).to.be.eq(0);
-                                    done();
-                                });
-                        });
-                    }
-                });
-            }
-        });
-
-        it('it should 404 for residency when given bad ID', (done) => {
-
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err
-            });
-
-            let firstNumber = 594265372;
-            var studentData = {
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-                resInfo: testRes
-            };
-
-            // Create 15 students
-            var count = 0;
-            for (var num = 0; num < 15; num++) {
-                studentData.number = firstNumber + num;
-                let testStudent = new Models.Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    // Start testing once all students are created
-                    if (++count == 15) {
-                        // Make request
-                        chai.request(server)
-                            .get('/students/453535')
-                            .end((err, res) => {
-                                expect(res).to.have.status(404);
-                                done();
-                            });
-                    }
-                });
-            }
-        });
-    });
-
-    /*
-     * Test the /PUT routes
-     */
-    describe('/PUT students', () => {
-        it('it should PUT an updated student', (done) => {
-
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err
-            });
-
-            let firstNumber = 594265372;
-            var studentData = {
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-                resInfo: testRes
-            };
-
-            // Create first student
-            studentData.number = firstNumber;
-            let testStudent = new Models.Students(studentData);
-            testStudent.save((err) => {
-                if (err) throw err;
-
-                // Create 14 students
-                var count = 0;
-                for (var num = 1; num < 15; num++) {
-                    studentData.number = firstNumber + num;
-                    let otherStudent = new Models.Students(studentData);
-                    otherStudent.save((err) => {
-                        if (err) throw err;
-
-                        // Start testing once all students are created
-                        if (++count == 14) {
-                            // Modify data
-                            studentData.number = firstNumber;
-                            studentData.gender = 0;
-
-                            // Make request
-                            chai.request(server)
-                                .put('/students/' + testStudent._id.toString())
-                                .send({student: studentData})
-                                .end((err, res) => {
-                                    expect(res).to.have.status(200);
-                                    expect(res).to.be.json;
-                                    expect(res.body).to.have.property('student');
-                                    expect(res.body.student.number).to.equal(firstNumber);
-                                    expect(res.body.student.firstName).to.equal(studentData.firstName);
-                                    expect(res.body.student.lastName).to.equal(studentData.lastName);
-                                    expect(res.body.student.gender).to.equal(studentData.gender);
-                                    expect(res.body.student.DOB).to.equal(studentData.DOB);
-                                    expect(res.body.student.photo).to.equal(studentData.photo);
-                                    expect(res.body.student.registrationComments).to.equal(studentData.registrationComments);
-                                    expect(res.body.student.basisOfAdmission).to.equal(studentData.basisOfAdmission);
-                                    expect(res.body.student.admissionAverage).to.equal(studentData.admissionAverage);
-                                    expect(res.body.student.admissionComments).to.equal(studentData.admissionComments);
-                                    expect(res.body.student.resInfo).to.equal(testRes._id.toString());
-
-                                    // Test mongo to ensure it was written
-                                    Models.Students.findById(testStudent._id, (error, res) => {
-                                        expect(error || res.length === 0).to.be.false;
-                                        expect(res.number).to.equal(firstNumber);
-                                        expect(res.firstName).to.equal(studentData.firstName);
-                                        expect(res.lastName).to.equal(studentData.lastName);
-                                        expect(res.gender).to.equal(studentData.gender);
-                                        expect(res.DOB.toISOString()).to.equal(studentData.DOB);
-                                        expect(res.photo).to.equal(studentData.photo);
-                                        expect(res.registrationComments).to.equal(studentData.registrationComments);
-                                        expect(res.basisOfAdmission).to.equal(studentData.basisOfAdmission);
-                                        expect(res.admissionAverage).to.equal(studentData.admissionAverage);
-                                        expect(res.admissionComments).to.equal(studentData.admissionComments);
-                                        expect(res.resInfo.toString()).to.equal(testRes._id.toString());
-                                        done();
-                                    });
-                                });
-                        }
-                    });
-                }
-            });
-        });
-
-        it('it should 500 on PUT a student with duplicate number', (done) => {
-
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err
-            });
-
-            let firstNumber = 594265372;
-            var studentData = {
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-                resInfo: testRes
-            };
-
-            // Create first student
-            studentData.number = firstNumber;
-            let testStudent = new Models.Students(studentData);
-            testStudent.save((err) => {
-                if (err) throw err;
-
-                // Create 14 students
-                var count = 0;
-                for (var num = 1; num < 15; num++) {
-                    studentData.number = firstNumber + num;
-                    let otherStudent = new Models.Students(studentData);
-                    otherStudent.save((err) => {
-                        if (err) throw err;
-
-                        // Start testing once all students are created
-                        if (++count == 14) {
-                            // Modify data
-                            studentData.number = firstNumber + 4;
-
-                            // Make request
-                            chai.request(server)
-                                .put('/students/' + testStudent._id.toString())
-                                .send({student: studentData})
-                                .end((err, res) => {
-                                    expect(res).to.have.status(500);
-
-                                    // Test mongo to ensure nothing was written
-                                    Models.Students.findById(testStudent._id, (error, res) => {
-                                        expect(error || res.length === 0).to.be.false;
-                                        expect(res.number).to.equal(firstNumber);
-                                        expect(res.firstName).to.equal(studentData.firstName);
-                                        expect(res.lastName).to.equal(studentData.lastName);
-                                        expect(res.gender).to.equal(studentData.gender);
-                                        expect(res.DOB.toISOString()).to.equal(studentData.DOB);
-                                        expect(res.photo).to.equal(studentData.photo);
-                                        expect(res.registrationComments).to.equal(studentData.registrationComments);
-                                        expect(res.basisOfAdmission).to.equal(studentData.basisOfAdmission);
-                                        expect(res.admissionAverage).to.equal(studentData.admissionAverage);
-                                        expect(res.admissionComments).to.equal(studentData.admissionComments);
-                                        expect(res.resInfo.toString()).to.equal(testRes._id.toString());
-                                        done();
-                                    });
-                                });
-                        }
-                    });
-                }
-            });
-        });
-
-        it('it should 404 on PUT a nonexistent student', (done) => {
-
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err
-            });
-
-            let firstNumber = 594265372;
-            var studentData = {
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-                resInfo: testRes
-            };
-
-            // Create 15 students
-            var count = 0;
-            for (var num = 0; num < 15; num++) {
-                studentData.number = firstNumber + num;
-                let testStudent = new Models.Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    // Start testing once all students are created
-                    if (++count == 15) {
-                        // Make request
-                        chai.request(server)
-                            .put('/students/' + '4534234')
-                            .send({student: studentData})
-                            .end((err, res) => {
-                                expect(res).to.have.status(404);
-                                done();
-                            });
-                    }
-                });
-            }
-        });
-    });
-
-    /*
-     * Test the /POST routes
-     */
-    describe('/POST a student', () => {
-        it('it should POST successfully', (done) => {
-
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err
-            });
-
-            var studentData = {
-                number: 594265372,
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-                resInfo: testRes._id.toString()
-            };
-
-            // Make request
-            chai.request(server)
-                .post('/students')
-                .send({student: studentData})
-                .end((err, res) => {
-                    expect(res).to.have.status(201);
-                    expect(res).to.be.json;
-                    expect(res.body).to.have.property('student');
-                    expect(res.body.student.number).to.equal(studentData.number);
-                    expect(res.body.student.firstName).to.equal(studentData.firstName);
-                    expect(res.body.student.lastName).to.equal(studentData.lastName);
-                    expect(res.body.student.gender).to.equal(studentData.gender);
-                    expect(res.body.student.DOB).to.equal(studentData.DOB);
-                    expect(res.body.student.photo).to.equal(studentData.photo);
-                    expect(res.body.student.registrationComments).to.equal(studentData.registrationComments);
-                    expect(res.body.student.basisOfAdmission).to.equal(studentData.basisOfAdmission);
-                    expect(res.body.student.admissionAverage).to.equal(studentData.admissionAverage);
-                    expect(res.body.student.admissionComments).to.equal(studentData.admissionComments);
-                    expect(res.body.student.resInfo).to.equal(testRes._id.toString());
-
-                    // Check underlying database
-                    Models.Students.findById(res.body.student._id, function (error, student) {
-                        expect(error).to.be.null;
-                        expect(student).to.not.be.null;
-                        expect(student.number).to.equal(studentData.number);
-                        expect(student.firstName).to.equal(studentData.firstName);
-                        expect(student.lastName).to.equal(studentData.lastName);
-                        expect(student.gender).to.equal(studentData.gender);
-                        expect(student.DOB.toISOString()).to.equal(studentData.DOB);
-                        expect(student.photo).to.equal(studentData.photo);
-                        expect(student.registrationComments).to.equal(studentData.registrationComments);
-                        expect(student.basisOfAdmission).to.equal(studentData.basisOfAdmission);
-                        expect(student.admissionAverage).to.equal(studentData.admissionAverage);
-                        expect(student.admissionComments).to.equal(studentData.admissionComments);
-                        expect(student.resInfo.toString()).to.equal(testRes._id.toString());
-
-                        done();
-                    });
-                });
-        });
-
-        it('it should 500 on POST of student with duplicate number', (done) => {
-
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err
-            });
-
-            var studentData = {
-                number: 594265372,
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-                resInfo: testRes._id.toString()
-            };
-
-            // Make request
-            chai.request(server)
-                .post('/students')
-                .send({student: studentData})
-                .end((err, res) => {
-                    expect(res).to.have.status(201);
-                    expect(res).to.be.json;
-                    expect(res.body).to.have.property('student');
-                    expect(res.body.student.number).to.equal(studentData.number);
-                    expect(res.body.student.firstName).to.equal(studentData.firstName);
-                    expect(res.body.student.lastName).to.equal(studentData.lastName);
-                    expect(res.body.student.gender).to.equal(studentData.gender);
-                    expect(res.body.student.DOB).to.equal(studentData.DOB);
-                    expect(res.body.student.photo).to.equal(studentData.photo);
-                    expect(res.body.student.registrationComments).to.equal(studentData.registrationComments);
-                    expect(res.body.student.basisOfAdmission).to.equal(studentData.basisOfAdmission);
-                    expect(res.body.student.admissionAverage).to.equal(studentData.admissionAverage);
-                    expect(res.body.student.admissionComments).to.equal(studentData.admissionComments);
-                    expect(res.body.student.resInfo).to.equal(testRes._id.toString());
-
-                    // Check underlying database
-                    Models.Students.findById(res.body.student._id, function (error, student) {
-                        expect(error).to.be.null;
-                        expect(student).to.not.be.null;
-                        expect(student.number).to.equal(studentData.number);
-                        expect(student.firstName).to.equal(studentData.firstName);
-                        expect(student.lastName).to.equal(studentData.lastName);
-                        expect(student.gender).to.equal(studentData.gender);
-                        expect(student.DOB.toISOString()).to.equal(studentData.DOB);
-                        expect(student.photo).to.equal(studentData.photo);
-                        expect(student.registrationComments).to.equal(studentData.registrationComments);
-                        expect(student.basisOfAdmission).to.equal(studentData.basisOfAdmission);
-                        expect(student.admissionAverage).to.equal(studentData.admissionAverage);
-                        expect(student.admissionComments).to.equal(studentData.admissionComments);
-                        expect(student.resInfo.toString()).to.equal(testRes._id.toString());
-
-                        done();
-                    });
-                });
-        });
-
-    });
-
-    /*
-     * Test the /DELETE routes
-     */
-    describe('/DELETE a student', () => {
-        it('it should DELETE successfully and delete linked awards and advanced standings', (done) => {
-
-            // Set up mock data
-            var studentData = {
-                number: 594265372,
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None"
-            };
-            let testStudent = new Models.Students(studentData);
-            testStudent.save((err) => {
-                if (err) throw err;
-
-                var awardData = {
-                    note: "test",
-                    recipient: testStudent
+    describe('/PUT functions', function () {
+        beforeEach(Common.regenAllData);
+
+        // Make sure PUTs work correctly
+        Common.Tests.PutTests.putUpdated(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let model = itemList[faker.random.number(itemList.length - 1)];
+                let updates = newModel();
+
+                // Update the object with the new random values
+                Object.keys(updates).forEach(key => model[key] = updates[key]);
+
+                // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                next([updates, model]);
+            },
+            requiredValues);
+
+        // Make sure that attempted ID changes are ignored
+        Common.Tests.PutTests.putUpdated(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let model = itemList[faker.random.number(itemList.length - 1)];
+                let updates = {
+                    name: faker.random.word(),
                 };
-                let testAward = new Models.Awards(awardData);
-                testAward.save((err) => {
-                   if (err) throw err;
 
-                    var standingData = {
-                        course: "BASKWV 1000",
-                        description: "Basket weaving",
-                        grade: 100,
-                        from: "UBC",
-                        recipient: testStudent
-                    };
-                    let testStanding = new Models.AdvancedStandings(standingData);
-                    testStanding.save((err) => {
-                        if (err) throw err;
+                // Update the object with the new random values
+                Object.keys(updates).forEach(key => model[key] = updates[key]);
 
-                        // Make request
-                        chai.request(server)
-                            .delete('/students/' + testStudent._id.toString())
-                            .end((err, res) => {
-                                expect(res).to.have.status(200);
+                // Try to change the id
+                updates._id = mongoose.Types.ObjectId();
 
-                                // Check underlying database
-                                Models.Students.findById(testStudent._id, function (error, student) {
-                                    expect(error).to.be.null;
-                                    expect(student).to.be.null;
+                // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                next([updates, model]);
+            },
+            requiredValues,
+            "This should succeed and ignore attempted ID change.");
 
-                                    Models.Awards.findById(testAward._id, function(error, award) {
-                                       expect(error).to.be.null;
-                                       expect(award).to.be.null;
+        // Make sure that attempts to violate uniqueness fails
+        each(
+            uniqueValues,
+            function (value, cb) {
+                Common.Tests.PutTests.putNotUnique(
+                    emberName,
+                    emberNamePluralized,
+                    emberModel,
+                    function (next) {
+                        // Get a random model and make random updates
+                        let model1 = itemList[faker.random.number(itemList.length - 1)];
+                        let model2 = itemList[faker.random.number(itemList.length - 1)];
 
-                                       Models.AdvancedStandings.findById(testStanding._id, function(error, standing) {
-                                          expect(error).to.be.null;
-                                          expect(standing).to.be.null;
+                        // Loop until models are different
+                        while (model1[value] === model2[value]) {
+                            model2 = itemList[faker.random.number(itemList.length - 1)];
+                        }
 
-                                          done();
-                                       });
-                                    });
-                                });
-                            });
-                    });
-                });
-            });
-        });
+                        // Try to update to create a duplicate value
+                        model1[value] = model2[value];
 
+                        // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                        next([model1, model1._id]);
+                    },
+                    requiredValues,
+                    "Posting with duplicate of unique field " + value + ", should 500.");
+                cb();
+            },
+            err => { });
+
+        // Make sure that attempts to not supply required values fails
+        each(
+            requiredValues,
+            function (value, cb) {
+                Common.Tests.PutTests.putUpdated(
+                    emberName,
+                    emberNamePluralized,
+                    emberModel,
+                    function (next) {
+                        // Get a random model and make random updates
+                        let model = itemList[faker.random.number(itemList.length - 1)];
+                        let updates = newModel();
+
+                        // Remove a required value
+                        delete updates[value];
+
+                        // Update the object with the new random values
+                        Object.keys(updates).forEach(key => model[key] = updates[key]);
+
+                        // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                        next([updates, model]);
+                    },
+                    requiredValues,
+                    "Missing " + value + ", this should 400.");
+                cb();
+            },
+            err => { });
+
+        // Make sure that attempts to push to a non-existent object fails
+        Common.Tests.PutTests.putUpdated(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let updates = newModel();
+                let model = new emberModel(updates);
+
+                // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                next([updates, model]);
+            },
+            requiredValues,
+            "This model does not exist yet, this should 404.");
     });
 
+    describe('/POST functions', function () {
+        beforeEach(Common.regenAllData);
+
+        // Make sure POSTs work correctly
+        Common.Tests.PostTests.postNew(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let newContent = newModel();
+                let model = new emberModel(newContent);
+                next([newContent, model])
+            },
+            requiredValues);
+
+        let idFerry = null;
+
+        // Make sure that attempts to set IDs are ignored
+        Common.Tests.PostTests.postNew(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Select a model and then attempt to set the new object's ID to the already-existing object
+                let model = itemList[faker.random.number(itemList.length - 1)];
+                let modelObj = newModel();
+                modelObj._id = model._id;
+                idFerry = model._id;
+
+                next([modelObj, model]);
+            },
+            requiredValues,
+            "POSTing a record with an ID that already exists. Should ignore the new ID.",
+            function (next, res) {
+                // Make sure the ID is different
+                expect(res.body[emberName]._id).to.not.equal(idFerry.toString());
+
+                // Make sure the creation was successful anyways
+                emberModel.findById(res.body[emberName]._id, function (err, results) {
+                    expect(err).to.be.null;
+                    expect(results).to.not.be.null;
+                    next();
+                });
+            });
+
+        // Make sure that attempts to not supply required values fails
+        each(
+            requiredValues,
+            function (value, cb) {
+                Common.Tests.PostTests.postNew(
+                    emberName,
+                    emberNamePluralized,
+                    emberModel,
+                    function (next) {
+                        // Get a random model and make random updates
+                        let newContent = newModel();
+
+                        // Delete a required value
+                        delete newContent[value];
+
+                        let model = new emberModel(newContent);
+                        next([newContent, model])
+                    },
+                    requiredValues,
+                    "Missing " + value + ", this should 400.");
+                cb();
+            },
+            err => { });
+
+        // Make sure attempts to post duplicate data fails
+        // TODO: I'm not sure if this test is appropriate...
+        Common.Tests.PostTests.postNotUnique(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                let model = itemList[faker.random.number(itemList.length - 1)];
+
+                next([model, model]);
+            },
+            requiredValues,
+            "POSTing a record with duplicate data, should 500.",
+            undefined,
+            it.skip);
+    });
+
+    describe('/DELETE functions', function () {
+        beforeEach(Common.regenAllData);
+
+        let elementFerry = null;
+
+        // Make sure that DELETEs are successful
+        Common.Tests.DeleteTests.deleteExisting(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                elementFerry = itemList[faker.random.number(itemList.length - 1)];
+                next(elementFerry._id);
+            },
+            undefined,
+            function (next, res) {
+                // Check that all dependent objects got deassociated
+                each([
+                    [HSGrades, "course"],
+                    [Awards, "recipient"],
+                    [AdvancedStandings, "recipient"],
+                    [Grades, "student"],
+                ],
+                    function (value, next) {
+                        value[0].find(
+                            { [value[1]]: elementFerry._id },
+                            (err, students) => {
+                                expect(err).to.be.null;
+                                expect(students).to.be.empty;
+
+                                next();
+                            });
+                    },
+                    err => {
+                        expect(err).to.be.null;
+                        next();
+                    });
+            });
+
+        // Make sure that attempts to delete a non-existent object fails
+        Common.Tests.DeleteTests.deleteNonexistent(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                next(mongoose.Types.ObjectId());
+            });
+    });
 });

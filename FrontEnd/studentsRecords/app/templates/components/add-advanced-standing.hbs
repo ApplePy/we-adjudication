@@ -1,0 +1,34 @@
+<div class="ui modal">
+  <div class="header">Add a Course</div>
+  <div class="content">
+      <div class="ui form">
+            <div class="inline field">
+                <label>Course</label>
+                {{input size="10" type="text" value = newcourse}}
+            </div>
+            <div class="inline field">
+                 <label>Description</label>
+                {{textarea cols="6" rows="6" value = newdescription}}
+            </div>
+            <div class="inline field">
+                <label>Units</label>
+                    {{input type="number" value = newunit}}
+            </div>
+            <div class="inline field">
+                <label>Grade</label>
+                {{input type="number" value = newgrade}}
+            </div>
+            <div class="inline field">
+                <label>From</label>
+                {{input type="text" value = newfrom}}
+            </div>
+    </div>
+<div class="actions">
+        <br>
+        <div class="ui green button" {{action "saveCourse"}}>Save</div>
+        <div class="ui red button" {{action "close"}}>Cancel</div>
+</div>
+
+  </div>
+  </div>
+

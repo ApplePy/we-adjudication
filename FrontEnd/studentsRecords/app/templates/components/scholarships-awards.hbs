@@ -1,0 +1,11 @@
+<table class="ui fixed three column table">
+  <tr>
+<td class="twelve wide">{{award.note}}</td>
+<td class="two wide"><div class="ui positive button" {{action "updateAward"}}>Update</div></td>
+<td class="two wide"><div class="ui negative button" {{action "deleteAward"}}>Delete</div></td>
+</tr>
+</table>
+
+ {{#if updateAward}} 
+   {{update-award updateaward = award notDONE = updateAward}} 
+ {{/if}}

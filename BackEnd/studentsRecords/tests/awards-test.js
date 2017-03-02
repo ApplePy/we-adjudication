@@ -1,589 +1,349 @@
-//During the test the env variable is set to test
 process.env.NODE_ENV = 'test';
 
-let mongoose = require("mongoose");
-let Models = require('../models/studentsRecordsDB');
+let each = require('async/each');
 
-//Require the dev-dependencies
-let chai = require('chai');
-let chaiHttp = require('chai-http');
-let server = require('../server');
+let faker = require('faker');
+let Common = require('./genericTestFramework-helper');
+let chai = Common.chai;
 let expect = chai.expect;
 
-chai.use(chaiHttp);
+let DB = require('../models/studentsRecordsDB');
+let mongoose = DB.mongoose;
 
-// Our parent block - stores the test
-describe('Awards', () => {
-    let host = "http://localhost:3700";     // This is the Node.js server
+////////
 
-    //Before each test we empty the database
-    beforeEach((done) => {
-        // Clear out all Residences and Students then call done
-        Models.Residencies.remove({}, (err) => {
-            if (err) throw "Error cleaning out Residencies";
-            Models.Students.remove({}, (err) => {
-                if (err) throw "Error cleaning out Students";
-                Models.Awards.remove({}, (err) => {
-                    if (err) throw "Error cleaning out Awards";
-                    Models.AdvancedStandings.remove({}, (err) => {
-                        if (err) throw "Error cleaning out Advanced Standings";
-                        done()
-                    });
-                });
+// NOTE: remember to not use () => {} functions inside mocha tests due to the 'this' binding - it breaks Mocha!
+
+////////
+
+///// THINGS TO CHANGE ON COPYPASTA /////
+let Awards = require('../models/schemas/studentinfo/awardSchema');
+
+let emberName = "award";
+let emberNamePluralized = "awards";
+let itemList = Common.DBElements.awardList;
+let emberModel = Awards;
+let newModel = () => {
+    return {
+        note: faker.random.words(5),
+        recipient: Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)]._id
+    }
+};
+let filterValueSearches = ['note', 'recipient'];
+let requiredValues = ['note', 'recipient'];
+let uniqueValues = [];
+
+// Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
+
+/////////////////////////////////////////
+
+
+describe('Awards', function () {
+
+    describe('/GET functions', function () {
+        before(Common.regenAllData);
+
+        // Make sure that you can retrieve all values
+        Common.Tests.GetTests.getAll(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            itemList,
+            function () {
+                let limit = itemList.length;
+                return { offset: 0, limit: limit };
             });
-        });
+
+        // Make sure that you can retrieve all values one page at a time
+        Common.Tests.GetTests.getPagination(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            itemList);
+
+        // Check that you can search by all non-array elements
+        each(
+            filterValueSearches,
+            function (element, cb) {
+                Common.Tests.GetTests.getByFilterSuccess(emberName, emberNamePluralized, emberModel, function (next) {
+                    // Pick random model for data
+                    let model = itemList[faker.random.number(itemList.length - 1)];
+
+                    // Convert MongoID into a string before attempting search
+                    let param = (model[element] instanceof mongoose.Types.ObjectId) ? model[element].toString() : model[element];
+
+                    next([{ [element]: param }, itemList.filter((el) => el[element] == model[element])]);
+                }, "Search by " + element, function () {
+                    let limit = itemList.length;
+                    return { offset: 0, limit: limit };
+                });
+                cb();
+            },
+            err => { });
+
+        // Make sure that searches for a nonexistent object returns nothing but succeeds
+        Common.Tests.GetTests.getByFilterSuccess(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                next([{ name: "NonExistent" }, []]);
+            },
+            "Search for a nonexistent model",
+            function () {
+                let limit = itemList.length;
+                return { offset: 0, limit: limit };
+            });
+
+        // Ensure you can search by ID
+        Common.Tests.GetTests.getByID(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                next(itemList[faker.random.number(itemList.length - 1)]);
+            });
+
+        // Make sure that searches fail with 404 when the ID doesn't exist
+        Common.Tests.GetTests.getByID(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                next(new emberModel({}));
+            },
+            "This ID does not exist, should 404.");
     });
 
-    /*
-     * Test the /GET routes
-     */
-    describe('/GET awards', () => {
-        it('it should GET all awards ', (done) => {
-            // Request all awards
-            chai.request(server)
-                .get('/awards')
-                .end((err, res) => {
-                    expect(res).to.have.status(200);
-                    expect(res).to.be.json;
-                    expect(res.body).to.have.property('award');
-                    expect(res.body.award.length).to.be.eq(0);
-                    done();
-                });
-        });
+    describe('/PUT functions', function () {
+        beforeEach(Common.regenAllData);
 
-        it('it should GET all awards when created', (done) => {
+        // Make sure PUTs work correctly
+        Common.Tests.PutTests.putUpdated(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let model = itemList[faker.random.number(itemList.length - 1)];
+                let updates = newModel();
 
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err;
+                // Update the object with the new random values
+                Object.keys(updates).forEach(key => model[key] = updates[key]);
 
-                // Make some students, then make awards for the students, then query for all
-                var studentData = {
-                    number: 594265372,
-                    firstName: "Johnny",
-                    lastName: "Test",
-                    gender: 1,
-                    DOB: new Date().toISOString(),
-                    photo: "/some/link",
-                    registrationComments: "No comment",
-                    basisOfAdmission: "Because",
-                    admissionAverage: 90,
-                    admissionComments: "None",
-                    resInfo: testRes
+                // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                next([updates, model]);
+            },
+            requiredValues);
+
+        // Make sure that attempted ID changes are ignored
+        Common.Tests.PutTests.putUpdated(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let model = itemList[faker.random.number(itemList.length - 1)];
+                let updates = {
+                    name: faker.random.word(),
                 };
-                let testStudent = new Models.Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
 
-                    var awardData = {
-                        recipient: testStudent
-                    };
+                // Update the object with the new random values
+                Object.keys(updates).forEach(key => model[key] = updates[key]);
 
-                    // Create 15 awards
-                    var count = 0;
-                    for (var num = 0; num < 15; num++) {
-                        awardData.note = num.toString();
-                        let testAward = new Models.Awards(awardData);
-                        testAward.save((err) => {
-                            if (err) throw err;
+                // Try to change the id
+                updates._id = mongoose.Types.ObjectId();
 
-                            // Start testing once all awards are created
-                            if (++count == 15) {
-                                // Make request
-                                chai.request(server)
-                                    .get('/awards')
-                                    .end((err, res) => {
-                                        expect(res).to.have.status(200);
-                                        expect(res).to.be.json;
-                                        expect(res.body).to.have.property('award');
-                                        expect(res.body.award.length).to.be.eq(15);
-                                        for (var num = 0; num < 15; num++) {
-                                            // Cannot test note value, since there's no guarantee that they're in order
-                                            expect(res.body.award[num].recipient).to.equal(testStudent._id.toString());
-                                        }
-                                        done();
-                                    });
-                            }
-                        });
-                    }
-                });
-            });
-        });
+                // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                next([updates, model]);
+            },
+            requiredValues,
+            "This should succeed and ignore attempted ID change.");
 
-        it('it should GET a award by recipient', (done) => {
+        // Make sure that attempts to violate uniqueness fails
+        each(
+            uniqueValues,
+            function (value, cb) {
+                Common.Tests.PutTests.putNotUnique(
+                    emberName,
+                    emberNamePluralized,
+                    emberModel,
+                    function (next) {
+                        // Get a random model and make random updates
+                        let model1 = itemList[faker.random.number(itemList.length - 1)];
+                        let model2 = itemList[faker.random.number(itemList.length - 1)];
 
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err;
-
-                // Make some students, then make awards for the students, then query for all
-                var studentData = {
-                    number: 594265372,
-                    firstName: "Johnny",
-                    lastName: "Test",
-                    gender: 1,
-                    DOB: new Date().toISOString(),
-                    photo: "/some/link",
-                    registrationComments: "No comment",
-                    basisOfAdmission: "Because",
-                    admissionAverage: 90,
-                    admissionComments: "None",
-                    resInfo: testRes
-                };
-                let testStudent = new Models.Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    var awardData = {
-                        recipient: testStudent
-                    };
-
-                    // Create 15 awards
-                    var count = 0;
-                    for (var num = 0; num < 15; num++) {
-                        awardData.note = num.toString();
-                        let testAward = new Models.Awards(awardData);
-                        testAward.save((err) => {
-                            if (err) throw err;
-
-                            // Start testing once all awards are created
-                            if (++count == 15) {
-                                // Race condition here doesn't matter, as all runs will still get 15 results returned
-
-                                // Make request
-                                chai.request(server)
-                                    .get('/awards')
-                                    .query({filter: {student: testStudent._id.toString()}})
-                                    .end((err, res) => {
-                                        expect(res).to.have.status(200);
-                                        expect(res).to.be.json;
-                                        expect(res.body).to.have.property('award');
-                                        expect(res.body.award.length).to.be.equal(15);
-                                        for (var num = 0; num < 15; num++) {
-                                            expect(res.body.award[num].recipient).to.equal(testAward.recipient.toString());
-                                        }
-                                        done();
-                                    });
-                            }
-                        });
-                    }
-                });
-            });
-        });
-
-        it('it should GET nothing if student has no award', (done) => {
-
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err;
-
-                // Make some students, then make awards for the students (except one), then query for all
-                var studentData = {
-                    number: 594265372,
-                    firstName: "Johnny",
-                    lastName: "Test",
-                    gender: 1,
-                    DOB: new Date().toISOString(),
-                    photo: "/some/link",
-                    registrationComments: "No comment",
-                    basisOfAdmission: "Because",
-                    admissionAverage: 90,
-                    admissionComments: "None",
-                    resInfo: testRes
-                };
-                let testStudent = new Models.Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    studentData.number = 541354335;
-                    let otherStudent = new Models.Students(studentData);
-                    otherStudent.save((err) => {
-                        if (err) throw err;
-
-                        var awardData = {
-                            recipient: otherStudent
-                        };
-
-                        // Create 15 awards
-                        var count = 0;
-                        for (var num = 0; num < 15; num++) {
-                            awardData.note = num.toString();
-                            let testAward = new Models.Awards(awardData);
-                            testAward.save((err) => {
-                                if (err) throw err;
-
-                                // Start testing once all awards are created
-                                if (++count == 15) {
-                                    // Race condition here doesn't matter, as all runs will still get 0 results returned
-
-                                    // Make request
-                                    chai.request(server)
-                                        .get('/awards')
-                                        .query({filter: {student: testStudent._id.toString()}})
-                                        .end((err, res) => {
-                                            expect(res).to.have.status(200);
-                                            expect(res).to.be.json;
-                                            expect(res.body).to.have.property('award');
-                                            expect(res.body.award.length).to.be.equal(0);
-                                            done();
-                                        });
-                                }
-                            });
+                        // Loop until models are different
+                        while (model1[value] === model2[value]) {
+                            model2 = itemList[faker.random.number(itemList.length - 1)];
                         }
-                    });
-                });
-            });
-        });
 
-        it('it should GET award when given ID', (done) => {
+                        // Try to update to create a duplicate value
+                        model1[value] = model2[value];
 
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err;
+                        // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                        next([model1, model1._id]);
+                    },
+                    requiredValues,
+                    "Posting with duplicate of unique field " + value + ", should 500.");
+                cb();
+            },
+            err => { });
 
-                // Make some students, then make awards for the students, then query for all
-                var studentData = {
-                    number: 594265372,
-                    firstName: "Johnny",
-                    lastName: "Test",
-                    gender: 1,
-                    DOB: new Date().toISOString(),
-                    photo: "/some/link",
-                    registrationComments: "No comment",
-                    basisOfAdmission: "Because",
-                    admissionAverage: 90,
-                    admissionComments: "None",
-                    resInfo: testRes
-                };
-                let testStudent = new Models.Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
+        // Make sure that attempts to not supply required values fails
+        each(
+            requiredValues,
+            function (value, cb) {
+                Common.Tests.PutTests.putUpdated(
+                    emberName,
+                    emberNamePluralized,
+                    emberModel,
+                    function (next) {
+                        // Get a random model and make random updates
+                        let model = itemList[faker.random.number(itemList.length - 1)];
+                        let updates = newModel();
 
-                    var awardData = {
-                        recipient: testStudent
-                    };
+                        // Remove a required value
+                        delete updates[value];
 
-                    // Create 15 awards
-                    var count = 0;
-                    for (var num = 0; num < 15; num++) {
-                        awardData.note = num.toString();
-                        let testAward = new Models.Awards(awardData);
-                        testAward.save((err) => {
-                            if (err) throw err;
+                        // Update the object with the new random values
+                        Object.keys(updates).forEach(key => model[key] = updates[key]);
 
-                            // Start testing once all awards are created
-                            if (++count == 15) {
-                                // Race condition here doesn't matter, as we already know that the latest version of testAward saved
+                        // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                        next([updates, model]);
+                    },
+                    requiredValues,
+                    "Missing " + value + ", this should 400.");
+                cb();
+            },
+            err => { });
 
-                                // Make request
-                                chai.request(server)
-                                    .get('/awards/' + testAward._id.toString())
-                                    .end((err, res) => {
-                                        expect(res).to.have.status(200);
-                                        expect(res).to.be.json;
-                                        expect(res.body).to.have.property('award');
-                                        expect(res.body.award.note).to.equal(testAward.note.toString());
-                                        expect(res.body.award.recipient).to.equal(testAward.recipient.toString());
-                                        done();
-                                    });
-                            }
-                        });
-                    }
-                });
-            });
-        });
+        // Make sure that attempts to push to a non-existent object fails
+        Common.Tests.PutTests.putUpdated(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let updates = newModel();
+                let model = new emberModel(updates);
 
-        it('it should 404 for award when given bad ID', (done) => {
-
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err;
-
-                // Make some students, then make awards for the students, then query for all
-                var studentData = {
-                    number: 594265372,
-                    firstName: "Johnny",
-                    lastName: "Test",
-                    gender: 1,
-                    DOB: new Date().toISOString(),
-                    photo: "/some/link",
-                    registrationComments: "No comment",
-                    basisOfAdmission: "Because",
-                    admissionAverage: 90,
-                    admissionComments: "None",
-                    resInfo: testRes
-                };
-                let testStudent = new Models.Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    var awardData = {
-                        recipient: testStudent
-                    };
-
-                    // Create 15 awards
-                    var count = 0;
-                    for (var num = 0; num < 15; num++) {
-                        awardData.note = num.toString();
-                        let testAward = new Models.Awards(awardData);
-                        testAward.save((err) => {
-                            if (err) throw err;
-
-                            // Start testing once all awards are created
-                            if (++count == 15) {
-                                // Race condition here doesn't matter, as none will have this ID
-                                // Make request
-                                chai.request(server)
-                                    .get('/awards/53425353')
-                                    .end((err, res) => {
-                                        expect(res).to.have.status(404);
-                                        done();
-                                    });
-                            }
-                        });
-                    }
-                });
-            });
-        });
+                // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                next([updates, model]);
+            },
+            requiredValues,
+            "This model does not exist yet, this should 404.");
     });
 
-    /*
-     * Test the /PUT routes
-     */
-    describe('/PUT awards', () => {
-        it('it should PUT an updated award', (done) => {
+    describe('/POST functions', function () {
+        beforeEach(Common.regenAllData);
 
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err
-            });
+        // Make sure POSTs work correctly
+        Common.Tests.PostTests.postNew(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let newContent = newModel();
+                let model = new emberModel(newContent);
+                next([newContent, model])
+            },
+            requiredValues);
 
-            var studentData = {
-                number: 594265372,
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-                resInfo: testRes
-            };
+        let idFerry = null;
 
-            let testStudent = new Models.Students(studentData);
-            testStudent.save((err) =>{
-                if (err) throw err;
+        // Make sure that attempts to set IDs are ignored
+        Common.Tests.PostTests.postNew(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Select a model and then attempt to set the new object's ID to the already-existing object
+                let model = itemList[faker.random.number(itemList.length - 1)];
+                let modelObj = newModel();
+                modelObj._id = model._id;
+                idFerry = model._id;
 
-                var awardData = {
-                    recipient: testStudent
-                };
+                next([modelObj, model]);
+            },
+            requiredValues,
+            "POSTing a record with an ID that already exists. Should ignore the new ID.",
+            function (next, res) {
+                // Make sure the ID is different
+                expect(res.body[emberName]._id).to.not.equal(idFerry.toString());
 
-
-                // Create first award
-                awardData.note = 0;
-                let testAward = new Models.Awards(awardData);
-                testAward.save((err) => {
-                    if (err) throw err;
-
-                    // Create 14 awards
-                    var count = 0;
-                    for (var num = 1; num < 15; num++) {
-                        awardData.note = num;
-                        let otherAwards = new Models.Awards(awardData);
-                        otherAwards.save((err) => {
-                            if (err) throw err;
-
-                            // Start testing once all awards are created
-                            if (++count == 14) {
-                                // Race condition here doesn't matter, as the modified data is being tested
-
-                                // Modify data
-                                awardData.note = "success";
-
-                                // Make request
-                                chai.request(server)
-                                    .put('/awards/' + testAward._id.toString())
-                                    .send({award: awardData})
-                                    .end((err, res) => {
-                                        expect(res).to.have.status(200);
-                                        expect(res).to.be.json;
-                                        expect(res.body).to.have.property('award');
-                                        expect(res.body.award.note).to.equal(awardData.note);
-                                        expect(res.body.award.recipient).to.equal(testStudent._id.toString());
-
-                                        // Test mongo to ensure it was written
-                                        Models.Awards.findById(testAward._id, (error, res) => {
-                                            expect(error || res.length === 0).to.be.false;
-                                            expect(res.note).to.equal(awardData.note);
-                                            expect(res.recipient.toString()).to.equal(testStudent._id.toString());
-                                            done();
-                                        });
-                                    });
-                            }
-                        });
-                    }
+                // Make sure the creation was successful anyways
+                emberModel.findById(res.body[emberName]._id, function (err, results) {
+                    expect(err).to.be.null;
+                    expect(results).to.not.be.null;
+                    next();
                 });
             });
-        });
 
-        it('it should 404 on PUT a nonexistent award', (done) => {
+        // Make sure that attempts to not supply required values fails
+        each(
+            requiredValues,
+            function (value, cb) {
+                Common.Tests.PostTests.postNew(
+                    emberName,
+                    emberNamePluralized,
+                    emberModel,
+                    function (next) {
+                        // Get a random model and make random updates
+                        let newContent = newModel();
 
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err
-            });
+                        // Delete a required value
+                        delete newContent[value];
 
-            let firstNumber = 594265372;
-            var awardData = {
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-                resInfo: testRes
-            };
+                        let model = new emberModel(newContent);
+                        next([newContent, model])
+                    },
+                    requiredValues,
+                    "Missing " + value + ", this should 400.");
+                cb();
+            },
+            err => { });
 
-            // Create 15 awards
-            var count = 0;
-            for (var num = 0; num < 15; num++) {
-                awardData.number = firstNumber + num;
-                let testAward = new Models.Awards(awardData);
-                testAward.save((err) => {
-                    if (err) throw err;
+        // Make sure attempts to post duplicate data fails
+        // TODO: I'm not sure if this test is appropriate...
+        Common.Tests.PostTests.postNotUnique(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                let model = itemList[faker.random.number(itemList.length - 1)];
 
-                    // Start testing once all awards are created
-                    if (++count == 15) {
-                        // Race condition here doesn't matter, as the queried ID will not exist
-                        // Make request
-                        chai.request(server)
-                            .put('/awards/' + '4534234')
-                            .send({award: awardData})
-                            .end((err, res) => {
-                                expect(res).to.have.status(404);
-                                done();
-                            });
-                    }
-                });
-            }
-        });
+                next([model, model]);
+            },
+            requiredValues,
+            "POSTing a record with duplicate data, should 500.",
+            undefined,
+            it.skip);
     });
 
-    /*
-     * Test the /POST routes
-     */
-    describe('/POST an award', () => {
-        it('it should POST successfully', (done) => {
+    describe('/DELETE functions', function () {
+        beforeEach(Common.regenAllData);
 
-            // Set up mock data
-            let studentData = {
-                number: 594265372
-            };
-            let testStudent = new Models.Students(studentData);
+        let elementFerry = null;
 
-            let awardData ={
-                note: "A note",
-                recipient: testStudent
-            };
-
-            // Save mock
-            testStudent.save((err) => {
-               if(err) throw err;
-
-                // Make request
-                chai.request(server)
-                    .post('/awards')
-                    .send({award: awardData})
-                    .end((err, res) => {
-                        expect(res).to.have.status(201);
-                        expect(res).to.be.json;
-                        expect(res.body).to.have.property('award');
-                        expect(res.body.award.note).to.be.a('String');
-                        expect(res.body.award.recipient).to.equal(testStudent._id.toString());
-
-                        // Check underlying database
-                        Models.Awards.findById(res.body.award._id, function (error, award) {
-                            expect(error).to.be.null;
-                            expect(award).to.not.be.null;
-                            expect(award.note).to.be.a('String');
-                           expect(award.recipient.toString()).to.equal(testStudent._id.toString());
-
-                            done();
-                        });
-                    });
+        // Make sure that DELETEs are successful
+        Common.Tests.DeleteTests.deleteExisting(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                elementFerry = itemList[faker.random.number(itemList.length - 1)];
+                next(elementFerry._id);
             });
-        });
 
-    });
-
-    /*
-     * Test the /DELETE routes
-     */
-    describe('/DELETE an award', () => {
-        it('it should DELETE successfully and remove associated link from Student', (done) => {
-
-            // Set up mock data
-            // Create student
-            var studentData = {
-                number: 594265372,
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-            };
-            let testStudent = new Models.Students(studentData);
-            testStudent.save((err) => {
-                if (err) throw err;
-
-                // Create award
-                var awardData = {
-                    note: "Test",
-                    recipient: testStudent
-                };
-                let testAward = new Models.Awards(awardData);
-                testAward.save((err) => {
-                    if (err) throw err;
-
-                    // Link student to award
-                    testStudent.awards = [testAward];
-                    testStudent.save((err) => {
-                        if (err) throw err;
-
-                        // Make request
-                        chai.request(server)
-                            .delete('/awards/' + testAward._id.toString())
-                            .end((err, res) => {
-                                expect(res).to.have.status(200);
-
-                                // Check underlying database
-                                Models.Awards.findById(testAward._id, function (error, award) {
-                                    expect(error).to.be.null;
-                                    expect(award).to.be.null;
-                                    done();
-                                });
-                            });
-                    });
-                });
+        // Make sure that attempts to delete a non-existent object fails
+        Common.Tests.DeleteTests.deleteNonexistent(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                next(mongoose.Types.ObjectId());
             });
-        });
-
     });
-
 });

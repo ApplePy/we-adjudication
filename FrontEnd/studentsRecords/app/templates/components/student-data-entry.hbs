@@ -56,8 +56,9 @@
 
   <div class="ui top attached tabular menu">
     <div class="active item" data-tab="basics">Basic Info</div>
-    <div class="item" data-tab="program">Program Record</div>
-    <div class="item" data-tab="others">Other tabs</div>
+    <div class="item" data-tab="admission">Admission Record</div>
+    <div class="item" data-tab="advancedStanding">Advanced Standing</div>
+    <div class="item" data-tab="scholarshipsAwards">Scholarships and Awards</div>
   </div>
   <div class="ui bottom attached active tab segment"data-tab="basics">
     <!-- student basic information !-->
@@ -80,9 +81,14 @@
           <div class="inline field">
             <label>Gender</label>
             <select onchange={{action 'selectGender' value="target.value"}}>
-              <option value=1 selected={{eq 1 currentStudent.gender}}>Male</option>
-              <option value=2 selected={{eq 2 currentStudent.gender}}>Female</option>
+
+              <!-- GENDER HERE -->
+              {{#each genderModel as |genderChoice|}}
+                <option value={{genderChoice.id}} selected={{eq currentStudent.genderInfo.id
+                                                                   genderChoice.id}}>{{genderChoice.name}} </option>
+              {{/each}}
             </select>
+
           </div>
           <div class="inline field">
             <label>Date of Birth</label>
@@ -97,6 +103,9 @@
               {{/each}}
             </select>
           </div>
+          <div class="inline field">
+            <button class="red ui button" {{action 'deleteStudent'}}>Delete Record</button>
+          </div>
         </div>
       </div>
       <!-- Show student photo -->
@@ -106,22 +115,84 @@
     </div>
 
   </div>
-  <div class="ui tab" data-tab="program">
-    <!-- Program records, courses and grades !-->
+  <div class="ui tab" data-tab="admission">
+    <!-- admission records !-->
     <br>
     <h2>{{currentStudent.number}}</h2>
       <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
-    <br><br><br>
+    <br><br>
+        <div class="ui form">
+          <div class="inline field">
+            <label>Admission Average</label>
+            {{input type="number" value = currentStudent.admissionAverage}}
+          </div>
+
+          <div class="inline field">
+            <label>Basis Of Admission</label>
+            {{textarea cols="1" rows="6" value = currentStudent.basisOfAdmission}}
+          </div>
+
+          <div class="inline field">
+            <label>Admission Comments</label>
+            {{textarea cols="1" rows="6" value = currentStudent.admissionComments}}
+          </div>
+
+          <div class="inline field">
+            <label>Registration Comments</label>
+            {{textarea cols="1" rows="6" value = currentStudent.registrationComments}}
+          </div>
+        </div>
   </div>
-  <div class="ui tab" data-tab="others">
-    <!-- Others !-->
-    <h2>Other data</h2>
+
+  <div class="ui tab" data-tab="advancedStanding">
+    <!-- Advanced standing !-->
+    <br>
+    <h2>{{currentStudent.number}}</h2>
+    <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
+   <table class="ui seven column very basic table">
+  <tr>
+<td class="three wide"><h4>Course</h4></td>
+<td class="three wide"><h4>From</h4></td>
+<td class="one wide"><h4>Units</h4></td>
+<td class="one wide"><h4>Grade</h4></td>
+<td class="three wide"></td>
+<td class="one wide"></td>
+ <td class="three wide"></td>
+</tr>
+</table>
+    {{#each advancedStandingArray as |course|}}
+    {{advanced-standing standing = course standings = advancedStandingArray}}
+    <br>
+    {{/each}}
+    <br>
+     <div class="ui button" {{action "addCourse"}}>Add Course</div>
+    {{#if showNewCourse}}
+    {{add-advanced-standing newrecipient = currentStudent notDONE = showNewCourse standings = advancedStandingArray}} <!-- INDEX = currentIndex notDONE = showFindStudent offset = offset studentsModel = studentsRecords -->
+    {{/if}}
   </div>
 
+  <div class="ui tab" data-tab="scholarshipsAwards">
+    <!-- scholarships and awards !-->
+    <br>
+    <h2>{{currentStudent.number}}</h2>
+    <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
+   <!-- <table class="ui three column very basic table">
+  <tr><td><h4>Note</h4></td></tr>
+  </table> -->
+  <h4>Note</h4>
+    {{#each awardNotes as |award|}}
+    {{scholarships-awards award = award awards = awardNotes}}
+    <br>
+    {{/each}}
+    <br>
+    <div class="ui button" {{action "addAward"}}>Add Scholarship/Award</div>
 
-  <button class="ui button" {{action 'deleteStudent'}}>Delete Record</button>
-
+    {{#if showNewAward}}
+    {{add-award newrecipient = currentStudent studentID = currentStudent.number notDONE = showNewAward awards = awardNotes}}
+    {{/if}}
+  </div>
 {{/if}}
+
 
 
 

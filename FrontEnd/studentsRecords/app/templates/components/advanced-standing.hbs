@@ -1,0 +1,18 @@
+<table class="ui fixed seven column table">
+  <tr>
+<td class="three wide">{{standing.course}}</td>
+<td class="three wide">{{standing.from}}</td>
+<td class="one wide">{{standing.units}}</td>
+<td class="one wide">{{standing.grade}}</td>
+<td class="three wide"><div class="ui primary button" {{action "showDescription"}}>Description</div></td>
+<td class="two wide"><div class="ui positive button" {{action "updateStanding"}}>Update</div></td>
+<td class="two wide"><div class="ui negative button" {{action "deleteStanding"}}>Delete</div></td>
+</tr>
+</table>
+
+ {{#if descriptionShow}} 
+{{show-description showstanding = standing notDONE = descriptionShow}}
+
+{{else if updateCourse}}
+{{update-standing updatestanding = standing notDONE = updateCourse}}
+ {{/if}}

@@ -1,0 +1,17 @@
+<div class="ui modal">
+  <div class="header">Add an award</div>
+  <div class="content">
+      <div class="ui form">
+  <div class="inline field">
+    <label>Note</label>
+      {{textarea cols="6" rows="6" value = newnote }}
+  </div>
+    </div>
+<div class="actions">
+        <br>
+        <div class="ui green button" {{action 'saveAward'}}>Save</div>
+        <div class="ui red basic button" {{action "close"}}>Cancel</div>
+</div>
+
+  </div>
+  </div>

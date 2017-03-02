@@ -3,6 +3,7 @@ import Ember from 'ember';
 export default Ember.Component.extend({
   store: Ember.inject.service(),
   residencyModel: null,
+  genderModel: null,
   selectedResidency: null,
   selectedGender: null,
   selectedDate: null,
@@ -11,27 +12,31 @@ export default Ember.Component.extend({
   numBox: null,
   fNameBox: null,
   lNameBox: null,
+  isHelpShowing: false,
 
   init() {
     this._super(...arguments);
     // load Residency data model
+    var self = this;
     this.get('store').findAll('residency').then((records) => {
-      this.set('residencyModel', records);
+      self.set('residencyModel', records);
+    });
+    // load Gender data model
+    this.get('store').findAll('gender').then(function (records) {
+      self.set('genderModel', records);
     });
   },
 
   actions: {
     saveStudent () {
       var res = this.get('store').peekRecord('residency', this.get('selectedResidency'));
-      //var gen = this.get('store').peekRecord('gender', this.get('selectedGender'));
-      var DOB = this.get('store').peekRecord('student', this.get('selectedDate'));
-      var store = this.get('store');
+      var gen = this.get('store').peekRecord('gender', this.get('selectedGender'));
 
       var newStudent = this.get('store').createRecord('student', {
         number: this.get('numBox'),
         firstName: this.get('fNameBox'),
         lastName: this.get('lNameBox'),
-        gender: null,
+        genderInfo: gen,
         photo: this.get('studentPhoto'),
         DOB: new Date(this.get('selectedDate')),
         resInfo: res
@@ -55,6 +60,10 @@ export default Ember.Component.extend({
         this.set('residencyModel', records);
       });
 
+    },
+
+    helpMe () {
+      this.set('isHelpShowing', true);
     },
 
     addMalePhoto () {
