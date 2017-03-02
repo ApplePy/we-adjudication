@@ -72,6 +72,15 @@ export default Ember.Component.extend({
       this.set('notDONE', false);
       Ember.$('.ui.modal').modal('hide');
       Ember.$('.ui.modal').remove();
+    },
+
+    closeCourse(course, grade){
+      var g = this.get('store').peekRecord('grade', grade);
+      g.rollbackAttributes();
+      course.rollbackAttributes();
+      this.set('notDONE', false);
+      Ember.$('.ui.modal').modal('hide');
+      Ember.$('.ui.modal').remove();
     }
   },
 

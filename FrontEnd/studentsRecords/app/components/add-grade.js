@@ -53,10 +53,10 @@ export default Ember.Component.extend({
             termInfo: t,
             gradeInfo: record
           });
-          course.save().then(function (rec) {
+          course.save().then(function () {
             console.log('saved course');
           }).catch(function(){
-            console.log("courseSave failed");
+            console.log("course save failed");
           });
         }
       }).catch(function(){

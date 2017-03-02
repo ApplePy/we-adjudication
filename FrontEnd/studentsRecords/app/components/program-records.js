@@ -32,7 +32,7 @@ export default Ember.Component.extend({
     },
 
     updateRecord(_model, object){
-
+      object.save();
       if(_model === 'term'){
 
         this.set('termToEdit', object);
