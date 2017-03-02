@@ -47,8 +47,9 @@ export default Ember.Component.extend({
 				        }, () => {
 				        	console.log("Could not add gender");
 				        });
-
+						
 		    		}
+
 		    	} else if (fileName == "residencies.xlsx") {
 
 		    		//Get worksheet
@@ -130,7 +131,9 @@ export default Ember.Component.extend({
 
 						var cellAddress = XLSX.utils.encode_cell({r: R, c: 0})
 					    var cell = worksheet[cellAddress];
-					    var cellValue = cell.v;
+					    try {
+					    	var cellValue = cell.v;
+					    } catch (e) {}
 
 					    console.log(cellValue);
 
@@ -153,98 +156,98 @@ export default Ember.Component.extend({
 
 					//for(var R = 1; R <=  XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
 
-						async.times(XLSX.utils.decode_range(worksheet['!ref']).e.r, (R, next) => {
-							if (R == 0) return next();
+					async.times(XLSX.utils.decode_range(worksheet['!ref']).e.r+1, (R, next) => {
+						if (R == 0) return next();
 
-							var number;
-							var firstName;
-							var lastName;
-							var DOB;
-							var gender;
-							var residency;
+						var number;
+						var firstName;
+						var lastName;
+						var DOB;
+						var gender;
+						var residency;
 
-							for(var C = 0; C <=  XLSX.utils.decode_range(worksheet['!ref']).e.c; ++C) {
-							
+						for(var C = 0; C <=  XLSX.utils.decode_range(worksheet['!ref']).e.c; C++) {
+						
 
-								var cellAddress = XLSX.utils.encode_cell({r: R, c: C});
-							    var cell = worksheet[cellAddress];
-							    var cellValue = cell.v;
+							var cellAddress = XLSX.utils.encode_cell({r: R, c: C});
+						    var cell = worksheet[cellAddress];
+						    try {
+						    	var cellValue = cell.v;
+						    } catch (e) {}
 
-							    //console.log(cellValue);
+						    console.log(cellValue);
 
-							    if (C == 0) {
-							    	number = cellValue;
-							    	console.log("number: " + cellValue);
-							    } else if (C == 1) {
-							    	firstName = cellValue;
-							    	console.log("firstName: " + cellValue);
-							    } else if (C == 2) {
-							    	lastName = cellValue;
-							    	console.log("lastName: " + cellValue);
-							    } else if (C == 3) {
-							    	gender = cellValue;
-							    	console.log("gender: " + cellValue);
-							    } else if (C == 4) {
-							    	DOB = cellValue;
-							    	console.log("DOB: " + cellValue);
-							    } else if (C == 5) {
-							    	residency = cellValue;
-							    	console.log("residency: " + cellValue);
-							    }
+						    if (C == 0) {
+						    	number = cellValue;
+						    	console.log("number: " + cellValue);
+						    } else if (C == 1) {
+						    	firstName = cellValue;
+						    	console.log("firstName: " + cellValue);
+						    } else if (C == 2) {
+						    	lastName = cellValue;
+						    	console.log("lastName: " + cellValue);
+						    } else if (C == 3) {
+						    	gender = cellValue;
+						    	console.log("gender: " + cellValue);
+						    } else if (C == 4) {
+						    	DOB = cellValue;
+						    	console.log("DOB: " + cellValue);
+						    } else if (C == 5) {
+						    	residency = cellValue;
+						    	console.log("residency: " + cellValue);
+						    }
 
-				    		}
+			    		}
 
-				    		//console.log(gender);
+			    		//console.log(gender);
 
-							this.get('store').query('gender', {
+						this.get('store').query('gender', {
+							filter: {
+								name: gender
+							}
+						}).then((genders) => {
+
+							gender = genders.get("firstObject");
+
+							//console.log(gender);
+
+							this.get('store').query('residency', {
 								filter: {
-									name: gender
+									name: residency
 								}
-							}).then((genders) => {
+							}).then((residencies) => {
 
-								gender = genders.get("firstObject");
+								residency = residencies.get("firstObject");
 
-								//console.log(gender);
-
-								this.get('store').query('residency', {
-									filter: {
-										name: residency
-									}
-								}).then((residencies) => {
-
-									residency = residencies.get("firstObject");
-
-									var studentJSON = {
-							       		number: number,
-										firstName: firstName,
-										lastName: lastName,
-										DOB: new Date(DOB),	// TODO: THIS DOES NOT WORK.
-										genderInfo: gender,
-										resInfo: residency
-							        };
-									var student = this.get('store').createRecord('student', studentJSON);
+								var studentJSON = {
+						       		number: number,
+									firstName: firstName,
+									lastName: lastName,
+									DOB: new Date(DOB),	// TODO: THIS DOES NOT WORK.
+									genderInfo: gender,
+									resInfo: residency
+						        };
+								var student = this.get('store').createRecord('student', studentJSON);
 
 
-							        student.save().then(() => {
-							        	console.log("Added student");
-							        	next();
-							        }, (err) => {
-							        	console.log("Could not add student");
-							        	next(err);
-							        });
-								}, (err) => {
-									next(err);
-								});
+						        student.save().then(() => {
+						        	console.log("Added student");
+						        	//next();
+						        }, (err) => {
+						        	console.log("Could not add student");
+						        	//next(err);
+						        });
 							}, (err) => {
 								next(err);
-							});	    		
-
+							});
 						}, (err) => {
-							console.log(err);
-						});
+							next(err);
+						});	    		
 
-						
-			    	//}
+					}, (err) => {
+						console.log(err);
+					});
+
 		    	} else if (fileName == "AdmissionComments.xlsx") {
 
 		    		//Get worksheet
@@ -254,6 +257,10 @@ export default Ember.Component.extend({
 					var number;
 					var note;
 
+					let save = true;
+
+					let admissionComments = new Map();
+
 					for(var R = 1; R <=  XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
 
 						for(var C = 0; C <=  XLSX.utils.decode_range(worksheet['!ref']).e.c; ++C) {
@@ -262,8 +269,10 @@ export default Ember.Component.extend({
 						    var cell = worksheet[cellAddress];
 						    try {
 						    	var cellValue = cell.v;
+						    	save = true;
 						    } catch (e) {
 						    	var cellValue = number;
+						    	save = false;
 						    }
 
 						    console.log(cellValue);
@@ -271,7 +280,12 @@ export default Ember.Component.extend({
 						    if (C == 0) {
 						    	number = cellValue;
 						    } else if (C == 1) {
-						    	note = cellValue;
+						    	if (save) {
+						    		note = cellValue;
+						    	} else {
+						    		note += cellValue;
+						    	}
+						    	
 						    }
 
 			    		}
@@ -294,7 +308,7 @@ export default Ember.Component.extend({
 					          	});
 
 							});
-						}	    		
+						}	
 			    	}
 		    	} else if (fileName == "RegistrationComments.xlsx") {
 
