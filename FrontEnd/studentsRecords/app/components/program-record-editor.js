@@ -10,10 +10,8 @@ export default Ember.Component.extend({
   selectedLoad: null,
   selectedStatus: null,
   statusModel: null,
-  planModel: null,
   loadModel: null,
   courses: null,
-  plans: null,
 
   actions:{
     selectLoad(load){
