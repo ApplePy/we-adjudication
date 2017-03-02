@@ -15,23 +15,6 @@ export default Ember.Component.extend({
   courses: null,
   plans: null,
 
-  init() {
-    this._super(...arguments);
-
-    var self = this;
-    this.get('store').findAll('plan-code').then(function (records) {
-      self.set('planModel', records);
-    });
-
-    this.get('store').findAll('program-status').then(function (records) {
-      self.set('statusModel', records);
-    });
-
-    this.get('store').findAll('course-load').then(function (records) {
-      self.set('loadModel', records);
-    });
-  },
-
   actions:{
     selectLoad(load){
       this.set('selectedLoad', load);

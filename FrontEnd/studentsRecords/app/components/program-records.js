@@ -2,6 +2,9 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
   store: Ember.inject.service(),
+  statusModel: null,
+  loadModel: null,
+  planModel: null,
   isAddingProgram: false,
   isAddingTerm: false,
   isAddingGrade: false,
@@ -20,19 +23,21 @@ export default Ember.Component.extend({
     },
 
     addRecord(term){
-      this.set('termToEdit', term);
+      this.set('termToEdit', term.id);
       this.set('isAddingProgram', true);
 
     },
 
     addGrade(term){
-      this.set('termToEdit', term);
+      this.set('termToEdit', term.id);
       this.set('isAddingGrade', true);
 
     },
 
     updateRecord(_model, object){
+
       object.save();
+
       if(_model === 'term'){
 
         this.set('termToEdit', object);
@@ -46,10 +51,10 @@ export default Ember.Component.extend({
         this.set('courseToEdit', null);
 
       } else if(_model === 'course'){
-
+        var c = this.get('store').peekRecord('course-code', object.id);
         this.set('termToEdit', null);
         this.set('programToEdit', null);
-        this.set('courseToEdit', object);
+        this.set('courseToEdit', c);
 
       }
       this.set('isEditing', true);

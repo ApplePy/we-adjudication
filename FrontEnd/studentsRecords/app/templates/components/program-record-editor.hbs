@@ -47,12 +47,12 @@
         {{#each plans as |plan|}}
           <div class="inline field">
             {{plan.name}}
-            <button class="ui tiny red basic right floated icon button" {{action 'deletePlan' program plan}}>
+            <button class="ui tiny red basic icon button" {{action 'deletePlan' program plan}}>
               <i class="x icon"></i>
             </button>
           </div>
         {{/each}}
-        {{plan-dropdown program = program}}
+        {{plan-dropdown program = program.id}}
       </div>
     </div>
       <br>

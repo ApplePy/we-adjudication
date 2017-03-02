@@ -11,20 +11,6 @@ export default Ember.Component.extend({
   newName: null,
   newLevel: null,
 
-  init() {
-    this._super(...arguments);
-    //set the plans array to empty
-    var self = this;
-    this.get('store').findAll('program-status').then(function (records) {
-      self.set('statusModel', records);
-    });
-
-    this.get('store').findAll('course-load').then(function (records) {
-      self.set('loadModel', records);
-    });
-
-  },
-
   actions:{
     selectLoad(load){
       this.set('selectedLoad', load);
@@ -45,7 +31,7 @@ export default Ember.Component.extend({
       }
       var load = this.get('store').peekRecord('course-load', sLoad);
       var status = this.get('store').peekRecord('program-status', sStatus);
-      var t = this.get('store').peekRecord('term-code', this.get('term').id);
+      var t = this.get('store').peekRecord('term-code', this.get('term'));
       var prog = this.get('store').createRecord('program-record', {
         name: this.get('newName'),
         level: this.get('newLevel'),

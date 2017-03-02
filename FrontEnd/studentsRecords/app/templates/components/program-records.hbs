@@ -35,7 +35,7 @@
                   </button>
                 </p>
               {{/each}}
-              {{plan-dropdown program = program}}
+              {{plan-dropdown program = program.id planModel = planModel}}
             </td>
             <td class="two wide">
               <button class="ui right floated red basic icon button" {{action 'deleteRecord' "program-record" program}}>
@@ -95,7 +95,7 @@
 <br>
 <div class="ui button" {{action "addTerm"}}>Add Term</div>
 {{#if isAddingProgram}}
-  {{add-program-record notDONE = isAddingProgram term = termToEdit}}
+  {{add-program-record notDONE = isAddingProgram term = termToEdit statusModel = statusModel loadModel = loadModel}}
 {{/if}}
 {{#if isAddingTerm}}
   {{add-term notDONE = isAddingTerm student = student terms = terms}}
@@ -107,5 +107,7 @@
   {{show-description title = "Grade" description = description notDONE = descriptionShow}}
 {{/if}}
 {{#if isEditing}}
-  {{program-record-editor notDONE = isEditing term = termToEdit program = programToEdit course = courseToEdit plans = programToEdit.plan}}
+  {{program-record-editor notDONE = isEditing term = termToEdit program = programToEdit course = courseToEdit plans = programToEdit.plan
+                          statusModel = statusModel loadModel = loadModel planModel = planModel}}
+
 {{/if}}

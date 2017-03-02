@@ -5,6 +5,9 @@ export default Ember.Component.extend({
   showAllStudents: false,
   residencyModel: null,
   genderModel: null,
+  statusModel: null,
+  loadModel: null,
+  planModel: null,
   selectedResidency: null,
   selectedGender: null,
   selectedDate: null,
@@ -68,15 +71,15 @@ export default Ember.Component.extend({
     });
 
     this.get('store').findAll('program-status').then(function (records) {
-
+      self.set('statusModel', records);
     });
 
     this.get('store').findAll('plan-code').then(function (records) {
-      self.set('residencyModel', records);
-    });
+      self.set('planModel', records);
+    });;
 
     this.get('store').findAll('course-load').then(function (records) {
-      self.set('residencyModel', records);
+      self.set('loadModel', records);
     });
 
     // load first page of the students records
@@ -181,7 +184,6 @@ export default Ember.Component.extend({
       this.get('currentStudent').rollbackAttributes();
       //Change the selected values so it doesn't mess with next student
       this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
-      //WILL HAVE TO CHANGE GENDER BASED ON NEW MODEL
       this.set('selectedGender', this.get('currentStudent').get('genderInfo').get('id'));
       this.set('selectedDate', this.get('currentStudent').get('DOB').toISOString().substring(0, 10));
     },

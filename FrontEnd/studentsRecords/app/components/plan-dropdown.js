@@ -7,15 +7,6 @@ export default Ember.Component.extend({
   planModel: null,
   isAdding: false,
 
-  init() {
-    this._super(...arguments);
-
-    var self = this;
-    this.get('store').findAll('plan-code').then(function (records) {
-      self.set('planModel', records);
-    });
-  },
-
   actions:{
     selectPlan(planId){
       var p = this.get('store').peekRecord('plan-code', planId);
@@ -31,7 +22,7 @@ export default Ember.Component.extend({
         var firstPlan = this.get('planModel').objectAt(0);
         this.set('selectedPlan', firstPlan);
       }
-      var updatedProgram = this.get('program');
+      var updatedProgram = this.get('store').peekRecord('program-record', this.get('program'));
       updatedProgram.get('plan').pushObject(this.get('selectedPlan'));
       updatedProgram.save();
       this.set('isAdding', false);
