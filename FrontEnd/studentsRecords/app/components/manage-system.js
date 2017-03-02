@@ -21,14 +21,6 @@ export default Ember.Component.extend({
       inputModelProp: 'name'  // Have to do it this way since Ember.keys() fails to enumerate properties set to null
     },
     {
-      name: "High School Course Sources",
-      list: null,
-      placeholder: "Add high school course source...",
-      inputID: 'newCourseSource',
-      emberName: 'hs-course-source',
-      inputModelProp: 'code'  // Have to do it this way since Ember.keys() fails to enumerate properties set to null
-    },
-    {
       name: "UWO Course Loads",
       list: null,
       placeholder: "Add course load...",
