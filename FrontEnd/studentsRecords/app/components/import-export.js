@@ -258,8 +258,6 @@ export default Ember.Component.extend({
 					var number;
 					var note;
 
-					let save = true;
-
 					let admissionComments = new Map();
 
 					for(var R = 1; R <=  XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
@@ -270,10 +268,8 @@ export default Ember.Component.extend({
 						    var cell = worksheet[cellAddress];
 						    try {
 						    	var cellValue = cell.v;
-						    	save = true;
 						    } catch (e) {
 						    	var cellValue = number;
-						    	save = false;
 						    }
 
 						    console.log(cellValue);
@@ -281,27 +277,40 @@ export default Ember.Component.extend({
 						    if (C == 0) {
 						    	number = cellValue;
 						    } else if (C == 1) {
-						    	if (save) {
-						    		note = cellValue;
-						    	} else {
-						    		note += cellValue;
-						    	}
-						    	
+						    	note = cellValue;
 						    }
 
+						    if (C == 1) {
+						    	//Add or update admission comments map
+						    	if (admissionComments.has(number) == undefined) {
+						    		admissionComments.set(number, note);
+						    	} else {
+						    		let noteAddition = admissionComments.get(number);
+						    		if (noteAddition == undefined) {
+						    			noteAddition = "";
+						    		}
+						    		noteAddition += note;
+						    		admissionComments.set(number, noteAddition);
+						    	}
+						    }
 			    		}
+			    	}
 
-			    		if (note != "NONE FOUND") {
+			    	admissionComments.forEach((value, key) => {
+
+						console.log(key + ' = ' + value);
+
+						if (value != "NONE FOUND") {
 
 							this.get('store').query('student', {
 								filter: {
-									number: number
+									number: key
 								}
 							}).then((students) => {
 
 								let student = students.get("firstObject");
 
-								student.set('admissionComments', note);
+								student.set('admissionComments', value);
 								student.save().then(() => {
 					        		console.log("Added admission comment");
 					        	}, () => {
@@ -309,8 +318,9 @@ export default Ember.Component.extend({
 					          	});
 
 							});
-						}	
-			    	}
+						}
+					});
+			    			
 		    	} else if (fileName == "RegistrationComments.xlsx") {
 
 		    		//Get worksheet
@@ -319,6 +329,8 @@ export default Ember.Component.extend({
 
 					var number;
 					var note;
+
+					let registrationComments = new Map();
 
 					for(var R = 1; R <=  XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
 
@@ -341,19 +353,38 @@ export default Ember.Component.extend({
 						    	note = cellValue;
 						    }
 
-			    		}
+						    if (C == 1) {
+						    	//Add or update registration comments map
+						    	if (registrationComments.has(number) == undefined) {
+						    		registrationComments.set(number, note);
+						    	} else {
+						    		let noteAddition = registrationComments.get(number);
+						    		if (noteAddition == undefined) {
+						    			noteAddition = "";
+						    		}
+						    		noteAddition += note;
+						    		registrationComments.set(number, noteAddition);
+						    	}
+						    }
 
-			    		if (note != "NONE FOUND") {
+			    		}
+			    	}
+
+			    	registrationComments.forEach((value, key) => {
+
+			    		console.log(key + ' = ' + value);
+
+			    		if (value != "NONE FOUND") {
 
 							this.get('store').query('student', {
 								filter: {
-									number: number
+									number: key
 								}
 							}).then((students) => {
 
 								let student = students.get("firstObject");
 
-								student.set('registrationComments', note);
+								student.set('registrationComments', value);
 								student.save().then(() => {
 					        		console.log("Added registration comment");
 					        	}, () => {
@@ -361,8 +392,9 @@ export default Ember.Component.extend({
 					          	});
 
 							});
-						}	    		
-			    	}
+						}
+					});    		
+			    	//}
 		    	} else if (fileName == "BasisOfAdmission.xlsx") {
 
 		    		//Get worksheet
