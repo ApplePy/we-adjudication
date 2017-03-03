@@ -10,8 +10,8 @@
 </tr>
 </table>
 
- {{#if descriptionShow}} 
-{{show-description showstanding = standing notDONE = descriptionShow}}
+ {{#if descriptionShow}}
+{{show-description title = standing.course description = standing.description notDONE = descriptionShow}}
 
 {{else if updateCourse}}
 {{update-standing updatestanding = standing notDONE = updateCourse}}

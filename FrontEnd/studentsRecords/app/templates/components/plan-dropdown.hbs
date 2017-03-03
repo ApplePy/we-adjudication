@@ -1,0 +1,26 @@
+{{#if isAdding}}
+  <div class="inline field">
+    <select onchange={{action 'selectPlan' value="target.value"}}>
+      {{#each planModel as |planChoice|}}
+        <option value={{planChoice.id}}>{{planChoice.name}}</option>
+      {{/each}}
+    </select>
+  </div>
+  <br>
+<div class="inline field">
+  <button class="ui icon button" {{action 'savePlan'}} title="Save">
+    <i class="check icon"></i>
+  </button>
+  <button class="ui icon button" {{action 'cancelAdd'}} title="Cancel">
+    <i class="delete icon"></i>
+  </button>
+</div>
+{{else}}
+<div class="inline field">
+  <label>Add a plan </label>
+<button class="ui icon button" {{action 'addPlan'}} title="Add a course">
+  <i class="plus icon"></i>
+</button>
+</div>
+{{/if}}
+<br>

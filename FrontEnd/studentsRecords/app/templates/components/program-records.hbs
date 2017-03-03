@@ -1,0 +1,113 @@
+<br>
+{{#each terms as |term|}}
+  <div class="ui two column grid">
+    <div class="ui column">
+      <h3>{{term.name}}</h3>
+    </div>
+    <div class="ui column">
+      <button class="ui right floated red basic button" {{action 'deleteRecord' "term-code" term}}>Delete {{term.name}}</button>
+      <button class="ui right floated blue basic button" {{action 'updateRecord' "term" term}}>Update</button>
+    </div>
+  </div>
+  <hr>
+  <h3>Program Record</h3>
+  <div class="ui segment">
+    {{#if term.programRecords}}
+      <table class="ui ten column very basic table">
+        <tr>
+          <td class="one wide"><h5>Program Name</h5></td>
+          <td class="one wide"><h5>Level</h5></td>
+          <td class="one wide"><h5>Load</h5></td>
+          <td class="two wide"><h5>Status</h5></td>
+          <td class="two wide"><h5>Plan(s)</h5></td>
+        </tr>
+        {{#each term.programRecords as |program|}}
+          <tr>
+            <td class="one wide">{{program.name}}</td>
+            <td class="one wide">{{program.level}}</td>
+            <td class="one wide">{{program.load.load}}</td>
+            <td class="two wide">{{program.status.status}}</td>
+            <td class="three wide">
+              {{#each program.plan as |plan|}}
+                <p>{{plan.name}}
+                  <button class="ui tiny red basic right floated icon button" {{action 'deletePlan' program plan}}>
+                  <i class="x icon"></i>
+                  </button>
+                </p>
+              {{/each}}
+              {{plan-dropdown program = program.id planModel = planModel}}
+            </td>
+            <td class="two wide">
+              <button class="ui right floated red basic icon button" {{action 'deleteRecord' "program-record" program}}>
+                <i class="trash icon"></i>
+              </button>
+              <button class="ui right floated blue basic button" {{action "updateRecord" "program" program}}>Update</button>
+            </td>
+          </tr>
+        {{/each}}
+      </table>
+    {{else}}
+      <p> No program info to show</p>
+    {{/if}}
+    <div class="ui button" {{action "addRecord" term}}>Add Program</div>
+  </div>
+  <h3>Grades</h3>
+  <div class="ui segment">
+    {{#if term.courses}}
+      <table class="ui eight column very basic table">
+        <tr>
+          <td class="one wide"><h5>Course Code</h5></td>
+          <td class="two wide"><h5>Course Name</h5></td>
+          <td class="one wide"><h5>Units</h5></td>
+          <td class="one wide"><h5>Grade</h5></td>
+          <td class="one wide"></td>
+          <td class="two wide"></td>
+        </tr>
+        {{#each term.courses as |course|}}
+          <tr>
+            <td class="one wide">{{course.courseLetter}} {{course.courseNumber}}</td>
+            <td class="two wide">{{course.name}}</td>
+            <td class="one wide">{{course.unit}}</td>
+            <td class="one wide">{{course.gradeInfo.mark}}</td>
+            <td class="one wide">
+              {{#if course.gradeInfo.note}}
+                <div class="ui black basic button" {{action "showNote" course.gradeInfo.note}}>Note</div>
+              {{/if}}
+            </td>
+            <td class="two wide">
+              <button class="ui right floated red basic icon button" {{action "deleteRecord" "course-code" course}}>
+                <i class="trash icon"></i>
+              </button>
+              <button class="ui right floated blue basic button" {{action "updateRecord" "course" course}}>Update</button>
+            </td>
+          </tr>
+        {{/each}}
+      </table>
+    {{else}}
+      <p>No grade info to show</p>
+    {{/if}}
+    <div class="ui button" {{action "addGrade" term}}>Add Grade</div>
+  </div>
+  <br>
+{{else}}
+  <h5>No information to show</h5>
+{{/each}}
+<br>
+<div class="ui button" {{action "addTerm"}}>Add Term</div>
+{{#if isAddingProgram}}
+  {{add-program-record notDONE = isAddingProgram term = termToEdit statusModel = statusModel loadModel = loadModel}}
+{{/if}}
+{{#if isAddingTerm}}
+  {{add-term notDONE = isAddingTerm student = student terms = terms}}
+{{/if}}
+{{#if isAddingGrade}}
+  {{add-grade notDONE = isAddingGrade term = termToEdit}}
+{{/if}}
+{{#if descriptionShow}}
+  {{show-description title = "Grade" description = description notDONE = descriptionShow}}
+{{/if}}
+{{#if isEditing}}
+  {{program-record-editor notDONE = isEditing term = termToEdit program = programToEdit course = courseToEdit plans = programToEdit.plan
+                          statusModel = statusModel loadModel = loadModel}}
+
+{{/if}}

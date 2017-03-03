@@ -5,6 +5,9 @@ export default Ember.Component.extend({
   showAllStudents: false,
   residencyModel: null,
   genderModel: null,
+  statusModel: null,
+  loadModel: null,
+  planModel: null,
   selectedResidency: null,
   selectedGender: null,
   selectedDate: null,
@@ -26,6 +29,7 @@ export default Ember.Component.extend({
   showNewAward: false,
   awardNotes: [],
   advancedStandingArray: [],
+  termModel: [],
   updateAdmission: false,
 
   studentModel: Ember.observer('offset', function () {
@@ -67,6 +71,18 @@ export default Ember.Component.extend({
       self.set('genderModel', records);
     });
 
+    this.get('store').findAll('program-status').then(function (records) {
+      self.set('statusModel', records);
+    });
+
+    this.get('store').findAll('plan-code').then(function (records) {
+      self.set('planModel', records);
+    });;
+
+    this.get('store').findAll('course-load').then(function (records) {
+      self.set('loadModel', records);
+    });
+
     // load first page of the students records
     this.set('limit', 10);
     this.set('offset', 0);
@@ -98,6 +114,7 @@ export default Ember.Component.extend({
     this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
     this.set('awardNotes', []);
     this.set('advancedStandingArray', []);
+    this.set('termModel',[]);
 
     this.set('selectedGender', this.get('currentStudent').get('genderInfo').get('id'));
 
@@ -111,7 +128,7 @@ export default Ember.Component.extend({
         }
        });
 
-       this.get('store').query('advanced-standing', {
+    this.get('store').query('advanced-standing', {
          filter: {
            recipient: this.get('currentStudent').id
          }
@@ -120,6 +137,28 @@ export default Ember.Component.extend({
           this.get('advancedStandingArray').pushObject(standing.objectAt(i));
         }
        });
+
+    this.get('store').query('term-code', {
+      limit: 500,
+      filter: {
+        student: this.get('currentStudent').id
+      }
+    }).then((terms) => {
+      this.get('store').query('grade', {limit: 500}).then();
+      for(var i = 0; i < terms.get('length'); i++) {
+        var term = terms.objectAt(i);
+
+        this.get('store').query('course-code', {limit: 500, filter: {termInfo: term.id}}).then((courses) => {
+
+        });
+
+        this.get('store').query('program-record', {limit: 500}).then((records) => {
+
+        });
+        this.get('termModel').pushObject(terms.objectAt(i));
+      }
+    });
+
   },
 
   didRender() {
@@ -144,7 +183,6 @@ export default Ember.Component.extend({
       this.get('currentStudent').rollbackAttributes();
       //Change the selected values so it doesn't mess with next student
       this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
-      //WILL HAVE TO CHANGE GENDER BASED ON NEW MODEL
       this.set('selectedGender', this.get('currentStudent').get('genderInfo').get('id'));
       this.set('selectedDate', this.get('currentStudent').get('DOB').toISOString().substring(0, 10));
     },
