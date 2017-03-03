@@ -51,6 +51,7 @@ stages:
 test_backend:
   <<: *test_common
   artifacts:
+    expire_in: 2 weeks
     paths:
       - BackEnd/studentsRecords/coverage/
   script:
