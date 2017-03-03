@@ -30,6 +30,7 @@ export default Ember.Component.extend({
   awardNotes: [],
   advancedStandingArray: [],
   termModel: [],
+  updateAdmission: false,
 
   studentModel: Ember.observer('offset', function () {
     var self = this;
@@ -97,8 +98,6 @@ export default Ember.Component.extend({
 
       // Show first student data
       self.set('currentIndex', self.get('firstIndex'));
-
-
     });
 
   },
@@ -281,6 +280,10 @@ export default Ember.Component.extend({
 
     addAward() {
       this.set('showNewAward', true);
+    },
+
+    updateAdmission() {
+      this.set('updateAdmission', true);
     },
   }
 });
