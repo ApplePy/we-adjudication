@@ -127,7 +127,7 @@ build:
 
 
 # This job takes the contents from the previous job, builds them into a docker image, then deploys everything
-deploy:
+production:
   <<: *deploy_common
   dependencies:
    - build
