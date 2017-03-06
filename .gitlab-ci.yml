@@ -17,6 +17,7 @@ stages:
 # Code common to the front- and back-end tests
 .test_common: &test_common
   stage: test
+  coverage: /Lines\s*:\s*(\d*\.?\d+)%/
   # This folder is cached between builds
   # http://docs.gitlab.com/ce/ci/yaml/README.html#cache
   variables:
@@ -49,15 +50,23 @@ stages:
 # This test ensures the back end works
 test_backend:
   <<: *test_common
+  artifacts:
+    expire_in: 2 weeks
+    paths:
+      - BackEnd/studentsRecords/coverage/
   script:
    - cd BackEnd/studentsRecords
    - npm install
-   - npm test
+   - npm run coverage
 
 
 # This test ensures the front end works
 test_frontend:
   <<: *test_common
+  artifacts:
+    expire_in: 2 weeks
+    paths:
+      - FrontEnd/studentsRecords/coverage/
   script:
    - pushd .
    - cd BackEnd/studentsRecords
@@ -67,7 +76,7 @@ test_frontend:
    - cd FrontEnd/studentsRecords
    - npm install
    - bower install
-   - ember test
+   - npm run coverage
   after_script:
    - pkill node
   allow_failure: true
