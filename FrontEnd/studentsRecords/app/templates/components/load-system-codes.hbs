@@ -31,13 +31,14 @@
   <div class="ui divider"></div>
 
   <!-- Loop through the list of objects and display them -->
-  {{#each (get lists codeObj.emberName) as |code|}}
+  {{#each (get lists codeObj.emberName) as |code eleIndex|}}
     <br>
       <div class="ui input">
 
         <!-- Loop through the properties of this model -->
         {{#each codeObj.inputModelProp as |prop index|}}
 
+        <div class={{concat "ui icon input " (append-number codeObj.emberName eleIndex)}} onclick={{action "resetState"}}>
           <!-- If matching property model is a string or number, display an input box -->
           {{#if (or (eq prop.type "string") (eq prop.type "number"))}}
             {{input type=prop.type value=(mut (get code prop.name))}}
@@ -59,10 +60,10 @@
             </select>
 
           {{/if}}
-
+        </div>
         {{/each}}
 
-        <button class="ui primary button" {{action 'modifyCode' codeObj.emberName code}}>Save</button>
+        <button disabled class="ui primary button buttonmodify" {{action 'modifyCode' codeObj.emberName code eleIndex}}>Save</button>
         <button class="negative ui button" {{action 'deleteCode' codeObj.emberName code.id}}>Delete</button>
       </div>
       <br>
