@@ -27,7 +27,6 @@ export default Ember.Component.extend({
   awardNotes: [],
   advancedStandingArray: [],
   hsMarks: [], //this array contains all the info from the hs-grade-schema.js model and gets populated the same way as awardNotes[] and advancedStandingArray[]
-  showNewHS: null, //this variable gets set to true if the "Add new high school course" button is clicked
 
   studentModel: Ember.observer('offset', function () {
     var self = this;
@@ -120,19 +119,6 @@ export default Ember.Component.extend({
        }).then((standing) => {
         for(var i = 0; i < standing.get('length'); i++) {
           this.get('advancedStandingArray').pushObject(standing.objectAt(i));
-        }
-       });
-
-       //*********************** POPULATE hsMarks[] **************************************
-       //you do this so the student-data-entry.hsb file knows whats up and can use the array to loop
-       //this is the same logic as awards and advanced standing so it should work (but of course it hasnt been tested yet)
-       this.get('store').query('hs-grade', {
-         filter: {
-           recipient: this.get('currentStudent').id
-         }
-       }).then((hsMark) => {
-        for(var i = 0; i < hsMark.get('length'); i++) {
-          this.get('hsMarks').pushObject(hsMark.objectAt(i));
         }
        });
   },
@@ -258,9 +244,5 @@ export default Ember.Component.extend({
     addAward() {
       this.set('showNewAward', true);
     },
-
-  addHS() {
-      this.set('showNewHS', true);
-  },
   }
 });

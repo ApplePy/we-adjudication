@@ -1,17 +1,32 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    //courseSourceModel: null,
-    hsGrade: null,
-    //hsCourse: null,
-    //hsSubject: null,
-    //secondarySchool: null,
-    //courseSource: null,
-    updateCourse: null,
-    showMore: null,
+  store: Ember.inject.service(),
+  student: null,
+  marks: [],
+  editGrade: null,
+  updateCourse: null,
+  showMore: null,
 
+  init() {
+    this._super(...arguments);
 
-actions: {
+    //*********************** POPULATE hsMarks[] **************************************
+    //you do this so the student-data-entry.hsb file knows whats up and can use the array to loop
+    //this is the same logic as awards and advanced standing so it should work (but of course it hasnt been tested yet)
+    this.get('store').query('hs-grade', {
+      filter: {
+        recipient: this.get('student').id
+      }
+    }).then(marks => {
+      for (var i = 0; i < marks.get('length'); i++) {
+        this.get('marks').pushObject(marks.objectAt(i));
+      }
+      console.log(this.get('marks').get('length'));
+    });
+  },
+
+  actions: {
 
   deleteCourse() {
 //**** I think the order you delete is important because of dependancies, but idk. Just incase it is though, I've deleted everything in the same order its all added and updated in
