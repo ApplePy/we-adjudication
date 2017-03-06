@@ -72,7 +72,7 @@ test_frontend:
    - cd FrontEnd/studentsRecords
    - npm install
    - bower install
-   - ember test
+   - npm run coverage
   after_script:
    - pkill node
   allow_failure: true
