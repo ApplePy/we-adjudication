@@ -140,7 +140,7 @@ production:
   after_script:
     - rm -f ~/.docker/config.json
   environment:
-    name: staging
+    name: production
     url: http://digitalpanda.incode.ca/
     on_stop: shutdown
 
@@ -152,6 +152,6 @@ shutdown:
   script:
     - docker-compose -H $DOCKER_HOST down --volumes     # Destroy the old image
   environment:
-    name: staging
+    name: production
     url: http://digitalpanda.incode.ca/
     action: stop
