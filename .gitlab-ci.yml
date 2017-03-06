@@ -63,6 +63,10 @@ test_backend:
 # This test ensures the front end works
 test_frontend:
   <<: *test_common
+  artifacts:
+    expire_in: 2 weeks
+    paths:
+      - FrontEnd/studentsRecords/coverage/
   script:
    - pushd .
    - cd BackEnd/studentsRecords
