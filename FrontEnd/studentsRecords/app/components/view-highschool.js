@@ -1,102 +1,184 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    //hsCourse: null,
-    //courseSource: null,
-    hsGrade: null,
-    //secondarySchool: null,
-    //hsSubject: null,
-    editCourse: null,
-    selectedSourceID: null,
-    courseSourceModel: null,
-    store: Ember.inject.service(), //idk if we need this or not
+  store: Ember.inject.service(),
+  newschool: null,
+  newsubject: null,
+  newcourse: null,
+  newmark: null,
+  newrecipient: null,
+  newGrade: null,
+  oldGrade: null,
+  notDONE: null,
+  systemLists: {
+    "secondarySchool": [],
+    "hs-subject": [],
+    "hs-course": []
+  },
 
-//hasmany relationship -> dont set it, mongo does it
-//belongsto relationship -> must set
+  //----- OBSERVERS -----//
+  // Populate the courses for a given school (and subject maybe)
+  populateCoursesSchool: Ember.observer('newschool', function () {
+    repopulateCourses.call(this);
+  }),
 
-    actions: {
-      //theoretically, init() should load up the courseSourceModel with all the hs-course-source info so all options can be displayed in the drop down
-      //idk if this is right because i cant test it but ive taken it from student-data-entry.js with the residencys and modified it 
-    init() {
-      var self = this;
-    // load course sources data model
-    this.get('store').findAll('hs-course-source').then(function (records) {
-      self.set('courseSourceModel', records);
+  populateCoursesSubject: Ember.observer('newsubject', function () {
+    repopulateCourses.call(this);
+  }),
+
+  // Enable save button when a mark has been given
+  enableSave: Ember.observer('newmark', function () {
+    if (this.get('newmark') !== null && !isNaN(parseInt(this.get('newmark'))) && this.get('newcourse') !== null) {
+      console.log('for the good of all of us');
+      Ember.$('#savebutton').prop('disabled', false);
+    } else {
+      Ember.$('#savebutton').prop('disabled', true);
+    }
+  }),
+
+
+  //----- INITIALIZERS -----//
+
+  init() {
+    this._super(...arguments);
+
+    // Get all the records necessary for the dropdown
+    let getAll = emberName => {
+      // Get the records
+      this.get('store')
+        .query(emberName, { limit: 10, offset: 0 })
+        .then(records => {
+
+          // If the result was paginated, get all results
+          if (typeof records.get("meta").total !== "undefined" && records.get('meta').limit < records.get('meta').total) {
+            this.get('store')
+              .query(emberName, { limit: records.get("meta").total })
+              .then(() => {
+                Ember.set(this.get('systemLists'), emberName, this.get('store').peekAll(emberName))
+              });
+          }
+          else {
+            Ember.set(this.get('systemLists'), emberName, this.get('store').peekAll(emberName));
+          }
+        });
+    };
+
+    // Populate the Secondary School course source, and subject list
+    getAll("secondary-school");
+    getAll("hs-subject");
+    getAll("hs-course-source");
+
+    // Populate the variables from oldGrade
+    let oldGradeObj = this.get('oldGrade');
+    oldGradeObj.get('course').then(course => {
+      this.set('newcourse', course);
+      this.set('newmark', this.get('oldGrade.mark'));
+      
+      course.get('school').then(school => {
+        this.set('newschool', school);
+      });
     });
 
-     this.set('selectedSourceID', this.get('hsGrade').get('source').get('id'));
+    oldGradeObj.get('recipient').then(recipient => {
+      this.set('newrecipient', recipient);
+    });
+  },
 
-},
+  //hasmany relationship -> dont set it, mongo does it
+  //belongsto relationship -> must set
 
-//this is what should happen when the "code" drop down is changed (like when a new option is selected)
-//once again... idk if this is right because i cant test it but ive taken it from student-data-entry.js with the residencys and modified it 
-selectCode (code){
-      this.set('selectedSourceID', code);
-      //Set the value of this student's residency to this one
-      var sourceCode = this.get('store').peekRecord('hs-course-source', this.get('selectedSourceID'));
-      this.get('hsGrade.course').set('source', sourceCode);
+  actions: {
+    saveDropdownVal(target, emberName, event) {
+      // Get value of dropdown
+      let value = event.target.value;
+
+      // Find this record
+      this.get('store').findRecord(emberName, value).then((record) => {
+        // Update the variable with the results
+        this.set(target, record);
+      });
+    },
+    saveHS() {
+      console.log("except the ones who are dead");
+
+      //high school grade must be created
+      var hsGrade = this.get('store').createRecord('hs-grade', {
+        mark: this.get('newmark'),
+        course: this.get('newcourse'),
+        recipient: this.get('newrecipient')
+      });
+      hsGrade.save();
+
+      // Send the new item to parent
+      this.set('newGrade', hsGrade);
+
+      //this stuff just closes the modal when its done saving
+      this.set('notDONE', false);
+      Ember.$('.ui.modal').modal('hide');
+      Ember.$('.ui.modal').remove();
     },
 
-    saveCourse() {
-
-      // **** the order you update the models in is important! 
-      //basically update/delete/add the models with dependancies last, and update/delete/add what theyre dependant on first
-
-      //update secondary school first
-        this.get('store').findRecord('secondary-school', this.get('hsGrade.course.school').id).then((secondarySchool) => {
-        secondarySchool.set('name', this.get('hsGrade.course.school.name'));
-        secondarySchool.save();
-      });
-
-      //update high school subject
-        this.get('store').findRecord('hs-subject-schema', this.get('hsGrade.course.subject').id).then((subject) => {
-        subject.set('name', this.get('hsGrade.course.subject.name'));
-        subject.set('description', this.get('hsGrade.course.subject.description'));
-        subject.save();
-      });
-
-      //update course source
-this.get('store').findRecord('hs-course-source', this.get('hsGrade.course.source').id).then((code) => {
-        code.set('code', this.get('hsGrade.course.source.code'));
-        code.save();
-      });
-
-      //update high school course
-      this.get('store').findRecord('hs-course', this.get('hsGrade.course').id).then((course) => {
-        course.set('level', this.get('hsGrade.course.level'));
-        course.set('unit', this.get('hsGrade.course.unit'));
-        course.set('source', this.get('hsGrade.course.source'));
-        course.set('school', this.get('hsGrade.course.school'));
-        course.set('subject', this.get('hsGrade.course.subject'));
-        course.save();
-      });
-
-      //update high school grade 
-      this.get('store').findRecord('hs-grade-schema', this.get('hsGrade').id).then((grade) => {
-        grade.set('mark', this.get('hsGrade.mark'));
-        grade.set('course', this.get('hsCourse'));
-        //I havent set the recipient because you dont need to, idk if mongo will like this or not
-        grade.save();
-      });
-
-//this stuff just closes the modal when its done updating
-    this.set('notDONE', false);
-     Ember.$('.ui.modal').modal('hide');
-     Ember.$('.ui.modal').remove();
-  },
-        
-   close: function() {
-    this.set('notDONE', false);
-     Ember.$('.ui.modal').modal('hide');
-     Ember.$('.ui.modal').remove();
+    close: function () {
+      this.set('notDONE', false);
+      Ember.$('.ui.modal').modal('hide');
+      Ember.$('.ui.modal').remove();
     }
-   },
+  },
 
- didRender() {
+
+  didRender() {
     Ember.$('.ui.modal')
       .modal({
         closable: false,
       })
       .modal('show');
   }
+
 });
+
+let repopulateCourses = function() {
+  console.log("it's hard to overstate");
+
+    let applyCourses = records => {
+      console.log('we do what we must');
+      // Clear courses
+      let courseArray = this.get('systemLists')['hs-course'];
+      courseArray.clear();
+
+      // Apply new courses
+      records.forEach(element => courseArray.pushObject(element));
+      console.log('because we can');
+    };
+
+    // Create filter
+    let filterObj = { school: this.get('newschool').id };
+
+    // Add subject to filter if selected
+    if (this.get('newsubject') !== null) {
+      filterObj.subject = this.get('newsubject').id;
+    }
+
+    console.log("my satisfaction");
+
+    // Get relevant subjects
+    this.get('store').query('hs-course', {
+      filter: filterObj,
+      limit: 10,
+      offset: 0
+    }).then(records => {
+      console.log("Apterture Science");
+
+      // If paginated, check to make sure all records were recieved
+      if (typeof records.get('meta').total !== 'undefined' && records.get('meta').total > records.get('meta').limit) {
+        // Missing records, get all
+        this.get('store').query('hs-course', {
+          filter: filterObj,
+          limit: records.get('meta').total,
+          offset: 0
+        }).then(applyCourses);
+      }
+
+      // Not missing records, put onto the system list
+      applyCourses(records);
+    });
+}

@@ -4,24 +4,31 @@ export default Ember.Component.extend({
   store: Ember.inject.service(),
   student: null,
   marks: [],
-  gradeEdit: false,
   openModal: false,
-  editState: false,
   newHS: false,
   newElement: null,
+  oldGrade: null,
 
   //----- OBSERVERS -----//
   addMark: Ember.observer("newElement", function () {
     // When new grade modal exits, add new grade element to list
     Ember.run.once(this, function () {
+      let marks = this.get('marks');
       let newEl = this.get('newElement');
+      let oldEl = this.get('oldGrade');
 
       // Check that a new element was set
       if (newEl !== null) {
-        this.get('marks').pushObject(newEl);
+        if (oldEl !== null) {
+          // If this was an edit, do an object replacement
+          marks.replace(marks.indexOf(oldEl), 1, [newEl]);
+        } else {
+          marks.pushObject(newEl);
+        }
 
         // Clean up when finished
         this.set('newElement', null);
+        this.set('oldGrade', null);
       }
     });
   }),
@@ -43,8 +50,8 @@ export default Ember.Component.extend({
     },
 
     //this function exicutes when a model-opening button is clicked. it just sets the "openModal" variable to true, this then will cause the view-highschool modal to show
-    viewModal(model, editable = false) {
-      this.set('editState', editable);
+    updateModal(model) {
+      this.set('oldGrade', model);
       this.set('openModal', true);
     },
 

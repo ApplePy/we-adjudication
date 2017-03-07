@@ -2,6 +2,7 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
   store: Ember.inject.service(),
+  newschool: null,
   newsubject: null,
   newcourse: null,
   newmark: null,

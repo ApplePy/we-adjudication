@@ -21,20 +21,20 @@
       <td>{{hsGrade.course.subject.name}}</td>
       <td>{{hsGrade.course.school.name}}</td>
       <td class='collapsing'>
-        <div class="ui positive button" {{action "viewModal" hsGrade true}}>Update</div>
+        <button class="ui positive button" {{action "updateModal" hsGrade}}>Update</button>
       </td>
       <td class='collapsing'>
-        <div class="ui negative button" {{action "deleteCourse" hsGrade}}>Delete</div>
+        <button class="ui negative button" {{action "deleteCourse" hsGrade}}>Delete</button>
       </td>
     </tr>
     {{/each}}
   </tbody>
 </table>
 
-<div class="ui button" {{action "addHS"}}>Add High School Course</div>
+<button class="ui button" {{action "addHS"}}>Add High School Course</button>
 
 {{#if openModal}}
-{{view-highschool hsGrade = gradeEdit notDONE = openModal editCourse = editState}}
+{{view-highschool notDONE = openModal oldGrade = oldGrade newGrade = newElement}}
 {{/if}}
 
 {{#if newHS}}
