@@ -34,16 +34,16 @@ let newModel = () => {
     if (records.length == 0)
         records.push(Common.DBElements.programRecordList.randomObject());
     return {
-        name: faker.random.words(2, 5),
+        termCode: Common.DBElements.termCodeList.randomObject(),
         student: faker.random.arrayElement(Common.DBElements.residencyList),
         programRecords: records,  // NOTE: In a many-to-many relationship, this WILL store data.
     }
 };
 let filterValueSearches = [
-    'name',
+    'termCode',
     'student'
 ];
-let requiredValues = ['name'];
+let requiredValues = [];
 let uniqueValues = [];
 
 // Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate

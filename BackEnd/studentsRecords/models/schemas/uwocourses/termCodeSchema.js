@@ -10,6 +10,6 @@ var termCodeSchema = mongoose.Schema(
     }
 );
 
-var TermCodes = mongoose.model('term', termCodeSchema);
+var TermCodes = mongoose.model('termCode', termCodeSchema);
 
 module.exports = TermCodes;

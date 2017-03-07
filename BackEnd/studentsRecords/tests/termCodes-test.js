@@ -26,7 +26,7 @@ let Terms = require('../models/schemas/uwocourses/termSchema');
 
 let emberName = "termCode";
 let emberNamePluralized = "termCodes";
-let itemList = Common.DBElements.termList;
+let itemList = Common.DBElements.termCodeList;
 let emberModel = TermCodes;
 let newModel = () => {
     return {

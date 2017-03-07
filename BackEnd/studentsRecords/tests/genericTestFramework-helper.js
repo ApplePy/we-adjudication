@@ -749,6 +749,7 @@ let generateTerm = (number, callback) => {
         records.push(Lists.programRecordList.randomObject());
 
     genBase(Terms, Lists.termList, {
+        termCode: Lists.termCodeList.randomObject(),
         student: Lists.studentList.randomObject(),
         programRecords: records
     })(err => {
