@@ -19,10 +19,8 @@ export default Ember.Component.extend({
 
       // Check that a new element was set
       if (newEl !== null) {
-        if (oldEl !== null) {
-          // If this was an edit, do an object replacement
-          marks.replace(marks.indexOf(oldEl), 1, [newEl]);
-        } else {
+        // If this wasn't an edit, push it onto the marks array
+        if (oldEl === null) {
           marks.pushObject(newEl);
         }
 
@@ -82,6 +80,10 @@ let _populateMarks = function () {
             marksArray.pushObject(element);
           });
         });
+      }).catch(err => {
+        // On resolve issues, just put the element up without it's data
+        console.warn(err);
+        marksArray.pushObject(element);
       });
     });
   };

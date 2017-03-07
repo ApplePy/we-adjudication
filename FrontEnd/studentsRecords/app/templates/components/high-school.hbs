@@ -34,10 +34,10 @@
 <button class="ui button" {{action "addHS"}}>Add High School Course</button>
 
 {{#if openModal}}
-{{view-highschool notDONE = openModal oldGrade = oldGrade newGrade = newElement}}
+{{view-highschool notDONE = openModal oldGrade = oldGrade}}
 {{/if}}
 
 {{#if newHS}}
 {{log "I'm making a note here"}}
-{{add-highschool newrecipient = student notDONE = newHS newGrade = newElement}}
+{{view-highschool newrecipient = student notDONE = newHS newGrade = newElement}}
 {{/if}}

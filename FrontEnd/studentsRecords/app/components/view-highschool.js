@@ -68,20 +68,22 @@ export default Ember.Component.extend({
     getAll("hs-subject");
     getAll("hs-course-source");
 
-    // Populate the variables from oldGrade
+    // Populate the variables from oldGrade if passed in
     let oldGradeObj = this.get('oldGrade');
-    oldGradeObj.get('course').then(course => {
-      this.set('newcourse', course);
-      this.set('newmark', this.get('oldGrade.mark'));
-      
-      course.get('school').then(school => {
-        this.set('newschool', school);
-      });
-    });
+    if (oldGradeObj !== null) {
+      oldGradeObj.get('course').then(course => {
+        this.set('newcourse', course);
+        this.set('newmark', this.get('oldGrade.mark'));
 
-    oldGradeObj.get('recipient').then(recipient => {
-      this.set('newrecipient', recipient);
-    });
+        course.get('school').then(school => {
+          this.set('newschool', school);
+        });
+      });
+
+      oldGradeObj.get('recipient').then(recipient => {
+        this.set('newrecipient', recipient);
+      });
+    }
   },
 
   //hasmany relationship -> dont set it, mongo does it
@@ -102,15 +104,29 @@ export default Ember.Component.extend({
       console.log("except the ones who are dead");
 
       //high school grade must be created
-      var hsGrade = this.get('store').createRecord('hs-grade', {
-        mark: this.get('newmark'),
-        course: this.get('newcourse'),
-        recipient: this.get('newrecipient')
-      });
-      hsGrade.save();
+      let hsGrade = null;
+      let gradeContents = {
+          mark: this.get('newmark'),
+          course: this.get('newcourse'),
+          recipient: this.get('newrecipient')
+        };
+      if (this.get('oldGrade') === null) {
+        // New element, create and save
+        hsGrade = this.get('store').createRecord('hs-grade', gradeContents);
+        hsGrade.save();
 
-      // Send the new item to parent
+        // Send the new item to parent
       this.set('newGrade', hsGrade);
+      } else {
+        // Changing existing element, update the old element and save
+        hsGrade = this.get('oldGrade');
+        for (let key of Object.keys(gradeContents)) {
+          hsGrade.set(key, gradeContents[key]);
+        }
+        hsGrade.save();
+
+        this.set('oldGrade', null);
+      }
 
       //this stuff just closes the modal when its done saving
       this.set('notDONE', false);
