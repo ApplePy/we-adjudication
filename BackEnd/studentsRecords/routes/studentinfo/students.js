@@ -1,7 +1,7 @@
 var Students = require('../../models/schemas/studentinfo/studentSchema');
 var Awards = require('../../models/schemas/studentinfo/awardSchema');
 var AdvancedStandings = require('../../models/schemas/studentinfo/advancedStandingSchema');
-var TermCodes = require('../../models/schemas/uwocourses/termCodeSchema');
+var Terms = require('../../models/schemas/uwocourses/termSchema');
 var CourseCodes = require('../../models/schemas/uwocourses/courseCodeSchema');
 var HSGrades = require('../../models/schemas/highschool/hsGradeSchema');
 var Setup = require('../genericRouting');
@@ -36,14 +36,14 @@ module.exports =
                     // Remove high school grades
                     HSGrades.remove({recipient: deleted._id}, (err3, removed3) => {
                         // Find attached terms
-                        TermCodes.find({student: deleted._id}, (err4, terms) => {
+                        Terms.find({student: deleted._id}, (err4, termsRes) => {
                             if (err) return;    // Just silently fail
 
-                            let termCodes = terms.map(el => el._id);
+                            let terms = termsRes.map(el => el._id);
 
                             // Remove attached courses and terms
-                            CourseCodes.remove({termInfo: {$in: termCodes}}, err5 => {});
-                            TermCodes.remove({student: deleted._id}, err6 => {});
+                            CourseCodes.remove({termInfo: {$in: terms}}, err5 => {});
+                            Terms.remove({student: deleted._id}, err6 => {});
                         });
                     });
                 });
