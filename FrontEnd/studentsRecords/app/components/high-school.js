@@ -4,79 +4,84 @@ export default Ember.Component.extend({
   store: Ember.inject.service(),
   student: null,
   marks: [],
-  editGrade: null,
-  updateCourse: null,
-  showMore: null,
+  gradeEdit: null,
+  openModal: null,
+  editState: false,
+  newHS: false,
+  newElement: null,
+
+  //----- OBSERVERS -----//
+  addMark: Ember.observer("newElement", function () {
+    // When new grade modal exits, add new grade element to list
+    Ember.run.once(this, function () {
+      let newEl = this.get('newElement');
+
+      // Check that a new element was set
+      if (newEl !== null) {
+        this.get('marks').pushObject(newEl);
+
+        // Clean up when finished
+        this.set('newElement', null);
+      }
+    });
+  }),
+  updateMarks: Ember.observer("student", function () {
+    // When student changes, change mark array contents
+    _populateMarks.call(this);
+  }),
 
   init() {
     this._super(...arguments);
-
-    //*********************** POPULATE hsMarks[] **************************************
-    //you do this so the student-data-entry.hsb file knows whats up and can use the array to loop
-    //this is the same logic as awards and advanced standing so it should work (but of course it hasnt been tested yet)
-    this.get('store').query('hs-grade', {
-      filter: {
-        recipient: this.get('student').id
-      }
-    }).then(marks => {
-      for (var i = 0; i < marks.get('length'); i++) {
-        this.get('marks').pushObject(marks.objectAt(i));
-      }
-      console.log(this.get('marks').get('length'));
-    });
+    _populateMarks.call(this);
   },
 
   actions: {
+    deleteCourse(hsGrade) {
+      //update high school grade
+      this.get('marks').removeObject(hsGrade);
+      hsGrade.destroyRecord();
+    },
 
-  deleteCourse() {
-//**** I think the order you delete is important because of dependancies, but idk. Just incase it is though, I've deleted everything in the same order its all added and updated in
+    //this function exicutes when a model-opening button is clicked. it just sets the "openModal" variable to true, this then will cause the view-highschool modal to show
+    viewModal(model, editable = false) {
+      this.set('editState', editable);
+      this.set('openModal', true);
+    },
 
-//delete secondary school
-        this.get('store').findRecord('secondary-school', this.get('hsGrade.course.school').id, { backgroundReload: false }).then(function(school) {
-        school.deleteRecord();
-        school.get('isDeleted');
-        school.save();
-      });
-
-       //delete high school subject
-        this.get('store').findRecord('hs-subject-schema', this.get('hsGrade.course.subject').id, { backgroundReload: false }).then(function(subject) {
-        subject.deleteRecord();
-        subject.get('isDeleted');
-        subject.save();
-      });
-
-       //update course source
-this.get('store').findRecord('hs-course-source', this.get('hsGrade.course.source').id, { backgroundReload: false }).then(function(source) {
-        source.deleteRecord();
-        source.get('isDeleted');
-        source.save();
-      });
-
-      //update high school course
-      this.get('store').findRecord('hs-course', this.get('hsGrade.course.').id, { backgroundReload: false }).then(function(course) {
-        course.deleteRecord();
-        course.get('isDeleted');
-        course.save();
-      });
-
-      //update high school grade 
-      this.get('store').findRecord('hs-grade-schema', this.get('hsGrade').id, { backgroundReload: false }).then(function(grade) {
-        grade.deleteRecord();
-        grade.get('isDeleted');
-        grade.save();
-      });
-
-  },
-
-//this function exicutes when the "update" button is clicked. it just sets the "updateCourse" variable to true, this then will cause the view-highschool modal to show
-  updateCourse() {
-       this.set('updateCourse', true); 
-  },
-
-//this function exicutes when the "view more" button is clicked. it just sets the "showMore" variable to true, this then will cause the view-highschool modal to show
-  viewMore() {
-    this.set('showMore', true); 
-  },
- }
+    // Open new high school course modal
+    addHS() {
+      console.log('this was a triumph');
+      this.set('newHS', true);
+    },
+  }
 });
 
+let _populateMarks = function () {
+  // Populate the marks array with contents
+    let populateMarksArray = marks => {
+      marks.forEach(element => this.get('marks').pushObject(element));
+    };
+
+  // Clear all existing marks
+  this.get('marks').clear();
+
+  //*********************** POPULATE hsMarks[] **************************************
+  //you do this so the student-data-entry.hbs file knows whats up and can use the array to loop
+  //this is the same logic as awards and advanced standing so it should work (but of course it hasnt been tested yet)
+  this.get('store').query('hs-grade', {
+    filter: { recipient: this.get('student').id },
+    limit: 50,
+    offset: 0
+  }).then(marks => {
+    // Handle pagination
+    if (marks.get('meta').total > 50) {
+      this.get('store'.query('hs-grade'), {
+        filter: { recipient: this.get('student').id },
+        limit: marks.get('meta').total,
+        offset: 0
+      }).then(populateMarksArray);
+    } else {
+      populateMarksArray(marks);
+    }
+  });
+};
