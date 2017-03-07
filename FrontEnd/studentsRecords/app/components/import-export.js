@@ -10,22 +10,22 @@ export default Ember.Component.extend({
 		uploadFile() {
 
 			//var file = Ember.$("#excelSheet").val();
-			var file = document.getElementById('excelSheet').files[0];
-			var fileName = file.name;
+			let file = document.getElementById('excelSheet').files[0];
+			let fileName = file.name;
 			console.log(file);
 			console.log(fileName);
 
 			//File Reader
-			var reader = new FileReader();
+			let reader = new FileReader();
 
 			//File loads
 			reader.onload = (event) => {
 
 				//Get workbook
-				var data = event.target.result;
+				let data = event.target.result;
 				this.workbook = XLSX.read(data, { type: 'binary' });	// Moved into the "this" variable to save typing
 
-				if (fileName == "genders.xlsx") {
+				if (fileName === "genders.xlsx") {
 
 					strategies.singleColumn.call(this, (cellValue) => {
 						var gender = this.get('store').createRecord('gender', {
@@ -39,7 +39,7 @@ export default Ember.Component.extend({
 						});
 					});
 
-				} else if (fileName == "residencies.xlsx") {
+				} else if (fileName === "residencies.xlsx") {
 
 					strategies.singleColumn.call(this, (cellValue) => {
 
@@ -54,8 +54,8 @@ export default Ember.Component.extend({
 						});
 
 					});
-				} else if (fileName == "UndergraduateCourses.xlsx") {
-					strategies.byRow.call(this, valueArray => {
+				} else if (fileName === "UndergraduateCourses.xlsx") {
+					strategies.byRow.call(this, false, valueArray => {
 						var courseCode = this.get('store').createRecord('course-code', {
 							courseLetter: valueArray[0],
 							courseNumber: valueArray[1],
@@ -69,7 +69,7 @@ export default Ember.Component.extend({
 							console.log("Could not add course code");
 						});
 					});
-				} else if (fileName == "HighSchools.xlsx") {
+				} else if (fileName === "HighSchools.xlsx") {
 
 					strategies.singleColumn.call(true, cellValue => {
 						var secondarySchool = this.get('store').createRecord('secondary-school', {
@@ -83,9 +83,9 @@ export default Ember.Component.extend({
 						});
 					});
 
-				} else if (fileName == "students.xlsx") {
+				} else if (fileName === "students.xlsx") {
 
-					strategies.byRow.call(this, valueArray => {
+					strategies.byRow.call(this, false, valueArray => {
 						this.get('store').query('gender', {
 							filter: {
 								name: valueArray[3]
@@ -118,65 +118,36 @@ export default Ember.Component.extend({
 								student.save().then(() => {
 									console.log("Added student");
 								}, (err) => {
-									 console.warn(err);
+									console.warn(err);
 									console.log("Could not add student");
 								});
 							});
 						});
 					});
 
-				} else if (fileName == "AdmissionComments.xlsx") {
-
-					//Get worksheet
-					var first_sheet_name = workbook.SheetNames[0];
-					var worksheet = workbook.Sheets[first_sheet_name];
-
-					var number;
-					var note;
+				} else if (fileName === "AdmissionComments.xlsx") {
 
 					let admissionComments = new Map();
 
-					for (var R = 1; R <= XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
-
-						for (var C = 0; C <= XLSX.utils.decode_range(worksheet['!ref']).e.c; ++C) {
-
-							var cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
-							var cell = worksheet[cellAddress];
-							try {
-								var cellValue = cell.v;
-							} catch (e) {
-								var cellValue = number;
+					strategies.byRow.call(this, true, valueArray => {
+						//Add or update admission comments map
+						if (admissionComments.has(valueArray[0]) === undefined) {
+							admissionComments.set(valueArray[0], valueArray[1]);
+						} else {
+							let noteAddition = admissionComments.get(valueArray[0]);
+							if (noteAddition === undefined) {
+								noteAddition = "";
 							}
-
-							console.log(cellValue);
-
-							if (C == 0) {
-								number = cellValue;
-							} else if (C == 1) {
-								note = cellValue;
-							}
-
-							if (C == 1) {
-								//Add or update admission comments map
-								if (admissionComments.has(number) == undefined) {
-									admissionComments.set(number, note);
-								} else {
-									let noteAddition = admissionComments.get(number);
-									if (noteAddition == undefined) {
-										noteAddition = "";
-									}
-									noteAddition += note;
-									admissionComments.set(number, noteAddition);
-								}
-							}
+							noteAddition += valueArray[1];
+							admissionComments.set(valueArray[0], noteAddition);
 						}
-					}
+					});
 
 					admissionComments.forEach((value, key) => {
 
 						console.log(key + ' = ' + value);
 
-						if (value != "NONE FOUND") {
+						if (value !== "NONE FOUND") {
 
 							this.get('store').query('student', {
 								filter: {
@@ -197,60 +168,29 @@ export default Ember.Component.extend({
 						}
 					});
 
-				} else if (fileName == "RegistrationComments.xlsx") {
-
-					//Get worksheet
-					var first_sheet_name = workbook.SheetNames[0];
-					var worksheet = workbook.Sheets[first_sheet_name];
-
-					var number;
-					var note;
+				} else if (fileName === "RegistrationComments.xlsx") {
 
 					let registrationComments = new Map();
 
-					for (var R = 1; R <= XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
-
-						for (var C = 0; C <= XLSX.utils.decode_range(worksheet['!ref']).e.c; ++C) {
-
-
-							var cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
-							var cell = worksheet[cellAddress];
-							try {
-								var cellValue = cell.v;
-							} catch (e) {
-								var cellValue = number;
+					strategies.byRow.call(this, true, valueArray => {
+						//Add or update admission comments map
+						if (registrationComments.has(valueArray[0]) === undefined) {
+							registrationComments.set(valueArray[0], valueArray[1]);
+						} else {
+							let noteAddition = registrationComments.get(valueArray[0]);
+							if (noteAddition === undefined) {
+								noteAddition = "";
 							}
-
-							console.log(cellValue);
-
-							if (C == 0) {
-								number = cellValue;
-							} else if (C == 1) {
-								note = cellValue;
-							}
-
-							if (C == 1) {
-								//Add or update registration comments map
-								if (registrationComments.has(number) == undefined) {
-									registrationComments.set(number, note);
-								} else {
-									let noteAddition = registrationComments.get(number);
-									if (noteAddition == undefined) {
-										noteAddition = "";
-									}
-									noteAddition += note;
-									registrationComments.set(number, noteAddition);
-								}
-							}
-
+							noteAddition += valueArray[1];
+							registrationComments.set(valueArray[0], noteAddition);
 						}
-					}
+					});
 
 					registrationComments.forEach((value, key) => {
 
 						console.log(key + ' = ' + value);
 
-						if (value != "NONE FOUND") {
+						if (value !== "NONE FOUND") {
 
 							this.get('store').query('student', {
 								filter: {
@@ -271,49 +211,19 @@ export default Ember.Component.extend({
 						}
 					});
 					//}
-				} else if (fileName == "BasisOfAdmission.xlsx") {
-
-					//Get worksheet
-					var first_sheet_name = workbook.SheetNames[0];
-					var worksheet = workbook.Sheets[first_sheet_name];
-
-					var number;
-					var note;
-
-					for (var R = 1; R <= XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
-
-						for (var C = 0; C <= XLSX.utils.decode_range(worksheet['!ref']).e.c; ++C) {
-
-
-							var cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
-							var cell = worksheet[cellAddress];
-							try {
-								var cellValue = cell.v;
-							} catch (e) {
-								var cellValue = number;
-							}
-
-							console.log(cellValue);
-
-							if (C == 0) {
-								number = cellValue;
-							} else if (C == 1) {
-								note = cellValue;
-							}
-
-						}
-
-						if (note != "NONE FOUND") {
+				} else if (fileName === "BasisOfAdmission.xlsx") {
+					strategies.byRow.call(this, true, valueArray => {
+						if (valueArray[1] !== "NONE FOUND") {
 
 							this.get('store').query('student', {
 								filter: {
-									number: number
+									number: valueArray[0]
 								}
 							}).then((students) => {
 
 								let student = students.get("firstObject");
 
-								student.set('basisOfAdmission', note);
+								student.set('basisOfAdmission', valueArray[1]);
 								student.save().then(() => {
 									console.log("Added basis of admission");
 								}, () => {
@@ -322,50 +232,21 @@ export default Ember.Component.extend({
 
 							});
 						}
-					}
-				} else if (fileName == "AdmissionAverages.xlsx") {
+					});
+				} else if (fileName === "AdmissionAverages.xlsx") {
 
-					//Get worksheet
-					var first_sheet_name = workbook.SheetNames[0];
-					var worksheet = workbook.Sheets[first_sheet_name];
-
-					var number;
-					var note;
-
-					for (var R = 1; R <= XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
-
-						for (var C = 0; C <= XLSX.utils.decode_range(worksheet['!ref']).e.c; ++C) {
-
-
-							var cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
-							var cell = worksheet[cellAddress];
-							try {
-								var cellValue = cell.v;
-							} catch (e) {
-								var cellValue = number;
-							}
-
-							console.log(cellValue);
-
-							if (C == 0) {
-								number = cellValue;
-							} else if (C == 1) {
-								note = cellValue;
-							}
-
-						}
-
-						if (note != "NONE FOUND") {
+					strategies.byRow.call(this, true, valueArray => {
+						if (valueArray[1] !== "NONE FOUND") {
 
 							this.get('store').query('student', {
 								filter: {
-									number: number
+									number: valueArray[0]
 								}
 							}).then((students) => {
 
 								let student = students.get("firstObject");
 
-								student.set('admissionAverage', note);
+								student.set('admissionAverage', valueArray[1]);
 								student.save().then(() => {
 									console.log("Added admission comment");
 								}, () => {
@@ -374,8 +255,8 @@ export default Ember.Component.extend({
 
 							});
 						}
-					}
-				} else if (fileName == "AdvancedStanding.xlsx") {
+					});
+				} else if (fileName === "AdvancedStanding.xlsx") {
 
 					//Get worksheet
 					var first_sheet_name = workbook.SheetNames[0];
@@ -873,27 +754,33 @@ export default Ember.Component.extend({
 });
 
 let strategies = {
-	byRowCarryingPreviousColumnValue : null,
-	byRow: function (saveFunction) {
+	byRow: function (savePreviousRowValue, saveFunction) {
 		//Get worksheet
-		var first_sheet_name = workbook.SheetNames[0];
-		var worksheet = workbook.Sheets[first_sheet_name];
+		let first_sheet_name = workbook.SheetNames[0];
+		let worksheet = workbook.Sheets[first_sheet_name];
 
-		for (var R = 1; R <= XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
+		// Stores all the values from the row
+		let valueArray = [];
 
-			// Stores all the values from the row
-			let valueArray = [];
+		// TODO: Look at changing to sheet_to_json to save lines?
+		for (let R = 1; R <= XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
 
-			for (var C = 0; C <= XLSX.utils.decode_range(worksheet['!ref']).e.c; ++C) {
+			if (!savePreviousRowValue)
+				valueArray.length = 0;	// Yes, this actually clears the array. It's true voodoo.
 
+			for (let C = 0; C <= XLSX.utils.decode_range(worksheet['!ref']).e.c; ++C) {
 
-				var cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
-				var cell = worksheet[cellAddress];
-				var cellValue = cell.v;
-
-				console.log(cellValue);
-
-				valueArray[C] = cellValue;
+				let cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+				let cell = worksheet[cellAddress];
+				try {
+					// Get value and save it to valueArray
+					let cellValue = cell.v;
+					console.log(cellValue);
+					valueArray[C] = cellValue;
+				} catch (err) {
+					valueArray[C] = null;
+					// Skip, extension point here later?
+				}
 			}
 
 			// Save values for row
@@ -905,12 +792,14 @@ let strategies = {
 		let first_sheet_name = this.workbook.SheetNames[0];
 		let worksheet = this.workbook.Sheets[first_sheet_name];
 
+		// TODO: Look at changing to sheet_to_json to save lines?
 		for (let R = 1; R <= XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
 
 			let cellAddress = XLSX.utils.encode_cell({ r: R, c: 0 });
 			let cell = worksheet[cellAddress];
+			let cellValue = null;
 			try {
-				let cellValue = cell.v;
+				cellValue = cell.v;
 			} catch (err) {
 				// Try/Catch was present in high schools parsing
 				console.warn(err);
