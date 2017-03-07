@@ -16,4 +16,4 @@ termSchema.plugin(mongoosePaginate);
 
 var Terms = mongoose.model('term', termSchema);
 
-module.exports = TermCodes;
+module.exports = Terms;
