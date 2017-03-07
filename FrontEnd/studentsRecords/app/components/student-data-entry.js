@@ -26,7 +26,6 @@ export default Ember.Component.extend({
   showNewAward: false,
   awardNotes: [],
   advancedStandingArray: [],
-  hsMarks: [], //this array contains all the info from the hs-grade-schema.js model and gets populated the same way as awardNotes[] and advancedStandingArray[]
 
   studentModel: Ember.observer('offset', function () {
     var self = this;
