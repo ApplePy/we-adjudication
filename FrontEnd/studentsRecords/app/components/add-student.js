@@ -13,6 +13,8 @@ export default Ember.Component.extend({
   fNameBox: null,
   lNameBox: null,
   isHelpShowing: false,
+  studentAdded: false,
+  studentFailAdded: false,
 
   init() {
     this._super(...arguments);
@@ -25,6 +27,22 @@ export default Ember.Component.extend({
     this.get('store').findAll('gender').then(function (records) {
       self.set('genderModel', records);
     });
+
+   this.get('store').queryRecord('residency', {
+         filter: {
+           name: 'Canadian/Native'
+         }
+       }).then((res) => {
+         self.set('selectedResidency', res.id); 
+       }); 
+
+       this.get('store').queryRecord('gender', {
+         filter: {
+           name: 'Male'
+         }
+       }).then((gen) => {
+        self.set('selectedGender', gen.id);
+       });
   },
 
   actions: {
@@ -41,9 +59,14 @@ export default Ember.Component.extend({
         DOB: new Date(this.get('selectedDate')),
         resInfo: res
       });
-      newStudent.save();
 
-      $('.small.modal').modal('show');
+      var self = this;
+
+      newStudent.save().then(() => {
+        self.set('studentAdded', true);
+      }).catch((adapterError) => {
+        self.set('studentFailAdded', true);
+      });
 
       // TODO: Review later to see if necessary. Merging for now.
 
@@ -51,15 +74,15 @@ export default Ember.Component.extend({
       this.set('fNameBox', null);
       this.set('lNameBox', null);
       this.set('residencyModel', null);
-      this.set('selectedResidency', null);
-      this.set('selectedGender', null);
+    //  this.set('selectedResidency', null);
+     // this.set('selectedGender', null);
       this.set('selectedDate', null);
       this.set('studentPhoto', null);
+      console.log(this.get('selectedGender'));
 
       this.get('store').findAll('residency').then((records) => {
         this.set('residencyModel', records);
       });
-
     },
 
     helpMe () {
