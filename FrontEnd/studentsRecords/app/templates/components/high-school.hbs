@@ -4,28 +4,31 @@
 <!-- delete should just delete the record -->
 <!-- ******** THESE FUNCTIONALITIES CANT BE TESTED UNTIL ROUTES ARE IN SO IDK IF THEY 100% WORK-->
 
-<table class="ui celled table">
-  <th>
-    <td><h4>Course</h4></td>
-    <td><h4>Grade</h4></td>
-    <td><h4>From</h4></td>
-  </th>
-  {{#each marks as |hsGrade|}}
-  <tr>
-    <td>{{hsGrade.course.subject.name}}</td>
-    <td>{{hsGrade.mark}}</td>
-    <td>{{hsGrade.course.school.name}}</td>
-    <td>
-      <div class="ui positive button" {{action "viewModal" hsGrade true}}>View More</div>
-    </td>
-    <td>
-      <div class="ui positive button" {{action "viewModal" hsGrade false}}>Update</div>
-    </td>
-    <td>
-      <div class="ui negative button" {{action "deleteCourse" hsGrade}}>Delete</div>
-    </td>
-  </tr>
-  {{/each}}
+<table class="ui table">
+  <thead>
+    <th><h4>Grade</h4></th>
+    <th><h4>Year</h4></th>
+    <th><h4>Subject</h4></th>
+    <th><h4>From</h4></th>
+    <th></th>
+    <th></th>
+  </thead>
+  <tbody>
+    {{#each marks as |hsGrade|}}
+    <tr>
+      <td>{{hsGrade.mark}}</td>
+      <td>{{hsGrade.course.level}}</td>
+      <td>{{hsGrade.course.subject.name}}</td>
+      <td>{{hsGrade.course.school.name}}</td>
+      <td class='collapsing'>
+        <div class="ui positive button" {{action "viewModal" hsGrade true}}>Update</div>
+      </td>
+      <td class='collapsing'>
+        <div class="ui negative button" {{action "deleteCourse" hsGrade}}>Delete</div>
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
 </table>
 
 <div class="ui button" {{action "addHS"}}>Add High School Course</div>

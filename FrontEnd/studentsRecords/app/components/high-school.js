@@ -4,8 +4,8 @@ export default Ember.Component.extend({
   store: Ember.inject.service(),
   student: null,
   marks: [],
-  gradeEdit: null,
-  openModal: null,
+  gradeEdit: false,
+  openModal: false,
   editState: false,
   newHS: false,
   newElement: null,
@@ -58,9 +58,26 @@ export default Ember.Component.extend({
 
 let _populateMarks = function () {
   // Populate the marks array with contents
-    let populateMarksArray = marks => {
-      marks.forEach(element => this.get('marks').pushObject(element));
-    };
+  let populateMarksArray = marks => {
+    // The array that the marks will be put into
+    let marksArray = this.get('marks');
+
+    marks.forEach(element => {
+      // This mess is to replace the promiseProxy relation objects in the element with their full equivalents
+      // Otherwise the front end doesn't render correctly
+      element.get('course').then(course => {
+        course.get('school').then(school => {
+          course.get('subject').then(subject => {
+            // Manually replace objects with their resolved versions
+            course.set('school', school);
+            course.set('subject', subject);
+            element.set('course', course);
+            marksArray.pushObject(element);
+          });
+        });
+      });
+    });
+  };
 
   // Clear all existing marks
   this.get('marks').clear();
