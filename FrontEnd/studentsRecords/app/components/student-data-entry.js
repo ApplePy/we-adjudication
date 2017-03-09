@@ -110,7 +110,6 @@ export default Ember.Component.extend({
     this.set('selectedDate', datestring);
 
     //Fixes gender/residency bug
-
     this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
     this.set('awardNotes', []);
     this.set('advancedStandingArray', []);

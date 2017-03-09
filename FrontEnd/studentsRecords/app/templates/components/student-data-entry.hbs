@@ -60,6 +60,7 @@
     <div class="item" data-tab="programRecord">Program Records</div>
     <div class="item" data-tab="advancedStanding">Advanced Standing</div>
     <div class="item" data-tab="scholarshipsAwards">Scholarships and Awards</div>
+    <div class="item" data-tab="highSchool">High School</div>
   </div>
   <div class="ui bottom attached active tab segment"data-tab="basics">
     <!-- student basic information !-->
@@ -207,8 +208,19 @@
     {{add-award newrecipient = currentStudent studentID = currentStudent.number notDONE = showNewAward awards = awardNotes}}
     {{/if}}
   </div>
-{{/if}}
+ 
 
+<div class="ui tab" data-tab="highSchool">
+    <!-- High school !-->
+    <br>
+    <h2>{{currentStudent.number}}</h2>
+    <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
+    {{#if currentStudent}}
+    {{high-school student = currentStudent}}
+    {{/if}}
+</div>
+
+{{/if}}
 
 
 

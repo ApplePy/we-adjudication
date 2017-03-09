@@ -1,0 +1,62 @@
+{{log "huge success"}}
+<div class="ui modal">
+    <div class="header">Add a High School Course</div>
+    <div class="content">
+        <div class="ui form">
+            <div class="inline field">
+                <label>Secondary School</label>
+                <select class="ui search dropdown" onchange={{action "saveDropdownVal" "newschool" "secondary-school"}}>
+                    <option disabled selected>Choose Secondary School...</option>
+
+                    {{#each systemLists.secondary-school as |element|}}
+                    <option value={{element.id}} selected={{eq element.id newschool.id}}>{{element.name}}</option>
+                    {{else}}
+                    <option>No options found</option>
+                    {{/each}}
+
+                </select>
+            </div>
+
+            {{#if newschool}}
+            <div class="inline field">
+                <label>Subject</label>
+                <select class="ui search dropdown" onchange={{action "saveDropdownVal" "newsubject" "hs-subject"}}>
+                    <option disabled selected>Choose Subject...</option>
+
+                    {{#each systemLists.hs-subject as |element|}}
+                    <option value={{element.id}}>{{element.name}}</option>
+                    {{else}}
+                    <option>No options found</option>
+                    {{/each}}
+                </select>
+                <i>(Optional: To assist filtering the courses dropdown)</i>
+            </div>
+            <div class="inline field">
+                <label>Course</label>
+                <select class="ui search dropdown" onchange={{action "saveDropdownVal" "newcourse" "hs-course"}}>
+                    <option disabled selected>Choose Course...</option>
+
+                    {{#each systemLists.hs-course as |element|}}
+                    <option selected={{eq element.id newcourse.id}}
+                    value={{element.id}}>Source: {{element.source.code}} Level: {{element.level}} Unit: {{element.unit}} Subject: {{element.subject.name}}</option>
+                    {{else}}
+                    <option>No options found</option>
+                    {{/each}}
+                </select>
+            </div>
+            {{/if}}
+
+            {{#if newcourse}}
+            <div class="inline field">
+                <label>Mark</label>
+                {{input type="number" value = newmark}}
+            </div>
+            {{/if}}
+        </div>
+        <div class="actions">
+            <br>
+            <button id="savebutton" disabled class="ui positive button" {{action "saveHS"}}>Save</button>
+            <button class="ui negative button" {{action "close"}}>Cancel</button>
+        </div>
+    </div>
+</div>

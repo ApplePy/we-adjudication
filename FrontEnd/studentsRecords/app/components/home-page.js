@@ -16,6 +16,7 @@ export default Ember.Component.extend({
   isManageSystemShowing: false,
   isAdding: false,
   isAboutShowing: false,
+  isHighSchoolShowing: false,
 
 
   actions: {
@@ -25,6 +26,7 @@ export default Ember.Component.extend({
       this.set('isManageSystemShowing', false);
       this.set('isAboutShowing', false);
       this.set('isAdding', false);
+      this.set('isHighSchoolShowing', false);
     },
 
     studentsDataEntry (){
@@ -33,12 +35,23 @@ export default Ember.Component.extend({
       this.set('isManageSystemShowing', false);
       this.set('isAboutShowing', false);
       this.set('isAdding', false);
+      this.set('isHighSchoolShowing', false);
     },
 
     manageSystem (){
       this.set('isHomeShowing', false);
       this.set('isStudentsRecordsDataEntry', false);
       this.set('isManageSystemShowing', true);
+      this.set('isAboutShowing', false);
+      this.set('isAdding', false);
+      this.set('isHighSchoolShowing', false);
+    },
+
+    manageHighSchoolData (){
+      this.set('isHighSchoolShowing', true);
+      this.set('isHomeShowing', false);
+      this.set('isStudentsRecordsDataEntry', false);
+      this.set('isManageSystemShowing', false);
       this.set('isAboutShowing', false);
       this.set('isAdding', false);
     },
@@ -49,6 +62,7 @@ export default Ember.Component.extend({
       this.set('isManageSystemShowing', false);
       this.set('isAboutShowing', false);
       this.set('isAdding', true);
+      this.set('isHighSchoolShowing', false);
     },
 
     about (){
@@ -57,6 +71,7 @@ export default Ember.Component.extend({
       this.set('isManageSystemShowing', false);
       this.set('isAboutShowing', true);
       this.set('isAdding', false);
+      this.set('isHighSchoolShowing', false);
     }
   }
 });
