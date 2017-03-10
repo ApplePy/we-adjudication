@@ -8,6 +8,7 @@ export default Ember.Component.extend({
   statusModel: null,
   loadModel: null,
   planModel: null,
+  termCodeModel: null,
   selectedResidency: null,
   selectedGender: null,
   selectedDate: null,
@@ -83,6 +84,10 @@ export default Ember.Component.extend({
       self.set('loadModel', records);
     });
 
+    this.get('store').findAll('term-code').then(function(records){
+      self.set('termCodeModel', records);
+    });
+
     // load first page of the students records
     this.set('limit', 10);
     this.set('offset', 0);
@@ -137,7 +142,7 @@ export default Ember.Component.extend({
         }
        });
 
-    this.get('store').query('term-code', {
+    this.get('store').query('term', {
       limit: 500,
       filter: {
         student: this.get('currentStudent').id
@@ -147,11 +152,11 @@ export default Ember.Component.extend({
       for(var i = 0; i < terms.get('length'); i++) {
         var term = terms.objectAt(i);
 
-        this.get('store').query('course-code', {limit: 500, filter: {termInfo: term.id}}).then((courses) => {
+        this.get('store').query('course-code', {limit: 500, filter: {termInfo: term.id}}).then(() => {
 
         });
 
-        this.get('store').query('program-record', {limit: 500}).then((records) => {
+        this.get('store').query('program-record', {limit: 500}).then(() => {
 
         });
         this.get('termModel').pushObject(terms.objectAt(i));

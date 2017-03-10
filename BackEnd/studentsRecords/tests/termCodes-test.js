@@ -22,36 +22,27 @@ let mongoose = DB.mongoose;
 
 ///// THINGS TO CHANGE ON COPYPASTA /////
 let TermCodes = require('../models/schemas/uwocourses/termCodeSchema');
-let CourseCodes = require('../models/schemas/uwocourses/courseCodeSchema');
-
+let Terms = require('../models/schemas/uwocourses/termSchema');
 
 let emberName = "termCode";
 let emberNamePluralized = "termCodes";
 let itemList = Common.DBElements.termCodeList;
 let emberModel = TermCodes;
 let newModel = () => {
-    let records = Common.DBElements.programRecordList.filter(() => Math.random() * 10 > 8);
-    if (records.length == 0)
-        records.push(Common.DBElements.programRecordList.randomObject());
     return {
-        name: faker.random.words(2, 5),
-        student: faker.random.arrayElement(Common.DBElements.residencyList),
-        programRecords: records,  // NOTE: In a many-to-many relationship, this WILL store data.
+        name: faker.lorem.words()
     }
 };
-let filterValueSearches = [
-    'name',
-    'student'
-];
+let filterValueSearches = ['name'];
 let requiredValues = ['name'];
-let uniqueValues = [];
+let uniqueValues = ['name'];
 
 // Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
 
 /////////////////////////////////////////
 
 
-describe('Term Codes', function () {
+describe('TermCodes', function () {
 
     describe('/GET functions', function () {
         before(Common.regenAllData);
@@ -61,18 +52,16 @@ describe('Term Codes', function () {
             emberName,
             emberNamePluralized,
             emberModel,
-            itemList,
-            function () {
-                let limit = itemList.length;
-                return { offset: 0, limit: limit };
-            });
+            itemList);
 
         // Make sure that you can retrieve all values one page at a time
         Common.Tests.GetTests.getPagination(
             emberName,
             emberNamePluralized,
             emberModel,
-            itemList);
+            itemList,
+            undefined,
+            it.skip);
 
         // Check that you can search by all non-array elements
         each(
@@ -91,11 +80,7 @@ describe('Term Codes', function () {
 
                         next([{ [element]: param }, itemList.filter((el) => el[element] == model[element])]);
                     },
-                    "Search by " + element,
-                    function () {
-                        let limit = itemList.length;
-                        return { offset: 0, limit: limit };
-                    });
+                    "Search by " + element);
                 cb();
             },
             err => { });
@@ -108,11 +93,7 @@ describe('Term Codes', function () {
             function (next) {
                 next([{ name: "NonExistent" }, []]);
             },
-            "Search for a nonexistent model",
-            function () {
-                let limit = itemList.length;
-                return { offset: 0, limit: limit };
-            });
+            "Search for a nonexistent model");
 
         // Ensure you can search by ID
         Common.Tests.GetTests.getByID(
@@ -358,21 +339,11 @@ describe('Term Codes', function () {
             undefined,
             function (next, res) {
                 // Check that all dependent objects got deassociated
-                each([
-                    [CourseCodes, "termInfo"]
-                ],
-                    function (value, next) {
-                        value[0].find(
-                            { [value[1]]: elementFerry._id },
-                            (err, students) => {
-                                expect(err).to.be.null;
-                                expect(students).to.be.empty;
-
-                                next();
-                            });
-                    },
-                    err => {
+                Terms.find(
+                    { termCode: elementFerry._id },
+                    (err, terms) => {
                         expect(err).to.be.null;
+                        expect(terms).to.be.empty;
                         next();
                     });
             });
@@ -387,4 +358,3 @@ describe('Term Codes', function () {
             });
     });
 });
-

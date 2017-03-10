@@ -24,6 +24,7 @@ let SecondarySchools = require('../models/schemas/highschool/secondarySchoolSche
 let HSSubjects = require('../models/schemas/highschool/hsSubjectSchema');
 
 // UWO courses imports
+let Terms = require('../models/schemas/uwocourses/termSchema');
 let TermCodes = require('../models/schemas/uwocourses/termCodeSchema');
 let CourseCodes = require('../models/schemas/uwocourses/courseCodeSchema');
 let CourseLoads = require('../models/schemas/uwocourses/courseLoadSchema');
@@ -54,6 +55,7 @@ let Lists = {
     hsCourseSourceList: [],
     hsSubjectList: [],
     secondarySchoolList: [],
+    termList: [],
     termCodeList: [],
     courseCodeList: [],
     courseLoadList: [],
@@ -596,6 +598,7 @@ let regenAllData = function (done) {
         HSCourseSources,
         SecondarySchools,
         HSSubjects,
+        Terms,
         TermCodes,
         CourseCodes,
         CourseLoads,
@@ -634,7 +637,8 @@ let regenAllData = function (done) {
                 [10, generateCourseCode],
                 [3, generateProgramStatus],
                 [3, generateProgramRecord],
-                [2, generateTermCode]
+                [3, generateTerm],
+                [50, generateTermCode]
             ];
             eachSeries(executions, (item, cb) => {
                 times(item[0], item[1], (err) => {
@@ -728,7 +732,7 @@ let generateCourseCode = (number, callback) => {
         courseNumber: faker.random.word(),
         name: faker.random.words(2),
         unit: faker.random.number(4) / 2,
-        termInfo: Lists.termCodeList.randomObject(),
+        termInfo: Lists.termList.randomObject(),
         gradeInfo: Lists.gradeList.randomObject()
     })(err => {
         // Retry a few times in case random generation causes duplicate
@@ -739,15 +743,27 @@ let generateCourseCode = (number, callback) => {
         else callback();
     });
 };
-let generateTermCode = (number, callback) => {
+let generateTerm = (number, callback) => {
     let records = Lists.programRecordList.filter(() => Math.random() * 10 > 8);
     if (records.length == 0)
         records.push(Lists.programRecordList.randomObject());
 
-    genBase(TermCodes, Lists.termCodeList, {
-        name: faker.random.words(1, 3),
+    genBase(Terms, Lists.termList, {
+        termCode: Lists.termCodeList.randomObject(),
         student: Lists.studentList.randomObject(),
         programRecords: records
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            else generateTerm(number - 1, callback);
+        }
+        else callback();
+    });
+};
+let generateTermCode = (number, callback) => {
+    genBase(TermCodes, Lists.termCodeList, {
+        name: faker.random.words(1, 3),
     })(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {

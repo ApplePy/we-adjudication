@@ -21,31 +21,27 @@ let mongoose = DB.mongoose;
 ////////
 
 ///// THINGS TO CHANGE ON COPYPASTA /////
-let ProgramRecords = require('../models/schemas/uwocourses/programRecordSchema');
 let Terms = require('../models/schemas/uwocourses/termSchema');
+let CourseCodes = require('../models/schemas/uwocourses/courseCodeSchema');
 
-let emberName = "programRecord";
-let emberNamePluralized = "programRecords";
-let itemList = Common.DBElements.programRecordList;
-let emberModel = ProgramRecords;
+
+let emberName = "term";
+let emberNamePluralized = "terms";
+let itemList = Common.DBElements.termList;
+let emberModel = Terms;
 let newModel = () => {
-    let plans = Common.DBElements.planCodeList.filter(() => Math.random() * 10 > 8);
-    if (plans.length == 0)
-        plans.push(Common.DBElements.planCodeList.randomObject());
-
+    let records = Common.DBElements.programRecordList.filter(() => Math.random() * 10 > 8);
+    if (records.length == 0)
+        records.push(Common.DBElements.programRecordList.randomObject());
     return {
-        name: faker.random.words(1, 3),
-        level: faker.random.number(9),
-        load: Common.DBElements.courseLoadList.randomObject(),
-        status: Common.DBElements.programStatusList.randomObject(),
-        plan: plans
-    };
+        termCode: Common.DBElements.termCodeList.randomObject(),
+        student: faker.random.arrayElement(Common.DBElements.residencyList),
+        programRecords: records,  // NOTE: In a many-to-many relationship, this WILL store data.
+    }
 };
 let filterValueSearches = [
-    'name',
-    'level',
-    'load',
-    'status'
+    'termCode',
+    'student'
 ];
 let requiredValues = [];
 let uniqueValues = [];
@@ -55,7 +51,7 @@ let uniqueValues = [];
 /////////////////////////////////////////
 
 
-describe('Program Records', function () {
+describe('Terms', function () {
 
     describe('/GET functions', function () {
         before(Common.regenAllData);
@@ -363,14 +359,14 @@ describe('Program Records', function () {
             function (next, res) {
                 // Check that all dependent objects got deassociated
                 each([
-                    [Terms, "programRecords"]
+                    [CourseCodes, "termInfo"]
                 ],
                     function (value, next) {
                         value[0].find(
-                            { [value[1]]: { $in: [elementFerry._id] } },
-                            (err, records) => {
+                            { [value[1]]: elementFerry._id },
+                            (err, students) => {
                                 expect(err).to.be.null;
-                                expect(records).to.not.contain(elementFerry._id);
+                                expect(students).to.be.empty;
 
                                 next();
                             });

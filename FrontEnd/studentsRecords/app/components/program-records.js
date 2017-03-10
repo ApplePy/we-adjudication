@@ -5,6 +5,7 @@ export default Ember.Component.extend({
   statusModel: null,
   loadModel: null,
   planModel: null,
+  termCodes: null,
   isAddingProgram: false,
   isAddingTerm: false,
   isAddingGrade: false,
@@ -61,7 +62,7 @@ export default Ember.Component.extend({
     },
 
     deleteRecord(_model, object){
-      if(_model === 'term-code'){
+      if(_model === 'term'){
         this.set('terms', this.get('terms').without(object));
       }
 

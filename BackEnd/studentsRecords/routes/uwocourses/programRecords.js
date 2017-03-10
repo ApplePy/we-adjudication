@@ -3,7 +3,7 @@
  */
 
 var ProgramRecords = require('../../models/schemas/uwocourses/programRecordSchema');
-var TermCodes = require('../../models/schemas/uwocourses/termCodeSchema');
+var Terms = require('../../models/schemas/uwocourses/termSchema');
 var Setup = require('../genericRouting');
 
 
@@ -18,7 +18,7 @@ module.exports =
         undefined,
         (req, res, next) => {
             // Map all affected term codes to null
-            TermCodes.update(
+            Terms.update(
                 {programRecords: {$in: [req.params.mongo_id]}},
                 {$pull: {programRecords: req.params.mongo_id}},
                 {multi: true},

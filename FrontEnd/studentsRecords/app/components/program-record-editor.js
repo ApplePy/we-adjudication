@@ -9,11 +9,17 @@ export default Ember.Component.extend({
   selectedPlan: null,
   selectedLoad: null,
   selectedStatus: null,
+  selectedTerm: null,
   statusModel: null,
   loadModel: null,
+  termCodes: null,
   courses: null,
 
   actions:{
+    selectTerm(term){
+      this.set('selectedTerm', term);
+    },
+
     selectLoad(load){
       this.set('selectedLoad', load);
     },
@@ -29,18 +35,29 @@ export default Ember.Component.extend({
       Ember.$('.ui.modal').remove();
     },
 
+    saveTerm(term){
+      var t = this.get('store').peekRecord('term-code', this.get('selectedTerm'));
+      if(t == null){
+        term.save();
+      } else {
+        term.set('termCode', t);
+        term.save();
+      }
+      this.set('notDONE', false);
+      Ember.$('.ui.modal').modal('hide');
+      Ember.$('.ui.modal').remove();
+    },
+
     saveProgram(program){
       var load = this.get('store').peekRecord('course-load', this.get('selectedLoad'));
       var status = this.get('store').peekRecord('program-status', this.get('selectedStatus'));
-      if(load === null){
-        load = this.get('loadModel').objectAt(0);
+      if(load !== null){
+        program.set('load', load);
       }
-      if(status === null){
-        status = this.get('statusModel').objectAt(0);
+      if(status !== null){
+        program.set('status', status);
       }
 
-      program.set('load', load);
-      program.set('status', status);
       program.save();
 
       this.set('notDONE', false);

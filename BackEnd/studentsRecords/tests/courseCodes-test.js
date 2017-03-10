@@ -33,7 +33,7 @@ let newModel = () => {
         courseNumber: faker.random.word(),
         name: faker.random.words(5, 10),
         unit: faker.random.number(4) / 2,
-        termInfo: Common.DBElements.termCodeList.randomObject(),
+        termInfo: Common.DBElements.termList.randomObject(),
         gradeInfo: Common.DBElements.gradeList.randomObject()
     }
 };
