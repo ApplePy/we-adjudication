@@ -40,7 +40,7 @@ export default Ember.Component.extend({
         note: this.get('newNote'),
       });
 
-      var t = this.get('store').peekRecord('term-code', this.get('term'));
+      var t = this.get('store').peekRecord('term', this.get('term'));
       var self = this;
 
       grade.save().then(function(record){

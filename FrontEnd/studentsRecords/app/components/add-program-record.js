@@ -31,7 +31,7 @@ export default Ember.Component.extend({
       }
       var load = this.get('store').peekRecord('course-load', sLoad);
       var status = this.get('store').peekRecord('program-status', sStatus);
-      var t = this.get('store').peekRecord('term-code', this.get('term'));
+      var t = this.get('store').peekRecord('term', this.get('term'));
       var prog = this.get('store').createRecord('program-record', {
         name: this.get('newName'),
         level: this.get('newLevel'),

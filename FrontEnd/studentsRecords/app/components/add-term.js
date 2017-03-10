@@ -6,11 +6,23 @@ export default Ember.Component.extend({
   newTermName: null,
   student: null,
   terms: null,
+  termCodes: null,
+  selectedTerm: null,
 
   actions: {
+    selectTerm(termID){
+      var t = this.get('store').peekRecord('term-code', termID);
+      this.set('selectedTerm', t);
+    },
+
     saveRecord(){
-      var term = this.get('store').createRecord('term-code', {
-        name: this.get('newTermName'),
+      if(this.get('selectedTerm') === null){
+        var firstTerm = this.get('termCodes').objectAt(0);
+        this.set('selectedTerm', firstTerm);
+      }
+
+      var term = this.get('store').createRecord('term', {
+        termCode: this.get('selectedTerm'),
         student: this.get('student')
       });
 

@@ -5,13 +5,17 @@
       <div class="ui form">
         <div class="inline field">
           <label>Term Name</label>
-          {{input size="20" type="text"  value = term.name}}
+          <select onchange={{action 'selectTerm' value="target.value"}}>
+            {{#each termCodes as |termChoice|}}
+              <option value={{termChoice.id}} selected={{eq term.termCode.id termChoice.id}}>{{termChoice.name}}</option>
+            {{/each}}
+          </select>
         </div>
       </div>
       <br>
       <div class="actions">
         <br>
-        <div class="ui green button" {{action 'saveRecord' term}}>Save</div>
+        <div class="ui green button" {{action 'saveTerm' term}}>Save</div>
         <div class="ui red basic button" {{action "close" term}}>Cancel</div>
       </div>
     </div>
