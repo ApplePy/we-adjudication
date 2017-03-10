@@ -11,15 +11,33 @@ export default Ember.Component.extend({
   student: null,
   studentArray: [],
 
- actions: {
+  actions: {
     find: function () {
       var studentID = this.get('studentID');
       var firstName = this.get('fName');
       var lastName = this.get('lName');
+      //the result array where matching students will be stored
       var resultArray = [];
 
-     this.get('store').query('student', {filter: {number: studentID, firstName: firstName, lastName: lastName}}).then(
+      var filterObject = {};
+
+      if (studentID != "") {
+        console.debug(studentID);
+        filterObject["studentID"] = studentID;
+      }
+      if ( firstName != "") {
+        console.debug(firstName);
+        filterObject["firstName"] = firstName;
+      }
+      if (lastName != "") {
+        console.debug(lastName);
+        filterObject["lastName"] = lastName;
+      }
+
+      this.get('store').query('student', {filter: filterObject}).then(
        (result) => {
+         console.log(result.get('length'));
+         console.log(result.get('meta').total);
          for(var i = 0; i < result.get('length'); i++) {
            this.get('studentArray').pushObject(result.objectAt(i));
          }
@@ -64,30 +82,32 @@ export default Ember.Component.extend({
              resultArray.push('student');
            }
          }
+          //if the result array is bigger than one, show a list
+          //if one, show the result
 
-         //if the result array is bigger than one, show a list
-         //if one, show the result
+          var index = this.get('studentsModel').indexOf(result);
 
-         var index = this.get('studentsModel').indexOf(result);
-         this.set('INDEX', index);
-         this.set('notDONE', false);
+          console.log(index)
+          this.set('INDEX', index);
+          this.set('notDONE', false);
 
-         Ember.$('.ui.modal').modal('hide');
-         Ember.$('.ui.modal').remove();
-       }
-     ).catch((err)=>{
-       alert("Invalid search!");
-     });
-     //checks to see if any students are returned
+          Ember.$('.ui.modal').modal('hide');
+          Ember.$('.ui.modal').remove();
+        }
+      ).catch((err) => {
+        console.log(err);
+        alert("Invalid search!");
+        //checks to see if any students are returned
      console.log(this.get('studentArray'));
+      });
     },
 
-   close: function() {
-     this.set('notDONE', false);
+    close: function () {
+      this.set('notDONE', false);
 
-     Ember.$('.ui.modal').modal('hide');
-     Ember.$('.ui.modal').remove();
-   }
+      Ember.$('.ui.modal').modal('hide');
+      Ember.$('.ui.modal').remove();
+    }
   },
 
   didRender() {

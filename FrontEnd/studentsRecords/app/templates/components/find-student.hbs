@@ -1,28 +1,28 @@
 <div class="ui modal">
   <div class="header">Search for a student number</div>
   <div class="content">
-      <div class="inline field">
-        <label>Student Number</label>
-        {{input size="10" type="text" valueBinding="studentID"}}
-      </div>
-
     <div class="inline field">
-      <label>Given Name</label>
-      {{input size="30" type="text" valueBinding="fName"}}
+      <label>Student Number</label> {{input size="10" type="text" valueBinding="studentID"}}
     </div>
 
     <div class="inline field">
-      <label>Surname</label>
-      {{input size="30" type="text" valueBinding="lName"}}
+      <label>Given Name</label> {{input size="30" type="text" valueBinding="fName"}}
     </div>
 
-      <div class="actions">
-        <hr>
-        <div class="ui positive button" {{action "find"}}>Find</div>
-        <div class="ui negative basic button" {{action "close"}}>Cancel</div>
-      </div>
+    <div class="inline field">
+      <label>Surname</label> {{input size="30" type="text" valueBinding="lName"}}
+    </div>
 
+    <div class="actions">
+      <hr>
+      <div class="ui positive button" {{action "find"}}>Find</div>
+      <div class="ui negative basic button" {{action "close"}}>Cancel</div>
+    </div>
   </div>
+
+  <div class="actions">
+    <div class="ui red button" {{action "close"}}>Close</div>
+    <div class="ui green button" {{action "find"}}>Find</div>
+  </div>
+
 </div>
-
-

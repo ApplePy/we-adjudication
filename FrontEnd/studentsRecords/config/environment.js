@@ -20,6 +20,7 @@ module.exports = function(environment) {
     APP: {
       // Here you can pass flags/options to your application instance
       // when it is created
+      host: 'http://localhost:3700'
     },
 
     contentSecurityPolicy: {
@@ -47,7 +48,8 @@ module.exports = function(environment) {
   }
 
   if (environment === 'production') {
-
+    ENV.APP.host = 'http://digitalpanda.incode.ca';
+    ENV.contentSecurityPolicy['connect-src'] = "'self'";
   }
 
   return ENV;

@@ -1,27 +1,18 @@
-<div class="ui form">
-  <div class="inline field">
-    <label>Course</label>
-      {{input size="10" type="text" value = standing.course}}
-  </div>
+<table class="ui fixed seven column table">
+  <tr>
+<td class="three wide">{{standing.course}}</td>
+<td class="three wide">{{standing.from}}</td>
+<td class="one wide">{{standing.units}}</td>
+<td class="one wide">{{standing.grade}}</td>
+<td class="three wide"><div class="ui primary button" {{action "showDescription"}}>Description</div></td>
+<td class="two wide"><div class="ui positive button" {{action "updateStanding"}}>Update</div></td>
+<td class="two wide"><div class="ui negative button" {{action "deleteStanding"}}>Delete</div></td>
+</tr>
+</table>
 
-  <div class="inline field">
-    <label>Description</label>
-      {{textarea cols="6" rows="6" value = standing.description}}
-  </div>
+ {{#if descriptionShow}}
+{{show-description title = standing.course description = standing.description notDONE = descriptionShow}}
 
-  <div class="inline field">
-    <label>Units</label> 
-    {{input type="number" value = standing.units}}
-  </div>
-
-  <div class="inline field">
-    <label>Grade</label>
-    {{input type="number" value = standing.grade}}
-  </div>
-
-  <div class="inline field">
-    <label>From</label>
-    {{input type="text" value = standing.from}}
-  </div>
-<div class="ui negative button" {{action "deleteStanding"}}>Delete Course</div>
-</div>
+{{else if updateCourse}}
+{{update-standing updatestanding = standing notDONE = updateCourse}}
+ {{/if}}

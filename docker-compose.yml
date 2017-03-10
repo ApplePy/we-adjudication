@@ -1,0 +1,21 @@
+version: '3.0'
+services:
+  webapp:
+    restart: always
+    build: .
+    links:
+      - mongo
+    ports:
+      - 80:80
+    environment:
+      - NODE_ENV=production
+      - MONGO_DB_HOST=mongo
+  mongo:
+    image: mongo:latest
+    restart: always
+  mongo-seed:
+    build: ./mongo-seed
+    depends_on:
+      - mongo
+    links:
+      - mongo

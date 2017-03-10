@@ -1,0 +1,37 @@
+<div class="ui long modal scrolling">
+  <div class="header">Add a New Program Record</div>
+  <div class="content">
+    <div class="ui form">
+      <div class="inline field">
+        <label>Name</label>
+        {{input size="10" type="text" value = newName}}
+      </div>
+      <div class="inline field">
+        <label>Level</label>
+        {{input size="10" type="number" value = newLevel}}
+      </div>
+      <div class="inline field">
+        <label>Load</label>
+        <select onchange={{action 'selectLoad' value="target.value"}}>
+          {{#each loadModel as |loadChoice|}}
+            <option value={{loadChoice.id}}>{{loadChoice.load}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <div class="inline field">
+        <label>Status</label>
+        <select onchange={{action 'selectStatus' value="target.value"}}>
+          {{#each statusModel as |statusChoice|}}
+            <option value={{statusChoice.id}}>{{statusChoice.status}}</option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+  </div>
+    <br><br>
+    <div class="actions">
+      <br>
+      <div class="ui positive button" {{action 'saveNewRecord'}}>Save</div>
+      <div class="ui negative basic button" {{action "close"}}>Cancel</div>
+    </div>
+</div>

@@ -1,743 +1,357 @@
-//During the test the env variable is set to test
+/**
+ * Created by darryl on 2017-02-13.
+ */
+
 process.env.NODE_ENV = 'test';
 
-let mongoose = require("mongoose");
-let Models = require('../models/studentsRecordsDB');
+let each = require('async/each');
 
-//Require the dev-dependencies
-let chai = require('chai');
-let chaiHttp = require('chai-http');
-let server = require('../server');
+let faker = require('faker');
+let Common = require('./genericTestFramework-helper');
+let chai = Common.chai;
 let expect = chai.expect;
 
-chai.use(chaiHttp);
+let DB = require('../models/studentsRecordsDB');
+let mongoose = DB.mongoose;
 
-// Our parent block - stores the test
-describe('Advanced Standings', () => {
-    let host = "http://localhost:3700";     // This is the Node.js server
+////////
 
-    //Before each test we empty the database
-    beforeEach((done) => {
-        // Clear out all Residences and Students then call done
-        Models.Residencies.remove({}, (err) => {
-            if (err) throw "Error cleaning out Residencies";
-            Models.Students.remove({}, (err) => {
-                if (err) throw "Error cleaning out Students";
-                Models.Awards.remove({}, (err) => {
-                    if (err) throw "Error cleaning out Awards";
-                    Models.AdvancedStandings.remove({}, (err) => {
-                        if (err) throw "Error cleaning out Advanced Standings";
-                        done()
-                    });
-                });
+// NOTE: remember to not use () => {} functions inside mocha tests due to the 'this' binding - it breaks Mocha!
+
+////////
+
+///// THINGS TO CHANGE ON COPYPASTA /////
+let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
+
+let emberName = "advancedStanding";
+let emberNamePluralized = "advancedStandings";
+let itemList = Common.DBElements.standingList;
+let emberModel = AdvancedStandings;
+let newModel = () => {
+    return {
+        course: faker.random.words(1),
+        description: faker.random.words(5),
+        units: faker.random.number(100) / 50,
+        grade: faker.random.number(100),
+        from: faker.random.word(),
+        recipient: Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)]._id
+    }
+};
+let filterValueSearches = ['course', 'description', 'units', 'grade', 'from', 'recipient'];
+let requiredValues = ['recipient'];
+let uniqueValues = [];
+
+// Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
+
+/////////////////////////////////////////
+
+
+describe('Advanced Standings', function () {
+
+    describe('/GET functions', function () {
+        before(Common.regenAllData);
+
+        // Make sure that you can retrieve all values
+        Common.Tests.GetTests.getAll(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            itemList,
+            function () {
+                let limit = itemList.length;
+                return { offset: 0, limit: limit };
             });
-        });
+
+        // Make sure that you can retrieve all values one page at a time
+        Common.Tests.GetTests.getPagination(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            itemList);
+
+        // Check that you can search by all non-array elements
+        each(
+            filterValueSearches,
+            function (element, cb) {
+                Common.Tests.GetTests.getByFilterSuccess(emberName, emberNamePluralized, emberModel, function (next) {
+                    // Pick random model for data
+                    let model = itemList[faker.random.number(itemList.length - 1)];
+
+                    // Convert MongoID into a string before attempting search
+                    let param = (model[element] instanceof mongoose.Types.ObjectId) ? model[element].toString() : model[element];
+
+                    next([{ [element]: param }, itemList.filter((el) => el[element] == model[element])]);
+                }, "Search by " + element, function () {
+                    let limit = itemList.length;
+                    return { offset: 0, limit: limit };
+                });
+                cb();
+            },
+            err => { });
+
+        // Make sure that searches for a nonexistent object returns nothing but succeeds
+        Common.Tests.GetTests.getByFilterSuccess(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                next([{ name: "NonExistent" }, []]);
+            },
+            "Search for a nonexistent model",
+            function () {
+                let limit = itemList.length;
+                return { offset: 0, limit: limit };
+            });
+
+        // Ensure you can search by ID
+        Common.Tests.GetTests.getByID(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                next(itemList[faker.random.number(itemList.length - 1)]);
+            });
+
+        // Make sure that searches fail with 404 when the ID doesn't exist
+        Common.Tests.GetTests.getByID(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                next(new emberModel({}));
+            },
+            "This ID does not exist, should 404.");
     });
 
-    /*
-     * Test the /GET routes
-     */
-    describe('/GET advanced standings', () => {
-        it('it should GET all advanced standings ', (done) => {
-            // Request all advanced standings
-            chai.request(server)
-                .get('/advancedStandings')
-                .end((err, res) => {
-                    expect(res).to.have.status(200);
-                    expect(res).to.be.json;
-                    expect(res.body).to.have.property('advancedStanding');
-                    expect(res.body.advancedStanding.length).to.be.eq(0);
-                    done();
-                });
-        });
+    describe('/PUT functions', function () {
+        beforeEach(Common.regenAllData);
 
-        it('it should GET all advanced standings when created', (done) => {
+        // Make sure PUTs work correctly
+        Common.Tests.PutTests.putUpdated(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let model = itemList[faker.random.number(itemList.length - 1)];
+                let updates = newModel();
 
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err;
+                // Update the object with the new random values
+                Object.keys(updates).forEach(key => model[key] = updates[key]);
 
-                // Make some students, then make advanced standings for the students, then query for all
-                var studentData = {
-                    number: 594265372,
-                    firstName: "Johnny",
-                    lastName: "Test",
-                    gender: 1,
-                    DOB: new Date().toISOString(),
-                    photo: "/some/link",
-                    registrationComments: "No comment",
-                    basisOfAdmission: "Because",
-                    admissionAverage: 90,
-                    admissionComments: "None",
-                    resInfo: testRes
+                // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                next([updates, model]);
+            },
+            requiredValues);
+
+        // Make sure that attempted ID changes are ignored
+        Common.Tests.PutTests.putUpdated(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let model = itemList[faker.random.number(itemList.length - 1)];
+                let updates = {
+                    name: faker.random.word(),
                 };
-                let testStudent = new Models.Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
 
-                    var standingData = {
-                        course: "BASKWV 1000",
-                        description: "Basket weaving",
-                        grade: 100,
-                        from: "UBC",
-                        recipient: testStudent
-                    };
+                // Update the object with the new random values
+                Object.keys(updates).forEach(key => model[key] = updates[key]);
 
-                    // Create 15 advanced standings
-                    var count = 0;
-                    for (var num = 0; num < 15; num++) {
-                        standingData.units = num.toString();
-                        let testStanding = new Models.AdvancedStandings(standingData);
-                        testStanding.save((err) => {
-                            if (err) throw err;
+                // Try to change the id
+                updates._id = mongoose.Types.ObjectId();
 
-                            // Start testing once all advanced standings are created
-                            if (++count == 15) {
-                                // Make request
-                                chai.request(server)
-                                    .get('/advancedStandings')
-                                    .end((err, res) => {
-                                        expect(res).to.have.status(200);
-                                        expect(res).to.be.json;
-                                        expect(res.body).to.have.property('advancedStanding');
-                                        expect(res.body.advancedStanding.length).to.eq(15);
-                                        for (var num = 0; num < 5; num++) {
-                                            expect(res.body.advancedStanding[num].course).to.eq(standingData.course);
-                                            expect(res.body.advancedStanding[num].description).to.eq(standingData.description);
-                                            expect(res.body.advancedStanding[num].grade).to.eq(standingData.grade);
-                                            expect(res.body.advancedStanding[num].from).to.eq(standingData.from);
-                                            expect(res.body.advancedStanding[num].recipient).to.equal(testStudent._id.toString());
-                                        }
-                                        done();
-                                    });
-                            }
-                        });
-                    }
-                });
-            });
-        });
+                // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                next([updates, model]);
+            },
+            requiredValues,
+            "This should succeed and ignore attempted ID change.");
 
-        it('it should GET an advanced standing by recipient', (done) => {
+        // Make sure that attempts to violate uniqueness fails
+        each(
+            uniqueValues,
+            function (value, cb) {
+                Common.Tests.PutTests.putNotUnique(
+                    emberName,
+                    emberNamePluralized,
+                    emberModel,
+                    function (next) {
+                        // Get a random model and make random updates
+                        let model1 = itemList[faker.random.number(itemList.length - 1)];
+                        let model2 = itemList[faker.random.number(itemList.length - 1)];
 
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err;
-
-                // Make some students, then make advanced standings for the students, then query for all
-                var studentData = {
-                    number: 594265372,
-                    firstName: "Johnny",
-                    lastName: "Test",
-                    gender: 1,
-                    DOB: new Date().toISOString(),
-                    photo: "/some/link",
-                    registrationComments: "No comment",
-                    basisOfAdmission: "Because",
-                    admissionAverage: 90,
-                    admissionComments: "None",
-                    resInfo: testRes
-                };
-                let testStudent = new Models.Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    var standingData = {
-                        course: "BASKWV 1000",
-                        description: "Basket weaving",
-                        grade: 100,
-                        from: "UBC",
-                        recipient: testStudent
-                    };
-
-                    // Create 15 advanced standings
-                    var count = 0;
-                    for (var num = 0; num < 15; num++) {
-                        standingData.units = num;
-                        let testStanding = new Models.AdvancedStandings(standingData);
-                        testStanding.save((err) => {
-                            if (err) throw err;
-
-                            // Start testing once all advanced standings are created
-                            if (++count == 15) {
-                                // Make request
-                                chai.request(server)
-                                    .get('/advancedStandings')
-                                    .query({filter: {recipient: testStudent._id.toString()}})
-                                    .end((err, res) => {
-                                        expect(res).to.have.status(200);
-                                        expect(res).to.be.json;
-                                        expect(res.body).to.have.property('advancedStanding');
-                                        expect(res.body.advancedStanding.length).to.eq(15);
-                                        for (var num = 0; num < 15; num++) {
-                                            expect(res.body.advancedStanding[num].course).to.eq(standingData.course);
-                                            expect(res.body.advancedStanding[num].description).to.eq(standingData.description);
-                                            expect(res.body.advancedStanding[num].grade).to.eq(standingData.grade);
-                                            expect(res.body.advancedStanding[num].from).to.eq(standingData.from);
-                                            //expect(res.body.advancedStanding[num].units).to.equal(num);
-                                            expect(res.body.advancedStanding[num].recipient).to.equal(testStudent._id.toString());
-                                        }
-                                        done();
-                                    });
-                            }
-                        });
-                    }
-                });
-            });
-        });
-
-        it('it should GET nothing if student has no advanced standing', (done) => {
-
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err;
-
-                // Make some students, then make advanced standings for the students (except one), then query for all
-                var studentData = {
-                    number: 594265372,
-                    firstName: "Johnny",
-                    lastName: "Test",
-                    gender: 1,
-                    DOB: new Date().toISOString(),
-                    photo: "/some/link",
-                    registrationComments: "No comment",
-                    basisOfAdmission: "Because",
-                    admissionAverage: 90,
-                    admissionComments: "None",
-                    resInfo: testRes
-                };
-                let testStudent = new Models.Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    studentData.number = 541354335;
-                    let otherStudent = new Models.Students(studentData);
-                    otherStudent.save((err) => {
-                        if (err) throw err;
-
-                        var standingData = {
-                            course: "BASKWV 1000",
-                            description: "Basket weaving",
-                            grade: 100,
-                            from: "UBC",
-                            recipient: otherStudent
-                        };
-
-                        // Create 15 advanced standings
-                        var count = 0;
-                        for (var num = 0; num < 15; num++) {
-                            standingData.units = num;
-                            let testStanding = new Models.AdvancedStandings(standingData);
-                            testStanding.save((err) => {
-                                if (err) throw err;
-
-                                // Start testing once all advanced standings are created
-                                if (++count == 15) {
-                                    // Make request
-                                    chai.request(server)
-                                        .get('/advancedStandings')
-                                        .query({filter: {recipient: testStudent._id.toString()}})
-                                        .end((err, res) => {
-                                            expect(res).to.have.status(200);
-                                            expect(res).to.be.json;
-                                            expect(res.body).to.have.property('advancedStanding');
-                                            expect(res.body.advancedStanding.length).to.be.equal(0);
-                                            done();
-                                        });
-                                }
-                            });
+                        // Loop until models are different
+                        while (model1[value] === model2[value]) {
+                            model2 = itemList[faker.random.number(itemList.length - 1)];
                         }
-                    });
-                });
-            });
-        });
 
-        it('it should GET advanced standing when given ID', (done) => {
+                        // Try to update to create a duplicate value
+                        model1[value] = model2[value];
 
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err;
+                        // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                        next([model1, model1._id]);
+                    },
+                    requiredValues,
+                    "Posting with duplicate of unique field " + value + ", should 500.");
+                cb();
+            },
+            err => { });
 
-                // Make some students, then make advanced standings for the students, then query for all
-                var studentData = {
-                    number: 594265372,
-                    firstName: "Johnny",
-                    lastName: "Test",
-                    gender: 1,
-                    DOB: new Date().toISOString(),
-                    photo: "/some/link",
-                    registrationComments: "No comment",
-                    basisOfAdmission: "Because",
-                    admissionAverage: 90,
-                    admissionComments: "None",
-                    resInfo: testRes
-                };
-                let testStudent = new Models.Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
+        // Make sure that attempts to not supply required values fails
+        each(
+            requiredValues,
+            function (value, cb) {
+                Common.Tests.PutTests.putUpdated(
+                    emberName,
+                    emberNamePluralized,
+                    emberModel,
+                    function (next) {
+                        // Get a random model and make random updates
+                        let model = itemList[faker.random.number(itemList.length - 1)];
+                        let updates = newModel();
 
-                    var standingData = {
-                        course: "BASKWV 1000",
-                        description: "Basket weaving",
-                        grade: 100,
-                        from: "UBC",
-                        recipient: testStudent
-                    };
+                        // Remove a required value
+                        delete updates[value];
 
-                    // Create 15 advanced standings
-                    var count = 0;
-                    for (var num = 0; num < 15; num++) {
-                        standingData.units = num;
-                        let testStanding = new Models.AdvancedStandings(standingData);
-                        testStanding.save((err) => {
-                            if (err) throw err;
+                        // Update the object with the new random values
+                        Object.keys(updates).forEach(key => model[key] = updates[key]);
 
-                            // Start testing once all advanced standings are created
-                            if (++count == 15) {
-                                // Make request
-                                chai.request(server)
-                                    .get('/advancedStandings/' + testStanding._id.toString())
-                                    .end((err, res) => {
-                                        expect(res).to.have.status(200);
-                                        expect(res).to.be.json;
-                                        expect(res.body).to.have.property('advancedStanding');
-                                        expect(res.body.advancedStanding.course).to.eq(standingData.course);
-                                        expect(res.body.advancedStanding.description).to.eq(standingData.description);
-                                        expect(res.body.advancedStanding.grade).to.eq(standingData.grade);
-                                        expect(res.body.advancedStanding.from).to.eq(standingData.from);
-                                        expect(res.body.advancedStanding.units).to.equal(testStanding.units);
-                                        expect(res.body.advancedStanding.recipient).to.equal(testStudent._id.toString());
-                                        done();
-                                    });
-                            }
-                        });
-                    }
-                });
-            });
-        });
+                        // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                        next([updates, model]);
+                    },
+                    requiredValues,
+                    "Missing " + value + ", this should 400.");
+                cb();
+            },
+            err => { });
 
-        it('it should 404 for advanced standing when given bad ID', (done) => {
+        // Make sure that attempts to push to a non-existent object fails
+        Common.Tests.PutTests.putUpdated(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let updates = newModel();
+                let model = new emberModel(updates);
 
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err;
-
-                // Make some students, then make awards for the students, then query for all
-                var studentData = {
-                    number: 594265372,
-                    firstName: "Johnny",
-                    lastName: "Test",
-                    gender: 1,
-                    DOB: new Date().toISOString(),
-                    photo: "/some/link",
-                    registrationComments: "No comment",
-                    basisOfAdmission: "Because",
-                    admissionAverage: 90,
-                    admissionComments: "None",
-                    resInfo: testRes
-                };
-                let testStudent = new Models.Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    var standingData = {
-                        course: "BASKWV 1000",
-                        description: "Basket weaving",
-                        grade: 100,
-                        from: "UBC",
-                        recipient: testStudent
-                    };
-
-                    // Create 15 advanced standings
-                    var count = 0;
-                    for (var num = 0; num < 15; num++) {
-                        standingData.units = num;
-                        let testStanding = new Models.AdvancedStandings(standingData);
-                        testStanding.save((err) => {
-                            if (err) throw err;
-
-                            // Start testing once all advanced standings are created
-                            if (++count == 15) {
-                                // Make request
-                                chai.request(server)
-                                    .get('/advancedStandings/53425353')
-                                    .end((err, res) => {
-                                        expect(res).to.have.status(404);
-                                        done();
-                                    });
-                            }
-                        });
-                    }
-                });
-            });
-        });
+                // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                next([updates, model]);
+            },
+            requiredValues,
+            "This model does not exist yet, this should 404.");
     });
 
-    /*
-     * Test the /PUT routes
-     */
-    describe('/PUT advanced standings', () => {
-        it('it should PUT an updated advanced standing', (done) => {
+    describe('/POST functions', function () {
+        beforeEach(Common.regenAllData);
 
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err
-            });
+        // Make sure POSTs work correctly
+        Common.Tests.PostTests.postNew(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Get a random model and make random updates
+                let newContent = newModel();
+                let model = new emberModel(newContent);
+                next([newContent, model])
+            },
+            requiredValues);
 
-            var studentData = {
-                number: 594265372,
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-                resInfo: testRes
-            };
+        let idFerry = null;
 
-            let testStudent = new Models.Students(studentData);
-            testStudent.save((err) => {
-                if (err) throw err;
+        // Make sure that attempts to set IDs are ignored
+        Common.Tests.PostTests.postNew(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                // Select a model and then attempt to set the new object's ID to the already-existing object
+                let model = itemList[faker.random.number(itemList.length - 1)];
+                let modelObj = newModel();
+                modelObj._id = model._id;
+                idFerry = model._id;
 
-                var standingData = {
-                    course: "BASKWV 1000",
-                    description: "Basket weaving",
-                    grade: 100,
-                    from: "UBC",
-                    recipient: testStudent
-                };
+                next([modelObj, model]);
+            },
+            requiredValues,
+            "POSTing a record with an ID that already exists. Should ignore the new ID.",
+            function (next, res) {
+                // Make sure the ID is different
+                expect(res.body[emberName]._id).to.not.equal(idFerry.toString());
 
-                // Create first advanced standing
-                standingData.units = 0;
-                let testStanding = new Models.AdvancedStandings(standingData);
-                testStanding.save((err) => {
-                    if (err) throw err;
-
-                    // Create 14 advanced standings
-                    var count = 0;
-                    for (var num = 1; num < 15; num++) {
-                        standingData.units = num;
-                        let otherStandings = new Models.AdvancedStandings(standingData);
-                        otherStandings.save((err) => {
-                            if (err) throw err;
-
-                            // Start testing once all awards are created
-                            if (++count == 14) {
-
-                                // Modify data
-                                standingData.units = 9001;
-
-                                // Make request
-                                chai.request(server)
-                                    .put('/advancedStandings/' + testStanding._id.toString())
-                                    .send({advancedStanding: standingData})
-                                    .end((err, res) => {
-                                        expect(res).to.have.status(200);
-                                        expect(res).to.be.json;
-                                        expect(res.body).to.have.property('advancedStanding');
-                                        expect(res.body.advancedStanding.course).to.eq(standingData.course);
-                                        expect(res.body.advancedStanding.description).to.eq(standingData.description);
-                                        expect(res.body.advancedStanding.grade).to.eq(standingData.grade);
-                                        expect(res.body.advancedStanding.from).to.eq(standingData.from);
-                                        expect(res.body.advancedStanding.units).to.equal(standingData.units);
-                                        expect(res.body.advancedStanding.recipient).to.equal(testStudent._id.toString());
-
-                                        // Test mongo to ensure it was written
-                                        Models.AdvancedStandings.findById(testStanding._id, (error, res) => {
-                                            expect(error || res.length === 0).to.be.false;
-                                            expect(res.course).to.eq(standingData.course);
-                                            expect(res.description).to.eq(standingData.description);
-                                            expect(res.grade).to.eq(standingData.grade);
-                                            expect(res.from).to.eq(standingData.from);
-                                            expect(res.units).to.equal(standingData.units);
-                                            expect(res.recipient.toString()).to.equal(testStudent._id.toString());
-                                            done();
-                                        });
-                                    });
-                            }
-                        });
-                    }
+                // Make sure the creation was successful anyways
+                emberModel.findById(res.body[emberName]._id, function (err, results) {
+                    expect(err).to.be.null;
+                    expect(results).to.not.be.null;
+                    next();
                 });
             });
-        });
 
-        it('it should 400 on PUT an advanced standing with no recipient', (done) => {
+        // Make sure that attempts to not supply required values fails
+        each(
+            requiredValues,
+            function (value, cb) {
+                Common.Tests.PostTests.postNew(
+                    emberName,
+                    emberNamePluralized,
+                    emberModel,
+                    function (next) {
+                        // Get a random model and make random updates
+                        let newContent = newModel();
 
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err
-            });
+                        // Delete a required value
+                        delete newContent[value];
 
-            var studentData = {
-                number: 594265372,
-                firstName: "Johnny",
-                lastName: "Test",
-                gender: 1,
-                DOB: new Date().toISOString(),
-                photo: "/some/link",
-                registrationComments: "No comment",
-                basisOfAdmission: "Because",
-                admissionAverage: 90,
-                admissionComments: "None",
-                resInfo: testRes
-            };
+                        let model = new emberModel(newContent);
+                        next([newContent, model])
+                    },
+                    requiredValues,
+                    "Missing " + value + ", this should 400.");
+                cb();
+            },
+            err => { });
 
-            let testStudent = new Models.Students(studentData);
-            testStudent.save((err) => {
-                if (err) throw err;
+        // Make sure attempts to post duplicate data fails
+        // TODO: I'm not sure if this test is appropriate...
+        Common.Tests.PostTests.postNotUnique(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                let model = itemList[faker.random.number(itemList.length - 1)];
 
-                var standingData = {
-                    course: "BASKWV 1000",
-                    description: "Basket weaving",
-                    grade: 100,
-                    from: "UBC",
-                    recipient: testStudent
-                };
-
-                // Create first advanced standing
-                standingData.units = 0;
-                let testStanding = new Models.AdvancedStandings(standingData);
-                testStanding.save((err) => {
-                    if (err) throw err;
-
-                    // Create 14 advanced standings
-                    var count = 0;
-                    for (var num = 1; num < 15; num++) {
-                        standingData.units = num;
-                        let otherStandings = new Models.AdvancedStandings(standingData);
-                        otherStandings.save((err) => {
-                            if (err) throw err;
-
-                            // Start testing once all awards are created
-                            if (++count == 14) {
-
-                                // Modify data
-                                standingData.units = 9001;
-                                standingData.recipient = null;
-
-                                // Make request
-                                chai.request(server)
-                                    .put('/advancedStandings/' + testStanding._id.toString())
-                                    .send({advancedStanding: standingData})
-                                    .end((err, res) => {
-                                        expect(res).to.have.status(400);
-
-                                        // Test mongo to ensure it was written
-                                        Models.AdvancedStandings.findById(testStanding._id, (error, res) => {
-                                            expect(error).to.be.null;
-                                            expect(res.recipient).to.not.be.null;
-                                            done();
-                                        });
-                                    });
-                            }
-                        });
-                    }
-                });
-            });
-        });
-
-        it('it should 404 on PUT a nonexistent advanced standing', (done) => {
-
-            // Set up mock data
-            let testRes = new Models.Residencies({name: "Johnny Test House"});
-            testRes.save((err) => {
-                if (err) throw err;
-
-                // Make some students, then make advanced standings for the students, then query for all
-                var studentData = {
-                    number: 594265372,
-                    firstName: "Johnny",
-                    lastName: "Test",
-                    gender: 1,
-                    DOB: new Date().toISOString(),
-                    photo: "/some/link",
-                    registrationComments: "No comment",
-                    basisOfAdmission: "Because",
-                    admissionAverage: 90,
-                    admissionComments: "None",
-                    resInfo: testRes
-                };
-                let testStudent = new Models.Students(studentData);
-                testStudent.save((err) => {
-                    if (err) throw err;
-
-                    var standingData = {
-                        course: "BASKWV 1000",
-                        description: "Basket weaving",
-                        grade: 100,
-                        from: "UBC",
-                        recipient: testStudent
-                    };
-
-                    // Create 15 advanced standings
-                    var count = 0;
-                    for (var num = 0; num < 15; num++) {
-                        standingData.units = num;
-                        let testStanding = new Models.AdvancedStandings(standingData);
-                        testStanding.save((err) => {
-                            if (err) throw err;
-
-                            // Start testing once all advanced standings are created
-                            if (++count == 15) {
-                                // Make request
-                                chai.request(server)
-                                    .get('/advancedStandings/4765437876543')
-                                    .end((err, res) => {
-                                        expect(res).to.have.status(404);
-                                        done();
-                                    });
-                            }
-                        });
-                    }
-                });
-            });
-        });
+                next([model, model]);
+            },
+            requiredValues,
+            "POSTing a record with duplicate data, should 500.",
+            undefined,
+            it.skip);
     });
 
-    /*
-     * Test the /POST routes
-     */
-    describe('/POST an advanced standings', () => {
-        it('it should POST successfully', (done) => {
+    describe('/DELETE functions', function () {
+        beforeEach(Common.regenAllData);
 
-            // Set up mock data
-            let studentData = {
-                number: 594265372
-            };
-            let testStudent = new Models.Students(studentData);
+        let elementFerry = null;
 
-            let standingData = {
-                course: "BASKWV 1000",
-                description: "Basket weaving",
-                grade: 100,
-                units: 1,
-                from: "UBC",
-                recipient: testStudent
-            };
-
-            // Save mock
-            testStudent.save((err) => {
-                if (err) throw err;
-
-                // Make request
-                chai.request(server)
-                    .post('/advancedStandings')
-                    .send({advancedStanding: standingData})
-                    .end((err, res) => {
-                        expect(res).to.have.status(201);
-                        expect(res).to.be.json;
-                        expect(res.body).to.have.property('advancedStanding');
-                        expect(res.body.advancedStanding.course).to.eq(standingData.course);
-                        expect(res.body.advancedStanding.description).to.eq(standingData.description);
-                        expect(res.body.advancedStanding.grade).to.eq(standingData.grade);
-                        expect(res.body.advancedStanding.from).to.eq(standingData.from);
-                        expect(res.body.advancedStanding.units).to.equal(standingData.units);
-                        expect(res.body.advancedStanding.recipient).to.equal(testStudent._id.toString());
-
-                        // Check underlying database
-                        Models.AdvancedStandings.findById(res.body.advancedStanding._id, function (error, standing) {
-                            expect(error).to.be.null;
-                            expect(standing).to.not.be.null;
-                            expect(res.body).to.have.property('advancedStanding');
-                            expect(standing.course).to.eq(standingData.course);
-                            expect(standing.description).to.eq(standingData.description);
-                            expect(standing.grade).to.eq(standingData.grade);
-                            expect(standing.from).to.eq(standingData.from);
-                            expect(standing.units).to.equal(standingData.units);
-                            expect(standing.recipient.toString()).to.equal(testStudent._id.toString());
-
-                            done();
-                        });
-                    });
+        // Make sure that DELETEs are successful
+        Common.Tests.DeleteTests.deleteExisting(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                elementFerry = itemList[faker.random.number(itemList.length - 1)];
+                next(elementFerry._id);
             });
-        });
 
-        it('it should 400 on POST with no recipient', (done) => {
-
-            // Set up mock data
-            let studentData = {
-                number: 594265372
-            };
-            let testStudent = new Models.Students(studentData);
-
-            let awardData ={
-                note: "A note"
-            };
-
-            // Save mock
-            testStudent.save((err) => {
-                if(err) throw err;
-
-                // Make request
-                chai.request(server)
-                    .post('/awards')
-                    .send({award: awardData})
-                    .end((err, res) => {
-                        expect(res).to.have.status(400);
-                        done();
-                    });
+        // Make sure that attempts to delete a non-existent object fails
+        Common.Tests.DeleteTests.deleteNonexistent(
+            emberName,
+            emberNamePluralized,
+            emberModel,
+            function (next) {
+                next(mongoose.Types.ObjectId());
             });
-        });
-
     });
-
-    /*
-     * Test the /DELETE routes
-     */
-    describe('/DELETE an award', () => {
-        it('it should DELETE successfully and remove links', (done) => {
-
-            // Set up mock data
-            let studentData = {
-                number: 594265372
-            };
-            let testStudent = new Models.Students(studentData);
-
-            let standingData = {
-                course: "BASKWV 1000",
-                description: "Basket weaving",
-                grade: 100,
-                units: 1,
-                from: "UBC",
-                recipient: testStudent
-            };
-
-            // Save mock student
-            testStudent.save((err) => {
-                if (err) throw err;
-
-                // save advanced standing
-                let testStanding = new Models.AdvancedStandings(standingData);
-                testStanding.save((err) => {
-                    if (err) throw err;
-
-
-                    // Make request
-                    chai.request(server)
-                        .delete('/advancedStandings/' + testStanding._id.toString())
-                        .send({advancedStanding: standingData})
-                        .end((err, res) => {
-                            expect(res).to.have.status(200);
-
-                            // Check underlying database
-                            Models.AdvancedStandings.findById(testStanding._id, function (error, award) {
-                                expect(error).to.be.null;
-                                expect(award).to.be.null;
-                                done();
-                            });
-                        });
-                });
-            });
-        });
-    });
-
 });

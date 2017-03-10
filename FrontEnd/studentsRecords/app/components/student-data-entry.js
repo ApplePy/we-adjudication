@@ -4,6 +4,11 @@ export default Ember.Component.extend({
   store: Ember.inject.service(),
   showAllStudents: false,
   residencyModel: null,
+  genderModel: null,
+  statusModel: null,
+  loadModel: null,
+  planModel: null,
+  termCodeModel: null,
   selectedResidency: null,
   selectedGender: null,
   selectedDate: null,
@@ -25,6 +30,8 @@ export default Ember.Component.extend({
   showNewAward: false,
   awardNotes: [],
   advancedStandingArray: [],
+  termModel: [],
+  updateAdmission: false,
 
   studentModel: Ember.observer('offset', function () {
     var self = this;
@@ -61,6 +68,26 @@ export default Ember.Component.extend({
       self.set('residencyModel', records);
     });
 
+    this.get('store').findAll('gender').then(function (records) {
+      self.set('genderModel', records);
+    });
+
+    this.get('store').findAll('program-status').then(function (records) {
+      self.set('statusModel', records);
+    });
+
+    this.get('store').findAll('plan-code').then(function (records) {
+      self.set('planModel', records);
+    });;
+
+    this.get('store').findAll('course-load').then(function (records) {
+      self.set('loadModel', records);
+    });
+
+    this.get('store').findAll('term-code').then(function(records){
+      self.set('termCodeModel', records);
+    });
+
     // load first page of the students records
     this.set('limit', 10);
     this.set('offset', 0);
@@ -76,8 +103,6 @@ export default Ember.Component.extend({
 
       // Show first student data
       self.set('currentIndex', self.get('firstIndex'));
-
-      
     });
 
   },
@@ -89,13 +114,14 @@ export default Ember.Component.extend({
     var datestring = date.toISOString().substring(0, 10);
     this.set('selectedDate', datestring);
 
-    //Fixes gender/residency bug.  Sets selectedResidency/selectedGender to the value
-    //the student has in the database.  Before, would only set the value if it was selected
+    //Fixes gender/residency bug
     this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
     this.set('awardNotes', []);
     this.set('advancedStandingArray', []);
+    this.set('termModel',[]);
 
-    this.set('selectedGender', this.get('currentStudent').get('gender'));
+    this.set('selectedGender', this.get('currentStudent').get('genderInfo').get('id'));
+
     this.get('store').query('award', {
          filter: {
            recipient: this.get('currentStudent').id
@@ -106,7 +132,7 @@ export default Ember.Component.extend({
         }
        });
 
-       this.get('store').query('advanced-standing', {
+    this.get('store').query('advanced-standing', {
          filter: {
            recipient: this.get('currentStudent').id
          }
@@ -115,6 +141,28 @@ export default Ember.Component.extend({
           this.get('advancedStandingArray').pushObject(standing.objectAt(i));
         }
        });
+
+    this.get('store').query('term', {
+      limit: 500,
+      filter: {
+        student: this.get('currentStudent').id
+      }
+    }).then((terms) => {
+      this.get('store').query('grade', {limit: 500}).then();
+      for(var i = 0; i < terms.get('length'); i++) {
+        var term = terms.objectAt(i);
+
+        this.get('store').query('course-code', {limit: 500, filter: {termInfo: term.id}}).then(() => {
+
+        });
+
+        this.get('store').query('program-record', {limit: 500}).then(() => {
+
+        });
+        this.get('termModel').pushObject(terms.objectAt(i));
+      }
+    });
+
   },
 
   didRender() {
@@ -124,19 +172,23 @@ export default Ember.Component.extend({
 
   actions: {
     saveStudent () {
+      console.log(this.get('currentStudent').get('genderInfo').get('id'));
+      console.log(this.get('selectedGender'));
       var updatedStudent = this.get('currentStudent');
-      var res = this.get('store').peekRecord('residency', this.get('selectedResidency'));
-      updatedStudent.set('gender', this.get('selectedGender'));
       updatedStudent.set('DOB', new Date(this.get('selectedDate')));
-      updatedStudent.set('resInfo', res);
       updatedStudent.save().then(() => {
-        //     this.set('isStudentFormEditing', false);
+
       });
+      console.log(this.get('currentStudent').get('genderInfo').get('id'));
+      console.log(this.get('selectedGender'));
     },
 
     undoSave(){
-      //Rollback the store value to the value last saved in the database
       this.get('currentStudent').rollbackAttributes();
+      //Change the selected values so it doesn't mess with next student
+      this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
+      this.set('selectedGender', this.get('currentStudent').get('genderInfo').get('id'));
+      this.set('selectedDate', this.get('currentStudent').get('DOB').toISOString().substring(0, 10));
     },
 
     firstStudent() {
@@ -175,10 +227,16 @@ export default Ember.Component.extend({
 
     selectGender (gender){
       this.set('selectedGender', gender);
+      //Set the value of this student's gender to the gender selected
+      var gen = this.get('store').peekRecord('gender', this.get('selectedGender'));
+      this.get('currentStudent').set('genderInfo', gen);
     },
 
     selectResidency (residency){
       this.set('selectedResidency', residency);
+      //Set the value of this student's residency to this one
+      var res = this.get('store').peekRecord('residency', this.get('selectedResidency'));
+      this.get('currentStudent').set('resInfo', res);
     },
 
     assignDate (date){
@@ -200,7 +258,7 @@ export default Ember.Component.extend({
       });
 
       //If this is the last student on the page, load previous.  If not, load next
-      if(this.get('currentIndex') == this.get('lastIndex')){
+      if(this.get('currentIndex') === this.get('lastIndex')){
         this.send('previousStudent');
       } else {
         this.send('nextStudent');
@@ -209,7 +267,7 @@ export default Ember.Component.extend({
       //Subtract 1 from the last index of this page of students to account for the missing record
       this.set('lastIndex', this.get('lastIndex') - 1);
     },
-    
+
     findStudent() {
       this.set('showFindStudent', true);
       this.set('showAllStudents', false);
@@ -226,6 +284,10 @@ export default Ember.Component.extend({
 
     addAward() {
       this.set('showNewAward', true);
-    }
+    },
+
+    updateAdmission() {
+      this.set('updateAdmission', true);
+    },
   }
 });

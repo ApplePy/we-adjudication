@@ -1,0 +1,20 @@
+<div class="ui modal">
+    <div class="header">Add New Term</div>
+    <div class="content">
+      <div class="ui form">
+        <div class="inline field">
+          <select onchange={{action 'selectTerm' value="target.value"}}>
+            {{#each termCodes as |termChoice|}}
+              <option value={{termChoice.id}}>{{termChoice.name}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+      <br>
+      <div class="actions">
+        <br>
+        <div class="ui green button" {{action 'saveRecord'}}>Save</div>
+        <div class="ui red basic button" {{action "close"}}>Cancel</div>
+      </div>
+    </div>
+</div>
