@@ -5,8 +5,8 @@ export default Ember.Component.extend({
   studentsModel: null,
   INDEX: null,
   studentID: null,
-  firstName: null,
-  lastName: null,
+  fName: "",
+  lName: "",
   notDONE: null,
   student: null,
   studentArray: [],
@@ -19,75 +19,33 @@ export default Ember.Component.extend({
       //the result array where matching students will be stored
       var resultArray = [];
 
+      // Create filter object
       var filterObject = {};
-
       if (studentID != "") {
-        console.debug(studentID);
-        filterObject["studentID"] = studentID;
+        filterObject["number"] = studentID;
       }
-      if ( firstName != "") {
-        console.debug(firstName);
+      if (firstName != "") {
         filterObject["firstName"] = firstName;
       }
       if (lastName != "") {
-        console.debug(lastName);
         filterObject["lastName"] = lastName;
       }
 
       this.get('store').query('student', {filter: filterObject}).then(
        (result) => {
-         console.log(result.get('length'));
-         console.log(result.get('meta').total);
-         for(var i = 0; i < result.get('length'); i++) {
-           this.get('studentArray').pushObject(result.objectAt(i));
-         }
+         result.forEach(element => this.get('studentArray').pushObject(element));
 
-         if(studentID.empty())
-         {
-           if ((this.indexOf(firstName) > -1) && ((this.indexOf(lastName) > -1)))
-           {
-             resultArray.push('student');
-           }
-         }
-         else if(firstName.empty())
-         {
-           if ((this.indexOf(studentID) > -1) && ((this.indexOf(lastName) > -1)))
-           {
-             resultArray.push('student');
-           }
-         }
-         else if(lastName.empty())
-         {
-           if ((this.indexOf(studentID) > -1) && ((this.indexOf(firstName) > -1)))
-           {
-             resultArray.push('student');
-           }
-         }
-         else if(studentID.empty()&& firstName.empty())
-         {
-           if (this.indexOf(lastName) > -1) {resultArray.push(this);}
-         }
-         else if(studentID.empty()&& lastName.empty())
-         {
-           if (this.indexOf(firstName) > -1) {resultArray.push(this);}
-         }
-         else if(firstName.empty()&& lastName.empty())
-         {
-           if (this.indexOf(studentID) > -1) {resultArray.push(this);}
-         }
-         else
-         {
-           if ((this.indexOf(studentID) > -1) && (this.indexOf(firstName) > -1) && (this.indexOf(lastName) > -1))
-           {
-             resultArray.push('student');
-           }
-         }
+        
           //if the result array is bigger than one, show a list
+          if(result.get('length') > 1) {
+            // TODO
+          }
+
           //if one, show the result
+          if (result.get('length') === 1){
+            var index = this.get('studentsModel').indexOf(result.get("firstObject"));
+          }
 
-          var index = this.get('studentsModel').indexOf(result);
-
-          console.log(index)
           this.set('INDEX', index);
           this.set('notDONE', false);
 
