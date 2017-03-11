@@ -5,7 +5,7 @@ var mongoose = require('./../../studentsRecordsDB').mongoose;
 
 var facultySchema = mongoose.Schema(
     {
-        name: String,
+        name: {type: String, required: true},
         assessmentCodes: [{type: mongoose.Schema.ObjectId, ref: "AssessmentCodes"}],
         departments: [{type: mongoose.Schema.ObjectId, ref: 'Departments'}]
     }

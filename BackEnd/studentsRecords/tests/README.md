@@ -27,12 +27,11 @@ test access
     
 ## Tips
 Current tests in this folder use a _"copypasta"_ format which dynamically
-generates many useful tests dynamically at runtime. To use, copy the contents
-of an existing test into your new test file, and change the contents of
-```
-///// THINGS TO CHANGE ON COPYPASTA /////
-```
-to fit your file. Items to change:
+generates many useful tests at runtime. To use, copy the contents
+of an existing test into your new test file, and change the contents of the
+`///// THINGS TO CHANGE ON COPYPASTA /////` block to fit your file.
+
+Items to change:
 
 | Variable Name         | Description                                                                                                                                   |
 |-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|

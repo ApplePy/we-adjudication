@@ -5,8 +5,8 @@ var mongoose = require('./../../studentsRecordsDB').mongoose;
 
 var programAdministrationSchema = mongoose.Schema(
     {
-        name: String,
-        position: String,
+        name: {type: String, required: true},
+        position: {type: String, required: true},
         department: {type: mongoose.Schema.ObjectId, ref: 'Departments'}
     }
 );
