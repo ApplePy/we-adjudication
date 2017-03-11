@@ -1,9 +1,9 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var mongoose = require('./../../studentsRecordsDB').mongoose;
+let mongoose = require('./../../studentsRecordsDB').mongoose;
 
-var assessmentCodeSchema = mongoose.Schema(
+let assessmentCodeSchema = mongoose.Schema(
     {
         code: String,
         name: String,
@@ -13,6 +13,6 @@ var assessmentCodeSchema = mongoose.Schema(
     }
 );
 
-var AssessmentCodes = mongoose.model('assessmentCode', assessmentCodeSchema);
+let AssessmentCodes = mongoose.model('assessmentCode', assessmentCodeSchema);
 
 module.exports = AssessmentCodes;

@@ -11,14 +11,22 @@ Digital Panda team.
 | tests         | Contains the tests that verify the functionality of the routes.             |
 
 ## Structure
-Routes follow a generic structure outlined in `genericRouting.js`, which exports a `Setup`
+Routes follow a generic structure outlined in `genericRouting.js`, which exports a `Route`
  function. Routes can be quickly created by specifying needs in the Setup parameters.
+
+ A `PropertyValidator` *queryHook* function is also exported for convienience. This function 
+ takes an array of strings that correspond to property names that must exist on the model 
+ object to be accepted.
+
+A `MapToNull` *pre-delete* function is also exported for convenience. This function takes a
+model and a property name, and sets the property *property* to **null** on all objects of 
+type *model* if the property matches the Mongo ID sent in the route URL.
  
-### Setup parameters:
+### Route function parameters:
 
 | Parameter Name     | Type                                              | Returns (Optional)                     | Description                                                                                                    |
 |--------------------|---------------------------------------------------|----------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| model              | Mongoose Model Object                             |                                        | The model to construct a route for.                                                                            |
+| Model              | Mongoose Model Object                             |                                        | The model to construct a route for.                                                                            |
 | modelNameEmberized | String                                            |                                        | The ember version of the model's name that it expects in JSON responses.                                       |
 | enablePaginate     | Boolean                                           |                                        | For equipped modules, enables pagination functionality for both GET all and filtered GETs.                     |
 | verifyHook         | Function(request, response, model)                | Success=0, Failure=array of error msgs | The hook to verify that the received model is properly filled out.                                             |

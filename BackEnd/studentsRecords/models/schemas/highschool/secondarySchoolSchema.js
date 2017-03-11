@@ -1,10 +1,10 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var mongoose = require('./../../studentsRecordsDB').mongoose;
-var mongoosePaginate = require('mongoose-paginate');
+let mongoose = require('./../../studentsRecordsDB').mongoose;
+let mongoosePaginate = require('mongoose-paginate');
 
-var secondarySchoolSchema = mongoose.Schema(
+let secondarySchoolSchema = mongoose.Schema(
     {
         name: {type: String, required: true},
         courses: [{type: mongoose.Schema.ObjectId, ref: 'HSCourses'}]
@@ -12,6 +12,6 @@ var secondarySchoolSchema = mongoose.Schema(
 );
 secondarySchoolSchema.plugin(mongoosePaginate);
 
-var SecondarySchools = mongoose.model('secondarySchool', secondarySchoolSchema);
+let SecondarySchools = mongoose.model('secondarySchool', secondarySchoolSchema);
 
 module.exports = SecondarySchools;

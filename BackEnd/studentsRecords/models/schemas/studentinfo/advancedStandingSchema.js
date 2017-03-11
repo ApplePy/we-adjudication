@@ -1,10 +1,10 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var mongoose = require('./../../studentsRecordsDB').mongoose;
-var mongoosePaginate = require('mongoose-paginate');
+let mongoose = require('./../../studentsRecordsDB').mongoose;
+let mongoosePaginate = require('mongoose-paginate');
 
-var advancedStandingSchema = mongoose.Schema(
+let advancedStandingSchema = mongoose.Schema(
     {
         course: String,
         description: String,
@@ -16,6 +16,6 @@ var advancedStandingSchema = mongoose.Schema(
 );
 advancedStandingSchema.plugin(mongoosePaginate);
 
-var AdvancedStandings = mongoose.model('advancedStanding', advancedStandingSchema);
+let AdvancedStandings = mongoose.model('advancedStanding', advancedStandingSchema);
 
 module.exports = AdvancedStandings;

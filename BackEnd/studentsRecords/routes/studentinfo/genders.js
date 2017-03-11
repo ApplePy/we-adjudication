@@ -1,34 +1,18 @@
-var Genders = require('../../models/schemas/studentinfo/genderSchema');
-var Students = require('../../models/schemas/studentinfo/studentSchema');
-var Setup = require('../genericRouting');
+let Genders = require('../../models/schemas/studentinfo/genderSchema');
+let Students = require('../../models/schemas/studentinfo/studentSchema');
+let Route = require('../genericRouting').Route;
+let PropertyValidator = require('../genericRouting').PropertyValidator;
+let MapToNull = require('../genericRouting').MapToNull;
 
 module.exports =
-    Setup(
+    new Route(
         Genders,
         'gender',
         false,
-        (req, res, mod) => {
-            if (!mod.name)
-                return ["name must be specified"];
-            else
-                return 0
-        },
+        new PropertyValidator("name"),
         undefined,
         undefined,
         undefined,
-        (req, res, next) => {
-            // Map all affected students to null
-            Students.update(
-                {genderInfo: req.params.mongo_id},
-                {$set: {genderInfo: null}},
-                {multi: true},
-                function (error, students) {
-                    if (error) res.status(500).send({error: error});
-                    else {
-                        // All students mapped successfully, delete residency
-                        next();
-                    }
-                });
-        },
+        new MapToNull(Students, "genderInfo"),
         undefined
     );

@@ -1,9 +1,9 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var mongoose = require('./../../studentsRecordsDB').mongoose;
+let mongoose = require('./../../studentsRecordsDB').mongoose;
 
-var departmentSchema = mongoose.Schema(
+let departmentSchema = mongoose.Schema(
     {
         name: {type: String, required: true},
         faculty: {type: mongoose.Schema.ObjectId, ref: "Faculties"},
@@ -11,6 +11,6 @@ var departmentSchema = mongoose.Schema(
     }
 );
 
-var Departments = mongoose.model('department', departmentSchema);
+let Departments = mongoose.model('department', departmentSchema);
 
 module.exports = Departments;

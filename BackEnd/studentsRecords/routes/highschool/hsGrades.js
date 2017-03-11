@@ -2,21 +2,17 @@
  * Created by darryl on 2017-02-13.
  */
 
-var HSGrades = require('../../models/schemas/highschool/hsGradeSchema');
-var Setup = require('../genericRouting');
+let HSGrades = require('../../models/schemas/highschool/hsGradeSchema');
+let Route = require('../genericRouting').Route;
+let PropertyValidator = require('../genericRouting').PropertyValidator;
 
 
 module.exports =
-    Setup(
+    new Route(
         HSGrades,
         'hsGrade',
         true,
-        (req, res, mod) => {
-            if (!mod.mark || !mod.recipient)
-                return ["Mark and recipient must be specified"];
-            else
-                return 0;
-        },
+        new PropertyValidator("mark", "recipient"),
         undefined,
         undefined,
         undefined,

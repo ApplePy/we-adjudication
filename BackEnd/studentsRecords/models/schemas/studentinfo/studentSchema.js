@@ -1,10 +1,10 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var mongoose = require('./../../studentsRecordsDB').mongoose;
-var mongoosePaginate = require('mongoose-paginate');
+let mongoose = require('./../../studentsRecordsDB').mongoose;
+let mongoosePaginate = require('mongoose-paginate');
 
-var studentsSchema = mongoose.Schema(
+let studentsSchema = mongoose.Schema(
     {
         number: {type: Number, index: {unique: true}},
         firstName: String,
@@ -25,6 +25,6 @@ var studentsSchema = mongoose.Schema(
 );
 studentsSchema.plugin(mongoosePaginate);
 
-var Students = mongoose.model('student', studentsSchema);
+let Students = mongoose.model('student', studentsSchema);
 
 module.exports = Students;

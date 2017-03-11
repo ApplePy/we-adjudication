@@ -1,9 +1,9 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var mongoose = require('./../../studentsRecordsDB').mongoose;
+let mongoose = require('./../../studentsRecordsDB').mongoose;
 
-var logicalExpressionSchema = mongoose.Schema(
+let logicalExpressionSchema = mongoose.Schema(
     {
         booleanExp: String,
         logicalLink: String,
@@ -12,6 +12,6 @@ var logicalExpressionSchema = mongoose.Schema(
     }
 );
 
-var LogicalExpressions = mongoose.model('logicalExpression', logicalExpressionSchema);
+let LogicalExpressions = mongoose.model('logicalExpression', logicalExpressionSchema);
 
 module.exports = LogicalExpressions;

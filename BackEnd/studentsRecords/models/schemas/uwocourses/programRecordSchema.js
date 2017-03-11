@@ -1,10 +1,10 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var mongoose = require('./../../studentsRecordsDB').mongoose;
-var mongoosePaginate = require('mongoose-paginate');
+let mongoose = require('./../../studentsRecordsDB').mongoose;
+let mongoosePaginate = require('mongoose-paginate');
 
-var programRecordSchema = mongoose.Schema(
+let programRecordSchema = mongoose.Schema(
     {
         name: String,
         level: Number,  // Student year
@@ -16,6 +16,6 @@ var programRecordSchema = mongoose.Schema(
 );
 programRecordSchema.plugin(mongoosePaginate);
 
-var ProgramRecords = mongoose.model('programRecord', programRecordSchema);
+let ProgramRecords = mongoose.model('programRecord', programRecordSchema);
 
 module.exports = ProgramRecords;

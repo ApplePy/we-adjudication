@@ -1,9 +1,9 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var mongoose = require('./../../studentsRecordsDB').mongoose;
+let mongoose = require('./../../studentsRecordsDB').mongoose;
 
-var adjudicationSchema = mongoose.Schema(
+let adjudicationSchema = mongoose.Schema(
     {
         date: Date,
         termAVG: Number,
@@ -14,6 +14,6 @@ var adjudicationSchema = mongoose.Schema(
     }
 );
 
-var Adjudications = mongoose.model('adjudication', adjudicationSchema);
+let Adjudications = mongoose.model('adjudication', adjudicationSchema);
 
 module.exports = Adjudications;

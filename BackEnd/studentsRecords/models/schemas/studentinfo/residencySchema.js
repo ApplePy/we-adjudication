@@ -1,15 +1,15 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var mongoose = require('./../../studentsRecordsDB').mongoose;
+let mongoose = require('./../../studentsRecordsDB').mongoose;
 
-var residencySchema = mongoose.Schema(
+let residencySchema = mongoose.Schema(
     {
         name: {type: String, index: {unique: true}},
         students: [{type: mongoose.Schema.ObjectId, ref: ('Students')}]
     }
 );
 
-var Residencies = mongoose.model('residency', residencySchema);
+let Residencies = mongoose.model('residency', residencySchema);
 
 module.exports = Residencies;

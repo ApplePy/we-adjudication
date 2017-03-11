@@ -2,12 +2,12 @@
  * Created by darryl on 2017-02-13.
  */
 
-var Terms = require('../../models/schemas/uwocourses/termSchema');
-var Setup = require('../genericRouting');
+let Terms = require('../../models/schemas/uwocourses/termSchema');
+let Route = require('../genericRouting').Route;
 
 
 module.exports =
-    Setup(
+    new Route(
         Terms,
         'term',
         true,

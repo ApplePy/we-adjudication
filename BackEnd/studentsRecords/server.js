@@ -1,26 +1,26 @@
 
-var express = require('express');
-var logger = require('./logger');
-var app = express();
+let express = require('express');
+let logger = require('./logger');
+let app = express();
 
-var students = require('./routes/studentinfo/students');
-var residencies = require('./routes/studentinfo/residencies');
-var genders = require('./routes/studentinfo/genders');
-var awards = require('./routes/studentinfo/awards');
-var advancedStandings = require('./routes/studentinfo/advancedStandings');
-var hsGrades = require('./routes/highschool/hsGrades');
-var hsCourses = require('./routes/highschool/hsCourses');
-var hsCourseSources = require('./routes/highschool/hsCourseSources');
-var secondarySchools = require('./routes/highschool/secondarySchools');
-var hsSubjects = require('./routes/highschool/hsSubjects');
-var termCodes = require('./routes/uwocourses/termCodes');
-var terms = require('./routes/uwocourses/terms');
-var grades = require('./routes/uwocourses/grades');
-var courseCodes = require('./routes/uwocourses/courseCodes');
-var courseLoads = require('./routes/uwocourses/courseLoads');
-var programStatuses = require('./routes/uwocourses/programStatuses');
-var programRecords = require('./routes/uwocourses/programRecords');
-var planCodes = require('./routes/uwocourses/planCodes');
+let students = require('./routes/studentinfo/students');
+let residencies = require('./routes/studentinfo/residencies');
+let genders = require('./routes/studentinfo/genders');
+let awards = require('./routes/studentinfo/awards');
+let advancedStandings = require('./routes/studentinfo/advancedStandings');
+let hsGrades = require('./routes/highschool/hsGrades');
+let hsCourses = require('./routes/highschool/hsCourses');
+let hsCourseSources = require('./routes/highschool/hsCourseSources');
+let secondarySchools = require('./routes/highschool/secondarySchools');
+let hsSubjects = require('./routes/highschool/hsSubjects');
+let termCodes = require('./routes/uwocourses/termCodes');
+let terms = require('./routes/uwocourses/terms');
+let grades = require('./routes/uwocourses/grades');
+let courseCodes = require('./routes/uwocourses/courseCodes');
+let courseLoads = require('./routes/uwocourses/courseLoads');
+let programStatuses = require('./routes/uwocourses/programStatuses');
+let programRecords = require('./routes/uwocourses/programRecords');
+let planCodes = require('./routes/uwocourses/planCodes');
 
 
 app.use(function (request, response, next) {
@@ -39,7 +39,7 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 // Set API namespace
-var api = express.Router();
+let api = express.Router();
 app.use('/api', api);
 
 // Set json header and API routes
@@ -67,7 +67,7 @@ api.use('/planCodes', planCodes);
 if (process.env.NODE_ENV === 'production') app.use(express.static('dist'));
 
 // Port to listen on
-var port = 3700;
+let port = 3700;
 
 // Change port to 80 in production
 if (process.env.NODE_ENV === 'production') port = 80;

@@ -1,6 +1,10 @@
 /**
  * Created by darryl on 2017-02-12.
  */
+
+// Due to all the chai assertions and dynamic searches, shut off expr and loopfunc for the entire file
+/* jshint expr: true, loopfunc: true */
+
 //During the test the env variable is set to test
 process.env.NODE_ENV = 'test';
 
@@ -104,13 +108,13 @@ let Tests = {
          *
          * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
          * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param modelType         A model that matches the type returned by the API call
-         * @param modelArray        An array containing modelType objects that is expected from the API call
+         * @param ModelType         A model that matches the type returned by the API call
+         * @param modelArray        An array containing ModelType objects that is expected from the API call
          * @param queryOperand      Query operand can be a URL query object or a function that resolves into a URL query object
          * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        getAll: function (emberName, emberPluralized, modelType, modelArray, queryOperand = null, itWrap = null) {
-            if (itWrap == null) itWrap = it;
+        getAll: function (emberName, emberPluralized, ModelType, modelArray, queryOperand = null, itWrap = null) {
+            if (itWrap === null) itWrap = it;
             return itWrap('it should GET all models', function (done) {
                 // Resolve query operands
                 if (typeof queryOperand === "function")
@@ -131,7 +135,7 @@ let Tests = {
                             // Get matching object
                             let comparison = modelArray.find((el) => el._id.toString() === res.body[emberName][num]._id.toString());
                             expect(comparison).to.be.ok;
-                            expect(new modelType(res.body[emberName][num]).equals(comparison)).to.be.true;
+                            expect(new ModelType(res.body[emberName][num]).equals(comparison)).to.be.true;
 
                         }
                         done();
@@ -144,13 +148,13 @@ let Tests = {
          * 
          * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
          * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param modelType         A model that matches the type returned by the API call
-         * @param modelArray        An array containing modelType objects that is expected from the API call
+         * @param ModelType         A model that matches the type returned by the API call
+         * @param modelArray        An array containing ModelType objects that is expected from the API call
          * @param pageSize          The size of the page to use
          * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        getPagination: function (emberName, emberPluralized, modelType, modelArray, pageSize = 5, itWrap = null) {
-            if (itWrap == null) itWrap = it;
+        getPagination: function (emberName, emberPluralized, ModelType, modelArray, pageSize = 5, itWrap = null) {
+            if (itWrap === null) itWrap = it;
             itWrap('it should GET all models, one page at a time', function (done) {
 
                 let remainingModels = new Set(modelArray.map(el => el._id.toString()));
@@ -176,7 +180,7 @@ let Tests = {
                             }
                             next();
                         });
-                }, function (err, results) {
+                }, function (err) {
                     if (err) throw err;
                     expect(remainingModels.size).to.equal(0);
                     done();
@@ -209,14 +213,14 @@ let Tests = {
          *
          * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
          * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param modelType         A model that matches the type returned by the API call
+         * @param ModelType         A model that matches the type returned by the API call
          * @param elementSelection  A function that calls the passed callback with argument [{... filter contents ...}, [expected data object(s)]]
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param queryOperand      Query operand can be a URL query object or a function that resolves into a URL query object
          * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        getByFilterSuccess: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "", queryOperand = null, itWrap = null) {
-            if (itWrap == null) itWrap = it;
+        getByFilterSuccess: function (emberName, emberPluralized, ModelType, elementSelection, descriptionText = "", queryOperand = null, itWrap = null) {
+            if (itWrap === null) itWrap = it;
             return itWrap('it should GET a model by a filter' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selections => {
                     // Resolve query operands
@@ -236,7 +240,7 @@ let Tests = {
                                 // Get matching object
                                 let comparison = selections[1].find((el) => el._id.toString() === res.body[emberName][num]._id.toString());
                                 expect(comparison).to.be.ok;
-                                expect(new modelType(res.body[emberName][num]).equals(comparison)).to.be.true;
+                                expect(new ModelType(res.body[emberName][num]).equals(comparison)).to.be.true;
                             }
                             done();
                         });
@@ -249,13 +253,13 @@ let Tests = {
          * 
          * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
          * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param modelType         A model that matches the type returned by the API call
+         * @param ModelType         A model that matches the type returned by the API call
          * @param elementSelection  A function that calls the passed callback with the data object as the argument
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        getByID: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "", itWrap = null) {
-            if (itWrap == null) itWrap = it;
+        getByID: function (emberName, emberPluralized, ModelType, elementSelection, descriptionText = "", itWrap = null) {
+            if (itWrap === null) itWrap = it;
             return itWrap('it should GET a model by id' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
                     // Make request
@@ -263,7 +267,7 @@ let Tests = {
                         .get(['/api', emberPluralized, selection._id.toString()].join('/'))
                         .end((err, res) => {
                             // Find model, expect a 404 if nothing was found
-                            modelType.findById(selection._id, function (err, found) {
+                            ModelType.findById(selection._id, function (err, found) {
                                 if (err) throw err;
 
                                 if (!found) {
@@ -278,7 +282,7 @@ let Tests = {
                                     expect(res).to.have.status(200);
                                     expect(res).to.be.json;
                                     expect(res.body).to.have.property(emberName);
-                                    expect(new modelType(res.body[emberName]).equals(selection)).to.be.true;
+                                    expect(new ModelType(res.body[emberName]).equals(selection)).to.be.true;
                                 }
                                 done();
                             });
@@ -294,15 +298,15 @@ let Tests = {
          * 
          * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
          * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param modelType         A model that matches the type returned by the API call
+         * @param ModelType         A model that matches the type returned by the API call
          * @param elementSelection  A function that calls the passed callback with argument [{updated data}, expected model]
          * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param postPutVerify     A function that receives (next, API result) to allow additional checks to be made before declaring the PUT a success
          * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        putUpdated: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPutVerify = (cb, res) => cb(), itWrap = null) {
-            if (itWrap == null) itWrap = it;
+        putUpdated: function (emberName, emberPluralized, ModelType, elementSelection, requiredElements = [], descriptionText = "", postPutVerify = (cb) => cb(), itWrap = null) {
+            if (itWrap === null) itWrap = it;
             return itWrap('it should PUT an updated model and update all fields' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
 
@@ -311,7 +315,7 @@ let Tests = {
                         .put(['/api', emberPluralized, selection[1]._id.toString()].join('/'))
                         .send({ [emberName]: selection[0] })
                         .end((err, res) => {
-                            modelType.findById(selection[1]._id, function (err, data) {
+                            ModelType.findById(selection[1]._id, function (err, data) {
                                 if (err) throw err;
 
 
@@ -339,7 +343,7 @@ let Tests = {
                                     expect(res.body).to.have.property(emberName);
 
                                     // Check to make sure returned value matches expected
-                                    expect(new modelType(res.body[emberName]).equals(selection[1])).to.be.true;
+                                    expect(new ModelType(res.body[emberName]).equals(selection[1])).to.be.true;
                                     expect(err).to.be.null;
                                     expect(data).to.be.ok;
                                     expect(data.equals(selection[1])).to.be.true;
@@ -356,15 +360,15 @@ let Tests = {
          *
          * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
          * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param modelType         A model that matches the type returned by the API call
+         * @param ModelType         A model that matches the type returned by the API call
          * @param elementSelection  A function that calls the passed callback with argument [{updated data}, id of model to update]
          * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param postPutVerify     A function that receives (next, API result) to allow additional checks to be made before declaring the PUT a success
          * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        putNotUnique: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPutVerify = (cb, res) => cb(), itWrap = null) {
-            if (itWrap == null) itWrap = it;
+        putNotUnique: function (emberName, emberPluralized, ModelType, elementSelection, requiredElements = [], descriptionText = "", postPutVerify = (cb) => cb(), itWrap = null) {
+            if (itWrap === null) itWrap = it;
             return itWrap('it should PUT an updated model and update all fields' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
 
@@ -373,7 +377,7 @@ let Tests = {
                         .put(['/api', emberPluralized, selection[1].toString()].join('/'))
                         .send({ [emberName]: selection[0] })
                         .end((err, res) => {
-                            modelType.findById(selection[1], function (err, data) {
+                            ModelType.findById(selection[1], function (err, data) {
                                 if (err) throw err;
 
 
@@ -413,15 +417,15 @@ let Tests = {
          *
          * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
          * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param modelType         A model that matches the type returned by the API call
+         * @param ModelType         A model that matches the type returned by the API call
          * @param elementSelection  A function that calls the passed callback with argument [{updated data}, expected model]
          * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param postPostVerify    A function that receives (next, API result) to allow additional checks to be made before declaring the POST a success
          * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        postNew: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPostVerify = (cb, res) => cb(), itWrap = null) {
-            if (itWrap == null) itWrap = it;
+        postNew: function (emberName, emberPluralized, ModelType, elementSelection, requiredElements = [], descriptionText = "", postPostVerify = (cb) => cb(), itWrap = null) {
+            if (itWrap === null) itWrap = it;
             return itWrap('it should POST' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
                     // Make request
@@ -445,10 +449,10 @@ let Tests = {
 
                                 // Check to make sure returned value matches expected
                                 selection[1]._id = res.body[emberName]._id;     // Swap out ID to make it match
-                                expect(new modelType(res.body[emberName]).equals(selection[1])).to.be.true;
+                                expect(new ModelType(res.body[emberName]).equals(selection[1])).to.be.true;
 
                                 // Check underlying database
-                                modelType.findById(res.body[emberName]._id, function (error, data) {
+                                ModelType.findById(res.body[emberName]._id, function (error, data) {
                                     expect(error).to.be.null;
                                     expect(data).to.be.ok;
                                     expect(data.equals(selection[1])).to.be.true;
@@ -465,15 +469,15 @@ let Tests = {
          *
          * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
          * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param modelType         A model that matches the type returned by the API call
+         * @param ModelType         A model that matches the type returned by the API call
          * @param elementSelection  A function that calls the passed callback with argument {new data}
          * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param postPostVerify    A function that receives (next, API result) to allow additional checks to be made before declaring the POST a success
          * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        postNotUnique: function (emberName, emberPluralized, modelType, elementSelection, requiredElements = [], descriptionText = "", postPostVerify = (cb, res) => cb(), itWrap = null) {
-            if (itWrap == null) itWrap = it;
+        postNotUnique: function (emberName, emberPluralized, ModelType, elementSelection, requiredElements = [], descriptionText = "", postPostVerify = (cb) => cb(), itWrap = null) {
+            if (itWrap === null) itWrap = it;
             return itWrap('it should POST' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
                     // Make request
@@ -507,14 +511,14 @@ let Tests = {
          *
          * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
          * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param modelType         A model that matches the type returned by the API call
+         * @param ModelType         A model that matches the type returned by the API call
          * @param elementSelection  A function that calls the passed callback with argument "id of object to delete"
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param postDeleteVerify  A function that receives (next, API result) to allow additional checks to be made before declaring the DELETE a success
          * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        deleteExisting: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "", postDeleteVerify = (cb, res) => cb(), itWrap = null) {
-            if (itWrap == null) itWrap = it;
+        deleteExisting: function (emberName, emberPluralized, ModelType, elementSelection, descriptionText = "", postDeleteVerify = (cb) => cb(), itWrap = null) {
+            if (itWrap === null) itWrap = it;
             return itWrap('it should DELETE and cleanup if applicable' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
                     // Make request
@@ -525,7 +529,7 @@ let Tests = {
                             expect(res.body).to.have.property(emberName);
 
                             // Check underlying database
-                            modelType.findById(selection._id, function (error, obj) {
+                            ModelType.findById(selection._id, function (error, obj) {
                                 expect(error).to.be.null;
                                 expect(obj).to.be.null;
                                 postDeleteVerify(done, res);
@@ -540,14 +544,14 @@ let Tests = {
          * 
          * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
          * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param modelType         A model that matches the type returned by the API call
+         * @param ModelType         A model that matches the type returned by the API call
          * @param elementSelection  A function that calls the passed callback with argument  "id of object to delete"
          * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
          * @param postDeleteVerify  A function that receives (next, API result) to allow additional checks to be made before declaring the DELETE a success
          * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
          */
-        deleteNonexistent: function (emberName, emberPluralized, modelType, elementSelection, descriptionText = "", postDeleteVerify = (cb, res) => cb(), itWrap = null) {
-            if (itWrap == null) itWrap = it;
+        deleteNonexistent: function (emberName, emberPluralized, ModelType, elementSelection, descriptionText = "", postDeleteVerify = (cb) => cb(), itWrap = null) {
+            if (itWrap === null) itWrap = it;
             return itWrap('it should fail to DELETE with error 404' + (descriptionText ? ": " : "") + descriptionText, function (done) {
                 elementSelection.bind(this)(selection => {
                     // Make request
@@ -562,7 +566,7 @@ let Tests = {
                             }
 
                             // Check underlying database
-                            modelType.findById(selection._id, function (error, obj) {
+                            ModelType.findById(selection._id, function (error, obj) {
                                 expect(error).to.be.null;
                                 expect(obj).to.be.null;
                                 postDeleteVerify(done, res);
@@ -683,7 +687,7 @@ let generateProgramStatus = (number, callback) => {
 };
 let generateProgramRecord = (number, callback) => {
     let plans = Lists.planCodeList.filter(() => Math.random() * 10 > 8);
-    if (plans.length == 0)
+    if (plans.length === 0)
         plans.push(Lists.planCodeList.randomObject());
 
     genBase(ProgramRecords, Lists.programRecordList, {
@@ -745,7 +749,7 @@ let generateCourseCode = (number, callback) => {
 };
 let generateTerm = (number, callback) => {
     let records = Lists.programRecordList.filter(() => Math.random() * 10 > 8);
-    if (records.length == 0)
+    if (records.length === 0)
         records.push(Lists.programRecordList.randomObject());
 
     genBase(Terms, Lists.termList, {
@@ -1020,20 +1024,20 @@ let generateResidency = (number, callback) => {
 };
 /**
  * Save a generic model to the database and add the object to a specified list.
- * @param model         The model to save.
+ * @param Model         The model to save.
  * @param list          The list to append the new model onto.
  * @param contents      The contents of the model.
  * @returns {Function}  Returns a function to call that accepts a callback when complete.
  */
-let genBase = (model, list, contents) => {
+let genBase = (Model, list, contents) => {
     return function (callback) {
-        let modelObj = new model(contents);
+        let modelObj = new Model(contents);
         modelObj.save(function (err, res) {
             if (err) return callback(err);
             list.push(res);
             callback(null, modelObj);
         });
-    }
+    };
 };
 
 

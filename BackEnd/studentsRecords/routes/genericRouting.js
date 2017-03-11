@@ -1,13 +1,13 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var parseUrlencoded = bodyParser.urlencoded({extended: false});
-var parseJSON = bodyParser.json();
+let express = require('express');
+let bodyParser = require('body-parser');
+let parseUrlencoded = bodyParser.urlencoded({extended: false});
+let parseJSON = bodyParser.json();
 
 
 /**
  * A generic API route to be customized by each model
  *
- * @param model                 Mongoose Model Object. The model to construct a route for.
+ * @param Model                 Mongoose Model Object. The model to construct a route for.
  * @param modelNameEmberized    String. The ember version of the model's name.
  * @param enablePaginate        Boolean. For equipped modules, enables pagination functionality.
  * @param verifyHook            Function(request, response, model). The hook to verify that the received model is properly filled out. Returns 0 on success, or an array of error messages.
@@ -17,14 +17,14 @@ var parseJSON = bodyParser.json();
  * @param preDeleteHook         Function (express middleware format). Hook called before deleting a model. Used for updating other dependent structures to null.
  * @param deleteCleanupHook     Function(request, response, deleted model). Hook called after successful deletion and response. Used for additional updating of backend structures.
  */
-var Setup = function(model,
+let Route = function(Model,
                      modelNameEmberized,
                      enablePaginate = false,
                      verifyHook = () => 0,
                      queryHook = null,
                      postPostHook = ()=>{},
                      postPutHook = () => {},
-                     preDeleteHook = (req, res, next) => {next()},
+                     preDeleteHook = (req, res, next) => next(),
                      deleteCleanupHook = () => {}) {
     let router = express.Router();
 
@@ -37,9 +37,10 @@ var Setup = function(model,
         .post(function (request, response) {
             // Create model
             delete request.body[modelNameEmberized]._id;
-            let modelObj = new model(request.body[modelNameEmberized]);
+            let modelObj = new Model(request.body[modelNameEmberized]);
 
             // Check to ensure contents are good
+            let verRes = null;
             if ((verRes = verifyHook(request, response, modelObj)) !== 0)
                 return response.status(400).json({error: {messages: [verRes]}});
 
@@ -67,7 +68,7 @@ var Setup = function(model,
                     if (typeof o !== 'number' || isNaN(o)) o = 0;
                     if (typeof l !== 'number' || isNaN(l)) l = 0;
 
-                    model.paginate({}, {offset: o, limit: l},
+                    Model.paginate({}, {offset: o, limit: l},
                         function (error, modelObjs) {
                             if (error) response.status(500).send({error: error});
                             else response.json({
@@ -83,7 +84,7 @@ var Setup = function(model,
                 }
                 // Return all models
                 else {
-                    model.find(function (error, modresults) {
+                    Model.find(function (error, modresults) {
                         if (error) response.status(500).send({error: error});
                         else response.json({[modelNameEmberized]: modresults});
                     });
@@ -97,7 +98,7 @@ var Setup = function(model,
                         if (typeof o !== 'number' || isNaN(o)) o = 0;
                         if (typeof l !== 'number' || isNaN(l)) l = 1;
 
-                        model.paginate(filter, {offset: o, limit: l},
+                        Model.paginate(filter, {offset: o, limit: l},
                             function (error, modelObjs) {
                                 if (error) response.status(500).send({error: error});
                                 else response.json({
@@ -112,7 +113,7 @@ var Setup = function(model,
                             });
                     }
                     else {
-                        model.find(filter, function (error, queryResults) {
+                        Model.find(filter, function (error, queryResults) {
                             if (error) response.status(500).send({error: error});
                             else response.json({[modelNameEmberized]: queryResults});
                         });
@@ -128,27 +129,28 @@ var Setup = function(model,
 
     // Get model by id
         .get(function (request, response) {
-            model.findById(request.params.mongo_id, function (error, modelObj) {
+            Model.findById(request.params.mongo_id, function (error, modelObj) {
                 if (error) response.status(500).send({error: error});
                 else if (!modelObj) response.sendStatus(404);
                 else response.json({[modelNameEmberized]: modelObj});
-            })
+            });
         })
 
         // Update model
         .put(function (request, response) {
-            model.findById(request.params.mongo_id, function (error, modelObj) {
+            Model.findById(request.params.mongo_id, function (error, modelObj) {
                 if (error) {
                     response.status(500).send({error: error});
                 }
                 else if (!modelObj) response.sendStatus(404);
                 else {
                     // Check to ensure that all fields in new version exist properly before updating
+                    let verRes = null;
                     if ((verRes = verifyHook(request, response, request.body[modelNameEmberized])) !== 0)
                         return response.status(400).json({error: {messages: [verRes]}});
 
                     // Get all the fields of the model
-                    let modelKeys = Object.keys(model.schema.obj);
+                    let modelKeys = Object.keys(Model.schema.obj);
 
                     // Save old version of the model
                     let oldModel = {};
@@ -177,7 +179,7 @@ var Setup = function(model,
 
         // Delete model
         .delete(preDeleteHook, function (request, response) {
-            model.findByIdAndRemove(request.params.mongo_id,
+            Model.findByIdAndRemove(request.params.mongo_id,
                 function (error, deleted) {
                     if (error) response.status(500).send({error: error});
                     else if (!deleted) response.sendStatus(404);
@@ -193,4 +195,54 @@ var Setup = function(model,
     return router;
 };
 
-module.exports = Setup;
+/**
+ * A rudimentary property validation function.
+ * 
+ * Checks that specified properties exist in the passed model *mod*.
+ * 
+ * @param {*} properties An array of strings that the passed model must have.
+ */
+let PropertyValidator = function(...properties) {
+    return (req, res, mod) => {
+            let results = [];
+
+            // Check that the needed properties exist
+            for (let property of properties)
+            if (!mod[property])
+                results.push(property + " must be specified.");
+
+            if (results.length > 0)
+                return results;
+            else
+                return 0;
+        };
+};
+
+
+/**
+ * An Express middleware that maps a Model's property to *null* if it matches
+ * the ID passed in the route URL.
+ * 
+ * @param Model     A Mongoose Model.
+ * @param property  The property to map to null.
+ */
+let MapToNull = function(Model, property) {
+    return (req, res, next) => {
+            // Map all affected program records to null
+            Model.update(
+                {[property]: req.params.mongo_id},
+                {$set: {[property]: null}},
+                {multi: true},
+                function (error) {
+                    if (error) res.status(500).send({error: error});
+                    else {
+                        // All program records mapped successfully, continue deletion
+                        next();
+                    }
+                });
+        };
+};
+
+module.exports.Route = Route;
+module.exports.PropertyValidator = PropertyValidator;
+module.exports.MapToNull = MapToNull;

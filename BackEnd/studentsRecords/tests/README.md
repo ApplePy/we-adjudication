@@ -38,6 +38,7 @@ Items to change:
 | emberName             | A string representing the name to be expected as the content-containing key in the API call route response                                    |
 | emberNamePluralized   | A string representing the name to be used in the API call route                                                                               |
 | itemList              | A list from DBElements that contains all the values of this model type that exist in the database                                             |
+| EmberModel            | A Mongoose model object that this test file tests                                                                                             | 
 | newModel              | A function that returns an object containing the properties required to make a new object of this model type                                  |
 | filterValueSearches   | A list of strings that contain the model properties that can be searched for **(does not support partial-text or subset array search)**       |
 | requiredValues        | A list of strings that contain the model properties that must be present in a update/creation of an object                                    |

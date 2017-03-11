@@ -1,9 +1,9 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var mongoose = require('./../../studentsRecordsDB').mongoose;
+let mongoose = require('./../../studentsRecordsDB').mongoose;
 
-var programAdministrationSchema = mongoose.Schema(
+let programAdministrationSchema = mongoose.Schema(
     {
         name: {type: String, required: true},
         position: {type: String, required: true},
@@ -11,6 +11,6 @@ var programAdministrationSchema = mongoose.Schema(
     }
 );
 
-var ProgramAdministrations = mongoose.model('programAdministration', programAdministrationSchema);
+let ProgramAdministrations = mongoose.model('programAdministration', programAdministrationSchema);
 
 module.exports = ProgramAdministrations;

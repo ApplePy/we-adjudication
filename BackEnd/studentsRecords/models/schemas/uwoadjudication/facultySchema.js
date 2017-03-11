@@ -1,9 +1,9 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var mongoose = require('./../../studentsRecordsDB').mongoose;
+let mongoose = require('./../../studentsRecordsDB').mongoose;
 
-var facultySchema = mongoose.Schema(
+let facultySchema = mongoose.Schema(
     {
         name: {type: String, required: true},
         assessmentCodes: [{type: mongoose.Schema.ObjectId, ref: "AssessmentCodes"}],
@@ -11,6 +11,6 @@ var facultySchema = mongoose.Schema(
     }
 );
 
-var Faculties = mongoose.model('faculty', facultySchema);
+let Faculties = mongoose.model('faculty', facultySchema);
 
 module.exports = Faculties;
