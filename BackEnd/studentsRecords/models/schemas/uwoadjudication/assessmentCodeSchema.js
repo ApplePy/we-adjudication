@@ -5,8 +5,8 @@ let mongoose = require('./../../studentsRecordsDB').mongoose;
 
 let assessmentCodeSchema = mongoose.Schema(
     {
-        code: String,
-        name: String,
+        code: {type: String, unique: true},
+        name: {type: String, required: true},
         faculty: {type: mongoose.Schema.ObjectId, ref: 'Faculties'},
         adjudications: [{type: mongoose.Schema.ObjectId, ref: "Adjudications"}],
         logicalExpressions: [{type: mongoose.Schema.ObjectId, ref: "LogicalExpressions"}]

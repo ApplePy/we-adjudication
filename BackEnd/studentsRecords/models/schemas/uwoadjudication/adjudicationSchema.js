@@ -2,6 +2,7 @@
  * Created by darryl on 2017-02-09.
  */
 let mongoose = require('./../../studentsRecordsDB').mongoose;
+let mongoosePaginate = require('mongoose-paginate');
 
 let adjudicationSchema = mongoose.Schema(
     {
@@ -13,6 +14,7 @@ let adjudicationSchema = mongoose.Schema(
         assessmentCode: {type: mongoose.Schema.ObjectId, ref: "AssessmentCodes"}
     }
 );
+adjudicationSchema.plugin(mongoosePaginate);
 
 let Adjudications = mongoose.model('adjudication', adjudicationSchema);
 

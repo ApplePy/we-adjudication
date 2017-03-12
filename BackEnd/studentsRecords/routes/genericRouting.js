@@ -14,7 +14,7 @@ let parseJSON = bodyParser.json();
  * @param queryHook             Function(request, response, filter). The hook for custom processing of queries containing a 'filter' parameter. MUST HANDLE RESPONSE TO CLIENT.
  * @param postPostHook          Function(request, response, new model). Hook called after a successful post and response. Used for additional updating of backend structures.
  * @param postPutHook           Function(request, response, old model, new model). Hook called after a successful put and response. Used for additional updating of backend structures.
- * @param preDeleteHook         Function (express middleware format). Hook called before deleting a model. Used for updating other dependent structures to null.
+ * @param preDeleteHook         Function (express middleware format). Hook called before deleting a model. Used for updating other dependent structures to null. Can be an array.
  * @param deleteCleanupHook     Function(request, response, deleted model). Hook called after successful deletion and response. Used for additional updating of backend structures.
  */
 let Route = function(Model,
