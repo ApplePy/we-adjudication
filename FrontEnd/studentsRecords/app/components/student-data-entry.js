@@ -78,7 +78,7 @@ export default Ember.Component.extend({
 
     this.get('store').findAll('plan-code').then(function (records) {
       self.set('planModel', records);
-    });;
+    });
 
     this.get('store').findAll('course-load').then(function (records) {
       self.set('loadModel', records);
@@ -86,6 +86,26 @@ export default Ember.Component.extend({
 
     this.get('store').findAll('term-code').then(function(records){
       self.set('termCodeModel', records);
+    });
+
+    //load all of the grades into the store
+    this.get('store').query('grade', {limit: 10}).then((records) => {
+      if( typeof records.get('meta') === "object" &&
+        typeof records.get('meta').total === "number" &&
+        10 < records.get('meta').total)
+      {
+        this.get('store').query('grade', {limit: records.get('meta').total - 10, offset: 10});
+      }
+    });
+
+    //Load all of the program records into the store
+    this.get('store').query('program-record', {limit: 10}).then((records) => {
+      if( typeof records.get('meta') === "object" &&
+        typeof records.get('meta').total === "number" &&
+        10 < records.get('meta').total)
+      {
+        this.get('store').query('program-record', {limit: records.get('meta').total - 10, offset: 10});
+      }
     });
 
     // load first page of the students records
@@ -118,50 +138,78 @@ export default Ember.Component.extend({
     this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
     this.set('awardNotes', []);
     this.set('advancedStandingArray', []);
-    this.set('termModel',[]);
+    this.set('termModel', []);
 
     this.set('selectedGender', this.get('currentStudent').get('genderInfo').get('id'));
 
     this.get('store').query('award', {
-         filter: {
-           recipient: this.get('currentStudent').id
-         }
-       }).then((awards) => {
-        for(var i = 0; i < awards.get('length'); i++) {
-          this.get('awardNotes').pushObject(awards.objectAt(i));
-        }
-       });
-
-    this.get('store').query('advanced-standing', {
-         filter: {
-           recipient: this.get('currentStudent').id
-         }
-       }).then((standing) => {
-        for(var i = 0; i < standing.get('length'); i++) {
-          this.get('advancedStandingArray').pushObject(standing.objectAt(i));
-        }
-       });
-
-    this.get('store').query('term', {
-      limit: 500,
       filter: {
-        student: this.get('currentStudent').id
+        recipient: this.get('currentStudent').id
       }
-    }).then((terms) => {
-      this.get('store').query('grade', {limit: 500}).then();
-      for(var i = 0; i < terms.get('length'); i++) {
-        var term = terms.objectAt(i);
-
-        this.get('store').query('course-code', {limit: 500, filter: {termInfo: term.id}}).then(() => {
-
-        });
-
-        this.get('store').query('program-record', {limit: 500}).then(() => {
-
-        });
-        this.get('termModel').pushObject(terms.objectAt(i));
+    }).then((awards) => {
+      for (var i = 0; i < awards.get('length'); i++) {
+        this.get('awardNotes').pushObject(awards.objectAt(i));
       }
     });
+
+    this.get('store').query('advanced-standing', {
+      filter: {
+        recipient: this.get('currentStudent').id
+      }
+    }).then((standing) => {
+      for (var i = 0; i < standing.get('length'); i++) {
+        this.get('advancedStandingArray').pushObject(standing.objectAt(i));
+      }
+    });
+
+     //Load all of the terms for this student
+     var baseLimit = 10;
+     this.get('store').query('term', {
+        limit: baseLimit,
+        filter: {
+          student: this.get('currentStudent').id
+        }
+     }).then((terms) => {
+
+       for(var i = 0; i < terms.get('length'); i++) {
+          var term = terms.objectAt(i);
+          this.get('termModel').pushObject(term);
+
+          this.get('store').query('course-code', {limit: baseLimit, filter: {termInfo: term.id}}).then((records) => {
+            if( typeof records.get('meta') === "object" &&
+                typeof records.get('meta').total === "number" &&
+                baseLimit < records.get('meta').total)
+            {
+                this.get('store').query('course-code', {limit: records.get('meta').total - baseLimit, offset: baseLimit, filter: {termInfo: term.id}});
+            }
+          });
+       }
+
+       if( typeof terms.get('meta') === "object" &&
+         typeof terms.get('meta').total === "number" &&
+         baseLimit < terms.get('meta').total)
+       {
+         this.get('store').query('term', {
+           limit: terms.get('meta').total - baseLimit,
+           offset: baseLimit,
+           filter: {student: this.get('currentStudent').id}
+         }).then((moreTerms) => {
+           for(var i = 0; i < moreTerms.get('length'); i++) {
+             var term = moreTerms.objectAt(i);
+             this.get('termModel').pushObject(term);
+
+             this.get('store').query('course-code', {limit: baseLimit, filter: {termInfo: term.id}}).then((records) => {
+               if( typeof records.get('meta') === "object" &&
+                 typeof records.get('meta').total === "number" &&
+                 baseLimit < records.get('meta').total)
+               {
+                 this.get('store').query('course-code', {limit: records.get('meta').total - baseLimit, offset: baseLimit, filter: {termInfo: term.id}});
+               }
+             });
+           }
+         });
+       }
+     });
 
   },
 
