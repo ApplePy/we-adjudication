@@ -38,6 +38,8 @@ stages:
      - npm config set proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/            # Setup proxy to stop killing bandwidth
      - npm config set https-proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/
      - npm config set strict-ssl false
+  except:
+     - temp
 
 
 
@@ -57,6 +59,7 @@ test_backend:
   script:
    - cd BackEnd/studentsRecords
    - npm install
+   - jshint -c .\.jshintrc --exclude "node_modules/, miscellaneous/" .
    - npm run coverage
 
 
