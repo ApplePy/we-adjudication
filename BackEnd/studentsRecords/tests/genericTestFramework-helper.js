@@ -37,6 +37,14 @@ let ProgramRecords = require('../models/schemas/uwocourses/programRecordSchema')
 let ProgramStatuses = require('../models/schemas/uwocourses/programStatusSchema');
 let PlanCodes = require('../models/schemas/uwocourses/planCodeSchema');
 
+// UWO adjudication imports
+let Adjudications = require('../models/schemas/uwoadjudication/adjudicationSchema');
+let AssessmentCodes = require('../models/schemas/uwoadjudication/assessmentCodeSchema');
+let Departments = require('../models/schemas/uwoadjudication/departmentSchema');
+let Faculties = require('../models/schemas/uwoadjudication/facultySchema');
+let LogicalExpressions = require('../models/schemas/uwoadjudication/logicalExpressionSchema');
+let ProgramAdministrations = require('../models/schemas/uwoadjudication/programAdministrationSchema');
+
 //Require the dev-dependencies
 let chai = require('chai');
 let chaiHttp = require('chai-http');
@@ -66,7 +74,13 @@ let Lists = {
     gradeList: [],
     programRecordList: [],
     programStatusList: [],
-    planCodeList: []
+    planCodeList: [],
+    adjudicationList: [],
+    assessmentCodeList: [],
+    departmentList: [],
+    facultyList: [],
+    logicalExpressionList: [],
+    programAdministrationList: []
 };
 
 /**
@@ -609,7 +623,13 @@ let regenAllData = function (done) {
         Grades,
         ProgramRecords,
         ProgramStatuses,
-        PlanCodes
+        PlanCodes,
+        ProgramAdministrations,
+        LogicalExpressions,
+        Faculties,
+        Departments,
+        AssessmentCodes,
+        Adjudications
     ], (mod, cb) => {
         // Delete all data from the given model, call cb(err) if something happens.
         mod.remove({}, (err) => err ? cb(err) : cb());
@@ -640,9 +660,9 @@ let regenAllData = function (done) {
                 [2, generateCourseLoad],
                 [10, generateCourseCode],
                 [3, generateProgramStatus],
-                [3, generateProgramRecord],
+                [75, generateProgramRecord],
                 [3, generateTerm],
-                [50, generateTermCode]
+                [5, generateTermCode]
             ];
             eachSeries(executions, (item, cb) => {
                 times(item[0], item[1], (err) => {
@@ -660,7 +680,82 @@ let regenAllData = function (done) {
 
 
 /// HELPERS ///
-
+let generateAdjudications = (number, callback) => {
+    throw "Not finished.";
+    genBase(Adjudications, Lists.adjudicationList, {
+        // TODO: Generation
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            else generateAdjudications(number - 1, callback);
+        }
+        else callback();
+    });
+};
+let generateAssessmentCodes = (number, callback) => {
+    throw "Not finished.";
+    genBase(AssessmentCodes, Lists.assessmentCodeList, {
+        // TODO: Generation
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            else generateAssessmentCodes(number - 1, callback);
+        }
+        else callback();
+    });
+};
+let generateDepartments = (number, callback) => {
+    genBase(Departments, Lists.departmentList, {
+        name: faker.lorem.words(5)
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            else generateDepartments(number - 1, callback);
+        }
+        else callback();
+    });
+};
+let generateFaculties = (number, callback) => {
+    genBase(Faculties, Lists.facultyList, {
+        name: faker.lorem.words(5)
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            else generateFaculties(number - 1, callback);
+        }
+        else callback();
+    });
+};
+let generateLogicalExpressions = (number, callback) => {
+    throw "Not finished.";
+    genBase(LogicalExpressions, Lists.logicalExpressionList, {
+        // TODO: Generation
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            else generateLogicalExpressions(number - 1, callback);
+        }
+        else callback();
+    });
+};
+let generateProgramAdministrations = (number, callback) => {
+    genBase(ProgramAdministrations, Lists.programAdministrationList, {
+        name: faker.name.findName(),
+        position: faker.name.jobDescriptor()
+    })(err => {
+        // Retry a few times in case random generation causes duplicate
+        if (err) {
+            if (number < -1) callback(err);
+            else generateProgramAdministrations(number - 1, callback);
+        }
+        else callback();
+    });
+};
 let generatePlanCode = (number, callback) => {
     genBase(PlanCodes, Lists.planCodeList, {
         name: faker.random.words(1, 3)
@@ -1059,38 +1154,3 @@ exports.Generators.generateResidency = generateResidency;
 
 
 exports.Tests = Tests;
-
-
-
-// /**
-//  * Given a flat API output (no nested objects that contain Mongo OIDs), compare against a model for equality.
-//  * @param apiOutput     The output returned by the API.
-//  * @param model         The model the API output is supposed to match
-//  * @param objIdKeys     The keys in the model that are actually Mongo OIDs that need to be handled specially.
-//  * @param excludeKeys   The keys for Mongo OID-containing nested data structures that need to be excluded from comparison.
-//  */
-// let checkForEquality = (apiOutput, model, objIdKeys, excludeKeys) => {
-//     // Strip off _id, __v, and other excluded keys since it causes problems
-//     delete apiOutput._id;
-//     delete apiOutput.__v;
-//     excludeKeys.forEach((el) => delete apiOutput[el]);
-//
-//     // Convert API return into array
-//     let experiment = convertObjToArray(apiOutput);
-//
-//     // Convert objIds into strings
-//     model = convertModelToArray(model);
-//     model.forEach((el, idx, arr) => {
-//         let key = Object.keys(el)[0];
-//         if(objIdKeys.includes(key)) el[key] = el[key].toString();
-//     });
-//
-//     // Check all members for equality
-//     expect(experiment).to.deep.include.members(model);
-// };
-// let convertObjToArray = (obj) => {
-//     return Object.keys(obj).map(key => {return {[key]: obj[key]}});
-// };
-// let convertModelToArray = (model) => {
-//     return Object.keys(model.schema.obj).map(key => {return {[key]: model[key]}});
-// };
