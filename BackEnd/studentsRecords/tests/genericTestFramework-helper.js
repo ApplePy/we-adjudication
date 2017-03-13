@@ -662,15 +662,15 @@ let regenAllData = function (done) {
                 [2, generateCourseLoad],
                 [10, generateCourseCode],
                 [3, generateProgramStatus],
-                [75, generateProgramRecord],
-                [3, generateTerm],
+                [50, generateProgramRecord],
+                [2, generateTerm],
                 [5, generateTermCode],
                 [2, generateFaculties],
-                [8, generateDepartments],
-                [20, generateProgramAdministrations],
-                [30, generateAssessmentCodes],
-                [85, generateAdjudications],
-                [1, (_, cb) => timesSeries(100, generateLogicalExpressions, cb)]
+                [4, generateDepartments],
+                [10, generateProgramAdministrations],
+                [20, generateAssessmentCodes],
+                [60, generateAdjudications],
+                [1, (_, cb) => timesSeries(40, generateLogicalExpressions, cb)]
             ];
             eachSeries(executions, (item, cb) => {
                 times(item[0], item[1], cb);
