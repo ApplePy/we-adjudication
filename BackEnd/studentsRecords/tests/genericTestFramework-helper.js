@@ -630,7 +630,8 @@ let regenAllData = function (done) {
         Faculties,
         Departments,
         AssessmentCodes,
-        Adjudications
+        Adjudications,
+        LogicalExpressions
     ], (mod, cb) => {
         // Delete all data from the given model, call cb(err) if something happens.
         mod.remove({}, (err) => err ? cb(err) : cb());
