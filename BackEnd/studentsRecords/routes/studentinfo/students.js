@@ -26,7 +26,7 @@ module.exports =
                     HSGrades.remove({recipient: deleted._id}, () => {
                         // Find attached terms
                         Terms.find({student: deleted._id}, (err4, termsRes) => {
-                            if (err) return;    // Just silently fail
+                            if (err) console.error(err);    // Just silently fail
 
                             let terms = termsRes.map(el => el._id);
 

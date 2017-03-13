@@ -21,23 +21,25 @@ let mongoose = DB.mongoose;
 ////////
 
 ///// THINGS TO CHANGE ON COPYPASTA /////
-let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
+let AssessmentCodes = require('../models/schemas/uwoadjudication/assessmentCodeSchema');
+let Adjudications = require('../models/schemas/uwoadjudication/adjudicationSchema');
+let LogicalExpressions = require('../models/schemas/uwoadjudication/logicalExpressionSchema');
 
-let emberName = "advancedStanding";
-let emberNamePluralized = "advancedStandings";
-let itemList = Common.DBElements.standingList;
-let EmberModel = AdvancedStandings;
-let newModel = Common.Generators.AdvancedStanding;
-let filterValueSearches = ['course', 'description', 'units', 'grade', 'from', 'recipient'];
-let requiredValues = ['recipient'];
-let uniqueValues = [];
+let emberName = "assessmentCode";
+let emberNamePluralized = "assessmentCodes";
+let itemList = Common.DBElements.assessmentCodeList;
+let EmberModel = AssessmentCodes;
+let newModel = Common.Generators.AssessmentCode;
+let filterValueSearches = ['code', 'name'];
+let requiredValues = ['code','name'];
+let uniqueValues = ['code'];
 
 // Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
 
 /////////////////////////////////////////
 
 
-describe('Advanced Standings', function () {
+describe('Assessment Codes', function () {
 
     describe('/GET functions', function () {
         before(Common.regenAllData);
@@ -58,7 +60,9 @@ describe('Advanced Standings', function () {
             emberName,
             emberNamePluralized,
             EmberModel,
-            itemList);
+            itemList,
+            undefined,
+            it.skip);
 
         // Check that you can search by all non-array elements
         each(
@@ -125,13 +129,35 @@ describe('Advanced Standings', function () {
             function (next) {
                 // Get a random model and make random updates
                 let model = itemList[faker.random.number(itemList.length - 1)];
-                let updates = newModel();
 
-                // Update the object with the new random values
-                Object.keys(updates).forEach(key => model[key] = updates[key]);
+                // Get new model that doesn't violate uniqueness
+                let uniqueModel = function (timesLeft) {
+                    let updates = newModel();
+                    let filter = [];
+                    for (let key of uniqueValues) {
+                        filter.push({ [key]: updates[key] });
+                    }
+                    EmberModel.find({ $or: filter })
+                        .then(function (err, res) {
+                            /*jshint expr: true*/
+                            expect(err).to.be.empty;
+                            expect(res).to.be.empty;
 
-                // Pass the updated object and the PUT contents to the tester to make sure the changes happen
-                next([updates, model]);
+                            // Update the object with the new random values
+                            Object.keys(updates).forEach(key => model[key] = updates[key]);
+
+                            // Pass the updated object and the PUT contents to the tester to make sure the changes happen
+                            next([updates, model]);
+                        }).catch(function (err) {
+                            if (timesLeft <= 0) throw err;  // Too many failures, abort!
+
+                            console.warn(err.message);
+                            uniqueModel(--timesLeft);
+                        });
+                };
+
+                // Try to get a unique model 3 times
+                uniqueModel(3);
             },
             requiredValues);
 
@@ -335,6 +361,30 @@ describe('Advanced Standings', function () {
             function (next) {
                 elementFerry = itemList[faker.random.number(itemList.length - 1)];
                 next(elementFerry._id);
+            },
+            undefined,
+            function (next) {
+                // Check that all dependent objects got deassociated
+                each([
+                    [Adjudications, "assessmentCode"],
+                    [LogicalExpressions, "assessmentCode"]
+                ],
+                    function (value, next) {
+                        value[0].find(
+                            { [value[1]]: elementFerry._id },
+                            (err, students) => {
+                                /* jshint expr: true */
+                                expect(err).to.be.null;
+                                expect(students).to.be.empty;
+
+                                next();
+                            });
+                    },
+                    err => {
+                        /* jshint expr: true */
+                        expect(err).to.be.null;
+                        next();
+                    });
             });
 
         // Make sure that attempts to delete a non-existent object fails

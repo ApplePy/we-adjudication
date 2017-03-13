@@ -21,15 +21,15 @@ let mongoose = DB.mongoose;
 ////////
 
 ///// THINGS TO CHANGE ON COPYPASTA /////
-let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
+let LogicalExpressions = require('../models/schemas/uwoadjudication/logicalExpressionSchema');
 
-let emberName = "advancedStanding";
-let emberNamePluralized = "advancedStandings";
-let itemList = Common.DBElements.standingList;
-let EmberModel = AdvancedStandings;
-let newModel = Common.Generators.AdvancedStanding;
-let filterValueSearches = ['course', 'description', 'units', 'grade', 'from', 'recipient'];
-let requiredValues = ['recipient'];
+let emberName = "logicalExpression";
+let emberNamePluralized = "logicalExpressions";
+let itemList = Common.DBElements.logicalExpressionList;
+let EmberModel = LogicalExpressions;
+let newModel = Common.Generators.LogicalExpression;
+let filterValueSearches = ['booleanExp', 'logicalLink'];
+let requiredValues = ['booleanExp', 'logicalLink'];
 let uniqueValues = [];
 
 // Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
@@ -37,7 +37,7 @@ let uniqueValues = [];
 /////////////////////////////////////////
 
 
-describe('Advanced Standings', function () {
+describe('Logical Expressions', function () {
 
     describe('/GET functions', function () {
         before(Common.regenAllData);
@@ -58,7 +58,9 @@ describe('Advanced Standings', function () {
             emberName,
             emberNamePluralized,
             EmberModel,
-            itemList);
+            itemList,
+            undefined,
+            it.skip);
 
         // Check that you can search by all non-array elements
         each(
@@ -335,6 +337,29 @@ describe('Advanced Standings', function () {
             function (next) {
                 elementFerry = itemList[faker.random.number(itemList.length - 1)];
                 next(elementFerry._id);
+            },
+            undefined,
+            function (next) {
+                // Check that all dependent objects got deassociated
+                each([
+                    [LogicalExpressions, "parentExpression"]
+                ],
+                    function (value, next) {
+                        value[0].find(
+                            { [value[1]]: elementFerry._id },
+                            (err, students) => {
+                                /* jshint expr: true */
+                                expect(err).to.be.null;
+                                expect(students).to.be.empty;
+
+                                next();
+                            });
+                    },
+                    err => {
+                        /* jshint expr: true */
+                        expect(err).to.be.null;
+                        next();
+                    });
             });
 
         // Make sure that attempts to delete a non-existent object fails

@@ -21,15 +21,15 @@ let mongoose = DB.mongoose;
 ////////
 
 ///// THINGS TO CHANGE ON COPYPASTA /////
-let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
+let Adjudications = require('../models/schemas/uwoadjudication/adjudicationSchema');
 
-let emberName = "advancedStanding";
-let emberNamePluralized = "advancedStandings";
-let itemList = Common.DBElements.standingList;
-let EmberModel = AdvancedStandings;
-let newModel = Common.Generators.AdvancedStanding;
-let filterValueSearches = ['course', 'description', 'units', 'grade', 'from', 'recipient'];
-let requiredValues = ['recipient'];
+let emberName = "adjudication";
+let emberNamePluralized = "adjudications";
+let itemList = Common.DBElements.adjudicationList;
+let EmberModel = Adjudications;
+let newModel = Common.Generators.Adjudication;
+let filterValueSearches = ['date', 'termAVG', 'termUnitsPassed', 'termUnitsTotal'];
+let requiredValues = [];
 let uniqueValues = [];
 
 // Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
@@ -37,7 +37,7 @@ let uniqueValues = [];
 /////////////////////////////////////////
 
 
-describe('Advanced Standings', function () {
+describe('Adjudications', function () {
 
     describe('/GET functions', function () {
         before(Common.regenAllData);

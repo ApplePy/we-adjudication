@@ -23,6 +23,7 @@ let mongoose = DB.mongoose;
 ///// THINGS TO CHANGE ON COPYPASTA /////
 let Terms = require('../models/schemas/uwocourses/termSchema');
 let CourseCodes = require('../models/schemas/uwocourses/courseCodeSchema');
+let Adjudications = require('../models/schemas/uwoadjudication/adjudicationSchema');
 
 
 let emberName = "term";
@@ -351,7 +352,8 @@ describe('Terms', function () {
             function (next) {
                 // Check that all dependent objects got deassociated
                 each([
-                    [CourseCodes, "termInfo"]
+                    [CourseCodes, "termInfo"],
+                    [Adjudications, "term"]
                 ],
                     function (value, next) {
                         value[0].find(

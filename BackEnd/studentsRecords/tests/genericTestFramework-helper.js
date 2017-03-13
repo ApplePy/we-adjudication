@@ -708,7 +708,7 @@ let generateAdjudication = (number, callback) => {
 };
 let newAssessmentCode = () => {
     return {
-        code: faker.lorem.word(),
+        code: faker.lorem.words(2),
         name: faker.lorem.words(5),
         faculty: Lists.facultyList.randomObject(),
     };
@@ -1239,7 +1239,7 @@ exports.Generators = {
     Student: newStudent,
     Gender: newGender,
     Award: newAward,
-    Standing: newStanding,
+    AdvancedStanding: newStanding,
     SecondarySchool: newSecondarySchool,
     HSCourseSource: newHSCourseSource,
     HSSubject: newHSSubject,

@@ -21,15 +21,15 @@ let mongoose = DB.mongoose;
 ////////
 
 ///// THINGS TO CHANGE ON COPYPASTA /////
-let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
+let ProgramAdministrations = require('../models/schemas/uwoadjudication/programAdministrationSchema');
 
-let emberName = "advancedStanding";
-let emberNamePluralized = "advancedStandings";
-let itemList = Common.DBElements.standingList;
-let EmberModel = AdvancedStandings;
-let newModel = Common.Generators.AdvancedStanding;
-let filterValueSearches = ['course', 'description', 'units', 'grade', 'from', 'recipient'];
-let requiredValues = ['recipient'];
+let emberName = "programAdministration";
+let emberNamePluralized = "programAdministrations";
+let itemList = Common.DBElements.programAdministrationList;
+let EmberModel = ProgramAdministrations;
+let newModel = Common.Generators.ProgramAdministration;
+let filterValueSearches = ['name', 'position'];
+let requiredValues = ['name', 'position'];
 let uniqueValues = [];
 
 // Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
@@ -37,7 +37,7 @@ let uniqueValues = [];
 /////////////////////////////////////////
 
 
-describe('Advanced Standings', function () {
+describe('Program Administrations', function () {
 
     describe('/GET functions', function () {
         before(Common.regenAllData);
@@ -58,7 +58,9 @@ describe('Advanced Standings', function () {
             emberName,
             emberNamePluralized,
             EmberModel,
-            itemList);
+            itemList,
+            undefined,
+            it.skip);
 
         // Check that you can search by all non-array elements
         each(

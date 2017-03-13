@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha tests/*-test.js",
     "coverage": "istanbul cover _mocha tests/*-test.js",
-    "lint": "jshint -c .jshintrc --exclude 'node_modules/, miscellaneous/' ."
+    "lint": "jshint -c .jshintrc --exclude 'coverage/, node_modules/, miscellaneous/' ."
   },
   "author": "Ouda",
   "license": "ISC",
