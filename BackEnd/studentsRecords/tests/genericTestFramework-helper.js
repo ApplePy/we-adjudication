@@ -12,6 +12,7 @@ let faker = require('faker');
 let times = require('async/times');
 let each = require('async/each');
 let eachSeries = require('async/eachSeries');
+let timesSeries = require('async/timesSeries');
 
 // StudentInfo imports
 let Students = require('../models/schemas/studentinfo/studentSchema');
@@ -662,14 +663,16 @@ let regenAllData = function (done) {
                 [3, generateProgramStatus],
                 [75, generateProgramRecord],
                 [3, generateTerm],
-                [5, generateTermCode]
+                [5, generateTermCode],
+                [2, generateFaculties],
+                [8, generateDepartments],
+                [20, generateProgramAdministrations],
+                [30, generateAssessmentCodes],
+                [85, generateAdjudications],
+                [1, (_, cb) => timesSeries(100, generateLogicalExpressions, cb)]
             ];
             eachSeries(executions, (item, cb) => {
-                times(item[0], item[1], (err) => {
-                    // Catch generation errors
-                    if (err) cb(err);
-                    else cb();
-                });
+                times(item[0], item[1], cb);
             }, (err) => {
                 if (err) throw err;
                 else done();
@@ -681,9 +684,15 @@ let regenAllData = function (done) {
 
 /// HELPERS ///
 let generateAdjudications = (number, callback) => {
-    throw "Not finished.";
+    let termTotal = faker.random.number(14)/2;    
     genBase(Adjudications, Lists.adjudicationList, {
-        // TODO: Generation
+        date: faker.date.past(10),
+        termAVG: faker.random.number(100),
+        termUnitsPassed: faker.random.number(termTotal * 2) / 2,
+        termUnitsTotal: termTotal,
+        note: faker.lorem.paragraph(),
+        term: Lists.termList.randomObject(),
+        assessmentCode: Lists.termList.randomObject()
     })(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
@@ -694,9 +703,10 @@ let generateAdjudications = (number, callback) => {
     });
 };
 let generateAssessmentCodes = (number, callback) => {
-    throw "Not finished.";
     genBase(AssessmentCodes, Lists.assessmentCodeList, {
-        // TODO: Generation
+        code: faker.lorem.word(),
+        name: faker.lorem.words(5),
+        faculty: Lists.facultyList.randomObject(),
     })(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
@@ -708,7 +718,8 @@ let generateAssessmentCodes = (number, callback) => {
 };
 let generateDepartments = (number, callback) => {
     genBase(Departments, Lists.departmentList, {
-        name: faker.lorem.words(5)
+        name: faker.lorem.words(5),
+        faculty: Lists.facultyList.randomObject()
     })(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
@@ -731,9 +742,12 @@ let generateFaculties = (number, callback) => {
     });
 };
 let generateLogicalExpressions = (number, callback) => {
-    throw "Not finished.";
+    // NOTE: Because this is self-referential, multiple calls must be called in series
     genBase(LogicalExpressions, Lists.logicalExpressionList, {
-        // TODO: Generation
+        booleanExp: faker.lorem.words(5),
+        logicalLink: faker.lorem.words(5),
+        assessmentCode: Lists.assessmentCodeList.randomObject(),
+        parentExpression: Lists.logicalExpressionList.randomObject()
     })(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
@@ -746,7 +760,8 @@ let generateLogicalExpressions = (number, callback) => {
 let generateProgramAdministrations = (number, callback) => {
     genBase(ProgramAdministrations, Lists.programAdministrationList, {
         name: faker.name.findName(),
-        position: faker.name.jobDescriptor()
+        position: faker.name.jobDescriptor(),
+        department: Lists.departmentList.randomObject()
     })(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
