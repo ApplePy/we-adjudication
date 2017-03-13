@@ -29,16 +29,7 @@ let emberName = "term";
 let emberNamePluralized = "terms";
 let itemList = Common.DBElements.termList;
 let EmberModel = Terms;
-let newModel = () => {
-    let records = Common.DBElements.programRecordList.filter(() => Math.random() * 10 > 8);
-    if (records.length === 0)
-        records.push(Common.DBElements.programRecordList.randomObject());
-    return {
-        termCode: Common.DBElements.termCodeList.randomObject(),
-        student: faker.random.arrayElement(Common.DBElements.residencyList),
-        programRecords: records,  // NOTE: In a many-to-many relationship, this WILL store data.
-    };
-};
+let newModel = Common.Generators.Term;
 let filterValueSearches = [
     'termCode',
     'student'

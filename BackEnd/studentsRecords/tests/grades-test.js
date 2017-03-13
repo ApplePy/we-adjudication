@@ -29,12 +29,7 @@ let emberName = "grade";
 let emberNamePluralized = "grades";
 let itemList = Common.DBElements.gradeList;
 let EmberModel = Grades;
-let newModel = () => {
-    return {
-        mark: faker.random.number(100).toString(),
-        note: faker.lorem.paragraph(),
-    };
-};
+let newModel = Common.Generators.Grade;
 let filterValueSearches = [
     'mark',
     'note'

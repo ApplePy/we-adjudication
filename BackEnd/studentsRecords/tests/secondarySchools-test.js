@@ -28,11 +28,7 @@ let emberName = "secondarySchool";
 let emberNamePluralized = "secondarySchools";
 let itemList = Common.DBElements.secondarySchoolList;
 let EmberModel = SecondarySchools;
-let newModel = () => {
-    return {
-        name: faker.random.words(2, 5)
-    };
-};
+let newModel = Common.Generators.SecondarySchool;
 let filterValueSearches = ['name'];
 let requiredValues = ['name'];
 let uniqueValues = [];

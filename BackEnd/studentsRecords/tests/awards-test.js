@@ -23,12 +23,7 @@ let emberName = "award";
 let emberNamePluralized = "awards";
 let itemList = Common.DBElements.awardList;
 let EmberModel = Awards;
-let newModel = () => {
-    return {
-        note: faker.random.words(5),
-        recipient: Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)]._id
-    };
-};
+let newModel = Common.Generators.Award;
 let filterValueSearches = ['note', 'recipient'];
 let requiredValues = ['note', 'recipient'];
 let uniqueValues = [];

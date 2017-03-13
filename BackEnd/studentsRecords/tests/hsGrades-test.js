@@ -27,13 +27,7 @@ let emberName = "hsGrade";
 let emberNamePluralized = "hsGrades";
 let itemList = Common.DBElements.hsGradeList;
 let EmberModel = HSGrades;
-let newModel = () => {
-    return {
-        mark: faker.random.number(100).toString(),
-        note: faker.random.words(5),
-        recipient: Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)]._id
-    };
-};
+let newModel = Common.Generators.HSGrade;
 let filterValueSearches = ['mark', 'note', 'recipient'];
 let requiredValues = ['mark', 'recipient'];
 let uniqueValues = [];

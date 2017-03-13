@@ -28,19 +28,7 @@ let emberName = "programRecord";
 let emberNamePluralized = "programRecords";
 let itemList = Common.DBElements.programRecordList;
 let EmberModel = ProgramRecords;
-let newModel = () => {
-    let plans = Common.DBElements.planCodeList.filter(() => Math.random() * 10 > 8);
-    if (plans.length === 0)
-        plans.push(Common.DBElements.planCodeList.randomObject());
-
-    return {
-        name: faker.random.words(1, 3),
-        level: faker.random.number(9),
-        load: Common.DBElements.courseLoadList.randomObject(),
-        status: Common.DBElements.programStatusList.randomObject(),
-        plan: plans
-    };
-};
+let newModel = Common.Generators.ProgramRecord;
 let filterValueSearches = [
     'name',
     'level',

@@ -29,12 +29,7 @@ let emberName = "hsSubject";
 let emberNamePluralized = "hsSubjects";
 let itemList = Common.DBElements.hsSubjectList;
 let EmberModel = HSSubjects;
-let newModel = () => {
-    return {
-        name: faker.random.word(),
-        description: faker.lorem.paragraphs(2)
-    };
-};
+let newModel = Common.Generators.HSSubject;
 let filterValueSearches = ['name', 'description'];
 let requiredValues = ['name'];
 let uniqueValues = ['name'];

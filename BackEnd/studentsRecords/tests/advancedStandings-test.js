@@ -27,16 +27,7 @@ let emberName = "advancedStanding";
 let emberNamePluralized = "advancedStandings";
 let itemList = Common.DBElements.standingList;
 let EmberModel = AdvancedStandings;
-let newModel = () => {
-    return {
-        course: faker.random.words(1),
-        description: faker.random.words(5),
-        units: faker.random.number(100) / 50,
-        grade: faker.random.number(100),
-        from: faker.random.word(),
-        recipient: Common.DBElements.studentList[faker.random.number(Common.DBElements.studentList.length - 1)]._id
-    };
-};
+let newModel = Common.Generators.Advancedtanding;
 let filterValueSearches = ['course', 'description', 'units', 'grade', 'from', 'recipient'];
 let requiredValues = ['recipient'];
 let uniqueValues = [];

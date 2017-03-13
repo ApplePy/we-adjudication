@@ -28,11 +28,7 @@ let emberName = "planCode";
 let emberNamePluralized = "planCodes";
 let itemList = Common.DBElements.planCodeList;
 let EmberModel = PlanCodes;
-let newModel = () => {
-    return {
-        name: faker.random.words(1, 3)
-    };
-};
+let newModel = Common.Generators.PlanCode;
 let filterValueSearches = ['name'];
 let requiredValues = ['name'];
 let uniqueValues = ['name'];

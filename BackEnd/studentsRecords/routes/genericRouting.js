@@ -7,15 +7,15 @@ let parseJSON = bodyParser.json();
 /**
  * A generic API route to be customized by each model
  *
- * @param Model                 Mongoose Model Object. The model to construct a route for.
- * @param modelNameEmberized    String. The ember version of the model's name.
- * @param enablePaginate        Boolean. For equipped modules, enables pagination functionality.
- * @param verifyHook            Function(request, response, model). The hook to verify that the received model is properly filled out. Returns 0 on success, or an array of error messages.
- * @param queryHook             Function(request, response, filter). The hook for custom processing of queries containing a 'filter' parameter. MUST HANDLE RESPONSE TO CLIENT.
- * @param postPostHook          Function(request, response, new model). Hook called after a successful post and response. Used for additional updating of backend structures.
- * @param postPutHook           Function(request, response, old model, new model). Hook called after a successful put and response. Used for additional updating of backend structures.
- * @param preDeleteHook         Function (express middleware format). Hook called before deleting a model. Used for updating other dependent structures to null. Can be an array.
- * @param deleteCleanupHook     Function(request, response, deleted model). Hook called after successful deletion and response. Used for additional updating of backend structures.
+ * @param {object} Model                                            Mongoose Model Object. The model to construct a route for.
+ * @param {string} modelNameEmberized                               String. The ember version of the model's name.
+ * @param {boolean} enablePaginate                                  Boolean. For equipped modules, enables pagination functionality.
+ * @param {function(object, object, object)} verifyHook             Function(request, response, model). The hook to verify that the received model is properly filled out. Returns 0 on success, or an array of error messages.
+ * @param {function(object, object, object)} queryHook              Function(request, response, filter). The hook for custom processing of queries containing a 'filter' parameter. MUST HANDLE RESPONSE TO CLIENT.
+ * @param {function(object, object, object)} postPostHook           Function(request, response, new model). Hook called after a successful post and response. Used for additional updating of backend structures.
+ * @param {function(object, object, object, object)} postPutHook    Function(request, response, old model, new model). Hook called after a successful put and response. Used for additional updating of backend structures.
+ * @param {function(object, object, object)} preDeleteHook          Function (express middleware format). Hook called before deleting a model. Used for updating other dependent structures to null. Can be an array.
+ * @param {function(object, object, object)} deleteCleanupHook      Function(request, response, deleted model). Hook called after successful deletion and response. Used for additional updating of backend structures.
  */
 let Route = function(Model,
                      modelNameEmberized,
@@ -200,7 +200,7 @@ let Route = function(Model,
  * 
  * Checks that specified properties exist in the passed model *mod*.
  * 
- * @param {*} properties An array of strings that the passed model must have.
+ * @param {...string} properties An array of strings that the passed model must have.
  */
 let PropertyValidator = function(...properties) {
     return (req, res, mod) => {
@@ -223,8 +223,8 @@ let PropertyValidator = function(...properties) {
  * An Express middleware that maps a Model's property to *null* if it matches
  * the ID passed in the route URL.
  * 
- * @param Model     A Mongoose Model.
- * @param property  The property to map to null.
+ * @param {object} Model        A Mongoose Model.
+ * @param {string} property     The property to map to null.
  */
 let MapToNull = function(Model, property) {
     return (req, res, next) => {

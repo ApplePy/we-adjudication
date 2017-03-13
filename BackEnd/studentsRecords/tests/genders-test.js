@@ -28,11 +28,7 @@ let emberName = "gender";
 let emberNamePluralized = "genders";
 let itemList = Common.DBElements.genderList;
 let EmberModel = Genders;
-let newModel = () => {
-    return {
-        name: faker.lorem.word()
-    };
-};
+let newModel = function() { return Common.Generators.Gender(faker.lorem.word()); }; // Lazy evaulation of faker
 let filterValueSearches = ['name'];
 let requiredValues = ['name'];
 let uniqueValues = ['name'];

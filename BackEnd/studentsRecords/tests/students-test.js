@@ -32,20 +32,7 @@ let emberName = "student";
 let emberNamePluralized = "students";
 let itemList = Common.DBElements.studentList;
 let EmberModel = Students;
-let newModel = () => {
-    return {
-        number: faker.random.number(100000000, 999999999),
-        firstName: faker.name.firstName(),
-        lastName: faker.name.lastName(),
-        DOB: faker.date.past(),   // TODO: this is wrong format
-        registrationComments: faker.lorem.paragraph(),
-        basisOfAdmission: faker.lorem.paragraph(),
-        admissionAverage: faker.random.number(100),
-        admissionComments: faker.lorem.paragraph(),
-        resInfo: Common.DBElements.residencyList[faker.random.number(Common.DBElements.residencyList.length - 1)],
-        genderInfo: Common.DBElements.genderList[faker.random.number(Common.DBElements.genderList.length - 1)],
-    };
-};
+let newModel = Common.Generators.Student;
 let filterValueSearches = [
     'number',
     'firstName',

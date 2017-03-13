@@ -28,11 +28,7 @@ let emberName = "courseLoad";
 let emberNamePluralized = "courseLoads";
 let itemList = Common.DBElements.courseLoadList;
 let EmberModel = CourseLoads;
-let newModel = () => {
-    return {
-        load: faker.random.word()
-    };
-};
+let newModel = Common.Generators.CourseLoad;
 let filterValueSearches = ['load'];
 let requiredValues = ['load'];
 let uniqueValues = ['load'];

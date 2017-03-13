@@ -28,11 +28,7 @@ let emberName = "programStatus";
 let emberNamePluralized = "ProgramStatuses";
 let itemList = Common.DBElements.programStatusList;
 let EmberModel = ProgramStatuses;
-let newModel = () => {
-    return {
-        status: faker.random.word()
-    };
-};
+let newModel = Common.Generators.ProgramStatus;
 let filterValueSearches = ['status'];
 let requiredValues = ['status'];
 let uniqueValues = ['status'];

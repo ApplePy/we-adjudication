@@ -27,16 +27,7 @@ let emberName = "courseCode";
 let emberNamePluralized = "courseCodes";
 let itemList = Common.DBElements.courseCodeList;
 let EmberModel = CourseCodes;
-let newModel = () => {
-    return {
-        courseLetter: faker.random.word(),
-        courseNumber: faker.random.word(),
-        name: faker.random.words(5, 10),
-        unit: faker.random.number(4) / 2,
-        termInfo: Common.DBElements.termList.randomObject(),
-        gradeInfo: Common.DBElements.gradeList.randomObject()
-    };
-};
+let newModel = Common.Generators.CourseCode;
 let filterValueSearches = ['courseLetter', 'courseNumber', 'name', 'unit', 'termInfo', 'gradeInfo'];
 let requiredValues = ['courseLetter', 'courseNumber'];
 let uniqueValues = [];

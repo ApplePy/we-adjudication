@@ -28,11 +28,7 @@ let emberName = "termCode";
 let emberNamePluralized = "termCodes";
 let itemList = Common.DBElements.termCodeList;
 let EmberModel = TermCodes;
-let newModel = () => {
-    return {
-        name: faker.lorem.words()
-    };
-};
+let newModel = Common.Generators.TermCode;
 let filterValueSearches = ['name'];
 let requiredValues = ['name'];
 let uniqueValues = ['name'];

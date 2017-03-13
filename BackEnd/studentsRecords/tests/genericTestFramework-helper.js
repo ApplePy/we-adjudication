@@ -87,9 +87,9 @@ let Lists = {
 /**
  * Selects a random array element.
  *
- * @param min   The minimum index that can be used
- * @param max   The maximum index that can be used
- * @returns     An object from the array
+ * @param {number} min  The minimum index that can be used
+ * @param {number} max  The maximum index that can be used
+ * @returns {object}    An object from the array
  */
 Array.prototype.randomObject = function (min = 0, max = null) {
     // Sanitize inputs
@@ -121,12 +121,12 @@ let Tests = {
         /**
          * Attempts to retrieve all models from the API endpoint and makes sure that it successfully received all data.
          *
-         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
-         * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param ModelType         A model that matches the type returned by the API call
-         * @param modelArray        An array containing ModelType objects that is expected from the API call
-         * @param queryOperand      Query operand can be a URL query object or a function that resolves into a URL query object
-         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
+         * @param {string} emberName                A string representing the name to be expected as the content-containing key in the API call route response
+         * @param {string} emberPluralized          A string representing the name to be used in the API call route
+         * @param {object} ModelType                A model that matches the type returned by the API call
+         * @param {object[]} modelArray             An array containing ModelType objects that is expected from the API call
+         * @param {object|function} queryOperand    Query operand can be a URL query object or a function that resolves into a URL query object
+         * @param {function} itWrap                 Change the function that is called for a test - defaults to mocha 'it'
          */
         getAll: function (emberName, emberPluralized, ModelType, modelArray, queryOperand = null, itWrap = null) {
             if (itWrap === null) itWrap = it;
@@ -161,12 +161,12 @@ let Tests = {
         /**
          * Attempts to retrieve all models from the API endpoint, one page at a time, and makes sure that it successfully received all data.
          * 
-         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
-         * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param ModelType         A model that matches the type returned by the API call
-         * @param modelArray        An array containing ModelType objects that is expected from the API call
-         * @param pageSize          The size of the page to use
-         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
+         * @param {string} emberName        A string representing the name to be expected as the content-containing key in the API call route response
+         * @param {string} emberPluralized  A string representing the name to be used in the API call route
+         * @param {object} ModelType        A model that matches the type returned by the API call
+         * @param {object[]} modelArray     An array containing ModelType objects that is expected from the API call
+         * @param {number} pageSize         The size of the page to use
+         * @param {function} itWrap         Change the function that is called for a test - defaults to mocha 'it'
          */
         getPagination: function (emberName, emberPluralized, ModelType, modelArray, pageSize = 5, itWrap = null) {
             if (itWrap === null) itWrap = it;
@@ -226,13 +226,13 @@ let Tests = {
         /**
          * Attempts to retrieve all models from an API endpoint that match a filter query, and makes sure that it successfully received all matching data.
          *
-         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
-         * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param ModelType         A model that matches the type returned by the API call
-         * @param elementSelection  A function that calls the passed callback with argument [{... filter contents ...}, [expected data object(s)]]
-         * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
-         * @param queryOperand      Query operand can be a URL query object or a function that resolves into a URL query object
-         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
+         * @param {string} emberName                A string representing the name to be expected as the content-containing key in the API call route response
+         * @param {string} emberPluralized          A string representing the name to be used in the API call route
+         * @param {object} ModelType                A model that matches the type returned by the API call
+         * @param {function} elementSelection       A function that calls the passed callback with argument [{... filter contents ...}, [expected data object(s)]]
+         * @param {string} descriptionText          A custom message to append onto the test name to explain the specifics that it is achieving
+         * @param {object|function} queryOperand    Query operand can be a URL query object or a function that resolves into a URL query object
+         * @param {function} itWrap                 Change the function that is called for a test - defaults to mocha 'it'
          */
         getByFilterSuccess: function (emberName, emberPluralized, ModelType, elementSelection, descriptionText = "", queryOperand = null, itWrap = null) {
             if (itWrap === null) itWrap = it;
@@ -266,12 +266,12 @@ let Tests = {
         /**
          * Attempts to retrieve a specific model from an API endpoint, and makes sure that it successfully received the requested data.
          * 
-         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
-         * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param ModelType         A model that matches the type returned by the API call
-         * @param elementSelection  A function that calls the passed callback with the data object as the argument
-         * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
-         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
+         * @param {string} emberName            A string representing the name to be expected as the content-containing key in the API call route response
+         * @param {string} emberPluralized      A string representing the name to be used in the API call route
+         * @param {object} ModelType            A model that matches the type returned by the API call
+         * @param {function} elementSelection   A function that calls the passed callback with the data object as the argument
+         * @param {string} descriptionText      A custom message to append onto the test name to explain the specifics that it is achieving
+         * @param {function} itWrap             Change the function that is called for a test - defaults to mocha 'it'
          */
         getByID: function (emberName, emberPluralized, ModelType, elementSelection, descriptionText = "", itWrap = null) {
             if (itWrap === null) itWrap = it;
@@ -311,14 +311,14 @@ let Tests = {
         /**
          * Attempts to update a given object with new values through an API endpoint, and makes sure that the model was updated successfully, or failed in an expected manner.
          * 
-         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
-         * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param ModelType         A model that matches the type returned by the API call
-         * @param elementSelection  A function that calls the passed callback with argument [{updated data}, expected model]
-         * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
-         * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
-         * @param postPutVerify     A function that receives (next, API result) to allow additional checks to be made before declaring the PUT a success
-         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
+         * @param {string} emberName                        A string representing the name to be expected as the content-containing key in the API call route response
+         * @param {string} emberPluralized                  A string representing the name to be used in the API call route
+         * @param {object} ModelType                        A model that matches the type returned by the API call
+         * @param {function} elementSelection               A function that calls the passed callback with argument [{updated data}, expected model]
+         * @param {string[]} requiredElements               An array that the new model requires to have, otherwise the API call will error 400
+         * @param {string} descriptionText                  A custom message to append onto the test name to explain the specifics that it is achieving
+         * @param {function(function,object)} postPutVerify A function that receives (next, API result) to allow additional checks to be made before declaring the PUT a success
+         * @param {function} itWrap                         Change the function that is called for a test - defaults to mocha 'it'
          */
         putUpdated: function (emberName, emberPluralized, ModelType, elementSelection, requiredElements = [], descriptionText = "", postPutVerify = (cb) => cb(), itWrap = null) {
             if (itWrap === null) itWrap = it;
@@ -373,14 +373,14 @@ let Tests = {
         /**
          * Attempts to update a given object with new values through an API endpoint that cause a uniqueness conflict, and makes sure that the update fails in an expected manner.
          *
-         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
-         * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param ModelType         A model that matches the type returned by the API call
-         * @param elementSelection  A function that calls the passed callback with argument [{updated data}, id of model to update]
-         * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
-         * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
-         * @param postPutVerify     A function that receives (next, API result) to allow additional checks to be made before declaring the PUT a success
-         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
+         * @param {string} emberName                        A string representing the name to be expected as the content-containing key in the API call route response
+         * @param {string} emberPluralized                  A string representing the name to be used in the API call route
+         * @param {object} ModelType                        A model that matches the type returned by the API call
+         * @param {function} elementSelection               A function that calls the passed callback with argument [{updated data}, id of model to update]
+         * @param {string[]} requiredElements               An array that the new model requires to have, otherwise the API call will error 400
+         * @param {string} descriptionText                  A custom message to append onto the test name to explain the specifics that it is achieving
+         * @param {function(function,object)} postPutVerify A function that receives (next, API result) to allow additional checks to be made before declaring the PUT a success
+         * @param {function} itWrap                         Change the function that is called for a test - defaults to mocha 'it'
          */
         putNotUnique: function (emberName, emberPluralized, ModelType, elementSelection, requiredElements = [], descriptionText = "", postPutVerify = (cb) => cb(), itWrap = null) {
             if (itWrap === null) itWrap = it;
@@ -430,14 +430,14 @@ let Tests = {
         /**
          * Attempts to create a given object with through an API endpoint, and makes sure that the model was created successfully, or failed in an expected manner.
          *
-         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
-         * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param ModelType         A model that matches the type returned by the API call
-         * @param elementSelection  A function that calls the passed callback with argument [{updated data}, expected model]
-         * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
-         * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
-         * @param postPostVerify    A function that receives (next, API result) to allow additional checks to be made before declaring the POST a success
-         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
+         * @param {string} emberName                            A string representing the name to be expected as the content-containing key in the API call route response
+         * @param {string} emberPluralized                      A string representing the name to be used in the API call route
+         * @param {object} ModelType                            A model that matches the type returned by the API call
+         * @param {function} elementSelection                   A function that calls the passed callback with argument [{updated data}, expected model]
+         * @param {string[]} requiredElements                   An array that the new model requires to have, otherwise the API call will error 400
+         * @param {string} descriptionText                      A custom message to append onto the test name to explain the specifics that it is achieving
+         * @param {function(function,object)} postPostVerify    A function that receives (next, API result) to allow additional checks to be made before declaring the POST a success
+         * @param {function} itWrap                             Change the function that is called for a test - defaults to mocha 'it'
          */
         postNew: function (emberName, emberPluralized, ModelType, elementSelection, requiredElements = [], descriptionText = "", postPostVerify = (cb) => cb(), itWrap = null) {
             if (itWrap === null) itWrap = it;
@@ -482,14 +482,14 @@ let Tests = {
         /**
          * Attempts to create a given object with new values through an API endpoint that cause a uniqueness conflict, and makes sure that the creation fails in an expected manner.
          *
-         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
-         * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param ModelType         A model that matches the type returned by the API call
-         * @param elementSelection  A function that calls the passed callback with argument {new data}
-         * @param requiredElements  An array that the new model requires to have, otherwise the API call will error 400
-         * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
-         * @param postPostVerify    A function that receives (next, API result) to allow additional checks to be made before declaring the POST a success
-         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
+         * @param {string} emberName                            A string representing the name to be expected as the content-containing key in the API call route response
+         * @param {string} emberPluralized                      A string representing the name to be used in the API call route
+         * @param {object} ModelType                            A model that matches the type returned by the API call
+         * @param {function} elementSelection                   A function that calls the passed callback with argument {new data}
+         * @param {string[]} requiredElements                   An array that the new model requires to have, otherwise the API call will error 400
+         * @param {string} descriptionText                      A custom message to append onto the test name to explain the specifics that it is achieving
+         * @param {function(function,object)} postPostVerify    A function that receives (next, API result) to allow additional checks to be made before declaring the POST a success
+         * @param {function} itWrap                             Change the function that is called for a test - defaults to mocha 'it'
          */
         postNotUnique: function (emberName, emberPluralized, ModelType, elementSelection, requiredElements = [], descriptionText = "", postPostVerify = (cb) => cb(), itWrap = null) {
             if (itWrap === null) itWrap = it;
@@ -524,13 +524,13 @@ let Tests = {
         /**
          * Attempts to delete a given object ID through an API endpoint, and makes sure that the deletion succeeded.
          *
-         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
-         * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param ModelType         A model that matches the type returned by the API call
-         * @param elementSelection  A function that calls the passed callback with argument "id of object to delete"
-         * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
-         * @param postDeleteVerify  A function that receives (next, API result) to allow additional checks to be made before declaring the DELETE a success
-         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
+         * @param {string} emberName                            A string representing the name to be expected as the content-containing key in the API call route response
+         * @param {string} emberPluralized                      A string representing the name to be used in the API call route
+         * @param {object} ModelType                            A model that matches the type returned by the API call
+         * @param {function} elementSelection                   A function that calls the passed callback with argument "id of object to delete"
+         * @param {string} descriptionText                      A custom message to append onto the test name to explain the specifics that it is achieving
+         * @param {function(function,object)} postDeleteVerify  A function that receives (next, API result) to allow additional checks to be made before declaring the DELETE a success
+         * @param {function} itWrap                             Change the function that is called for a test - defaults to mocha 'it'
          */
         deleteExisting: function (emberName, emberPluralized, ModelType, elementSelection, descriptionText = "", postDeleteVerify = (cb) => cb(), itWrap = null) {
             if (itWrap === null) itWrap = it;
@@ -557,13 +557,13 @@ let Tests = {
         /**
          * Attempts to delete a non-existent object ID through an API endpoint, and makes sure that the deletion failed in an expected manner.
          * 
-         * @param emberName         A string representing the name to be expected as the content-containing key in the API call route response
-         * @param emberPluralized   A string representing the name to be used in the API call route
-         * @param ModelType         A model that matches the type returned by the API call
-         * @param elementSelection  A function that calls the passed callback with argument  "id of object to delete"
-         * @param descriptionText   A custom message to append onto the test name to explain the specifics that it is achieving
-         * @param postDeleteVerify  A function that receives (next, API result) to allow additional checks to be made before declaring the DELETE a success
-         * @param itWrap            Change the function that is called for a test - defaults to mocha 'it'
+         * @param {string} emberName                            A string representing the name to be expected as the content-containing key in the API call route response
+         * @param {string} emberPluralized                      A string representing the name to be used in the API call route
+         * @param {object} ModelType                            A model that matches the type returned by the API call
+         * @param {function} elementSelection                   A function that calls the passed callback with argument  "id of object to delete"
+         * @param {string} descriptionText                      A custom message to append onto the test name to explain the specifics that it is achieving
+         * @param {function(function,object)} postDeleteVerify  A function that receives (next, API result) to allow additional checks to be made before declaring the DELETE a success
+         * @param {function} itWrap                             Change the function that is called for a test - defaults to mocha 'it'
          */
         deleteNonexistent: function (emberName, emberPluralized, ModelType, elementSelection, descriptionText = "", postDeleteVerify = (cb) => cb(), itWrap = null) {
             if (itWrap === null) itWrap = it;
@@ -599,7 +599,7 @@ let Tests = {
 
 /**
  * This function wipes and regenerates new random data in the database for the next test.
- * @param done  The callback to be called when regeneration is finished.
+ * @param {function} done   The callback to be called when regeneration is finished.
  */
 let regenAllData = function (done) {
     // This may be a slow operation
@@ -653,10 +653,10 @@ let regenAllData = function (done) {
                 [50, generateAward],
                 [50, generateStanding],
                 [5, generateSecondarySchool],
-                [2, generateHsCourseSource],
-                [5, generateHsSubject],
-                [10, generateHsCourse],
-                [50, generateHsGrade],
+                [2, generateHSCourseSource],
+                [5, generateHSSubject],
+                [10, generateHSCourse],
+                [50, generateHSGrade],
                 [10, generatePlanCode],
                 [50, generateGrade],
                 [2, generateCourseLoad],
@@ -665,12 +665,12 @@ let regenAllData = function (done) {
                 [50, generateProgramRecord],
                 [2, generateTerm],
                 [5, generateTermCode],
-                [2, generateFaculties],
-                [4, generateDepartments],
-                [10, generateProgramAdministrations],
-                [20, generateAssessmentCodes],
-                [60, generateAdjudications],
-                [1, (_, cb) => timesSeries(40, generateLogicalExpressions, cb)]
+                [2, generateFaculty],
+                [4, generateDepartment],
+                [10, generateProgramAdministration],
+                [20, generateAssessmentCode],
+                [60, generateAdjudication],
+                [1, (_, cb) => timesSeries(40, generateLogicalExpression, cb)]
             ];
             eachSeries(executions, (item, cb) => {
                 times(item[0], item[1], cb);
@@ -684,9 +684,9 @@ let regenAllData = function (done) {
 
 
 /// HELPERS ///
-let generateAdjudications = (number, callback) => {
-    let termTotal = faker.random.number(14)/2;    
-    genBase(Adjudications, Lists.adjudicationList, {
+let newAdjudication = () => {
+    let termTotal = faker.random.number(14)/2; 
+    return {
         date: faker.date.past(10),
         termAVG: faker.random.number(100),
         termUnitsPassed: faker.random.number(termTotal * 2) / 2,
@@ -694,88 +694,109 @@ let generateAdjudications = (number, callback) => {
         note: faker.lorem.paragraph(),
         term: Lists.termList.randomObject(),
         assessmentCode: Lists.termList.randomObject()
-    })(err => {
+    };
+};
+let generateAdjudication = (number, callback) => {   
+    genBase(Adjudications, Lists.adjudicationList, newAdjudication())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
-            else generateAdjudications(number - 1, callback);
+            else generateAdjudication(number - 1, callback);
         }
         else callback();
     });
 };
-let generateAssessmentCodes = (number, callback) => {
-    genBase(AssessmentCodes, Lists.assessmentCodeList, {
+let newAssessmentCode = () => {
+    return {
         code: faker.lorem.word(),
         name: faker.lorem.words(5),
         faculty: Lists.facultyList.randomObject(),
-    })(err => {
+    };
+};
+let generateAssessmentCode = (number, callback) => {
+    genBase(AssessmentCodes, Lists.assessmentCodeList, newAssessmentCode())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
-            else generateAssessmentCodes(number - 1, callback);
+            else generateAssessmentCode(number - 1, callback);
         }
         else callback();
     });
 };
-let generateDepartments = (number, callback) => {
-    genBase(Departments, Lists.departmentList, {
+let newDepartment = () => {
+    return {
         name: faker.lorem.words(5),
         faculty: Lists.facultyList.randomObject()
-    })(err => {
+    };
+};
+let generateDepartment = (number, callback) => {
+    genBase(Departments, Lists.departmentList, newDepartment())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
-            else generateDepartments(number - 1, callback);
+            else generateDepartment(number - 1, callback);
         }
         else callback();
     });
 };
-let generateFaculties = (number, callback) => {
-    genBase(Faculties, Lists.facultyList, {
+let newFaculty = () => {
+    return {
         name: faker.lorem.words(5)
-    })(err => {
+    };
+};
+let generateFaculty = (number, callback) => {
+    genBase(Faculties, Lists.facultyList, newFaculty())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
-            else generateFaculties(number - 1, callback);
+            else generateFaculty(number - 1, callback);
         }
         else callback();
     });
 };
-let generateLogicalExpressions = (number, callback) => {
-    // NOTE: Because this is self-referential, multiple calls must be called in series
-    genBase(LogicalExpressions, Lists.logicalExpressionList, {
+let newLogicalExpression = () => {
+    return {
         booleanExp: faker.lorem.words(5),
         logicalLink: faker.lorem.words(5),
         assessmentCode: Lists.assessmentCodeList.randomObject(),
         parentExpression: Lists.logicalExpressionList.randomObject()
-    })(err => {
+    };
+};
+let generateLogicalExpression = (number, callback) => {
+    // NOTE: Because this is self-referential, multiple calls must be called in series
+    genBase(LogicalExpressions, Lists.logicalExpressionList, newLogicalExpression())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
-            else generateLogicalExpressions(number - 1, callback);
+            else generateLogicalExpression(number - 1, callback);
         }
         else callback();
     });
 };
-let generateProgramAdministrations = (number, callback) => {
-    genBase(ProgramAdministrations, Lists.programAdministrationList, {
+let newProgramAdministration = () => {
+    return {
         name: faker.name.findName(),
         position: faker.name.jobDescriptor(),
         department: Lists.departmentList.randomObject()
-    })(err => {
+    };
+};
+let generateProgramAdministration = (number, callback) => {
+    genBase(ProgramAdministrations, Lists.programAdministrationList, newProgramAdministration())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
-            else generateProgramAdministrations(number - 1, callback);
+            else generateProgramAdministration(number - 1, callback);
         }
         else callback();
     });
 };
-let generatePlanCode = (number, callback) => {
-    genBase(PlanCodes, Lists.planCodeList, {
+let newPlanCode = () => {
+    return {
         name: faker.random.words(1, 3)
-    })(err => {
+    };
+};
+let generatePlanCode = (number, callback) => {
+    genBase(PlanCodes, Lists.planCodeList, newPlanCode())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
@@ -784,10 +805,13 @@ let generatePlanCode = (number, callback) => {
         else callback();
     });
 };
-let generateProgramStatus = (number, callback) => {
-    genBase(ProgramStatuses, Lists.programStatusList, {
+let newProgramStatus = () => {
+    return {
         status: faker.random.words(1, 3)
-    })(err => {
+    };
+};
+let generateProgramStatus = (number, callback) => {
+    genBase(ProgramStatuses, Lists.programStatusList, newProgramStatus())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
@@ -796,18 +820,21 @@ let generateProgramStatus = (number, callback) => {
         else callback();
     });
 };
-let generateProgramRecord = (number, callback) => {
+let newProgramRecord = () => {
     let plans = Lists.planCodeList.filter(() => Math.random() * 10 > 8);
     if (plans.length === 0)
         plans.push(Lists.planCodeList.randomObject());
 
-    genBase(ProgramRecords, Lists.programRecordList, {
+    return {
         name: faker.random.words(1, 3),
         level: faker.random.number(9),
         load: Lists.courseLoadList.randomObject(),
         status: Lists.programStatusList.randomObject(),
         plan: plans
-    })(err => {
+    };
+};
+let generateProgramRecord = (number, callback) => {
+    genBase(ProgramRecords, Lists.programRecordList, newProgramRecord())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
@@ -816,11 +843,14 @@ let generateProgramRecord = (number, callback) => {
         else callback();
     });
 };
-let generateGrade = (number, callback) => {
-    genBase(Grades, Lists.gradeList, {
+let newGrade = () => {
+    return {
         mark: faker.random.number(100).toString(),
         note: faker.lorem.paragraph()
-    })(err => {
+    };
+};
+let generateGrade = (number, callback) => {
+    genBase(Grades, Lists.gradeList, newGrade())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
@@ -829,10 +859,13 @@ let generateGrade = (number, callback) => {
         else callback();
     });
 };
-let generateCourseLoad = (number, callback) => {
-    genBase(CourseLoads, Lists.courseLoadList, {
+let newCourseLoad = () => {
+    return {
         load: faker.random.words(1, 3)
-    })(err => {
+    };
+};
+let generateCourseLoad = (number, callback) => {
+    genBase(CourseLoads, Lists.courseLoadList, newCourseLoad())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
@@ -841,15 +874,18 @@ let generateCourseLoad = (number, callback) => {
         else callback();
     });
 };
-let generateCourseCode = (number, callback) => {
-    genBase(CourseCodes, Lists.courseCodeList, {
+let newCourseCode = () => {
+    return {
         courseLetter: faker.random.word(),
         courseNumber: faker.random.word(),
         name: faker.random.words(2),
         unit: faker.random.number(4) / 2,
         termInfo: Lists.termList.randomObject(),
         gradeInfo: Lists.gradeList.randomObject()
-    })(err => {
+    };
+};
+let generateCourseCode = (number, callback) => {
+    genBase(CourseCodes, Lists.courseCodeList, newCourseCode())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
@@ -858,16 +894,19 @@ let generateCourseCode = (number, callback) => {
         else callback();
     });
 };
-let generateTerm = (number, callback) => {
+let newTerm = () => {
     let records = Lists.programRecordList.filter(() => Math.random() * 10 > 8);
     if (records.length === 0)
         records.push(Lists.programRecordList.randomObject());
 
-    genBase(Terms, Lists.termList, {
+    return {
         termCode: Lists.termCodeList.randomObject(),
         student: Lists.studentList.randomObject(),
         programRecords: records
-    })(err => {
+    };
+};
+let generateTerm = (number, callback) => {
+    genBase(Terms, Lists.termList, newTerm())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
@@ -876,10 +915,13 @@ let generateTerm = (number, callback) => {
         else callback();
     });
 };
-let generateTermCode = (number, callback) => {
-    genBase(TermCodes, Lists.termCodeList, {
+let newTermCode = () => {
+    return {
         name: faker.random.words(1, 3),
-    })(err => {
+    };
+};
+let generateTermCode = (number, callback) => {
+    genBase(TermCodes, Lists.termCodeList, newTermCode())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
@@ -888,10 +930,13 @@ let generateTermCode = (number, callback) => {
         else callback();
     });
 };
-let generateSecondarySchool = (number, callback) => {
-    genBase(SecondarySchools, Lists.secondarySchoolList, {
+let newSecondarySchool = () => {
+    return {
         name: faker.random.words(2, 5)
-    })(err => {
+    };
+};
+let generateSecondarySchool = (number, callback) => {
+    genBase(SecondarySchools, Lists.secondarySchoolList, newSecondarySchool())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
@@ -900,62 +945,74 @@ let generateSecondarySchool = (number, callback) => {
         else callback();
     });
 };
-let generateHsSubject = (number, callback) => {
-    genBase(HSSubjects, Lists.hsSubjectList, {
+let newHSSubject = () => {
+    return {
         name: faker.random.words(1, 2),
         description: faker.lorem.paragraphs(2)
-    })(err => {
+    };
+};
+let generateHSSubject = (number, callback) => {
+    genBase(HSSubjects, Lists.hsSubjectList, newHSSubject())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
-            else generateHsSubject(number - 1, callback);
+            else generateHSSubject(number - 1, callback);
         }
         else callback();
     });
 };
-let generateHsCourseSource = (number, callback) => {
-    genBase(HSCourseSources, Lists.hsCourseSourceList, {
+let newHSCourseSource = () => {
+    return {
         code: faker.random.word()
-    })(err => {
+    };
+};
+let generateHSCourseSource = (number, callback) => {
+    genBase(HSCourseSources, Lists.hsCourseSourceList, newHSCourseSource())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
-            else generateHsCourseSource(number - 1, callback);
+            else generateHSCourseSource(number - 1, callback);
         }
         else callback();
     });
 };
-let generateHsCourse = (number, callback) => {
-    genBase(HSCourses, Lists.hsCourseList, {
+let newHSCourse = () => {
+    return {
         level: faker.random.number(9, 12),
         unit: faker.random.number(1, 4) / 2,
         source: Lists.hsCourseSourceList[faker.random.number(Lists.hsCourseSourceList.length - 1)],
         school: Lists.secondarySchoolList[faker.random.number(Lists.secondarySchoolList.length - 1)],
         subject: Lists.hsSubjectList[faker.random.number(Lists.hsSubjectList.length - 1)]
-    })(err => {
+    };
+};
+let generateHSCourse = (number, callback) => {
+    genBase(HSCourses, Lists.hsCourseList, newHSCourse())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
-            else generateHsCourse(number - 1, callback);
+            else generateHSCourse(number - 1, callback);
         }
         else callback();
     });
 };
-let generateHsGrade = (number, callback) => {
-    genBase(HSGrades, Lists.hsGradeList, {
+let newHSGrade = () => {
+    return {
         mark: faker.random.number(100).toString(),
         course: Lists.hsCourseList[faker.random.number(Lists.hsCourseList.length - 1)],
         recipient: Lists.studentList[faker.random.number(Lists.studentList.length - 1)]
-    })(err => {
+    };
+};
+let generateHSGrade = (number, callback) => {
+    genBase(HSGrades, Lists.hsGradeList, newHSGrade())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
-            else generateHsGrade(number - 1, callback);
+            else generateHSGrade(number - 1, callback);
         }
         else callback();
     });
 };
-let generateStanding = (number, callback) => {
+let newStanding = () => {
     let courses = [
         {
             course: 'BASKWEAV 1000',
@@ -1016,14 +1073,17 @@ let generateStanding = (number, callback) => {
     // Pick a random course
     let course = courses[faker.random.number(courses.length - 1)];
 
-    genBase(AdvancedStandings, Lists.standingList, {
+    return {
         course: course.course,
         description: course.description,
         units: Math.floor(Math.random() * 4) / 2 + 0.5, // Either 0, 0.5, 1, 1.5, or 2
         grade: Math.floor(Math.random() * 101), // From 0-100
         from: fromData[Math.floor(Math.random() * fromData.length)],
         recipient: Lists.studentList[faker.random.number(Lists.studentList.length - 1)]
-    })(err => {
+    };
+};
+let generateStanding = (number, callback) => {
+    genBase(AdvancedStandings, Lists.standingList, newStanding())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
@@ -1032,7 +1092,7 @@ let generateStanding = (number, callback) => {
         else callback();
     });
 };
-let generateAward = (number, callback) => {
+let newAward = () => {
     let awardNames = [
         'Excellence in Academia',
         'Making the Difference',
@@ -1085,10 +1145,14 @@ let generateAward = (number, callback) => {
         'Caught in the Act of Caring Award',
         'Made My Day Award'
     ];
-    genBase(Awards, Lists.awardList, {
+    return {
         note: awardNames[faker.random.number(awardNames.length - 1)],
         recipient: Lists.studentList[faker.random.number(Lists.studentList.length - 1)]
-    })(err => {
+    };
+};
+let generateAward = (number, callback) => {
+    
+    genBase(Awards, Lists.awardList, newAward())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
@@ -1097,8 +1161,8 @@ let generateAward = (number, callback) => {
         else callback();
     });
 };
-let generateStudent = (number, callback) => {
-    genBase(Students, Lists.studentList, {
+let newStudent = () => {
+    return {
         number: faker.random.number(100000000, 999999999),
         firstName: faker.name.firstName(),
         lastName: faker.name.lastName(),
@@ -1109,7 +1173,10 @@ let generateStudent = (number, callback) => {
         admissionComments: faker.lorem.paragraph(),
         resInfo: Lists.residencyList[faker.random.number(Lists.residencyList.length - 1)],
         genderInfo: Lists.genderList[faker.random.number(Lists.genderList.length - 1)],
-    })(err => {
+    };
+};
+let generateStudent = (number, callback) => {
+    genBase(Students, Lists.studentList, newStudent())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
@@ -1118,13 +1185,19 @@ let generateStudent = (number, callback) => {
         else callback();
     });
 };
+let newGender = (name) => {
+    return { name: name };
+};
 let generateGender = (name, cb) => {
     // Create and save gender, then put on list
-    genBase(Genders, Lists.genderList, { name: name })(cb);
+    genBase(Genders, Lists.genderList, newGender(name))(cb);
+};
+let newResidency = () => {
+    return { name: faker.lorem.words(1, 5) };
 };
 let generateResidency = (number, callback) => {
     // Create and save residency, then put on list
-    genBase(Residencies, Lists.residencyList, { name: faker.lorem.words(1, 5) })(err => {
+    genBase(Residencies, Lists.residencyList, newResidency())(err => {
         // Retry a few times in case random generation causes duplicate
         if (err) {
             if (number < -1) callback(err);
@@ -1135,10 +1208,10 @@ let generateResidency = (number, callback) => {
 };
 /**
  * Save a generic model to the database and add the object to a specified list.
- * @param Model         The model to save.
- * @param list          The list to append the new model onto.
- * @param contents      The contents of the model.
- * @returns {Function}  Returns a function to call that accepts a callback when complete.
+ * @param {object} Model    The model to save.
+ * @param {object[]} list   The list to append the new model onto.
+ * @param {object} contents The contents of the model.
+ * @returns {Function}      Returns a function to call that accepts a callback when complete.
  */
 let genBase = (Model, list, contents) => {
     return function (callback) {
@@ -1161,12 +1234,32 @@ exports.server = server;
 
 exports.DBElements = Lists;
 
-exports.Generators = {};
-exports.Generators.generateStanding = generateStanding;
-exports.Generators.generateAward = generateAward;
-exports.Generators.generateStudent = generateStudent;
-exports.Generators.generateGender = generateGender;
-exports.Generators.generateResidency = generateResidency;
+exports.Generators = {
+    Residency: newResidency,
+    Student: newStudent,
+    Gender: newGender,
+    Award: newAward,
+    Standing: newStanding,
+    SecondarySchool: newSecondarySchool,
+    HSCourseSource: newHSCourseSource,
+    HSSubject: newHSSubject,
+    HSCourse: newHSCourse,
+    HSGrade: newHSGrade,
+    PlanCode: newPlanCode,
+    Grade: newGrade,
+    CourseLoad: newCourseLoad,
+    CourseCode: newCourseCode,
+    ProgramStatus: newProgramStatus,
+    ProgramRecord: newProgramRecord,
+    Term: newTerm,
+    TermCode: newTermCode,
+    Faculty: newFaculty,
+    Department: newDepartment,
+    ProgramAdministration: newProgramAdministration,
+    AssessmentCode: newAssessmentCode,
+    Adjudication: newAdjudication,
+    LogicalExpression: newLogicalExpression
+};
 
 
 exports.Tests = Tests;

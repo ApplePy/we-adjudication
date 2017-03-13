@@ -20,6 +20,8 @@ To extend the testing framework to cover more classes:
 * `regenAllData` must be extended to wipe the new class model
 * A new generator must be supplied to generate new objects of the new class,
  along with a call in `regenAllData` to add it to the generation
+    * Remember to export the associated new content function!
+    * If wrapping the new content function, do **not** use ES6 arrow functions.
 * Another array must be created to store the generated class objects for
 test access
     * This new list must be created under `Lists` to access it in tests

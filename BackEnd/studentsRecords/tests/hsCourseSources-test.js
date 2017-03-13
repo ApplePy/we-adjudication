@@ -28,11 +28,7 @@ let emberName = "hsCourseSource";
 let emberNamePluralized = "hsCourseSources";
 let itemList = Common.DBElements.hsCourseSourceList;
 let EmberModel = HSCourseSources;
-let newModel = () => {
-    return {
-        code: faker.lorem.word()
-    };
-};
+let newModel = Common.Generators.HSCourseSource;
 let filterValueSearches = ['code'];
 let requiredValues = ['code'];
 let uniqueValues = ['code'];

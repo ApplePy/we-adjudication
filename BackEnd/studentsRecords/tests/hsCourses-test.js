@@ -28,15 +28,7 @@ let emberName = "hsCourse";
 let emberNamePluralized = "hsCourses";
 let itemList = Common.DBElements.hsCourseList;
 let EmberModel = HSCourses;
-let newModel = () => {
-    return {
-        level: faker.random.number(9, 12),
-        unit: (faker.random.number(5) + 1) / 2,
-        source: Common.DBElements.hsCourseSourceList[faker.random.number(Common.DBElements.hsCourseSourceList.length - 1)],
-        school: Common.DBElements.secondarySchoolList[faker.random.number(Common.DBElements.secondarySchoolList.length - 1)],
-        subject: Common.DBElements.hsSubjectList[faker.random.number(Common.DBElements.hsSubjectList.length - 1)]
-    };
-};
+let newModel = Common.Generators.HSCourse;
 let filterValueSearches = ['level', 'unit', 'source', 'school', 'subject'];
 let requiredValues = ['level', 'unit'];
 let uniqueValues = [];

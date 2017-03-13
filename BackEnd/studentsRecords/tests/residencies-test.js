@@ -28,11 +28,7 @@ let emberName = "residency";
 let emberNamePluralized = "residencies";
 let itemList = Common.DBElements.residencyList;
 let EmberModel = Residencies;
-let newModel = () => {
-    return {
-        name: faker.lorem.words()
-    };
-};
+let newModel = Common.Generators.Residency;
 let filterValueSearches = ['name'];
 let requiredValues = ['name'];
 let uniqueValues = ['name'];
