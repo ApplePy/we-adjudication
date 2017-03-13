@@ -1,10 +1,10 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var mongoose = require('./../../studentsRecordsDB').mongoose;
-var mongoosePaginate = require('mongoose-paginate');
+let mongoose = require('./../../studentsRecordsDB').mongoose;
+let mongoosePaginate = require('mongoose-paginate');
 
-var termSchema = mongoose.Schema(
+let termSchema = mongoose.Schema(
     {
         termCode: {type: mongoose.Schema.ObjectId, ref: 'Terms'},
         student: {type: mongoose.Schema.ObjectId, ref: 'Students'},
@@ -14,6 +14,6 @@ var termSchema = mongoose.Schema(
 );
 termSchema.plugin(mongoosePaginate);
 
-var Terms = mongoose.model('term', termSchema);
+let Terms = mongoose.model('term', termSchema);
 
 module.exports = Terms;

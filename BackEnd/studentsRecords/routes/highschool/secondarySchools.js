@@ -2,37 +2,22 @@
  * Created by darryl on 2017-02-13.
  */
 
-var SecondarySchools = require('../../models/schemas/highschool/secondarySchoolSchema');
-var HSCourses = require('../../models/schemas/highschool/hsCourseSchema');
-var Setup = require('../genericRouting');
+let SecondarySchools = require('../../models/schemas/highschool/secondarySchoolSchema');
+let HSCourses = require('../../models/schemas/highschool/hsCourseSchema');
+let Route = require('../genericRouting').Route;
+let PropertyValidator = require('../genericRouting').PropertyValidator;
+let MapToNull = require('../genericRouting').MapToNull;
 
 
 module.exports =
-    Setup(
+    new Route(
         SecondarySchools,
         'secondarySchool',
         true,
-        (req, res, model) => {
-            if (!model.name)
-                return ["A school name must be specified"];
-            else
-                return 0;
-        },
+        new PropertyValidator("name"),
         undefined,
         undefined,
         undefined,
-        (req, res, next) => {
-            // Remap course school to null
-            HSCourses.update(
-                {school: req.params.mongo_id},
-                {$set: {school: null}},
-                {multi: true},
-                function (error, courses) {
-                    if (error) res.status(500).send({error: error});
-                    // All courses mapped successfully, delete source
-                    else next();
-                }
-            );
-        },
+        new MapToNull(HSCourses, "school"),
         undefined
     );

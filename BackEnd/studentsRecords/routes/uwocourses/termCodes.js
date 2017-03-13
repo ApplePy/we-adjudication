@@ -2,38 +2,22 @@
  * Created by darryl on 2017-02-13.
  */
 
-var TermCodes = require('../../models/schemas/uwocourses/termCodeSchema');
-var Terms = require('../../models/schemas/uwocourses/termSchema');
-var Setup = require('../genericRouting');
+let TermCodes = require('../../models/schemas/uwocourses/termCodeSchema');
+let Terms = require('../../models/schemas/uwocourses/termSchema');
+let Route = require('../genericRouting').Route;
+let PropertyValidator = require('../genericRouting').PropertyValidator;
+let MapToNull = require('../genericRouting').MapToNull;
 
 
 module.exports =
-    Setup(
+    new Route(
         TermCodes,
         'termCode',
         false,
-        (req, res, mod) => {
-            if (!mod.name)
-                return ["Term name must be specified"];
-            else
-                return 0;
-        },
+        new PropertyValidator("name"),
         undefined,
         undefined,
         undefined,
-        (request, response, next) => {
-            // Map all affected students to null
-            Terms.update(
-                {termCode: request.params.mongo_id},
-                {$set: {termCode: null}},
-                {multi: true},
-                function (error, terms) {
-                    if (error) response.status(500).send({error: error});
-                    else {
-                        // All students mapped successfully, delete residency
-                        next();
-                    }
-                });
-        },
+        new MapToNull(Terms, "termCode"),
         undefined
     );

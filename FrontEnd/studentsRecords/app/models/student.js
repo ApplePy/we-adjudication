@@ -1,11 +1,11 @@
 import DS from 'ember-data';
 
 export default DS.Model.extend({
-  number: DS.attr(),
-  firstName: DS.attr(),
-  lastName: DS.attr(),
+  number: DS.attr('number'),
+  firstName: DS.attr('string'),
+  lastName: DS.attr('string'),
   DOB: DS.attr('date'),
-  photo: DS.attr(),
+  photo: DS.attr('string'),
   registrationComments: DS.attr('string'),
   basisOfAdmission: DS.attr('string'),
   admissionAverage: DS.attr('string'),

@@ -2,13 +2,14 @@
  * Created by darryl on 2017-02-13.
  */
 
-var ProgramRecords = require('../../models/schemas/uwocourses/programRecordSchema');
-var Terms = require('../../models/schemas/uwocourses/termSchema');
-var Setup = require('../genericRouting');
+let ProgramRecords = require('../../models/schemas/uwocourses/programRecordSchema');
+let Terms = require('../../models/schemas/uwocourses/termSchema');
+let Route = require('../genericRouting').Route;
+let MapToNull = require('../genericRouting').MapToNull;
 
 
 module.exports =
-    Setup(
+    new Route(
         ProgramRecords,
         'programRecord',
         true,
@@ -16,19 +17,6 @@ module.exports =
         undefined,
         undefined,
         undefined,
-        (req, res, next) => {
-            // Map all affected term codes to null
-            Terms.update(
-                {programRecords: {$in: [req.params.mongo_id]}},
-                {$pull: {programRecords: req.params.mongo_id}},
-                {multi: true},
-                function (error) {
-                    if (error) res.status(500).send({error: error});
-                    else {
-                        // All courses mapped successfully, delete grade
-                        next();
-                    }
-                });
-        },
+        new MapToNull(Terms, "programRecords"),
         undefined
     );

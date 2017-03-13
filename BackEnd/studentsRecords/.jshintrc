@@ -1,8 +1,10 @@
 {
   "predef": [
+    "global",
     "require",
     "process",
     "module",
+    "exports",
     "describe",
     "it",
     "before",

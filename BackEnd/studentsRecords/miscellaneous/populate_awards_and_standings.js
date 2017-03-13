@@ -1,10 +1,10 @@
-var Students = require('../models/schemas/studentinfo/studentSchema');
-var Awards = require('../models/schemas/studentinfo/awardSchema');
-var AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
+let Students = require('../models/schemas/studentinfo/studentSchema');
+let Awards = require('../models/schemas/studentinfo/awardSchema');
+let AdvancedStandings = require('../models/schemas/studentinfo/advancedStandingSchema');
 
 let doneCounter = 0;
 
-var awardNames = [
+let awardNames = [
     'Excellence in Academia',
     'Making the Difference',
     'Completion',
@@ -79,7 +79,7 @@ Students.find({}).then((students) => {
     }
 });
 
-var courses = [
+let courses = [
     {
         course: 'BASKWEAV 1000',
         description: "Intro to Basket Weaving"
@@ -122,7 +122,7 @@ var courses = [
     },
 ];
 
-var fromData = [
+let fromData = [
     'UBC',
     'Brock',
     'Harvard',

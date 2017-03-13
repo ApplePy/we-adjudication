@@ -1,10 +1,10 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var mongoose = require('./../../studentsRecordsDB').mongoose;
-var mongoosePaginate = require('mongoose-paginate');
+let mongoose = require('./../../studentsRecordsDB').mongoose;
+let mongoosePaginate = require('mongoose-paginate');
 
-var hsGradeSchema = mongoose.Schema(
+let hsGradeSchema = mongoose.Schema(
     {
         mark: {type: String, required: true},
         course: {type: mongoose.Schema.ObjectId, ref: 'HSCourses'},
@@ -13,6 +13,6 @@ var hsGradeSchema = mongoose.Schema(
 );
 hsGradeSchema.plugin(mongoosePaginate);
 
-var HSGrades = mongoose.model('hsGrade', hsGradeSchema);
+let HSGrades = mongoose.model('hsGrade', hsGradeSchema);
 
 module.exports = HSGrades;
