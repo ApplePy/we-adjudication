@@ -21,6 +21,12 @@ let courseLoads = require('./routes/uwocourses/courseLoads');
 let programStatuses = require('./routes/uwocourses/programStatuses');
 let programRecords = require('./routes/uwocourses/programRecords');
 let planCodes = require('./routes/uwocourses/planCodes');
+let adjudications = require('./routes/uwoadjudication/adjudications');
+let assessmentCodes = require('./routes/uwoadjudication/assessmentCodes');
+let departments = require('./routes/uwoadjudication/departments');
+let faculties = require('./routes/uwoadjudication/faculties');
+let logicalExpressions = require('./routes/uwoadjudication/logicalExpressions');
+let programAdministrations = require('./routes/uwoadjudication/programAdministrations');
 
 
 app.use(function (request, response, next) {
@@ -62,6 +68,12 @@ api.use('/courseLoads', courseLoads);
 api.use('/programStatuses', programStatuses);
 api.use('/programRecords', programRecords);
 api.use('/planCodes', planCodes);
+api.use('/adjudications', adjudications);
+api.use('/assessmentCodes', assessmentCodes);
+api.use('/departments', departments);
+api.use('/faculties', faculties);
+api.use('/logicalExpressions', logicalExpressions);
+api.use('/programAdministrations', programAdministrations);
 
 // Set default serve
 if (process.env.NODE_ENV === 'production') app.use(express.static('dist'));
