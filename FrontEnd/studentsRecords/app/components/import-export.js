@@ -1,6 +1,7 @@
 import Ember from 'ember';
-import async from 'npm:async';
 import XLSX from "npm:xlsx-browserify-shim";
+
+/* jshint loopfunc: true */
 
 export default Ember.Component.extend({
 
@@ -27,9 +28,9 @@ export default Ember.Component.extend({
 
 				// TODO: Recommendation to avoid capitalization causing issues: run all the strings through a "toUpperCase" or "toLowerCase" before comparison
 				if (fileName === "genders.xlsx") {
-					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, {name: cellValue}, "gender"));
+					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "gender"));
 				} else if (fileName === "residencies.xlsx") {
-					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, {name: cellValue}, "residency"));
+					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "residency"));
 				} else if (fileName === "UndergraduateCourses.xlsx") {
 					parseStrategies.byRow.call(this, false, valueArray => saveStrategies.createAndSave.call(this, {
 						courseLetter: valueArray[0],
@@ -38,50 +39,41 @@ export default Ember.Component.extend({
 						unit: valueArray[3]
 					}, "course-code"));
 				} else if (fileName === "HighSchools.xlsx") {
-					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, {name: cellValue}, "secondary-school"));
+					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "secondary-school"));
 				} else if (fileName === "students.xlsx") {
 					parseStrategies.byRow.call(this, false, valueArray => {
-						this.get('store').query('gender', {filter: {name: valueArray[3]}})
-						.then((genders) => {
-							let gender = genders.get("firstObject");
+						// Get gender and dependencies
+						// TODO: Find out if this usage of Promise.all makes Ember squirm... it intentionally removed Promise from jshint global space
+						Promise.all([
+							this.get('store').query('gender', { filter: { name: valueArray[3] } }),
+							this.get('store').query('residency', { filter: { name: valueArray[5] } })
+						]).then(values => {
+							let gender = values[0].get("firstObject");
+							let residency = values[1].get("firstObject");
 
-							this.get('store').query('residency', {filter: {name: valueArray[5]}})
-							.then((residencies) => {
-								let residency = residencies.get("firstObject");
-
-								let studentJSON = {
-									number: valueArray[0],
-									firstName: valueArray[1],
-									lastName: valueArray[2],
-									DOB: new Date(valueArray[4]),	// TODO: THIS DOES NOT WORK.
-									genderInfo: gender,
-									resInfo: residency
-								};
-
-								saveStrategies.createAndSave.call(this, studentJSON, "student");
-							});
+							// Create new record
+							let studentJSON = {
+								number: valueArray[0],
+								firstName: valueArray[1],
+								lastName: valueArray[2],
+								DOB: new Date(valueArray[4]),	// TODO: THIS DOES NOT WORK.
+								genderInfo: gender,
+								resInfo: residency
+							};
+							saveStrategies.createAndSave.call(this, studentJSON, "student");
 						});
 					});
-
 				} else if (fileName === "AdmissionComments.xlsx") {
 					let admissionComments = miscellaneous.parseComments();
-
 					admissionComments.forEach((value, key) => {
-
-						console.log(key + ' = ' + value);
-
 						if (value !== "NONE FOUND") {
-							saveStrategies.modifyAndSave.call(this, "student", {number: key}, "admissionComments", value);
+							saveStrategies.modifyAndSave.call(this, "student", { number: key }, "admissionComments", value);
 						}
 					});
 
 				} else if (fileName === "RegistrationComments.xlsx") {
 					let registrationComments = miscellaneous.parseComments();
-
 					registrationComments.forEach((value, key) => {
-
-						console.log(key + ' = ' + value);
-
 						if (value !== "NONE FOUND") {
 							saveStrategies.modifyAndSave.call(this, "student", { number: key }, "registrationComments", value);
 						}
@@ -89,366 +81,228 @@ export default Ember.Component.extend({
 				} else if (fileName === "BasisOfAdmission.xlsx") {
 					parseStrategies.byRow.call(this, true, valueArray => {
 						if (valueArray[1] !== "NONE FOUND") {
-							saveStrategies.modifyAndSave.call(this, "student", {number: valueArray[0]}, "basisOfAdmission", valueArray[1]);
+							saveStrategies.modifyAndSave.call(this, "student", { number: valueArray[0] }, "basisOfAdmission", valueArray[1]);
 						}
 					});
 				} else if (fileName === "AdmissionAverages.xlsx") {
 
 					parseStrategies.byRow.call(this, true, valueArray => {
 						if (valueArray[1] !== "NONE FOUND") {
-							saveStrategies.modifyAndSave.call(this, "student", {number: valueArray[0]}, "admissionAverage", valueArray[1]);
+							saveStrategies.modifyAndSave.call(this, "student", { number: valueArray[0] }, "admissionAverage", valueArray[1]);
 						}
 					});
 				} else if (fileName === "AdvancedStanding.xlsx") {
+					parseStrategies.byRowJSON.call(this, json => {
+						if (json.course !== "NONE FOUND") {
+							// Find student to save an advanced standing for
+							this.get('store').query('student', { filter: { number: json.studentNumber } })
+								.then(students => {
+									let student = students.get("firstObject");
 
-					//Get worksheet
-					let first_sheet_name = workbook.SheetNames[0];
-					let worksheet = workbook.Sheets[first_sheet_name];
-
-					// FIXME: How do we refactor this parsing?
-					let sheetJSON = XLSX.utils.sheet_to_json(worksheet);
-					console.log(sheetJSON);
-
-					let studentNumber;
-					for (let row of sheetJSON) {
-						let rowContents = {
-							course: null,
-							description: null,
-							units: null,
-							grade: null,
-							from: null,
-						}
-						let keys = Object.keys(row);
-						keys.remove("__rowNum__");
-						for (let col of keys) {
-							if (column != "studentNumber") {
-								rowContents[col] = row[col];
-							} else {
-								studentNumber = row[col];
-							}
-						}
-
-						if (rowContents[course] != "NONE FOUND") {
-
-							this.get('store').query('student', {
-								filter: {
-									number: studentNumber
-								}
-							}).then((students) => {
-
-								let student = students.get("firstObject");
-
-								saveStrategies.createAndSave.call(this, {
-									course: rowContents.course,
-									description: rowContents.description,
-									units: rowContents.units,
-									grade: rowContents.grade,
-									from: rowContents.from,
-									recipient: student
-								}, "advanced-standing");
-							});
-						}
-					}
-				} else if (fileName == "scholarshipsAndAwards.xlsx") {
-
-					//Get worksheet
-					let first_sheet_name = workbook.SheetNames[0];
-					let worksheet = workbook.Sheets[first_sheet_name];
-
-					// FIXME: How do we refactor this parsing?
-					let sheetJSON = XLSX.utils.sheet_to_json(worksheet);
-					console.log(sheetJSON);
-
-					let studentNumber;
-					for (let row of sheetJSON) {
-						let note = null;
-						let keys = Object.keys(row);
-						keys.remove("__rowNum__");
-						for (let col of keys) {
-							if (column != "studentNumber") {
-								note = row[col];
-							} else {
-								studentNumber = row[col];
-							}
-						}
-
-						if (note != "NONE FOUND") {
-
-							this.get('store').query('student', {
-								filter: {
-									number: studentNumber
-								}
-							}).then((students) => {
-
-								let student = students.get("firstObject");
-
-								saveStrategies.createAndSave.call(this, {
-									note: note,
-									recipient: student
-								}, "award");
-							});
-						}
-					}
-				} else if (fileName == "HighSchoolCourseInformation.xlsx") {
-
-					//Get worksheet
-					let first_sheet_name = workbook.SheetNames[0];
-					let worksheet = workbook.Sheets[first_sheet_name];
-
-					// FIXME: How do we refactor this parsing?
-					let sheetJSON = XLSX.utils.sheet_to_json(worksheet);
-					console.log(sheetJSON);
-
-					let rows = [];
-
-					let studentNumber;
-					let schoolName;
-
-					for (let row of sheetJSON) {
-
-						let rowContents = {
-							level: null,
-							subject: null,
-							description: null,
-							source: null,
-							units: null,
-							grade: null
-						}
-						let keys = Object.keys(row);
-						keys.remove("__rowNum__");
-						for (let col of keys) {
-							if (column == "studentNumber") {
-								studentNumber = row[col];
-							} else if (column == "schoolName") {
-								schoolName = row[col];
-							} else {
-								rowContents[col] = row[col];
-							}
-						}
-
-						if (row.schoolName != "NONE FOUND") {
-
-							// TODO: Use the promise replacement trick to flatten these nested thens out.
-
-							this.get('store').query('hs-subject', { filter: { subject: rowContents.subject, description: rowContents.description } })
-								.then((findSubjects) => {
-
-									if (findSubjects.length == 0) {
-
-										saveStrategies.createAndSave.call(this, {
-											name: rowContents.subject,
-											description: rowContents.description
-										}, "hs-subject");
-
-									} else {
-										let subject = findSubjects.get("firstObject");
-
-										this.get('store').query('hs-course-source', { filter: { code: rowContents.source } })
-											.then((sources) => {
-												if (sources.length == 0) {
-													saveStrategies.createAndSave.call(this, { code: rowContents.source }, "hs-course-source");
-												} else {
-													let courseSource = sources.get("firstObject");
-
-													// Save a new high school course
-													saveStrategies.createAndSave.call(this, {
-														level: rowContents.level,
-														unit: rowContents.units,
-														source: courseSource,
-														school: schoolName,
-														subject: subject
-													}, "hs-course")
-														.then(() => {
-
-															// After saving, find the student object needed
-															this.get('store').query('student', { filter: { number: studentNumber } })
-																.then((students) => {
-																	let student = students.get("firstObject");
-
-																	// Save the student's grade
-																	saveStrategies.createAndSave.call(this, {
-																		mark: row.grade,
-																		course: hsCourse,
-																		recipient: student
-																	}, "hs-grade");
-																});
-														});
-												}
-											});
-									}
+									// Save advanced standing
+									saveStrategies.createAndSave.call(this, {
+										course: json.course,
+										description: json.description,
+										units: json.units,
+										grade: json.grade,
+										from: json.from,
+										recipient: student
+									}, "advanced-standing");
 								});
 						}
-					}
+					}, "studentNumber");
+				} else if (fileName === "scholarshipsAndAwards.xlsx") {
+					parseStrategies.byRowJSON.call(this, json => {
+						if (json.note !== "NONE FOUND") {
+							// Find student and save a new award related to student
+							this.get('store').query('student', { filter: { number: studentNumber } })
+								.then(students => {
+									let student = students.get("firstObject");
 
-				} else if (fileName == "UndergraduateRecordCourses.xlsx") {
-
-					//Get worksheet
-					let first_sheet_name = workbook.SheetNames[0];
-					let worksheet = workbook.Sheets[first_sheet_name];
-
-					let sheetJSON = XLSX.utils.sheet_to_json(worksheet);
-					console.log(sheetJSON);
-
-					let studentNumber;
-					let term;
-
-					for (let row of sheetJSON) {
-
-						let rowContents = {
-							courseLetter: null,
-							courseNumber: null,
-							section: null,
-							grade: null,
-							note: null
+									saveStrategies.createAndSave.call(this, { note: json.note, recipient: student }, "award");
+								});
 						}
+					}, "studentNumber");
+				} else if (fileName === "HighSchoolCourseInformation.xlsx") {
+					parseStrategies.byRowJSON.call(this, rowContents => {
+						if (rowContents.schoolName !== "NONE FOUND") {
+							// Find listed subject
+							Promise.all([
+								this.get('store').query('hs-subject', { filter: { subject: rowContents.subject, description: rowContents.description } }),
+								this.get('store').query('hs-course-source', { filter: { code: rowContents.source } }),
+								this.get('store').query('student', { filter: { number: rowContents.studentNumber } })
+							]).then(values => {
+								// Array of tasks that need to be done before saving the high school course
+								let preRequisitePromises = [];
+								let emptySubject = (values[0].length === 0);
+								let emptySource = (values[1].length === 0);
 
-						let keys = Object.keys(row);
-						keys.remove("__rowNum__");
-						for (let col of keys) {
-							if (column == "studentNumber") {
-								studentNumber = row[col];
-							} else if (column == "term") {
-								term = row[col];
-							} else {
-								rowContents[col] = row[col];
-							}
+								// If subject does not exist, create it
+								if (emptySubject) {
+									preRequisitePromises.push(
+										saveStrategies.createAndSave.bind(this, { name: rowContents.subject, description: rowContents.description }, "hs-subject")
+									);
+								} else {
+									preRequisitePromises.push(null);	// To keep position in the preReqValues array
+								}
+
+								// If course source does not exist, create it
+								if (emptySource) {
+									preRequisitePromises.push(
+										saveStrategies.createAndSave.bind(this, { code: rowContents.source }, "hs-course-source")
+									);
+								} else {
+									preRequisitePromises.push(null);	// To keep position in the preReqValues array
+								}
+
+								// Handle the rerequisite
+								Promise.all(preRequisitePromises).then(preReqValues => {
+									// Get the right value
+									let subject = emptySubject ? preReqValues[0] : values[0].get('firstObject');// TODO: Don't know if the .get('firstObject') is needed
+									let source = emptySource ? preReqValues[1] : values[1].get('firstObject');	// TODO: Don't know if the .get('firstObject') is needed
+
+									// Save a new high school course
+									saveStrategies.createAndSave.call(this, {
+										level: rowContents.level,
+										unit: rowContents.units,
+										source: source,
+										school: schoolName,
+										subject: subject
+									}, "hs-course")
+										.then((hsCourse) => {
+											let student = values[2].get("firstObject");
+
+											// Save the student's grade
+											saveStrategies.createAndSave.call(this, { mark: rowContents.grade, course: hsCourse, recipient: student }, "hs-grade");
+										});
+								});
+							});
 						}
+					}, "studentNumber", "schoolName");
+				} else if (fileName === "UndergraduateRecordCourses.xlsx") {
+					parseStrategies.byRowJSON.call(this, rowContents => {
+						// Save grades
+						saveStrategies.createAndSave({ mark: rowContents.grade, note: rowContents.note }, "grade")
+							.then((grade) => {
 
-						// TODO: Use the promise replacement trick to flatten these nested thens out.
+								// Get relevant student data
+								Promise.all([
+									this.get('store').query('student', { filter: { number: rowContents.studentNumber } }),
+									this.get('store').query('term-code', { filter: { name: rowContents.term, number: rowContents.studentNumber } })
+								]).then(values => {
+									let student = values[0].get("firstObject");
+									let termCodes = values[1];
+									let preRequisitePromises = [];
 
-						saveStrategies.createAndSave({
-							mark: rowContents.grade,
-							note: rowContents.note
-						}, "grade")
-						.then(() => {
-							this.get('store').query('student', {filter: {number: studentNumber}})
-							.then((students) => {
-								let student = students.get("firstObject");
-
-								this.get('store').query('term-code', {filter: {name: term, number: studentNumber}})
-								.then((termCodes) => {
-
-									if (termCodes.length == 0) {
-										saveStrategies.createAndSave.call(this, {
-											name: term,
-											student: student
-										}, "term-code");
+									// If new term, create it
+									if (termCodes.length === 0) {
+										preRequisitePromises.push(
+											saveStrategies.createAndSave.call(this, { name: rowContents.term, student: student }, "term-code"
+											));
 									} else {
-										let termCode = termCodes.get("firstObject");
-									
+										preRequisitePromises.push(null);
+									}
+
+									// Resolve prerequistes and then continue
+									Promise.all(preRequisitePromises).then(preReqValues => {
+										let termCode = termCodes.length === 0 ? preReqValues[0] : termCodes.get("firstObject");
+
+										// Save new course code
 										saveStrategies.modifyAndSave.call(this, "course-code", {
 											courseLetter: rowContents.courseLetter,
-											courseNumber: rowContents.courseNumber,
+											courseNumber: rowContents.courseNumber
 										},
-										"termInfo", termCode,
-										"gradeInfo", grade);
-									}
+											"termInfo", termCode,
+											"gradeInfo", grade);
+									});
 								});
 							});
-						});
-					}
-				} else if (fileName == "UndergraduateRecordPlans.xlsx") {
+					}, "studentNumber", "term");
+				} else if (fileName === "UndergraduateRecordPlans.xlsx") {
+					parseStrategies.byRowJSON.call(this, rowContents => {
+						this.get('store').query('student', { filter: { number: rowContents.studentNumber } })
+							.then(students => {
+								let student = students.get("firstObject");
 
-					//Get worksheet
-					let first_sheet_name = workbook.SheetNames[0];
-					let worksheet = workbook.Sheets[first_sheet_name];
+								// Get all prerequisite data 
+								Promise.all([
+									this.get('store').query('program-status', { filter: { status: "Active" } }),
+									this.get('store').query('plan-code', { filter: { name: rowContents.plan } }),
+									this.get('store').query('course-load', { filter: { load: rowContents.load } }),
+									this.get('store').query('program-record', {
+										filter: {
+											name: rowContents.program,
+											level: rowContents.level,
+											load: rowContents.load,
+											status: rowContents.status
+										}
+									}),
+									this.get('store').query('term-code', { filter: { name: rowContents.term, number: rowContents.studentNumber } })
+								]).then(values => {
+									let preReqValues = [];
+									let emptyStatus = (values[0].length === 0);
+									let emptyPlanCode = (values[1].length === 0);
+									let emptyLoad = (values[2].length === 0);
+									let emptyRecords = (values[3].length === 0);
+									let emptyTermCode = (values[4].length === 0);
 
-					let sheetJSON = XLSX.utils.sheet_to_json(worksheet);
-					console.log(sheetJSON);
+									// If something is missing, create it
+									if (emptyStatus) {
+										preReqValues.push(saveStrategies.createAndSave.call(this, { status: "Active" }, "program-status"));		// MASSIVE ASSUMPTION
+									} else { preReqValues.push(null); }
 
-					let studentNumber;
-					let term;
-					let program;
-					let level;
-					let load;
-					let plan = null;
+									if (emptyPlanCode) {
+										preReqValues.push(saveStrategies.createAndSave.call(this, { name: rowContents.plan }, "plan-code"));
+									} else { preReqValues.push(null); }
 
-					for (let row of sheetJSON) {
+									if (emptyLoad) {
+										saveStrategies.createAndSave.call(this, { load: rowContents.load }, "course-load");
+									} else { preReqValues.push(null); }
 
-						let keys = Object.keys(row);
-						keys.remove("__rowNum__");
-						for (let col of keys) {
-							if (column == "studentNumber") {
-								studentNumber = row[col];
-							} else if (column == "term") {
-								term = row[col];
-							} else if (column == "program") {
-								program = row[col];
-							} else if (column == "level") {
-								level = row[col];
-							} else if (column == "load") {
-								load = row[col];
-							} else if (column == "plan") {
-								plan = row[col];
-							}
-						}
+									// Since program record cannot be created until planCode is, resolve now
+									Promise.all(preReqValues).then(preReqValues => {
+										let preReqValuesTwo = [];
+										let status = emptyStatus ? preReqValues[0] : values[0].get('firstObject');
+										let planCode = emptyPlanCode ? preReqValues[1] : values[1].get('firstObject');
+										let load = emptyLoad ? preReqValues[2] : values[2].get('firstObject');
 
-						this.get('store').query('student', {
-							filter: {
-								number: studentNumber
-							}
-						}).then((students) => {
+										// If record doesn't already exist, create it, otherwise add the plan code
+										if (emptyRecords) {
+											preReqValuesTwo.push(saveStrategies.createAndSave.call(this, { name: program, level: level, load: load, status: status, plan: [planCode] }, "program-record"));
+										} else {
+											let programRecord = programRecords.get("firstObject");
+											preReqValuesTwo.push(programRecord.get('plan').then(plans => {
+												// Add planCode if not already there
+												plans.addObject(planCode);
 
-							let student = students.get("firstObject");
-
-							saveStrategies.createAndSave.call(this, {name: plan}, "plan-code")
-							.then(() => {
-								saveStrategies.createAndSave.call(this, {status: "Active"}, "program-status")
-								.then(() => {
-									saveStrategies.createAndSave.call(this, {load: load}, "course-load")
-									.then(() => {
-										this.get('store').query('program-record', {
-											filter: {
-												name: program,
-												level: level,
-												load: load,
-												status: status
-											}
-										}).then((programRecords) => {
-
-											if (programRecords.length == 0) {
-												saveStrategies.createAndSave.call(this, {
-													name: program,
-													level: level,
-													load: load,
-													status: status,
-													plan: [planCode]
-												},"program-record");
-											} else {
-
-												let programRecord = programRecords.get("firstObject");
-
-												let plans = programRecord.get('plan');
-												plans.push(planCode);
-
+												// Save updated programRecord
 												programRecord.set('plan', plans);
-												programRecord.save().then(() => {
+												return programRecord.save().then(() => {
 													console.log("Added program record");
 												}, () => {
 													console.log("Could not add program record");
 												});
+											}));
+										}
 
-											}
+										// After program record is set up...
+										Promise.all(preReqValues).then(preReqTwoValues => {
+											let programRecord = preReqTwoValues[0];
+											let termCodes = values[4];
 
-											this.get('store').query('term-code', {
-												filter: {
+											// If term does not exist, create with program record, otherwise append new program record
+											if (emptyTermCode) {
+												saveStrategies.createAndSave.call(this, {
 													name: term,
-													number: studentNumber
-												}
-											}).then((termCodes) => {
+													student: student,
+													programRecords: [programRecord]
+												}, "term-code");
+											} else {
+												let termCode = termCodes.get("firstObject");
 
-												if (termCodes.length == 0) {
-													saveStrategies.createAndSave.call(this, {
-														name: term,
-														student: student,
-														programRecords: [programRecord]
-													}, "term-code");
-												} else {
-
-													let termCode = termCodes.get("firstObject");
-
-													let programRecords = termCode.get('programRecords');
-													programRecords.push(programRecord);
+												termCode.get('programRecords').then(programRecords => {
+													// Add if not already there
+													programRecords.addObject(programRecord);
 
 													termCode.set('programRecords', programRecords);
 													termCode.save().then(() => {
@@ -456,29 +310,19 @@ export default Ember.Component.extend({
 													}, () => {
 														console.log("Could not add term code");
 													});
-												}
-											});
-
+												});
+											}
 										});
-
-									}, () => {
-										console.log("Could not add load");
 									});
-
-								}, () => {
-									console.log("Could not add status");
 								});
 
-							}, () => {
-								console.log("Could not add plan code");
 							});
-						});
-					}
+					}, "studentNumber", "term", "program", "level", "load", "plan");
 				}
 			};
 
 			//Error in file loading
-			reader.onerror = (event) => {
+			reader.onerror = () => {
 				alert("Error in loading file.");
 			};
 
@@ -520,6 +364,33 @@ let miscellaneous = {
 };
 
 let parseStrategies = {
+	byRowJSON: function (saveFunction, ...multiLineVariables) {
+		//Get worksheet
+		let first_sheet_name = this.workbook.SheetNames[0];
+		let worksheet = this.workbook.Sheets[first_sheet_name];
+
+		// FIXME: How do we refactor this parsing?
+		let sheetJSON = XLSX.utils.sheet_to_json(worksheet);
+		console.log(sheetJSON);
+
+		let preservedVariables = {};
+		for (let row of sheetJSON) {
+			let rowContents = {};
+			let keys = Object.keys(row);
+			keys.remove("__rowNum__");
+			for (let col of keys) {
+				if (multiLineVariables.indexOf(col) === -1) {
+					rowContents[col] = row[col];
+				} else {
+					preservedVariables[col] = row[col];
+				}
+			}
+
+			// Mash them together and save
+			let result = this.$.extend({}, rowContents, preservedVariables);
+			saveFunction(result);
+		}
+	},
 	byRow: function (savePreviousRowValue, saveFunction) {
 		//Get worksheet
 		let first_sheet_name = this.workbook.SheetNames[0];
@@ -531,8 +402,9 @@ let parseStrategies = {
 		// TODO: Look at changing to sheet_to_json to save lines?
 		for (let R = 1; R <= XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
 
-			if (!savePreviousRowValue)
+			if (!savePreviousRowValue) {
 				valueArray.length = 0;	// Yes, this actually clears the array. It's true voodoo.
+			}
 
 			for (let C = 0; C <= XLSX.utils.decode_range(worksheet['!ref']).e.c; ++C) {
 
@@ -589,7 +461,7 @@ let saveStrategies = {
 		}
 
 		// Find the record to change
-		this.get('store').query(emberName, { filter: filter })
+		return this.get('store').query(emberName, { filter: filter })
 			.then((models) => {
 				let model = models.get("firstObject");
 
@@ -600,10 +472,10 @@ let saveStrategies = {
 
 				// Return promise of the modified record saving
 				return model.save().then(() => {
-					console.log("Modified " + modifyKey + " on a " + emberName.replace("-", " "));
+					console.log("Modified on a " + emberName.replace("-", " "));
 				}, err => {
 					console.warn(err);
-					console.log("Could not modify " + modifyKey + " on a " + emberName.replace("-", " "));
+					console.log("Could not modify on a " + emberName.replace("-", " "));
 				});
 
 			});
