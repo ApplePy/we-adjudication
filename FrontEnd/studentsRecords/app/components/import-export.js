@@ -26,21 +26,20 @@ export default Ember.Component.extend({
 				let data = event.target.result;
 				this.workbook = XLSX.read(data, { type: 'binary' });	// Moved into the "this" variable to save typing
 
-				// TODO: Recommendation to avoid capitalization causing issues: run all the strings through a "toUpperCase" or "toLowerCase" before comparison
-				if (fileName === "genders.xlsx") {
+				if (fileName.toUpperCase() === "genders.xlsx".toUpperCase()) {
 					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "gender"));
-				} else if (fileName === "residencies.xlsx") {
+				} else if (fileName.toUpperCase() === "residencies.xlsx".toUpperCase()) {
 					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "residency"));
-				} else if (fileName === "UndergraduateCourses.xlsx") {
+				} else if (fileName.toUpperCase() === "UndergraduateCourses.xlsx".toUpperCase()) {
 					parseStrategies.byRow.call(this, false, valueArray => saveStrategies.createAndSave.call(this, {
 						courseLetter: valueArray[0],
 						courseNumber: valueArray[1],
 						name: valueArray[2],
 						unit: valueArray[3]
 					}, "course-code"));
-				} else if (fileName === "HighSchools.xlsx") {
+				} else if (fileName.toUpperCase() === "HighSchools.xlsx".toUpperCase()) {
 					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "secondary-school"));
-				} else if (fileName === "students.xlsx") {
+				} else if (fileName.toUpperCase() === "students.xlsx".toUpperCase()) {
 					parseStrategies.byRow.call(this, false, valueArray => {
 						// Get gender and dependencies
 						// TODO: Find out if this usage of Promise.all makes Ember squirm... it intentionally removed Promise from jshint global space
@@ -63,7 +62,7 @@ export default Ember.Component.extend({
 							saveStrategies.createAndSave.call(this, studentJSON, "student");
 						});
 					});
-				} else if (fileName === "AdmissionComments.xlsx") {
+				} else if (fileName.toUpperCase() === "AdmissionComments.xlsx".toUpperCase()) {
 					let admissionComments = miscellaneous.parseComments();
 					admissionComments.forEach((value, key) => {
 						if (value !== "NONE FOUND") {
@@ -71,27 +70,27 @@ export default Ember.Component.extend({
 						}
 					});
 
-				} else if (fileName === "RegistrationComments.xlsx") {
+				} else if (fileName.toUpperCase() === "RegistrationComments.xlsx".toUpperCase()) {
 					let registrationComments = miscellaneous.parseComments();
 					registrationComments.forEach((value, key) => {
 						if (value !== "NONE FOUND") {
 							saveStrategies.modifyAndSave.call(this, "student", { number: key }, "registrationComments", value);
 						}
 					});
-				} else if (fileName === "BasisOfAdmission.xlsx") {
+				} else if (fileName.toUpperCase() === "BasisOfAdmission.xlsx".toUpperCase()) {
 					parseStrategies.byRow.call(this, true, valueArray => {
 						if (valueArray[1] !== "NONE FOUND") {
 							saveStrategies.modifyAndSave.call(this, "student", { number: valueArray[0] }, "basisOfAdmission", valueArray[1]);
 						}
 					});
-				} else if (fileName === "AdmissionAverages.xlsx") {
+				} else if (fileName.toUpperCase() === "AdmissionAverages.xlsx".toUpperCase()) {
 
 					parseStrategies.byRow.call(this, true, valueArray => {
 						if (valueArray[1] !== "NONE FOUND") {
 							saveStrategies.modifyAndSave.call(this, "student", { number: valueArray[0] }, "admissionAverage", valueArray[1]);
 						}
 					});
-				} else if (fileName === "AdvancedStanding.xlsx") {
+				} else if (fileName.toUpperCase() === "AdvancedStanding.xlsx".toUpperCase()) {
 					parseStrategies.byRowJSON.call(this, json => {
 						if (json.course !== "NONE FOUND") {
 							// Find student to save an advanced standing for
@@ -111,11 +110,11 @@ export default Ember.Component.extend({
 								});
 						}
 					}, "studentNumber");
-				} else if (fileName === "scholarshipsAndAwards.xlsx") {
+				} else if (fileName.toUpperCase() === "scholarshipsAndAwards.xlsx".toUpperCase()) {
 					parseStrategies.byRowJSON.call(this, json => {
 						if (json.note !== "NONE FOUND") {
 							// Find student and save a new award related to student
-							this.get('store').query('student', { filter: { number: studentNumber } })
+							this.get('store').query('student', { filter: { number: json.studentNumber } })
 								.then(students => {
 									let student = students.get("firstObject");
 
@@ -123,7 +122,7 @@ export default Ember.Component.extend({
 								});
 						}
 					}, "studentNumber");
-				} else if (fileName === "HighSchoolCourseInformation.xlsx") {
+				} else if (fileName.toUpperCase() === "HighSchoolCourseInformation.xlsx".toUpperCase()) {
 					parseStrategies.byRowJSON.call(this, rowContents => {
 						if (rowContents.schoolName !== "NONE FOUND") {
 							// Find listed subject
@@ -166,7 +165,7 @@ export default Ember.Component.extend({
 										level: rowContents.level,
 										unit: rowContents.units,
 										source: source,
-										school: schoolName,
+										school: rowContents.schoolName,
 										subject: subject
 									}, "hs-course")
 										.then((hsCourse) => {
@@ -179,7 +178,7 @@ export default Ember.Component.extend({
 							});
 						}
 					}, "studentNumber", "schoolName");
-				} else if (fileName === "UndergraduateRecordCourses.xlsx") {
+				} else if (fileName.toUpperCase() === "UndergraduateRecordCourses.xlsx".toUpperCase()) {
 					parseStrategies.byRowJSON.call(this, rowContents => {
 						// Save grades
 						saveStrategies.createAndSave({ mark: rowContents.grade, note: rowContents.note }, "grade")
@@ -218,7 +217,7 @@ export default Ember.Component.extend({
 								});
 							});
 					}, "studentNumber", "term");
-				} else if (fileName === "UndergraduateRecordPlans.xlsx") {
+				} else if (fileName.toUpperCase() === "UndergraduateRecordPlans.xlsx".toUpperCase()) {
 					parseStrategies.byRowJSON.call(this, rowContents => {
 						this.get('store').query('student', { filter: { number: rowContents.studentNumber } })
 							.then(students => {
@@ -268,9 +267,15 @@ export default Ember.Component.extend({
 
 										// If record doesn't already exist, create it, otherwise add the plan code
 										if (emptyRecords) {
-											preReqValuesTwo.push(saveStrategies.createAndSave.call(this, { name: program, level: level, load: load, status: status, plan: [planCode] }, "program-record"));
+											preReqValuesTwo.push(
+												saveStrategies.createAndSave.call(this, {
+													name: rowContents.program,
+													level: rowContents.level,
+													load: load,
+													status: status,
+													plan: [planCode] }, "program-record"));
 										} else {
-											let programRecord = programRecords.get("firstObject");
+											let programRecord = values[3].get("firstObject");
 											preReqValuesTwo.push(programRecord.get('plan').then(plans => {
 												// Add planCode if not already there
 												plans.addObject(planCode);
@@ -293,7 +298,7 @@ export default Ember.Component.extend({
 											// If term does not exist, create with program record, otherwise append new program record
 											if (emptyTermCode) {
 												saveStrategies.createAndSave.call(this, {
-													name: term,
+													name: rowContents.term,
 													student: student,
 													programRecords: [programRecord]
 												}, "term-code");
@@ -368,8 +373,7 @@ let parseStrategies = {
 		//Get worksheet
 		let first_sheet_name = this.workbook.SheetNames[0];
 		let worksheet = this.workbook.Sheets[first_sheet_name];
-
-		// FIXME: How do we refactor this parsing?
+		
 		let sheetJSON = XLSX.utils.sheet_to_json(worksheet);
 		console.log(sheetJSON);
 
