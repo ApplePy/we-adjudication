@@ -25,86 +25,31 @@ export default Ember.Component.extend({
 				let data = event.target.result;
 				this.workbook = XLSX.read(data, { type: 'binary' });	// Moved into the "this" variable to save typing
 
+				// TODO: Recommendation to avoid capitalization causing issues: run all the strings through a "toUpperCase" or "toLowerCase" before comparison
 				if (fileName === "genders.xlsx") {
-
-					strategies.singleColumn.call(this, (cellValue) => {
-						var gender = this.get('store').createRecord('gender', {
-							name: cellValue
-						});
-
-						gender.save().then(() => {
-							console.log("Added gender");
-						}, () => {
-							console.log("Could not add gender");
-						});
-					});
-
+					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, {name: cellValue}, "gender"));
 				} else if (fileName === "residencies.xlsx") {
-
-					strategies.singleColumn.call(this, (cellValue) => {
-
-						var residency = this.get('store').createRecord('residency', {
-							name: cellValue
-						});
-
-						residency.save().then(() => {
-							console.log("Added residency");
-						}, () => {
-							console.log("Could not add residency");
-						});
-
-					});
+					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, {name: cellValue}, "residency"));
 				} else if (fileName === "UndergraduateCourses.xlsx") {
-					strategies.byRow.call(this, false, valueArray => {
-						var courseCode = this.get('store').createRecord('course-code', {
-							courseLetter: valueArray[0],
-							courseNumber: valueArray[1],
-							name: valueArray[2],
-							unit: valueArray[3]
-						});
-
-						courseCode.save().then(() => {
-							console.log("Added course code");
-						}, () => {
-							console.log("Could not add course code");
-						});
-					});
+					parseStrategies.byRow.call(this, false, valueArray => saveStrategies.createAndSave.call(this, {
+						courseLetter: valueArray[0],
+						courseNumber: valueArray[1],
+						name: valueArray[2],
+						unit: valueArray[3]
+					}, "course-code"));
 				} else if (fileName === "HighSchools.xlsx") {
-
-					strategies.singleColumn.call(true, cellValue => {
-						var secondarySchool = this.get('store').createRecord('secondary-school', {
-							name: cellValue
-						});
-
-						secondarySchool.save().then(() => {
-							console.log("Added secondary school");
-						}, () => {
-							console.log("Could not add secondary school");
-						});
-					});
-
+					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, {name: cellValue}, "secondary-school"));
 				} else if (fileName === "students.xlsx") {
+					parseStrategies.byRow.call(this, false, valueArray => {
+						this.get('store').query('gender', {filter: {name: valueArray[3]}})
+						.then((genders) => {
+							let gender = genders.get("firstObject");
 
-					strategies.byRow.call(this, false, valueArray => {
-						this.get('store').query('gender', {
-							filter: {
-								name: valueArray[3]
-							}
-						}).then((genders) => {
+							this.get('store').query('residency', {filter: {name: valueArray[5]}})
+							.then((residencies) => {
+								let residency = residencies.get("firstObject");
 
-							gender = genders.get("firstObject");
-
-							//console.log(gender);
-
-							this.get('store').query('residency', {
-								filter: {
-									name: valueArray[5]
-								}
-							}).then((residencies) => {
-
-								residency = residencies.get("firstObject");
-
-								var studentJSON = {
+								let studentJSON = {
 									number: valueArray[0],
 									firstName: valueArray[1],
 									lastName: valueArray[2],
@@ -112,157 +57,56 @@ export default Ember.Component.extend({
 									genderInfo: gender,
 									resInfo: residency
 								};
-								var student = this.get('store').createRecord('student', studentJSON);
 
-
-								student.save().then(() => {
-									console.log("Added student");
-								}, (err) => {
-									console.warn(err);
-									console.log("Could not add student");
-								});
+								saveStrategies.createAndSave.call(this, studentJSON, "student");
 							});
 						});
 					});
 
 				} else if (fileName === "AdmissionComments.xlsx") {
-
-					let admissionComments = new Map();
-
-					strategies.byRow.call(this, true, valueArray => {
-						//Add or update admission comments map
-						if (admissionComments.has(valueArray[0]) === undefined) {
-							admissionComments.set(valueArray[0], valueArray[1]);
-						} else {
-							let noteAddition = admissionComments.get(valueArray[0]);
-							if (noteAddition === undefined) {
-								noteAddition = "";
-							}
-							noteAddition += valueArray[1];
-							admissionComments.set(valueArray[0], noteAddition);
-						}
-					});
+					let admissionComments = miscellaneous.parseComments();
 
 					admissionComments.forEach((value, key) => {
 
 						console.log(key + ' = ' + value);
 
 						if (value !== "NONE FOUND") {
-
-							this.get('store').query('student', {
-								filter: {
-									number: key
-								}
-							}).then((students) => {
-
-								let student = students.get("firstObject");
-
-								student.set('admissionComments', value);
-								student.save().then(() => {
-									console.log("Added admission comment");
-								}, () => {
-									console.log("Could not add admission comment");
-								});
-
-							});
+							saveStrategies.modifyAndSave.call(this, "student", {number: key}, "admissionComments", value);
 						}
 					});
 
 				} else if (fileName === "RegistrationComments.xlsx") {
-
-					let registrationComments = new Map();
-
-					strategies.byRow.call(this, true, valueArray => {
-						//Add or update admission comments map
-						if (registrationComments.has(valueArray[0]) === undefined) {
-							registrationComments.set(valueArray[0], valueArray[1]);
-						} else {
-							let noteAddition = registrationComments.get(valueArray[0]);
-							if (noteAddition === undefined) {
-								noteAddition = "";
-							}
-							noteAddition += valueArray[1];
-							registrationComments.set(valueArray[0], noteAddition);
-						}
-					});
+					let registrationComments = miscellaneous.parseComments();
 
 					registrationComments.forEach((value, key) => {
 
 						console.log(key + ' = ' + value);
 
 						if (value !== "NONE FOUND") {
-
-							this.get('store').query('student', {
-								filter: {
-									number: key
-								}
-							}).then((students) => {
-
-								let student = students.get("firstObject");
-
-								student.set('registrationComments', value);
-								student.save().then(() => {
-									console.log("Added registration comment");
-								}, () => {
-									console.log("Could not add registration comment");
-								});
-
-							});
+							saveStrategies.modifyAndSave.call(this, "student", { number: key }, "registrationComments", value);
 						}
 					});
-					//}
 				} else if (fileName === "BasisOfAdmission.xlsx") {
-					strategies.byRow.call(this, true, valueArray => {
+					parseStrategies.byRow.call(this, true, valueArray => {
 						if (valueArray[1] !== "NONE FOUND") {
-
-							this.get('store').query('student', {
-								filter: {
-									number: valueArray[0]
-								}
-							}).then((students) => {
-
-								let student = students.get("firstObject");
-
-								student.set('basisOfAdmission', valueArray[1]);
-								student.save().then(() => {
-									console.log("Added basis of admission");
-								}, () => {
-									console.log("Could not add basis of admission");
-								});
-
-							});
+							saveStrategies.modifyAndSave.call(this, "student", {number: valueArray[0]}, "basisOfAdmission", valueArray[1]);
 						}
 					});
 				} else if (fileName === "AdmissionAverages.xlsx") {
 
-					strategies.byRow.call(this, true, valueArray => {
+					parseStrategies.byRow.call(this, true, valueArray => {
 						if (valueArray[1] !== "NONE FOUND") {
-
-							this.get('store').query('student', {
-								filter: {
-									number: valueArray[0]
-								}
-							}).then((students) => {
-
-								let student = students.get("firstObject");
-
-								student.set('admissionAverage', valueArray[1]);
-								student.save().then(() => {
-									console.log("Added admission comment");
-								}, () => {
-									console.log("Could not add admission comment");
-								});
-
-							});
+							saveStrategies.modifyAndSave.call(this, "student", {number: valueArray[0]}, "admissionAverage", valueArray[1]);
 						}
 					});
 				} else if (fileName === "AdvancedStanding.xlsx") {
 
 					//Get worksheet
-					var first_sheet_name = workbook.SheetNames[0];
-					var worksheet = workbook.Sheets[first_sheet_name];
+					let first_sheet_name = workbook.SheetNames[0];
+					let worksheet = workbook.Sheets[first_sheet_name];
 
-					var sheetJSON = XLSX.utils.sheet_to_json(worksheet);
+					// FIXME: How do we refactor this parsing?
+					let sheetJSON = XLSX.utils.sheet_to_json(worksheet);
 					console.log(sheetJSON);
 
 					let studentNumber;
@@ -294,30 +138,25 @@ export default Ember.Component.extend({
 
 								let student = students.get("firstObject");
 
-								var advancedStanding = this.get('store').createRecord('advanced-standing', {
+								saveStrategies.createAndSave.call(this, {
 									course: rowContents.course,
 									description: rowContents.description,
 									units: rowContents.units,
 									grade: rowContents.grade,
 									from: rowContents.from,
 									recipient: student
-								});
-
-								advancedStanding.save().then(() => {
-									console.log("Added advanced standing");
-								}, () => {
-									console.log("Could not add advanced standing");
-								});
+								}, "advanced-standing");
 							});
 						}
 					}
 				} else if (fileName == "scholarshipsAndAwards.xlsx") {
 
 					//Get worksheet
-					var first_sheet_name = workbook.SheetNames[0];
-					var worksheet = workbook.Sheets[first_sheet_name];
+					let first_sheet_name = workbook.SheetNames[0];
+					let worksheet = workbook.Sheets[first_sheet_name];
 
-					var sheetJSON = XLSX.utils.sheet_to_json(worksheet);
+					// FIXME: How do we refactor this parsing?
+					let sheetJSON = XLSX.utils.sheet_to_json(worksheet);
 					console.log(sheetJSON);
 
 					let studentNumber;
@@ -343,26 +182,21 @@ export default Ember.Component.extend({
 
 								let student = students.get("firstObject");
 
-								var award = this.get('store').createRecord('award', {
+								saveStrategies.createAndSave.call(this, {
 									note: note,
 									recipient: student
-								});
-
-								award.save().then(() => {
-									console.log("Added award");
-								}, () => {
-									console.log("Could not add award");
-								});
+								}, "award");
 							});
 						}
 					}
 				} else if (fileName == "HighSchoolCourseInformation.xlsx") {
 
 					//Get worksheet
-					var first_sheet_name = workbook.SheetNames[0];
-					var worksheet = workbook.Sheets[first_sheet_name];
+					let first_sheet_name = workbook.SheetNames[0];
+					let worksheet = workbook.Sheets[first_sheet_name];
 
-					var sheetJSON = XLSX.utils.sheet_to_json(worksheet);
+					// FIXME: How do we refactor this parsing?
+					let sheetJSON = XLSX.utils.sheet_to_json(worksheet);
 					console.log(sheetJSON);
 
 					let rows = [];
@@ -394,96 +228,65 @@ export default Ember.Component.extend({
 
 						if (row.schoolName != "NONE FOUND") {
 
-							this.get('store').query('hs-subject', {
-								filter: {
-									subject: rowContents.subject,
-									description: rowContents.description
-								}
-							}).then((findSubjects) => {
+							// TODO: Use the promise replacement trick to flatten these nested thens out.
 
-								if (findSubjects.length == 0) {
-									var subject = this.get('store').createRecord('hs-subject', {
-										name: rowContents.subject,
-										description: rowContents.description
-									});
+							this.get('store').query('hs-subject', { filter: { subject: rowContents.subject, description: rowContents.description } })
+								.then((findSubjects) => {
 
-									subject.save().then(() => {
-										console.log("Added hs subject");
-									}, () => {
-										console.log("Could not add hs subject");
-									});
-								} else {
-									let subject = findSubjects.get("firstObject");
-								}
+									if (findSubjects.length == 0) {
 
-								this.get('store').query('hs-course-source', {
-									filter: {
-										code: rowContents.source
-									}
-								}).then((sources) => {
+										saveStrategies.createAndSave.call(this, {
+											name: rowContents.subject,
+											description: rowContents.description
+										}, "hs-subject");
 
-									if (sources.length == 0) {
-										var courseSource = this.get('store').createRecord('hs-course-source', {
-											code: rowContents.source
-										});
-
-										courseSource.save().then(() => {
-											console.log("Added source");
-										}, () => {
-											console.log("Could not source");
-										});
 									} else {
-										let courseSource = sources.get("firstObject");
+										let subject = findSubjects.get("firstObject");
+
+										this.get('store').query('hs-course-source', { filter: { code: rowContents.source } })
+											.then((sources) => {
+												if (sources.length == 0) {
+													saveStrategies.createAndSave.call(this, { code: rowContents.source }, "hs-course-source");
+												} else {
+													let courseSource = sources.get("firstObject");
+
+													// Save a new high school course
+													saveStrategies.createAndSave.call(this, {
+														level: rowContents.level,
+														unit: rowContents.units,
+														source: courseSource,
+														school: schoolName,
+														subject: subject
+													}, "hs-course")
+														.then(() => {
+
+															// After saving, find the student object needed
+															this.get('store').query('student', { filter: { number: studentNumber } })
+																.then((students) => {
+																	let student = students.get("firstObject");
+
+																	// Save the student's grade
+																	saveStrategies.createAndSave.call(this, {
+																		mark: row.grade,
+																		course: hsCourse,
+																		recipient: student
+																	}, "hs-grade");
+																});
+														});
+												}
+											});
 									}
-
-									var hsCourse = this.get('store').createRecord('hs-course', {
-										level: rowContents.level,
-										unit: rowContents.units,
-										source: courseSource,
-										school: schoolName,
-										subject: subject
-									});
-
-									hsCourse.save().then(() => {
-
-										console.log("Added hs course");
-
-										this.get('store').query('student', {
-											filter: {
-												number: studentNumber
-											}
-										}).then((students) => {
-
-											let student = students.get("firstObject");
-
-											var hsGrade = this.get('store').createRecord('hs-grade', {
-												mark: row.grade,
-												course: hsCourse,
-												recipient: student
-											});
-
-											hsGrade.save().then(() => {
-												console.log("Added hs grade");
-											}, () => {
-												console.log("Could not add hs grade");
-											});
-
-										}, () => {
-											console.log("Could not add hs course");
-										});
-									});
 								});
-							});
 						}
 					}
 
 				} else if (fileName == "UndergraduateRecordCourses.xlsx") {
 
 					//Get worksheet
-					var first_sheet_name = workbook.SheetNames[0];
-					var worksheet = workbook.Sheets[first_sheet_name];
+					let first_sheet_name = workbook.SheetNames[0];
+					let worksheet = workbook.Sheets[first_sheet_name];
 
-					var sheetJSON = XLSX.utils.sheet_to_json(worksheet);
+					let sheetJSON = XLSX.utils.sheet_to_json(worksheet);
 					console.log(sheetJSON);
 
 					let studentNumber;
@@ -511,81 +314,46 @@ export default Ember.Component.extend({
 							}
 						}
 
-						var grade = this.get('store').createRecord('grade', {
+						// TODO: Use the promise replacement trick to flatten these nested thens out.
+
+						saveStrategies.createAndSave({
 							mark: rowContents.grade,
 							note: rowContents.note
-						});
-
-						grade.save().then(() => {
-
-							console.log("Added grade");
-
-							this.get('store').query('student', {
-								filter: {
-									number: studentNumber
-								}
-							}).then((students) => {
-
+						}, "grade")
+						.then(() => {
+							this.get('store').query('student', {filter: {number: studentNumber}})
+							.then((students) => {
 								let student = students.get("firstObject");
 
-								this.get('store').query('term-code', {
-									filter: {
-										name: term,
-										number: studentNumber
-									}
-								}).then((termCodes) => {
+								this.get('store').query('term-code', {filter: {name: term, number: studentNumber}})
+								.then((termCodes) => {
 
 									if (termCodes.length == 0) {
-										var termCode = this.get('store').createRecord('term-code', {
+										saveStrategies.createAndSave.call(this, {
 											name: term,
 											student: student
-										});
-
-										termCode.save().then(() => {
-											console.log("Added term code");
-										}, () => {
-											console.log("Could not add term code");
-										});
+										}, "term-code");
 									} else {
 										let termCode = termCodes.get("firstObject");
-									}
-
-									this.get('store').query('course-code', {
-										filter: {
+									
+										saveStrategies.modifyAndSave.call(this, "course-code", {
 											courseLetter: rowContents.courseLetter,
 											courseNumber: rowContents.courseNumber,
-										}
-									}).then((courseCodes) => {
-
-										let courseCode = courseCodes.get("firstObject");
-
-										courseCode.set('termInfo', termCode);
-										courseCode.set('gradeInfo', grade);
-										courseCode.save().then(() => {
-											console.log("Added course code");
-										}, () => {
-											console.log("Could not add course code");
-										});
-
-									});
-
+										},
+										"termInfo", termCode,
+										"gradeInfo", grade);
+									}
 								});
-
 							});
-
-						}, () => {
-							console.log("Could not add grade");
 						});
-
 					}
-
 				} else if (fileName == "UndergraduateRecordPlans.xlsx") {
 
 					//Get worksheet
-					var first_sheet_name = workbook.SheetNames[0];
-					var worksheet = workbook.Sheets[first_sheet_name];
+					let first_sheet_name = workbook.SheetNames[0];
+					let worksheet = workbook.Sheets[first_sheet_name];
 
-					var sheetJSON = XLSX.utils.sheet_to_json(worksheet);
+					let sheetJSON = XLSX.utils.sheet_to_json(worksheet);
 					console.log(sheetJSON);
 
 					let studentNumber;
@@ -623,30 +391,12 @@ export default Ember.Component.extend({
 
 							let student = students.get("firstObject");
 
-							var planCode = this.get('store').createRecord('plan-code', {
-								name: plan
-							});
-
-							planCode.save().then(() => {
-
-								console.log("Added plan code");
-
-								var status = this.get('store').createRecord('program-status', {
-									status: "Active"
-								});
-
-								status.save().then(() => {
-
-									console.log("Added status");
-
-									var load = this.get('store').createRecord('course-load', {
-										load: load
-									});
-
-									load.save().then(() => {
-
-										console.log("Added load");
-
+							saveStrategies.createAndSave.call(this, {name: plan}, "plan-code")
+							.then(() => {
+								saveStrategies.createAndSave.call(this, {status: "Active"}, "program-status")
+								.then(() => {
+									saveStrategies.createAndSave.call(this, {load: load}, "course-load")
+									.then(() => {
 										this.get('store').query('program-record', {
 											filter: {
 												name: program,
@@ -657,20 +407,13 @@ export default Ember.Component.extend({
 										}).then((programRecords) => {
 
 											if (programRecords.length == 0) {
-
-												var programRecord = this.get('store').createRecord('program-record', {
+												saveStrategies.createAndSave.call(this, {
 													name: program,
 													level: level,
 													load: load,
 													status: status,
 													plan: [planCode]
-												});
-
-												programRecord.save().then(() => {
-													console.log("Added program record");
-												}, () => {
-													console.log("Could not add program record");
-												});
+												},"program-record");
 											} else {
 
 												let programRecord = programRecords.get("firstObject");
@@ -695,17 +438,11 @@ export default Ember.Component.extend({
 											}).then((termCodes) => {
 
 												if (termCodes.length == 0) {
-													var termCode = this.get('store').createRecord('term-code', {
+													saveStrategies.createAndSave.call(this, {
 														name: term,
 														student: student,
 														programRecords: [programRecord]
-													});
-
-													termCode.save().then(() => {
-														console.log("Added term code");
-													}, () => {
-														console.log("Could not add term code");
-													});
+													}, "term-code");
 												} else {
 
 													let termCode = termCodes.get("firstObject");
@@ -753,11 +490,40 @@ export default Ember.Component.extend({
 
 });
 
-let strategies = {
+
+//////////////////////////////
+//                          //
+//	STRATEGIES AND HELPERS  //
+//                          //
+//////////////////////////////
+
+let miscellaneous = {
+	parseComments: function () {
+		let comments = new Map();
+
+		parseStrategies.byRow.call(this, true, valueArray => {
+			//Add or update admission comments map
+			if (comments.has(valueArray[0]) === undefined) {
+				comments.set(valueArray[0], valueArray[1]);
+			} else {
+				let noteAddition = comments.get(valueArray[0]);
+				if (noteAddition === undefined) {
+					noteAddition = "";
+				}
+				noteAddition += valueArray[1];
+				comments.set(valueArray[0], noteAddition);
+			}
+		});
+
+		return comments;
+	}
+};
+
+let parseStrategies = {
 	byRow: function (savePreviousRowValue, saveFunction) {
 		//Get worksheet
-		let first_sheet_name = workbook.SheetNames[0];
-		let worksheet = workbook.Sheets[first_sheet_name];
+		let first_sheet_name = this.workbook.SheetNames[0];
+		let worksheet = this.workbook.Sheets[first_sheet_name];
 
 		// Stores all the values from the row
 		let valueArray = [];
@@ -805,9 +571,53 @@ let strategies = {
 				console.warn(err);
 			}
 
-			console.log(cellValue);
-
+			// Save values for row
 			saveFunction(cellValue);
 		}
 	}
-}
+};
+
+// Key feature to note: the promises' then functions return the *promise* of the save occurring,
+//   so that these functions can be chained together to save multiple items sequentially
+// TODO: Check how exceptions and rejections are handled with chained thens
+let saveStrategies = {
+	modifyAndSave: function (emberName, filter, ...modifyObjects) {
+
+		// Basic sanity check
+		if (modifyObjects.length % 2 !== 0) {
+			throw "Missing a parameter in the list of properties to modify and their new value.";
+		}
+
+		// Find the record to change
+		this.get('store').query(emberName, { filter: filter })
+			.then((models) => {
+				let model = models.get("firstObject");
+
+				// Make all requested modifications
+				for (let i = 0; i < modifyObjects.length / 2; i++) {
+					model.set(modifyObjects[i * 2], modifyObjects[i * 2 + 1]);
+				}
+
+				// Return promise of the modified record saving
+				return model.save().then(() => {
+					console.log("Modified " + modifyKey + " on a " + emberName.replace("-", " "));
+				}, err => {
+					console.warn(err);
+					console.log("Could not modify " + modifyKey + " on a " + emberName.replace("-", " "));
+				});
+
+			});
+	},
+	createAndSave: function (recordJSON, emberName) {
+		// Create record
+		let model = this.get('store').createRecord(emberName, recordJSON);
+
+		// Return promise of the record saving
+		return model.save().then(() => {
+			console.log("Added " + emberName.replace("-", " "));
+		}, err => {
+			console.warn(err);
+			console.log("Could not add " + emberName.replace("-", " "));
+		});
+	}
+};
