@@ -1,0 +1,36 @@
+<div class="ui modal">
+  <div class="content">
+    <div class ="ui center aligned basic segment">
+      {{#if isWorking}}
+        <br><br><br><br><br>
+        <div class="ui active inverted dimmer">
+          <br><br>
+          <div class="ui centered inline text loader">Adjudication In Progress</div>
+          <p>{{message}}</p>
+        </div>
+      {{else if isFinished}}
+        <br>
+        <div class="ui inline field">
+          <i class="huge green checkmark icon"></i>
+          <h3>All Done!</h3>
+        </div>
+        <br>
+      {{else if hasError}}
+        <br>
+        <div class="ui inline field">
+          <i class="huge orange warning icon"></i>
+          <h3>Warning!</h3>
+          <p>One or more students will require manual adjudication</p>
+        </div>
+        <br>
+      {{/if}}
+    </div>
+    <div class="actions">
+      <div class="ui button" {{action "done"}}>Toggle Done</div>
+      <div class="ui button" {{action "error"}}>Toggle Error</div>
+      <div class="ui button" {{action "working"}}>Toggle Working</div>
+      <div class="right floated basic red ui button" {{action "cancel"}}>Cancel</div>
+      <br><br>
+    </div>
+  </div>
+</div>
