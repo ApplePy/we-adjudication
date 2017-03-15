@@ -41,10 +41,10 @@ var Setup = function(model,
 
             // Check to ensure contents are good
             if ((verRes = verifyHook(request, response, modelObj)) !== 0)
-                return response.status(400).json({error: {messages: [verRes]}});
+                return response.status(400).json({errors: {messages: verRes, request: request.body}});
 
             modelObj.save(function (error) {
-                if (error) response.status(500).send({error: error});
+                if (error) response.status(500).send({errors: error});
                 else {
                     // Send success and call post hook
                     response.status(201).json({[modelNameEmberized]: modelObj});
@@ -69,14 +69,14 @@ var Setup = function(model,
 
                     model.paginate({}, {offset: o, limit: l},
                         function (error, modelObjs) {
-                            if (error) response.status(500).send({error: error});
+                            if (error) response.status(500).send({errors: error});
                             else response.json({[modelNameEmberized]: modelObjs.docs});
                         });
                 }
                 // Return all models
                 else {
                     model.find(function (error, modresults) {
-                        if (error) response.status(500).send({error: error});
+                        if (error) response.status(500).send({errors: error});
                         else response.json({[modelNameEmberized]: modresults});
                     });
                 }
@@ -91,13 +91,13 @@ var Setup = function(model,
 
                         model.paginate(filter, {offset: o, limit: l},
                             function (error, modelObjs) {
-                                if (error) response.status(500).send({error: error});
+                                if (error) response.status(500).send({errors: error});
                                 else response.json({[modelNameEmberized]: modelObjs.docs});
                             });
                     }
                     else {
                         model.find(filter, function (error, queryResults) {
-                            if (error) response.status(500).send({error: error});
+                            if (error) response.status(500).send({errors: error});
                             else response.json({[modelNameEmberized]: queryResults});
                         });
                     }
@@ -113,7 +113,7 @@ var Setup = function(model,
     // Get model by id
         .get(function (request, response) {
             model.findById(request.params.mongo_id, function (error, modelObj) {
-                if (error) response.status(500).send({error: error});
+                if (error) response.status(500).send({errors: error});
                 else if (!modelObj) response.sendStatus(404);
                 else response.json({[modelNameEmberized]: modelObj});
             })
@@ -123,13 +123,13 @@ var Setup = function(model,
         .put(function (request, response) {
             model.findById(request.params.mongo_id, function (error, modelObj) {
                 if (error) {
-                    response.status(500).send({error: error});
+                    response.status(500).send({errors: error});
                 }
                 else if (!modelObj) response.sendStatus(404);
                 else {
                     // Check to ensure that all fields in new version exist properly before updating
                     if ((verRes = verifyHook(request, response, request.body[modelNameEmberized])) !== 0)
-                        return response.status(400).json({error: {messages: [verRes]}});
+                        return response.status(400).json({errors: {messages: verRes, request: request.body}});
 
                     // Get all the fields of the model
                     let modelKeys = Object.keys(model.schema.obj);
@@ -147,7 +147,7 @@ var Setup = function(model,
                     modelObj.save(function (error) {
                         if (error) {
                             // Ends up here if the recipient specified is bad
-                            response.status(500).send({error: error});
+                            response.status(500).send({errors: error});
                         }
                         else {
                             // Send success and call post hook
@@ -163,7 +163,7 @@ var Setup = function(model,
         .delete(preDeleteHook, function (request, response) {
             model.findByIdAndRemove(request.params.mongo_id,
                 function (error, deleted) {
-                    if (error) response.status(500).send({error: error});
+                    if (error) response.status(500).send({errors: error});
                     else if (!deleted) response.sendStatus(404);
                     else {
                         // Send success and call cleanup hook

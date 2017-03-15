@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import XLSX from "npm:xlsx-browserify-shim";
+import XLSX from "npm:xlsx-browserify-shim"; 
 
 /* jshint loopfunc: true */
 
@@ -63,7 +63,7 @@ export default Ember.Component.extend({
 						});
 					});
 				} else if (fileName.toUpperCase() === "AdmissionComments.xlsx".toUpperCase()) {
-					let admissionComments = miscellaneous.parseComments();
+					let admissionComments = miscellaneous.parseComments.call(this);
 					admissionComments.forEach((value, key) => {
 						if (value !== "NONE FOUND") {
 							saveStrategies.modifyAndSave.call(this, "student", { number: key }, "admissionComments", value);
@@ -71,7 +71,7 @@ export default Ember.Component.extend({
 					});
 
 				} else if (fileName.toUpperCase() === "RegistrationComments.xlsx".toUpperCase()) {
-					let registrationComments = miscellaneous.parseComments();
+					let registrationComments = miscellaneous.parseComments.call(this);
 					registrationComments.forEach((value, key) => {
 						if (value !== "NONE FOUND") {
 							saveStrategies.modifyAndSave.call(this, "student", { number: key }, "registrationComments", value);
@@ -124,15 +124,21 @@ export default Ember.Component.extend({
 					}, "studentNumber");
 				} else if (fileName.toUpperCase() === "HighSchoolCourseInformation.xlsx".toUpperCase()) {
 					parseStrategies.byRowJSON.call(this, rowContents => {
+						console.debug(rowContents);
 						if (rowContents.schoolName !== "NONE FOUND") {
 							// Find listed subject
 							Promise.all([
 								this.get('store').query('hs-subject', { filter: { subject: rowContents.subject, description: rowContents.description } }),
 								this.get('store').query('hs-course-source', { filter: { code: rowContents.source } }),
-								this.get('store').query('student', { filter: { number: rowContents.studentNumber } })
+								this.get('store').query('student', { filter: { number: rowContents.studentNumber } }),
+								this.get('store').query('secondary-school', { filter: { name: rowContents.schoolName } })
 							]).then(values => {
+								console.debug(values);
+								console.debug(values[0].get('length'));
+								values[0].forEach(el => console.log(el.get("name")));
 								// Array of tasks that need to be done before saving the high school course
 								let preRequisitePromises = [];
+								let school = values[3].get('firstObject');
 								let emptySubject = (values[0].length === 0);
 								let emptySource = (values[1].length === 0);
 
@@ -156,16 +162,20 @@ export default Ember.Component.extend({
 
 								// Handle the rerequisite
 								Promise.all(preRequisitePromises).then(preReqValues => {
+									console.debug(preReqValues);
 									// Get the right value
 									let subject = emptySubject ? preReqValues[0] : values[0].get('firstObject');// TODO: Don't know if the .get('firstObject') is needed
 									let source = emptySource ? preReqValues[1] : values[1].get('firstObject');	// TODO: Don't know if the .get('firstObject') is needed
+
+									console.debug(subject);
+									console.debug(source);
 
 									// Save a new high school course
 									saveStrategies.createAndSave.call(this, {
 										level: rowContents.level,
 										unit: rowContents.units,
 										source: source,
-										school: rowContents.schoolName,
+										school: school,
 										subject: subject
 									}, "hs-course")
 										.then((hsCourse) => {
@@ -352,16 +362,12 @@ let miscellaneous = {
 
 		parseStrategies.byRow.call(this, true, valueArray => {
 			//Add or update admission comments map
-			if (comments.has(valueArray[0]) === undefined) {
-				comments.set(valueArray[0], valueArray[1]);
-			} else {
-				let noteAddition = comments.get(valueArray[0]);
-				if (noteAddition === undefined) {
-					noteAddition = "";
-				}
-				noteAddition += valueArray[1];
-				comments.set(valueArray[0], noteAddition);
+			let noteAddition = comments.get(valueArray[0]);
+			if (noteAddition === undefined) {
+				noteAddition = "";
 			}
+			noteAddition += valueArray[1] + " ";
+			comments.set(valueArray[0], noteAddition);
 		});
 
 		return comments;
@@ -375,13 +381,11 @@ let parseStrategies = {
 		let worksheet = this.workbook.Sheets[first_sheet_name];
 		
 		let sheetJSON = XLSX.utils.sheet_to_json(worksheet);
-		console.log(sheetJSON);
 
 		let preservedVariables = {};
 		for (let row of sheetJSON) {
 			let rowContents = {};
 			let keys = Object.keys(row);
-			keys.remove("__rowNum__");
 			for (let col of keys) {
 				if (multiLineVariables.indexOf(col) === -1) {
 					rowContents[col] = row[col];
@@ -391,7 +395,7 @@ let parseStrategies = {
 			}
 
 			// Mash them together and save
-			let result = this.$.extend({}, rowContents, preservedVariables);
+			let result = Ember.$.extend({}, rowContents, preservedVariables);
 			saveFunction(result);
 		}
 	},
@@ -406,8 +410,10 @@ let parseStrategies = {
 		// TODO: Look at changing to sheet_to_json to save lines?
 		for (let R = 1; R <= XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
 
-			if (!savePreviousRowValue) {
-				valueArray.length = 0;	// Yes, this actually clears the array. It's true voodoo.
+			if (savePreviousRowValue) {
+				valueArray = [...valueArray];
+			} else {
+				valueArray = [];
 			}
 
 			for (let C = 0; C <= XLSX.utils.decode_range(worksheet['!ref']).e.c; ++C) {
@@ -417,10 +423,8 @@ let parseStrategies = {
 				try {
 					// Get value and save it to valueArray
 					let cellValue = cell.v;
-					console.log(cellValue);
 					valueArray[C] = cellValue;
 				} catch (err) {
-					valueArray[C] = null;
 					// Skip, extension point here later?
 				}
 			}
@@ -442,9 +446,12 @@ let parseStrategies = {
 			let cellValue = null;
 			try {
 				cellValue = cell.v;
+				// HAX to handle Ouda file weirdness
+				if (cellValue === "---END OF FILE") {throw "Ignore this.";}
 			} catch (err) {
 				// Try/Catch was present in high schools parsing
 				console.warn(err);
+				continue;
 			}
 
 			// Save values for row

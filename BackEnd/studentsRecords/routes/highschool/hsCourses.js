@@ -16,7 +16,7 @@ module.exports =
             let list = [];
             if (!model.level)
                 list.push("Course level must be specified.");
-            if (!model.unit)
+            if (typeof model.unit !== "number")
                 list.push("Course unit must be specified.");
             if (list.length > 0)
                 return list;
