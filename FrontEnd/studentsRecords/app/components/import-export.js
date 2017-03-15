@@ -453,6 +453,52 @@ let parseStrategies = {
 			// Save values for row
 			saveFunction(cellValue);
 		}
+	},
+	byColumn: function (removeDuplicates, columnsToRead, saveFunction) {
+
+		//Get worksheet
+		let first_sheet_name = this.workbook.SheetNames[0];
+		let worksheet = this.workbook.Sheets[first_sheet_name];
+		
+		let sheetJSON = XLSX.utils.sheet_to_json(worksheet);
+		
+		//Loop through different groups of columns to read
+		for (let i = 0; i <= columnsToRead.length; i++) {	
+			let results = [];  //Array to save results in for each group of columns
+
+			//Iterate through rows
+			for (let row of sheetJSON) {
+				let keys = Object.keys(row);
+				let rowContents = {}; //Contents of row
+				for (let col of keys) {
+					//Checks to see if the column I am currently on is one that I am looking for
+					if (columnsToRead[i].indexOf(col) !== -1) {
+						//Add property and value to rowContents
+						rowContents[col] = row[col];		
+					}
+				}
+				//Check if duplicates are to be removed
+				if (removeDuplicates) {
+					//Find if rowContents is in results
+					let foundIndex = results.findIndex(element => {
+						let keys = Object.keys(element);
+
+						//Return true if equivalent object is found in results, otherwise, return false
+						for (let key of keys){
+							if (rowContents[key] !== element[key])
+								return false;
+						}
+						return true;
+					});
+					//If rowContents not in results, push row contents
+					if (foundIndex === -1) {
+						results.push(rowContents);
+					}
+				}
+			}
+			//Save results of specific group of columns to read
+			saveFunction(results);
+		}
 	}
 };
 
