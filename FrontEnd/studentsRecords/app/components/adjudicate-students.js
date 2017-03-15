@@ -54,6 +54,9 @@ export default Ember.Component.extend({
       *     termUnitsPassed += course.unit
       * termAVG = termTotalMarks / termTotalCourses
       *
+      * WILL WE HAVE TO CALCULATE THE CUMULATIVE AVERAGE??
+      * Cumulative Average Calculation: Will need to be done for each student
+      *
       *
       *
       * Get all of the terms whose termID matches the one passed into this component
