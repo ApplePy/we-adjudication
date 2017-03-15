@@ -124,7 +124,6 @@ export default Ember.Component.extend({
 					}, "studentNumber");
 				} else if (fileName.toUpperCase() === "HighSchoolCourseInformation.xlsx".toUpperCase()) {
 					parseStrategies.byRowJSON.call(this, rowContents => {
-						console.debug(rowContents);
 						if (rowContents.schoolName !== "NONE FOUND") {
 							// Find listed subject
 							Promise.all([
@@ -133,19 +132,16 @@ export default Ember.Component.extend({
 								this.get('store').query('student', { filter: { number: rowContents.studentNumber } }),
 								this.get('store').query('secondary-school', { filter: { name: rowContents.schoolName } })
 							]).then(values => {
-								console.debug(values);
-								console.debug(values[0].get('length'));
-								values[0].forEach(el => console.log(el.get("name")));
 								// Array of tasks that need to be done before saving the high school course
 								let preRequisitePromises = [];
 								let school = values[3].get('firstObject');
-								let emptySubject = (values[0].length === 0);
-								let emptySource = (values[1].length === 0);
+								let emptySubject = (values[0].get('length') === 0);
+								let emptySource = (values[1].get('length') === 0);
 
 								// If subject does not exist, create it
 								if (emptySubject) {
 									preRequisitePromises.push(
-										saveStrategies.createAndSave.bind(this, { name: rowContents.subject, description: rowContents.description }, "hs-subject")
+										saveStrategies.createAndSave.call(this, { name: rowContents.subject, description: rowContents.description }, "hs-subject")
 									);
 								} else {
 									preRequisitePromises.push(null);	// To keep position in the preReqValues array
@@ -154,7 +150,7 @@ export default Ember.Component.extend({
 								// If course source does not exist, create it
 								if (emptySource) {
 									preRequisitePromises.push(
-										saveStrategies.createAndSave.bind(this, { code: rowContents.source }, "hs-course-source")
+										saveStrategies.createAndSave.call(this, { code: rowContents.source }, "hs-course-source")
 									);
 								} else {
 									preRequisitePromises.push(null);	// To keep position in the preReqValues array
@@ -204,7 +200,7 @@ export default Ember.Component.extend({
 									let preRequisitePromises = [];
 
 									// If new term, create it
-									if (termCodes.length === 0) {
+									if (termCodes.get("length") === 0) {
 										preRequisitePromises.push(
 											saveStrategies.createAndSave.call(this, { name: rowContents.term, student: student }, "term-code"
 											));
@@ -214,7 +210,7 @@ export default Ember.Component.extend({
 
 									// Resolve prerequistes and then continue
 									Promise.all(preRequisitePromises).then(preReqValues => {
-										let termCode = termCodes.length === 0 ? preReqValues[0] : termCodes.get("firstObject");
+										let termCode = termCodes.get("length") === 0 ? preReqValues[0] : termCodes.get("firstObject");
 
 										// Save new course code
 										saveStrategies.modifyAndSave.call(this, "course-code", {
@@ -249,11 +245,11 @@ export default Ember.Component.extend({
 									this.get('store').query('term-code', { filter: { name: rowContents.term, number: rowContents.studentNumber } })
 								]).then(values => {
 									let preReqValues = [];
-									let emptyStatus = (values[0].length === 0);
-									let emptyPlanCode = (values[1].length === 0);
-									let emptyLoad = (values[2].length === 0);
-									let emptyRecords = (values[3].length === 0);
-									let emptyTermCode = (values[4].length === 0);
+									let emptyStatus = (values[0].get("length") === 0);
+									let emptyPlanCode = (values[1].get("length") === 0);
+									let emptyLoad = (values[2].get("length") === 0);
+									let emptyRecords = (values[3].get("length") === 0);
+									let emptyTermCode = (values[4].get("length") === 0);
 
 									// If something is missing, create it
 									if (emptyStatus) {
