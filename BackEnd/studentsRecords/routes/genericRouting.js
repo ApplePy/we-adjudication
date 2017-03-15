@@ -42,10 +42,10 @@ let Route = function(Model,
             // Check to ensure contents are good
             let verRes = null;
             if ((verRes = verifyHook(request, response, modelObj)) !== 0)
-                return response.status(400).json({error: {messages: [verRes]}});
+                return response.status(400).json({errors: {messages: verRes, request: request.body}});
 
             modelObj.save(function (error) {
-                if (error) response.status(500).send({error: error});
+                if (error) response.status(500).send({errors: error, request: request.body});
                 else {
                     // Send success and call post hook
                     response.status(201).json({[modelNameEmberized]: modelObj});
@@ -70,7 +70,7 @@ let Route = function(Model,
 
                     Model.paginate({}, {offset: o, limit: l},
                         function (error, modelObjs) {
-                            if (error) response.status(500).send({error: error});
+                            if (error) response.status(500).send({errors: error});
                             else response.json({
                                 [modelNameEmberized]: modelObjs.docs,
                                  meta:
@@ -85,7 +85,7 @@ let Route = function(Model,
                 // Return all models
                 else {
                     Model.find(function (error, modresults) {
-                        if (error) response.status(500).send({error: error});
+                        if (error) response.status(500).send({errors: error});
                         else response.json({[modelNameEmberized]: modresults});
                     });
                 }
@@ -100,7 +100,7 @@ let Route = function(Model,
 
                         Model.paginate(filter, {offset: o, limit: l},
                             function (error, modelObjs) {
-                                if (error) response.status(500).send({error: error});
+                                if (error) response.status(500).send({errors: error});
                                 else response.json({
                                     [modelNameEmberized]: modelObjs.docs,
                                     meta:
@@ -114,7 +114,7 @@ let Route = function(Model,
                     }
                     else {
                         Model.find(filter, function (error, queryResults) {
-                            if (error) response.status(500).send({error: error});
+                            if (error) response.status(500).send({errors: error});
                             else response.json({[modelNameEmberized]: queryResults});
                         });
                     }
@@ -130,7 +130,7 @@ let Route = function(Model,
     // Get model by id
         .get(function (request, response) {
             Model.findById(request.params.mongo_id, function (error, modelObj) {
-                if (error) response.status(500).send({error: error});
+                if (error) response.status(500).send({errors: error});
                 else if (!modelObj) response.sendStatus(404);
                 else response.json({[modelNameEmberized]: modelObj});
             });
@@ -140,14 +140,14 @@ let Route = function(Model,
         .put(function (request, response) {
             Model.findById(request.params.mongo_id, function (error, modelObj) {
                 if (error) {
-                    response.status(500).send({error: error});
+                    response.status(500).send({errors: error});
                 }
                 else if (!modelObj) response.sendStatus(404);
                 else {
                     // Check to ensure that all fields in new version exist properly before updating
                     let verRes = null;
                     if ((verRes = verifyHook(request, response, request.body[modelNameEmberized])) !== 0)
-                        return response.status(400).json({error: {messages: [verRes]}});
+                        return response.status(400).json({errors: {messages: verRes, request: request.body}});
 
                     // Get all the fields of the model
                     let modelKeys = Object.keys(Model.schema.obj);
@@ -165,7 +165,7 @@ let Route = function(Model,
                     modelObj.save(function (error) {
                         if (error) {
                             // Ends up here if the recipient specified is bad
-                            response.status(500).send({error: error});
+                            response.status(500).send({errors: error, request: request.body});
                         }
                         else {
                             // Send success and call post hook
@@ -181,7 +181,7 @@ let Route = function(Model,
         .delete(preDeleteHook, function (request, response) {
             Model.findByIdAndRemove(request.params.mongo_id,
                 function (error, deleted) {
-                    if (error) response.status(500).send({error: error});
+                    if (error) response.status(500).send({errors: error});
                     else if (!deleted) response.sendStatus(404);
                     else {
                         // Send success and call cleanup hook
