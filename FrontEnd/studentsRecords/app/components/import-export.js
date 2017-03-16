@@ -123,48 +123,44 @@ export default Ember.Component.extend({
 						}
 					}, "studentNumber");
 				} else if (fileName.toUpperCase() === "HighSchoolCourseInformation.xlsx".toUpperCase()) {
-					parseStrategies.byRowJSON.call(this, rowContents => {
-						if (rowContents.schoolName !== "NONE FOUND") {
-							// Find listed subject
-							Promise.all([
-								this.get('store').query('hs-subject', { filter: { subject: rowContents.subject, description: rowContents.description } }),
-								this.get('store').query('hs-course-source', { filter: { code: rowContents.source } }),
-								this.get('store').query('student', { filter: { number: rowContents.studentNumber } }),
-								this.get('store').query('secondary-school', { filter: { name: rowContents.schoolName } })
-							]).then(values => {
-								// Array of tasks that need to be done before saving the high school course
-								let preRequisitePromises = [];
-								let school = values[3].get('firstObject');
-								let emptySubject = (values[0].get('length') === 0);
-								let emptySource = (values[1].get('length') === 0);
+					let saveAsyncs = [];
 
-								// If subject does not exist, create it
-								if (emptySubject) {
-									preRequisitePromises.push(
-										saveStrategies.createAndSave.call(this, { name: rowContents.subject, description: rowContents.description }, "hs-subject")
-									);
-								} else {
-									preRequisitePromises.push(null);	// To keep position in the preReqValues array
-								}
+					parseStrategies.byColumn.call(this,
+					 true,
+					 [[source],[subject, description]],
+					 [{modelName: "hs-course-source", source: "name"}, {modeName: "hs-subject", subject: "name"}],
+					 (results, context) => {
+						//Results is an array of objects
+						// Context is the arbitrary objects we passed in
+						for (let result of results) {
+							let keys = Object.keys(context);
+							keys.remove('modelName');
+							for (let key of keys)
+							{
+								// WARNING: JAVASCRIPT MAGIC
+								result[context[key]] = result[key];		// Create a new property with the right name
+								delete result[key];						// Delete property with wrong name
+							}
 
-								// If course source does not exist, create it
-								if (emptySource) {
-									preRequisitePromises.push(
-										saveStrategies.createAndSave.call(this, { code: rowContents.source }, "hs-course-source")
-									);
-								} else {
-									preRequisitePromises.push(null);	// To keep position in the preReqValues array
-								}
+							saveAsyncs.push(saveStrategies.createAndSave.call(this, result, context.modelName));
+						}
+					});
 
-								// Handle the rerequisite
-								Promise.all(preRequisitePromises).then(preReqValues => {
-									console.debug(preReqValues);
+					Promise.all(saveAsyncs).then(() => {
+						parseStrategies.byRowJSON.call(this, rowContents => {
+							if (rowContents.schoolName !== "NONE FOUND") {
+								// Find listed subject
+								Promise.all([
+									this.get('store').query('hs-subject', { filter: { subject: rowContents.subject, description: rowContents.description } }),
+									this.get('store').query('hs-course-source', { filter: { code: rowContents.source } }),
+									this.get('store').query('student', { filter: { number: rowContents.studentNumber } }),
+									this.get('store').query('secondary-school', { filter: { name: rowContents.schoolName } })
+								]).then(values => {
+									let school = values[3].get('firstObject');
+
 									// Get the right value
-									let subject = emptySubject ? preReqValues[0] : values[0].get('firstObject');// TODO: Don't know if the .get('firstObject') is needed
-									let source = emptySource ? preReqValues[1] : values[1].get('firstObject');	// TODO: Don't know if the .get('firstObject') is needed
-
-									console.debug(subject);
-									console.debug(source);
+									let subject = values[0].get('firstObject');
+									let source = values[1].get('firstObject');
 
 									// Save a new high school course
 									saveStrategies.createAndSave.call(this, {
@@ -173,17 +169,16 @@ export default Ember.Component.extend({
 										source: source,
 										school: school,
 										subject: subject
-									}, "hs-course")
-										.then((hsCourse) => {
-											let student = values[2].get("firstObject");
+									}, "hs-course").then((hsCourse) => {
+										let student = values[2].get("firstObject");
 
-											// Save the student's grade
-											saveStrategies.createAndSave.call(this, { mark: rowContents.grade, course: hsCourse, recipient: student }, "hs-grade");
-										});
+										// Save the student's grade
+										saveStrategies.createAndSave.call(this, { mark: rowContents.grade, course: hsCourse, recipient: student }, "hs-grade");
+									});
 								});
-							});
-						}
-					}, "studentNumber", "schoolName");
+							}
+						}, "studentNumber", "schoolName");
+					});
 				} else if (fileName.toUpperCase() === "UndergraduateRecordCourses.xlsx".toUpperCase()) {
 					parseStrategies.byRowJSON.call(this, rowContents => {
 						// Save grades
@@ -454,7 +449,12 @@ let parseStrategies = {
 			saveFunction(cellValue);
 		}
 	},
-	byColumn: function (removeDuplicates, columnsToRead, saveFunction) {
+	byColumn: function (removeDuplicates, columnsToRead, contexts, saveFunction) {
+
+		// Sanity check
+		if (columnsToRead.length != saveModels.length) {
+			throw "Invalid parameters!";
+		}
 
 		//Get worksheet
 		let first_sheet_name = this.workbook.SheetNames[0];
@@ -497,7 +497,7 @@ let parseStrategies = {
 				}
 			}
 			//Save results of specific group of columns to read
-			saveFunction(results);
+			saveFunction(results, contexts[i]);
 		}
 	}
 };
