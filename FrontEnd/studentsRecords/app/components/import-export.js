@@ -485,8 +485,9 @@ let parseStrategies = {
 
 						//Return true if equivalent object is found in results, otherwise, return false
 						for (let key of keys){
-							if (rowContents[key] !== element[key])
+							if (rowContents[key] !== element[key]) {
 								return false;
+							}
 						}
 						return true;
 					});
@@ -494,6 +495,9 @@ let parseStrategies = {
 					if (foundIndex === -1) {
 						results.push(rowContents);
 					}
+				} else {
+					// Duplicates don't matter, it anyways
+					results.push(rowContents);
 				}
 			}
 			//Save results of specific group of columns to read
