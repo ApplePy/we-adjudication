@@ -13,37 +13,5 @@
   {{/if}}
 </div>
 {{#if isAdding}}
-  <div class="ui segment">
-    <div class="ui form">
-      <h3>Add Rule</h3>
-      <p>Develop a boolean expression using the form below.</p>
-      <div class="four fields">
-        <div class="three wide field">
-          <select onchange={{action 'selectParam' value="target.value"}}>
-            <option disabled selected>Parameter</option>
-            {{#each parameters as |param|}}
-              <option value={{param.id}}>{{param.description}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <div class="four wide field">
-          <select onchange={{action 'selectOpr' value="target.value"}}>
-            <option disabled selected>opr</option>
-            {{#each oprs as |opr|}}
-              <option value={{opr.id}}>{{opr.description}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <div class="three wide field">
-          {{input size="10" placeholder="value" value= newValue}}
-        </div>
-        <div class="two wide field">
-          <button class="ui green button" {{action "addRule"}}>Add</button>
-        </div>
-      </div>
-    </div>
-    {{#each rulesToBeAdded as |rule|}}
-      <p>{{rule.parameter.description}} {{rule.opr.description}} {{rule.value}}</p>
-    {{/each}}
-  </div>
+  {{add-rule notDONE = isAdding}}
 {{/if}}
