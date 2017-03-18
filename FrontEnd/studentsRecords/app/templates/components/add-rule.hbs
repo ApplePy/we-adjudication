@@ -14,18 +14,21 @@
     {{#if rulesToBeAdded}}
       <p>Rule to be Added: </p>
       {{#each rulesToBeAdded as |rule|}}
-        <div class="two fields">
+        <div class="three fields">
           <div class="seven wide field">
             <h4>{{rule.parameter.description}} {{rule.opr.description}} {{rule.value}} {{rule.link.description}}</h4>
           </div>
           {{#unless rule.link}}
             <div class="four wide field">
-              <select onchange={{action 'selectLink' value="target.value"}}>
+              <select class="ui search dropdown" onchange={{action 'selectLink' value="target.value"}}>
                 <option disabled selected>link</option>
                 {{#each links as |link|}}
                   <option value={{link.id}}>{{link.description}}</option>
                 {{/each}}
               </select>
+            </div>
+            <div class="one wide field">
+              <button class="red ui icon button" {{action "removeRule" rule}}><i class="delete icon"></i></button>
             </div>
           {{/unless}}
         </div>
@@ -34,7 +37,7 @@
     {{#if devBool}}
       <div class="fields">
         <div class="three wide field">
-          <select onchange={{action 'selectParam' value="target.value"}}>
+          <select class="ui search dropdown" onchange={{action 'selectParam' value="target.value"}}>
             <option disabled selected>Parameter</option>
             {{#each parameters as |param|}}
               <option value={{param.id}}>{{param.description}}</option>
@@ -42,7 +45,7 @@
           </select>
         </div>
         <div class="four wide field">
-          <select onchange={{action 'selectOpr' value="target.value"}}>
+          <select class="ui search dropdown" onchange={{action 'selectOpr' value="target.value"}}>
             <option disabled selected>operator</option>
             {{#each oprs as |opr|}}
               <option value={{opr.id}}>{{opr.description}}</option>
@@ -67,7 +70,7 @@
       <p>If you are satisfied with the rule, select 'done' from the dropdown
         and save
       </p>
-      <button class="green ui button" {{action "doneAdding"}}>Done</button>
+      <button class="green ui button" {{action "doneAdding"}}>Done Building</button>
     {{/if}}
   {{/if}}
     <button class="red ui button" {{action "cancel"}}>Cancel</button>

@@ -10,19 +10,18 @@ export default Ember.Component.extend({
   init() {
     this._super(...arguments);
 
+    this.set('rules', []);
 
-  this.get('store').query('logical-expression', {limit: 10}).then((records) => {
-    let totalRecords = records.get('meta').total;
-    let offsetUsed = records.get('meta').offset;
-    let limitUsed = records.get('meta').limit;
-    this.get('store').query('logical-expression', {limit: totalRecords}).then((rules) => {
-      for(var i=0; i < rules.get('length'); i++){
-        this.get('rules').pushObject(rules.objectAt(i));
-      }
+    this.get('store').query('logical-expression', {limit: 10}).then((records) => {
+      let totalRecords = records.get('meta').total;
+      let offsetUsed = records.get('meta').offset;
+      let limitUsed = records.get('meta').limit;
+      this.get('store').query('logical-expression', {limit: totalRecords}).then((rules) => {
+        for(var i=0; i < rules.get('length'); i++){
+          this.get('rules').pushObject(rules.objectAt(i));
+        }
+      });
     });
-  });
-
-
   },
 
   actions:{
