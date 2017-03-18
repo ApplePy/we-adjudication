@@ -6,7 +6,6 @@
 {{#if isAdding}}
   <br>
   {{add-rule notDONE = isAdding ruleArray = rules}}
-
 {{/if}}
 <div class="ui segment">
   {{#if rules}}
@@ -17,7 +16,7 @@
       {{#each rules as |rule|}}
         <tr>
           <td>{{rule.booleanExp}}</td>
-          <td><button class="red right floated ui button">Delete</button></td>
+          <td><button class="red right floated ui button" {{action "deleteRule" rule}}>Delete</button></td>
         </tr>
       {{/each}}
     </table>

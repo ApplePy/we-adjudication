@@ -27,6 +27,16 @@ export default Ember.Component.extend({
     add(){
       this.set('isAdding', true);
     },
+
+    deleteRule(rule){
+      var self = this;
+      this.get('store').findRecord('logical-expression', rule.id, { backgroundReload: false }).then(function(obj) {
+        obj.destroyRecord().then(function(object) {
+          console.log("Deleted rule");
+          self.set('rules', self.get('rules').without(object));
+        });
+      });
+    }
   },
 
 });
