@@ -9,14 +9,20 @@
 {{/if}}
 <div class="ui segment">
   {{#if rules}}
-    <table class="ui two column very basic table">
+    <table class="ui eleven column very basic table">
       <tr>
-        <td><h3>Rule</h3></td>
+        <td class="eight wide"><h3>Rule</h3></td>
       </tr>
       {{#each rules as |rule|}}
         <tr>
-          <td>{{rule.booleanExp}}</td>
-          <td><button class="red right floated ui button" {{action "deleteRule" rule}}>Delete</button></td>
+          <td class="eight wide">{{rule.booleanExp}}</td>
+          {{#if rule.assessmentCode}}
+            <td class="three wide">
+              The rule must be removed from Assessment Code before modifying.  See "Manage Adjudication Codes"
+            </td>
+          {{/if}}
+          <td class="two wide"><button class="green right floated ui button" {{action "updateRule" rule}}>Update</button></td>
+          <td class="one wide"><button class="red ui button" {{action "deleteRule" rule}}>Delete</button></td>
         </tr>
       {{/each}}
     </table>
@@ -24,3 +30,7 @@
     <p>There are no adjudication rules currently in the database</p>
   {{/if}}
 </div>
+
+{{#if isUpdating}}
+  {{update-rule notDONE = isUpdating rule = ruleToEdit}}
+{{/if}}

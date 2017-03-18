@@ -1,0 +1,17 @@
+<div class="ui modal">
+  <div class="header">Update Rule</div>
+  <div class="content">
+    <div class="ui form">
+      <div class="inline field">
+        <label>Boolean Expression</label>
+        {{textarea cols="6" rows="3" value = rule.booleanExp }}
+      </div>
+    </div>
+    <div class="actions">
+      <br>
+      <div class="ui green button" {{action 'saveRecord'}}>Save</div>
+      <div class="ui red basic button" {{action "close"}}>Cancel</div>
+    </div>
+
+  </div>
+</div>

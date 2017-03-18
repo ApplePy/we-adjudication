@@ -4,6 +4,8 @@ export default Ember.Component.extend({
   store: Ember.inject.service(),
   rules: [],
   isAdding: false,
+  isUpdating: false,
+  ruleToEdit: null,
 
   init() {
     this._super(...arguments);
@@ -26,6 +28,11 @@ export default Ember.Component.extend({
   actions:{
     add(){
       this.set('isAdding', true);
+    },
+
+    updateRule(rule){
+      this.set('isUpdating', true);
+      this.set('ruleToEdit', rule);
     },
 
     deleteRule(rule){
