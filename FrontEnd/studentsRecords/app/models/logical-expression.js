@@ -4,6 +4,6 @@ export default DS.Model.extend({
     booleanExp: DS.attr('String'),
     logicalLink: DS.attr('String'),
     assessmentCode: DS.belongsTo('assessment-code'),
-    parentExpression: DS.belongsTo('logical-expression'),
+    //parentExpression: DS.belongsTo('logical-expression'),
     logicalExpressions: DS.hasMany('logical-expression')
 });
