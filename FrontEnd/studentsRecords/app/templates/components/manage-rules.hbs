@@ -5,12 +5,21 @@
 </div>
 {{#if isAdding}}
   <br>
-  {{add-rule notDONE = isAdding}}
+  {{add-rule notDONE = isAdding ruleArray = rules}}
+
 {{/if}}
 <div class="ui segment">
   {{#if rules}}
-    <table class="ui one column very basic table">
-
+    <table class="ui two column very basic table">
+      <tr>
+        <td><h3>Rule</h3></td>
+      </tr>
+      {{#each rules as |rule|}}
+        <tr>
+          <td>{{rule.booleanExp}}</td>
+          <td><button class="red right floated ui button">Delete</button></td>
+        </tr>
+      {{/each}}
     </table>
   {{else}}
     <p>There are no adjudication rules currently in the database</p>

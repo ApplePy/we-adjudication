@@ -2,6 +2,7 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
   store: Ember.inject.service(),
+  ruleArray: null,
   rulesToBeAdded: [],
   selectedOpr: null,
   selectedParam: null,
@@ -162,7 +163,11 @@ export default Ember.Component.extend({
         assessmentCode: null
       });
 
-      newRule.save();
+      var self = this;
+      newRule.save().then(function(record){
+        self.get('ruleArray').pushObject(record);
+      });
+
       this.set('notDONE', false);
     },
 
