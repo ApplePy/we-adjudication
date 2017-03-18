@@ -3,6 +3,10 @@
     <button class="ui green button" {{action "add"}}>Add Rule</button>
   </h1>
 </div>
+{{#if isAdding}}
+  <br>
+  {{add-rule notDONE = isAdding}}
+{{/if}}
 <div class="ui segment">
   {{#if rules}}
     <table class="ui one column very basic table">
@@ -12,6 +16,3 @@
     <p>There are no adjudication rules currently in the database</p>
   {{/if}}
 </div>
-{{#if isAdding}}
-  {{add-rule notDONE = isAdding}}
-{{/if}}

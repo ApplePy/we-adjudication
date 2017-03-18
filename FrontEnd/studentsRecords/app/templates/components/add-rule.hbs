@@ -8,7 +8,8 @@
       {{rule.parameter.description}} {{rule.opr.description}} {{rule.value}} {{rule.link.description}}
     {{/each}}
     </h3>
-    <button class="green ui button" {{action "saveRule"}}>Save</button>
+    <button class="green ui button" {{action "saveRule"}}>Yes</button>
+    <button class="blue ui button" {{action "notConfirmed"}}>No, Back to Form</button>
   {{else}}
     {{#if rulesToBeAdded}}
       <p>Rule to be Added: </p>
@@ -21,7 +22,6 @@
             <div class="four wide field">
               <select onchange={{action 'selectLink' value="target.value"}}>
                 <option disabled selected>link</option>
-                <option value="done">Done</option>
                 {{#each links as |link|}}
                   <option value={{link.id}}>{{link.description}}</option>
                 {{/each}}
@@ -52,8 +52,8 @@
         <div class="four wide field">
           {{input size="15" placeholder="value" value= newValue}}
         </div>
-        <div class="two wide field">
-          <button class="ui green button" {{action "addRule"}}>Add</button>
+        <div class="one wide field">
+          <button class="ui green icon button" {{action "addRule"}}><i class="plus icon"></i></button>
         </div>
         {{#if rulesToBeAdded}}
           <div class="two wide field">
@@ -67,6 +67,7 @@
       <p>If you are satisfied with the rule, select 'done' from the dropdown
         and save
       </p>
+      <button class="green ui button" {{action "doneAdding"}}>Done</button>
     {{/if}}
   {{/if}}
     <button class="red ui button" {{action "cancel"}}>Cancel</button>

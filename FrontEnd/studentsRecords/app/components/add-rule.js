@@ -1,11 +1,12 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
+  store: Ember.inject.service(),
   rulesToBeAdded: [],
   selectedOpr: null,
   selectedParam: null,
-  devBool: true,
-  confirming: false,
+  devBool: null,
+  confirming: null,
   notDONE: null,
 
   parameters: [
@@ -78,6 +79,9 @@ export default Ember.Component.extend({
 
   init(){
     this._super(...arguments);
+    this.set('devBool', true);
+    this.set('confirming', false);
+    this.set('rulesToBeAdded', []);
     this.set('selectedParam', null);
     this.set('selectedOpr', null);
   },
@@ -105,10 +109,6 @@ export default Ember.Component.extend({
     },
 
     selectLink(link){
-      if(link === "done"){
-        this.set('confirming', true);
-
-      } else {
         var obj = this.get('links')[link];
         var rule = this.get('rulesToBeAdded').get('lastObject');
         var newRule = {
@@ -120,7 +120,6 @@ export default Ember.Component.extend({
         this.get('rulesToBeAdded').popObject();
         this.get('rulesToBeAdded').pushObject(newRule);
         this.set('devBool', true);
-      }
     },
 
     selectParam(param){
@@ -141,9 +140,34 @@ export default Ember.Component.extend({
       this.set('devBool', false);
     },
 
-    saveRule(){
-      //Set up the boolean expression 
+    doneAdding(){
+      this.set('confirming', true);
+    },
 
+    saveRule(){
+      //Set up the boolean expression
+      var rules = this.get('rulesToBeAdded');
+      var expression = "";
+      for(var i=0; i < rules.length; i++){
+        var rule = rules.objectAt(i);
+        expression += "(" + rule.parameter.description + " " + rule.opr.description + " " + rule.value + ")";
+        if(rule.link != null){
+          expression += ' ' + rule.link.description + ' ';
+        }
+      }
+      //Create a new logical expression using the expression
+      var newRule = this.get('store').createRecord('logical-expression', {
+        booleanExp: expression,
+        logicalLink: null,
+        assessmentCode: null
+      });
+
+      newRule.save();
+      this.set('notDONE', false);
+    },
+
+    notConfirmed(){
+      this.set('confirming', false);
     },
 
     cancel(){
