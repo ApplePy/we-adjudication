@@ -29,7 +29,7 @@ let itemList = Common.DBElements.logicalExpressionList;
 let EmberModel = LogicalExpressions;
 let newModel = Common.Generators.LogicalExpression;
 let filterValueSearches = ['booleanExp', 'logicalLink'];
-let requiredValues = ['booleanExp', 'logicalLink'];
+let requiredValues = ['booleanExp'];
 let uniqueValues = [];
 
 // Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
