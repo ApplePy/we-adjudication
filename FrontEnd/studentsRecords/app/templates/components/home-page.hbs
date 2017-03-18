@@ -22,6 +22,11 @@
         Manage High School Data
       </a>
 
+      <a class="item" {{action "manageRules"}}>
+        <i class="large write icon"></i>
+        Manage Adjudication Rules
+      </a>
+
       <a class="item" {{action "manageSystem"}}a>
         <i class="large code icon"></i>
         Manage System
@@ -61,6 +66,9 @@
       {{/if}}
       {{#if isHighSchoolShowing}}
         {{high-school-data}}
+      {{/if}}
+      {{#if isManageRulesShowing}}
+        {{manage-rules}}
       {{/if}}
     </div>
   </div>
