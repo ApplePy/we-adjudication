@@ -9,7 +9,7 @@ module.exports =
         LogicalExpressions,
         'logicalExpression',
         true,
-        new PropertyValidator("booleanExp", "logicalLink"),
+        new PropertyValidator("booleanExp"),
         undefined,
         undefined,
         undefined,

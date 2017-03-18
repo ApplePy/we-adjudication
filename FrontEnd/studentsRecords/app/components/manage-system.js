@@ -41,6 +41,14 @@ export default Ember.Component.extend({
       inputModelProp: [
         { name: 'name', type: "string" }
       ]
+    },
+    {
+      name: "UWO Term Codes",
+      placeholder: ["Add term code..."],
+      emberName: 'term-code',
+      inputModelProp: [
+        {name: 'name', type: "string"}
+      ]
     }
   ]
 });
