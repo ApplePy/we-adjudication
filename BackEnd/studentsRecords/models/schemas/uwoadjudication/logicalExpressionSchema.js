@@ -7,7 +7,7 @@ let mongoosePaginate = require('mongoose-paginate');
 let logicalExpressionSchema = mongoose.Schema(
     {
         booleanExp: {type: String, required: true},
-        logicalLink: {type: String, required: true},
+        logicalLink: String,
         assessmentCode: {type: mongoose.Schema.ObjectId, ref: 'AssessmentCodes'},
         parentExpression: {type: mongoose.Schema.ObjectId, ref: "LogicalExpressions"},
         logicalExpressions: [{type: mongoose.Schema.ObjectId, ref: "LogicalExpressions"}]
