@@ -3,6 +3,9 @@ import XLSX from "npm:xlsx-browserify-shim";
 
 /* jshint loopfunc: true */
 
+
+// FIXME: Major assumption: The database does not already contain objects! Fix to check before save, and handle 500s!
+
 export default Ember.Component.extend({
 
 	store: Ember.inject.service(),
@@ -24,161 +27,182 @@ export default Ember.Component.extend({
 
 				//Get workbook
 				let data = event.target.result;
-				this.workbook = XLSX.read(data, { type: 'binary' });	// Moved into the "this" variable to save typing
+				this.workbook = XLSX.read(data, { type: 'binary', cellDates: true });	// Moved into the "this" variable to save typing
 
 				if (fileName.toUpperCase() === "genders.xlsx".toUpperCase()) {
-					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "gender"));
+					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "gender"), true);
 				} else if (fileName.toUpperCase() === "residencies.xlsx".toUpperCase()) {
-					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "residency"));
+					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "residency"), true);
 				} else if (fileName.toUpperCase() === "UndergraduateCourses.xlsx".toUpperCase()) {
 					parseStrategies.byRow.call(this, false, valueArray => saveStrategies.createAndSave.call(this, {
 						courseLetter: valueArray[0],
 						courseNumber: valueArray[1],
 						name: valueArray[2],
 						unit: valueArray[3]
-					}, "course-code"));
+					}, "course-code"), true);
 				} else if (fileName.toUpperCase() === "HighSchools.xlsx".toUpperCase()) {
-					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "secondary-school"));
+					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "secondary-school"), true);
 				} else if (fileName.toUpperCase() === "students.xlsx".toUpperCase()) {
-					parseStrategies.byRow.call(this, false, valueArray => {
-						// Get gender and dependencies
-						// TODO: Find out if this usage of Promise.all makes Ember squirm... it intentionally removed Promise from jshint global space
-						Promise.all([
-							this.get('store').query('gender', { filter: { name: valueArray[3] } }),
-							this.get('store').query('residency', { filter: { name: valueArray[5] } })
-						]).then(values => {
-							let gender = values[0].get("firstObject");
-							let residency = values[1].get("firstObject");
+					// Get all genders and residencies (sensitive to pagination)
+					Promise.all([
+						this.get('store').findAll('gender'),
+						this.get('store').findAll('residency')])
+						.then(values => {
+							parseStrategies.byRow.call(this, false, valueArray => {
+								let gender = values[0].find(el => el.get('name') === valueArray[3]);
+								let residency = values[1].find(el => el.get('name') === valueArray[5]);
 
-							// Create new record
-							let studentJSON = {
-								number: valueArray[0],
-								firstName: valueArray[1],
-								lastName: valueArray[2],
-								DOB: new Date(valueArray[4]),	// TODO: THIS DOES NOT WORK.
-								genderInfo: gender,
-								resInfo: residency
-							};
-							saveStrategies.createAndSave.call(this, studentJSON, "student");
+								// Sanity check
+								if (typeof gender === "undefined" || typeof residency === "undefined") {
+									throw "Gender or residency not found!";
+								}
+
+								// Parse birthday
+								console.log(valueArray);
+								console.log(typeof valueArray[4]);
+								let dateParse = valueArray[4].split('-');
+								let date = new Date(dateParse[2], dateParse[1] - 1, dateParse[0]);
+
+								// Create new record
+								let studentJSON = {
+									number: valueArray[0],
+									firstName: valueArray[1],
+									lastName: valueArray[2],
+									DOB: date,
+									genderInfo: gender,
+									resInfo: residency
+								};
+								return saveStrategies.createAndSave.call(this, studentJSON, "student");
+							}, true);
 						});
-					});
 				} else if (fileName.toUpperCase() === "AdmissionComments.xlsx".toUpperCase()) {
-					let admissionComments = miscellaneous.parseComments.call(this);
-					admissionComments.forEach((value, key) => {
+					miscellaneous.parseComments.call(this).then(comments => comments.forEach((value, key) => {
 						if (value !== "NONE FOUND") {
 							saveStrategies.modifyAndSave.call(this, "student", { number: key }, "admissionComments", value);
 						}
-					});
-
+					}));
 				} else if (fileName.toUpperCase() === "RegistrationComments.xlsx".toUpperCase()) {
-					let registrationComments = miscellaneous.parseComments.call(this);
-					registrationComments.forEach((value, key) => {
+					miscellaneous.parseComments.call(this).then(comments => comments.forEach((value, key) => {
 						if (value !== "NONE FOUND") {
 							saveStrategies.modifyAndSave.call(this, "student", { number: key }, "registrationComments", value);
 						}
-					});
+					}));
 				} else if (fileName.toUpperCase() === "BasisOfAdmission.xlsx".toUpperCase()) {
 					parseStrategies.byRow.call(this, true, valueArray => {
 						if (valueArray[1] !== "NONE FOUND") {
-							saveStrategies.modifyAndSave.call(this, "student", { number: valueArray[0] }, "basisOfAdmission", valueArray[1]);
+							return saveStrategies.modifyAndSave.call(this, "student", { number: valueArray[0] }, "basisOfAdmission", valueArray[1]);
+						} else {
+							return null;
 						}
 					});
 				} else if (fileName.toUpperCase() === "AdmissionAverages.xlsx".toUpperCase()) {
-
 					parseStrategies.byRow.call(this, true, valueArray => {
 						if (valueArray[1] !== "NONE FOUND") {
-							saveStrategies.modifyAndSave.call(this, "student", { number: valueArray[0] }, "admissionAverage", valueArray[1]);
+							return saveStrategies.modifyAndSave.call(this, "student", { number: valueArray[0] }, "admissionAverage", valueArray[1]);
+						} else {
+							return null;
 						}
 					});
 				} else if (fileName.toUpperCase() === "AdvancedStanding.xlsx".toUpperCase()) {
-					parseStrategies.byRowJSON.call(this, json => {
-						if (json.course !== "NONE FOUND") {
-							// Find student to save an advanced standing for
-							this.get('store').query('student', { filter: { number: json.studentNumber } })
-								.then(students => {
-									let student = students.get("firstObject");
-
-									// Save advanced standing
-									saveStrategies.createAndSave.call(this, {
-										course: json.course,
-										description: json.description,
-										units: json.units,
-										grade: json.grade,
-										from: json.from,
-										recipient: student
-									}, "advanced-standing");
-								});
-						}
-					}, "studentNumber");
-				} else if (fileName.toUpperCase() === "scholarshipsAndAwards.xlsx".toUpperCase()) {
-					parseStrategies.byRowJSON.call(this, json => {
-						if (json.note !== "NONE FOUND") {
-							// Find student and save a new award related to student
-							this.get('store').query('student', { filter: { number: json.studentNumber } })
-								.then(students => {
-									let student = students.get("firstObject");
-
-									saveStrategies.createAndSave.call(this, { note: json.note, recipient: student }, "award");
-								});
-						}
-					}, "studentNumber");
-				} else if (fileName.toUpperCase() === "HighSchoolCourseInformation.xlsx".toUpperCase()) {
-					let saveAsyncs = [];
-
-					parseStrategies.byColumn.call(this,
-					 true,
-					 [[source],[subject, description]],
-					 [{modelName: "hs-course-source", source: "name"}, {modeName: "hs-subject", subject: "name"}],
-					 (results, context) => {
-						//Results is an array of objects
-						// Context is the arbitrary objects we passed in
-						for (let result of results) {
-							let keys = Object.keys(context);
-							keys.remove('modelName');
-							for (let key of keys)
-							{
-								// WARNING: JAVASCRIPT MAGIC
-								result[context[key]] = result[key];		// Create a new property with the right name
-								delete result[key];						// Delete property with wrong name
-							}
-
-							saveAsyncs.push(saveStrategies.createAndSave.call(this, result, context.modelName));
-						}
+					miscellaneous.parseAwardsAndStandings.call(this, "course", "advanced-standing", (json, student, emberName) => {
+						// Save advanced standing
+						return saveStrategies.createAndSave.call(this, {
+							course: json.course,
+							description: json.description,
+							units: json.units,
+							grade: json.grade,
+							from: json.from,
+							recipient: student
+						}, emberName);
 					});
+				} else if (fileName.toUpperCase() === "scholarshipsAndAwards.xlsx".toUpperCase()) {
+					miscellaneous.parseAwardsAndStandings.call(this, "note", "advanced-standing", (json, student, emberName) => {
+						// Save advanced standing
+									return saveStrategies.createAndSave.call(this, { note: json.note, recipient: student }, emberName);
+					});
+				} else if (fileName.toUpperCase() === "HighSchoolCourseInformation.xlsx".toUpperCase()) {
+					// Parse through each column and create all column
+					parseStrategies.byColumn.call(this,
+						true,
+						[['source'], ['subject', 'description'], ['schoolName']],
+						[{ modelName: "hs-course-source", source: "name" }, { modeName: "hs-subject", subject: "name" }, { modelName: "secondary-school", schoolName: "name" }],
+						(results, context) => {
+							//Results is an array of objects
+							// Context is the arbitrary objects we passed in
+							for (let result of results) {
+								let keys = Object.keys(context);
+								keys.remove('modelName');
+								for (let key of keys) {
+									// WARNING: JAVASCRIPT MAGIC
+									result[context[key]] = result[key];		// Create a new property with the right name
+									delete result[key];						// Delete property with wrong name
+								}
 
-					Promise.all(saveAsyncs).then(() => {
-						parseStrategies.byRowJSON.call(this, rowContents => {
-							if (rowContents.schoolName !== "NONE FOUND") {
-								// Find listed subject
-								Promise.all([
-									this.get('store').query('hs-subject', { filter: { subject: rowContents.subject, description: rowContents.description } }),
-									this.get('store').query('hs-course-source', { filter: { code: rowContents.source } }),
-									this.get('store').query('student', { filter: { number: rowContents.studentNumber } }),
-									this.get('store').query('secondary-school', { filter: { name: rowContents.schoolName } })
-								]).then(values => {
-									let school = values[3].get('firstObject');
+								// Assuming the value doesn't already exist
+								return saveStrategies.createAndSave.call(this, result, context.modelName);
+							}
+						}, false)
+						.then(() => {
+							// Get all prerequisite models
+							return Promise.all([
+								miscellaneous.getAllModels.call(this, 'hs-subject'),
+								miscellaneous.getAllModels.call(this, 'hs-course-source'),
+								miscellaneous.getAllModels.call(this, 'student'),
+								miscellaneous.getAllModels.call(this, 'secondary-school')]);
+						})
+						.then(values => {
+							// Create all the courses
+							parseStrategies.byRowJSON.call(this, rowContents => {
+								if (rowContents.schoolName !== "NONE FOUND") {
+									// Find needed elements
+									let school = values[3].find(el => el.get('name') === rowContents.schoolName);
+									let subject = values[0].find(el => el.get('name') === rowContents.subject);
+									let source = values[1].find(el => el.get('code') === rowContents.source);
 
-									// Get the right value
-									let subject = values[0].get('firstObject');
-									let source = values[1].get('firstObject');
+									// Sanity check
+									if (typeof school === 'undefined' || typeof subject === 'undefined' || typeof source === 'undefined') {
+										throw "Required values are missing!";
+									}
 
 									// Save a new high school course
-									saveStrategies.createAndSave.call(this, {
+									return saveStrategies.createAndSave.call(this, {
 										level: rowContents.level,
 										unit: rowContents.units,
 										source: source,
 										school: school,
 										subject: subject
-									}, "hs-course").then((hsCourse) => {
-										let student = values[2].get("firstObject");
+									}, "hs-course");
+								} else {
+									return null;
+								}
+							}, false, "studentNumber", "schoolName")
+							// Create all the grade entries
+							.then((hsCourses) => {
+							// Remove null courses
+									hsCourses = hsCourses.filter(el => el !== null);
 
-										// Save the student's grade
-										saveStrategies.createAndSave.call(this, { mark: rowContents.grade, course: hsCourse, recipient: student }, "hs-grade");
-									});
+									return parseStrategies.byRowJSON.call(this, rowContents => {
+										if (rowContents.schoolName !== "NONE FOUND") {
+											// Find student
+											let student = values[2].find(el => el.get('number') === rowContents.studentNumber);
+
+											// Find course
+											let course = hsCourses.find(el => {
+												if (el.get('level') === rowContents.level && el.get('unit') === rowContents.units &&
+													el.get('source.name') === rowContents.source && el.get('subject.name') === rowConents.subject &&
+													el.get('school.name') === rowContents.schoolName) {
+													return true;
+												} else {
+													return false;
+												}
+											});
+
+											// Save the student's grade
+											return saveStrategies.createAndSave.call(this, { mark: rowContents.grade, course: course, recipient: student }, "hs-grade");
+										}
+									}, false, "studentNumber", "schoolName");
 								});
-							}
-						}, "studentNumber", "schoolName");
-					});
+						});
 				} else if (fileName.toUpperCase() === "UndergraduateRecordCourses.xlsx".toUpperCase()) {
 					parseStrategies.byRowJSON.call(this, rowContents => {
 						// Save grades
@@ -348,178 +372,345 @@ export default Ember.Component.extend({
 //////////////////////////////
 
 let miscellaneous = {
-	parseComments: function () {
-		let comments = new Map();
+	/**
+	 * Retrieves all models.
+	 * 
+	 * @param {string} emberName	The model to get.
+	 * @returns {Promise}
+	 */
+	getAllModels: function(emberName) {
+		return this.get('store').getAll(emberName).then(records => {
+			let meta = records.get('meta');
 
-		parseStrategies.byRow.call(this, true, valueArray => {
-			//Add or update admission comments map
-			let noteAddition = comments.get(valueArray[0]);
-			if (noteAddition === undefined) {
-				noteAddition = "";
+			// Was not paginated, return
+			if (typeof meta === "undefined" || meta === null) {
+				return records
 			}
-			noteAddition += valueArray[1] + " ";
-			comments.set(valueArray[0], noteAddition);
-		});
 
-		return comments;
+			let total = meta.get('total');
+			return this.get('store').query(emberName, { limit: total, offset: 0 });
+		});
+	},
+
+	/**
+	 * Saves Awards and Advanced Standings to a student.
+	 * 
+	 * @param {string} noneFoundColumn	The column that the award name is in that will list "NONE FOUND"
+	 * @param {string} emberName				Model name to use when saving.
+	 * @param {function} saveFunction		The save function to use, accepting parameters (row json, student object, emberName)
+	 */
+	parseAwardsAndStandings: function (noneFoundColumn, emberName, saveFunction) {
+		this.get('store').query('student', {}).then(records => {
+			// Get number of records to retrieved
+			let totalRecords = records.get('meta').get('total');
+
+			// Get all students
+			this.get('store').query('student', { limit: totalRecords, offset: 0 }).then(students => {
+				parseStrategies.byRowJSON.call(this, json => {
+					if (json[noneFoundColumn] !== "NONE FOUND") {
+						// Get student
+						let student = students.find(el => el.get('number') === json.studentNumber);
+
+						// Sanity check
+						if (typeof student === "undefined") {
+							throw "Student not found!";
+						}
+
+						// Save
+						return saveFunction.call(this, json, student, emberName);
+					} else {
+						return null;
+					}
+				}, true, "studentNumber");
+			});
+		});
+	},
+
+	/**
+	 * Parses a spreadsheet set up in comments format and returns the comments for the first column.
+	 * 
+	 * @returns {Promise}	Resolves into a map of student number/comment
+	 */
+	parseComments: function () {
+		let self = this;
+
+		return new Promise(function(resolve, reject) {
+			let comments = new Map();
+
+			// Go through each row and collect the comments
+			parseStrategies.byRow.call(self, true, valueArray => {
+				//Add or update admission comments map
+				let noteAddition = comments.get(valueArray[0]);
+				if (noteAddition === undefined) {
+					noteAddition = "";
+				}
+				noteAddition += valueArray[1] + " ";
+				comments.set(valueArray[0], noteAddition);
+
+				// No promise to return
+				return null;
+			}, true)
+			// Send the comments off
+			.then(() => resolve(comments));
+		});
 	}
 };
-
+// Strategies that are commonly used to parse spreadsheets.
 let parseStrategies = {
-	byRowJSON: function (saveFunction, ...multiLineVariables) {
+	/**
+	 * Parse sheets by row, saving each row.
+	 * 
+	 * @param {function} saveFunction					The save function that is passed ({row column: row value}). Returns a promise.
+	 * @param {boolean} ignoreSaveErrors			Dictates if errors from the saveFunction should be suppressed.
+	 * @param {...string} multiLineVariables	Strings that correspond to column names that must be preserved between rows.
+	 * @throws {string}												Throws on bad parameters.
+	 * @returns {Promise}											Returns a promise that resolves into an array of saved objects.
+	 */
+	byRowJSON: function (saveFunction, ignoreSaveErrors = false, ...multiLineVariables) {
+		// Basic sanity check
+		if (typeof saveFunction !== "function" || typeof ignoreSaveErrors !== "boolean") {
+			throw "Invalid arguments!";
+		}
+
 		//Get worksheet
 		let first_sheet_name = this.workbook.SheetNames[0];
 		let worksheet = this.workbook.Sheets[first_sheet_name];
-		
+
 		let sheetJSON = XLSX.utils.sheet_to_json(worksheet);
 
-		let preservedVariables = {};
-		for (let row of sheetJSON) {
-			let rowContents = {};
-			let keys = Object.keys(row);
-			for (let col of keys) {
-				if (multiLineVariables.indexOf(col) === -1) {
-					rowContents[col] = row[col];
-				} else {
-					preservedVariables[col] = row[col];
-				}
-			}
+		return new Promise(function (resolve, reject) {
+			let savePromises = [];	// Stores all the promises emitted from the save function
+			let preservedVariables = {};	// Stores all variables that need to be preserved between rows
 
-			// Mash them together and save
-			let result = Ember.$.extend({}, rowContents, preservedVariables);
-			saveFunction(result);
-		}
-	},
-	byRow: function (savePreviousRowValue, saveFunction) {
-		//Get worksheet
-		let first_sheet_name = this.workbook.SheetNames[0];
-		let worksheet = this.workbook.Sheets[first_sheet_name];
-
-		// Stores all the values from the row
-		let valueArray = [];
-
-		// TODO: Look at changing to sheet_to_json to save lines?
-		for (let R = 1; R <= XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
-
-			if (savePreviousRowValue) {
-				valueArray = [...valueArray];
-			} else {
-				valueArray = [];
-			}
-
-			for (let C = 0; C <= XLSX.utils.decode_range(worksheet['!ref']).e.c; ++C) {
-
-				let cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
-				let cell = worksheet[cellAddress];
-				try {
-					// Get value and save it to valueArray
-					let cellValue = cell.v;
-					valueArray[C] = cellValue;
-				} catch (err) {
-					// Skip, extension point here later?
-				}
-			}
-
-			// Save values for row
-			saveFunction(valueArray);
-		}
-	},
-	singleColumn: function (saveFunction) {
-		//Get worksheet
-		let first_sheet_name = this.workbook.SheetNames[0];
-		let worksheet = this.workbook.Sheets[first_sheet_name];
-
-		// TODO: Look at changing to sheet_to_json to save lines?
-		for (let R = 1; R <= XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
-
-			let cellAddress = XLSX.utils.encode_cell({ r: R, c: 0 });
-			let cell = worksheet[cellAddress];
-			let cellValue = null;
-			try {
-				cellValue = cell.v;
-				// HAX to handle Ouda file weirdness
-				if (cellValue === "---END OF FILE") {throw "Ignore this.";}
-			} catch (err) {
-				// Try/Catch was present in high schools parsing
-				console.warn(err);
-				continue;
-			}
-
-			// Save values for row
-			saveFunction(cellValue);
-		}
-	},
-	byColumn: function (removeDuplicates, columnsToRead, contexts, saveFunction) {
-
-		// Sanity check
-		if (columnsToRead.length != saveModels.length) {
-			throw "Invalid parameters!";
-		}
-
-		//Get worksheet
-		let first_sheet_name = this.workbook.SheetNames[0];
-		let worksheet = this.workbook.Sheets[first_sheet_name];
-		
-		let sheetJSON = XLSX.utils.sheet_to_json(worksheet);
-		
-		//Loop through different groups of columns to read
-		for (let i = 0; i <= columnsToRead.length; i++) {	
-			let results = [];  //Array to save results in for each group of columns
-
-			//Iterate through rows
 			for (let row of sheetJSON) {
+				let rowContents = {};
 				let keys = Object.keys(row);
-				let rowContents = {}; //Contents of row
 				for (let col of keys) {
-					//Checks to see if the column I am currently on is one that I am looking for
-					if (columnsToRead[i].indexOf(col) !== -1) {
-						//Add property and value to rowContents
-						rowContents[col] = row[col];		
+					if (multiLineVariables.indexOf(col) === -1) {
+						rowContents[col] = row[col];
+					} else {
+						preservedVariables[col] = row[col];
 					}
 				}
-				//Check if duplicates are to be removed
-				if (removeDuplicates) {
-					//Find if rowContents is in results
-					let foundIndex = results.findIndex(element => {
-						let keys = Object.keys(element);
 
-						//Return true if equivalent object is found in results, otherwise, return false
-						for (let key of keys){
-							if (rowContents[key] !== element[key]) {
-								return false;
-							}
+				// Mash them together and save
+				let result = Ember.$.extend({}, rowContents, preservedVariables);
+				// Save values for row, and store the promise returned; ignore errors if requested
+				let savePromise = ignoreSaveErrors ? saveFunction(result).catch((err) => console.warn(err)) : saveFunction(result);
+				savePromises.push(savePromise);
+			}
+			// Wait on all saves and only resolve when finished
+			Promise.all(savePromises).then(resolve).catch(reject);
+		});
+	},
+
+	/**
+	 * Parse sheets by row, saving each row.
+	 * 
+	 * This function is kept around for legacy code.
+	 * 
+	 * @param {function} saveFunction			The save function that is passed ([row contents]). Returns a promise.
+	 * @param {boolean} ignoreSaveErrors	Dictates if errors from the saveFunction should be suppressed.
+	 * @throws {string}										Throws on bad parameters.
+	 * @returns {Promise}									Returns a promise that resolves into an array of saved objects.
+	 */
+	byRow: function (savePreviousRowValue, saveFunction, ignoreSaveErrors = false) {
+		// Basic sanity check
+		if (typeof savePreviousRowValue !== "boolean" || typeof saveFunction !== "function" || typeof ignoreSaveErrors !== "boolean") {
+			throw "Invalid arguments!";
+		}
+
+		//Get worksheet
+		let first_sheet_name = this.workbook.SheetNames[0];
+		let worksheet = this.workbook.Sheets[first_sheet_name];
+		
+		return new Promise(function (resolve, reject) {
+			let savePromises = [];	// Stores all the promises emitted from the save function
+
+			// Stores all the values from the row
+			let valueArray = [];
+
+			// Loop through each row
+			for (let R = 1; R <= XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
+
+				// Save previous values if requested, otherwise wipe
+				valueArray = savePreviousRowValue ? [...valueArray] : [];
+
+				// Loop through each column in the row
+				for (let C = 0; C <= XLSX.utils.decode_range(worksheet['!ref']).e.c; ++C) {
+
+					let cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+					let cell = worksheet[cellAddress];
+					console.log(cell);
+					try {
+						// Get value and save it to valueArray
+						let cellValue = cell.v;
+						valueArray[C] = cellValue;
+					} catch (err) {
+						// Skip, extension point here later?
+					}
+				}
+
+				// Save values for row, and store the promise returned; ignore errors if requested
+				let savePromise = ignoreSaveErrors ? saveFunction(valueArray).catch((err) => console.warn(err)) : saveFunction(valueArray);
+				savePromises.push(savePromise);
+			}
+
+			// Wait on all saves and only resolve when finished
+			Promise.all(savePromises).then(resolve).catch(reject);
+		});
+	},
+
+	/**
+	 * Parse sheets by a column, saving the contents found.
+	 * 
+	 * This function is kept around for legacy code.
+	 * 
+	 * @param {function} saveFunction			The save function that is passed (column contents). Returns a promise.
+	 * @param {boolean} ignoreSaveErrors	Dictates if errors from the saveFunction should be suppressed.
+	 * @throws {string}										Throws on bad parameters.
+	 * @returns {Promise}									Returns a promise that resolves into an array of saved objects.
+	 */
+	singleColumn: function (saveFunction, ignoreSaveErrors = false) {
+		// Basic sanity check
+		if (typeof saveFunction !== "function" || typeof ignoreSaveErrors !== "boolean") {
+			throw "Invalid arguments!";
+		}
+
+		//Get worksheet
+		let first_sheet_name = this.workbook.SheetNames[0];
+		let worksheet = this.workbook.Sheets[first_sheet_name];
+
+		return new Promise(function(resolve, reject) {
+			let savePromises = [];	// Stores all the promises emitted from the save function
+
+			// loop through each row
+			for (let R = 1; R <= XLSX.utils.decode_range(worksheet['!ref']).e.r; ++R) {
+
+				let cellAddress = XLSX.utils.encode_cell({ r: R, c: 0 });
+				let cell = worksheet[cellAddress];
+				let cellValue = null;
+				try {
+					cellValue = cell.v;
+					// HAX to handle Ouda file weirdness
+					if (cellValue === "---END OF FILE") {throw "Ignore this.";}
+				} catch (err) {
+					// Try/Catch was present in high schools parsing
+					continue;	// Ignore erroring row
+				}
+
+				// Save values for row, and store the promise returned; ignore errors if requested
+				let savePromise = ignoreSaveErrors ? saveFunction(cellValue).catch((err) => console.warn(err)) : saveFunction(cellValue);
+				savePromises.push(savePromise);
+			}
+
+			// Wait on all saves and only resolve when finished
+			Promise.all(savePromises).then(resolve).catch(reject);
+		});
+	},
+
+	/**
+	 * Parse sheets by columns (or groups of columns), returning the contents of a column (or group of columns), optionally de-deduplicated.
+	 * 
+	 * @param {boolean} removeDuplicates	Boolean dictates if duplicate elements in a column should be removed.
+	 * @param {object[]} columnsToRead		An array of ['columnName', ...] objects that specify groups of columns to read.
+	 * @param {any[]} contexts						An array of objects that are passed to the save function with their corresponding column group.
+	 * @param {function} saveFunction			The save function that is passed ([column group contents], context). Returns a promise.
+	 * @param {boolean} ignoreSaveErrors	Dictates if errors from the saveFunction should be suppressed.
+	 * @throws {string}										Throws on bad parameters.
+	 * @returns {Promise}									Returns a promise that resolves into an array of saved objects.
+	 */
+	byColumn: function (removeDuplicates, columnsToRead, contexts, saveFunction, ignoreSaveErrors = false) {
+		// Basic sanity check
+		if (typeof removeDuplicates !== "boolean" || columnsToRead.length <= 0 ||
+			contexts.length !== columnsToRead.length || typeof saveFunction !== "function" || typeof ignoreSaveErrors !== "boolean") {
+			throw "Invalid arguments!";
+		}
+
+		//Get worksheet
+		let first_sheet_name = this.workbook.SheetNames[0];
+		let worksheet = this.workbook.Sheets[first_sheet_name];
+		let sheetJSON = XLSX.utils.sheet_to_json(worksheet);
+
+		return new Promise(function (resolve, reject) {
+			let savePromises = [];	// Stores all the promises emitted from the save function
+
+			//Loop through different groups of columns to read
+			for (let i = 0; i <= columnsToRead.length; i++) {
+				let results = [];  //Array to save results in for each group of columns
+
+				//Iterate through rows
+				for (let row of sheetJSON) {
+					let keys = Object.keys(row);
+					let rowContents = {}; //Contents of row
+					for (let col of keys) {
+						//Checks to see if the column I am currently on is one that I am looking for
+						if (columnsToRead[i].indexOf(col) !== -1) {
+							//Add property and value to rowContents
+							rowContents[col] = row[col];
 						}
-						return true;
-					});
-					//If rowContents not in results, push row contents
-					if (foundIndex === -1) {
+					}
+					//Check if duplicates are to be removed
+					if (removeDuplicates) {
+						//Find if rowContents is in results
+						let foundIndex = results.findIndex(element => {
+							let keys = Object.keys(element);
+
+							//Return true if equivalent object is found in results, otherwise, return false
+							for (let key of keys) {
+								if (rowContents[key] !== element[key]) {
+									return false;
+								}
+							}
+							return true;
+						});
+						//If rowContents not in results, push row contents
+						if (foundIndex === -1) {
+							results.push(rowContents);
+						}
+					} else {
+						// Duplicates don't matter, push it anyways
 						results.push(rowContents);
 					}
-				} else {
-					// Duplicates don't matter, it anyways
-					results.push(rowContents);
 				}
+
+				//Save results of specific group of columns to read, ignore errors if requested
+				let savePromise = ignoreSaveErrors ? saveFunction(results, contexts[i]).catch((err) => console.warn(err)) : saveFunction(results, contexts[i]);
+				savePromises.push(savePromise);
 			}
-			//Save results of specific group of columns to read
-			saveFunction(results, contexts[i]);
-		}
+			// Wait on all saves and only resolve when finished
+			Promise.all(savePromises).then(resolve).catch(reject);
+		});
 	}
 };
 
-// Key feature to note: the promises' then functions return the *promise* of the save occurring,
-//   so that these functions can be chained together to save multiple items sequentially
-// TODO: Check how exceptions and rejections are handled with chained thens
+// Strategies to use that encapsulate common saving behaviours
 let saveStrategies = {
+	/**
+	 * Finds an existing object and modifies it with new values.
+	 * 
+	 * @param {string} emberName			A string representing the name of the ember model.
+	 * @param {object} filter					An object that contains properties to help find the model to change.
+	 * @param {any[]} modifyObjects		A list of [model property name, new value] that represents the object replacement.
+	 * @throws {string}								Throws when there are an odd number of modifyObjects, or if emberName or filter are empty.
+	 * @returns {Promise}							Returns a promise that resolves into a modified record.
+	 */
 	modifyAndSave: function (emberName, filter, ...modifyObjects) {
-
 		// Basic sanity check
 		if (modifyObjects.length % 2 !== 0) {
 			throw "Missing a parameter in the list of properties to modify and their new value.";
 		}
+		else if (typeof filter !== "object" || filter === null || typeof emberName !== "string" && emberName.length <= 0) {
+			throw "Invalid emberName or filter!";
+		}
 
 		// Find the record to change
-		return this.get('store').query(emberName, { filter: filter })
-			.then((models) => {
+		return this.get('store').query(emberName, { filter: filter }).then((models) => {
+			// No matching model found!
+			if (models.get('length') === 0) {
+				throw "No model matching filter " + filter + " was found.";
+			}
+				// Get the model
 				let model = models.get("firstObject");
 
 				// Make all requested modifications
@@ -527,26 +718,58 @@ let saveStrategies = {
 					model.set(modifyObjects[i * 2], modifyObjects[i * 2 + 1]);
 				}
 
-				// Return promise of the modified record saving
+				// Return promise of the record saving
 				return model.save().then(() => {
-					console.log("Modified on a " + emberName.replace("-", " "));
-				}, err => {
-					console.warn(err);
-					console.log("Could not modify on a " + emberName.replace("-", " "));
-				});
+					console.log("Modified " + emberName.replace("-", " "));
+				}).catch(err => {
+					// Logging
+					console.debug(err);
+					console.error("Could not modify " + emberName.replace("-", " "));
 
+					// Re-break the chain
+					throw err;
+				});
 			});
 	},
-	createAndSave: function (recordJSON, emberName) {
-		// Create record
-		let model = this.get('store').createRecord(emberName, recordJSON);
 
-		// Return promise of the record saving
-		return model.save().then(() => {
-			console.log("Added " + emberName.replace("-", " "));
-		}, err => {
-			console.warn(err);
-			console.log("Could not add " + emberName.replace("-", " "));
+	/**
+	 * Saves a new element to backend if it does not already exist.
+	 *
+	 * @param {object} recordJSON		A flat JS object that represents the new model object.
+	 * @param {string} emberName		A string representing the name of the ember model.
+	 * @throws {string}							Throws when the parameters are malformed.
+	 * @returns {Promise}						Returns promise that resolves into a record.
+	 */
+	createAndSave: function (recordJSON, emberName) {
+		// Basic sanity check
+		if (typeof recordJSON !== "object" || recordJSON === null || typeof emberName !== "string" && emberName.length <= 0) {
+			throw "Invalid arguments!";
+		}
+
+		// Check if record already exists
+		return this.get('store').query(emberName, {filter: recordJSON, limit: 1}).then(records => {
+
+			// If the record already exists
+			if (records.get('length') !== 0) {
+				// Provide warning and send the found record
+				console.warn("Record " + recordJSON + " already exists. Not saving again.");
+				return records.get('firstObject');	// Return previously-saved element
+			}
+
+			// Create record
+			let model = this.get('store').createRecord(emberName, recordJSON);
+
+			// Return promise of the record saving
+			return model.save().then(() => {
+				console.log("Added " + emberName.replace("-", " "));
+			}).catch(err => {
+				// Logging
+				console.debug(err);
+				console.error("Could not add " + emberName.replace("-", " "));
+
+				// Re-break the chain
+				throw err;
+			});
 		});
 	}
 };
