@@ -22,20 +22,20 @@ export default Ember.Component.extend({
         var firstPlan = this.get('planModel').objectAt(0);
         this.set('selectedPlan', firstPlan);
       }
-
+/*
 
      var updatedProgram = this.get('store').peekRecord('assessment-code', this.get('program'));
      console.log(updatedProgram.get('logicalExpressions'));
      updatedProgram.get('logicalExpressions').pushObject(this.get('selectedPlan'));
      console.log(updatedProgram);
      console.log(updatedProgram.get('logicalExpressions'));
-     updatedProgram.save(); 
+     updatedProgram.save(); */
 
-/*     var updatedProgram = this.get('store').peekRecord('assessment-code', this.get('program'));
+     var updatedProgram = this.get('store').peekRecord('assessment-code', this.get('program'));
      var rule = this.get('store').peekRecord('logical-expression', this.get('selectedPlan').id);
      rule.set('assessmentCode', updatedProgram);
-     rule.save();
-*/
+     rule.save(); 
+
       this.set('isAdding', false);
       this.set('selectedPlan', null);
     },

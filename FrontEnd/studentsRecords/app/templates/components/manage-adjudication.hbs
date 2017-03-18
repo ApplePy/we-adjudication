@@ -12,7 +12,6 @@
 <td class="two wide">{{assessmentCode.code}}</td>
 <td class="five wide">{{assessmentCode.name}}</td>
 <td class="five wide">
-   {{adjudicationrules-dropdown program = assessmentCode.id planModel = ruleModel}}
   <ul>
     {{#each assessmentCode.logicalExpressions as |rule|}}
   <li>{{rule.booleanExp}}</li>

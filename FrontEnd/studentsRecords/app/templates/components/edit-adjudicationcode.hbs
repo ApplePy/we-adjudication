@@ -13,13 +13,13 @@
         {{textarea rows='8' cols='8' value=codeToEdit.name}}
         </div>
 
-       <!-- <div>
+     <div>
         <label>Rules</label>
         {{adjudicationrules-dropdown program = codeToEdit.id planModel = ruleModel}}
         {{#each codeToEdit.logicalExpressions as |rule|}}
-            {{input type="text" value=rule.booleanExp}} <div class="ui red button" {{action 'deleteRule' rule}}>Delete</div>
+            {{rule.booleanExp}} <div class="ui red button" {{action 'deleteRule' rule}}>Delete</div>
         {{/each}}
-        </div> -->
+        </div>
 
     </div>
     <div class="actions">
