@@ -139,6 +139,7 @@ let Route = function(Model,
         // Update model
         .put(function (request, response) {
             Model.findById(request.params.mongo_id, function (error, modelObj) {
+                console.log(request.params);
                 if (error) {
                     response.status(500).send({error: error});
                 }

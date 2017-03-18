@@ -18,7 +18,7 @@ export default Ember.Component.extend({
   isAdding: false,
   isAboutShowing: false,
   isHighSchoolShowing: false,
-
+  isManageAdjudicationShowing: false,
 
   actions: {
     home () {
@@ -29,6 +29,7 @@ export default Ember.Component.extend({
       this.set('isAboutShowing', false);
       this.set('isAdding', false);
       this.set('isHighSchoolShowing', false);
+      this.set('isManageAdjudicationShowing', false);
     },
 
     studentsDataEntry (){
@@ -39,6 +40,7 @@ export default Ember.Component.extend({
       this.set('isAboutShowing', false);
       this.set('isAdding', false);
       this.set('isHighSchoolShowing', false);
+      this.set('isManageAdjudicationShowing', false);
     },
 
     manageSystem (){
@@ -49,6 +51,7 @@ export default Ember.Component.extend({
       this.set('isAboutShowing', false);
       this.set('isAdding', false);
       this.set('isHighSchoolShowing', false);
+      this.set('isManageAdjudicationShowing', false);
     },
 
     manageHighSchoolData (){
@@ -59,6 +62,7 @@ export default Ember.Component.extend({
       this.set('isManageSystemShowing', false);
       this.set('isAboutShowing', false);
       this.set('isAdding', false);
+      this.set('isManageAdjudicationShowing', false);
     },
 
     addStudent (){
@@ -69,6 +73,17 @@ export default Ember.Component.extend({
       this.set('isAboutShowing', false);
       this.set('isAdding', true);
       this.set('isHighSchoolShowing', false);
+      this.set('isManageAdjudicationShowing', false);
+    },
+
+     manageAdjudication (){
+      this.set('isHomeShowing', false);
+      this.set('isStudentsRecordsDataEntry', false);
+      this.set('isManageSystemShowing', false);
+      this.set('isAboutShowing', false);
+      this.set('isAdding', false);
+      this.set('isHighSchoolShowing', false);
+      this.set('isManageAdjudicationShowing', true);
     },
 
     manageRules(){
@@ -89,6 +104,7 @@ export default Ember.Component.extend({
       this.set('isAboutShowing', true);
       this.set('isAdding', false);
       this.set('isHighSchoolShowing', false);
+      this.set('isManageAdjudicationShowing', false);
     }
   }
 });

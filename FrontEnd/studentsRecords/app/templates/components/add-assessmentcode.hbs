@@ -1,0 +1,23 @@
+<div class="ui modal">
+  <div class="header">Add Code</div>
+  <div class="content">
+      <div class="ui form">
+
+        <div class="inline field">
+        <label>Code</label>
+        {{input type="text" value=newCode}}
+        </div>
+
+        <div class="inline field">
+        <label>Description</label>
+        {{input type="text" value=newName}}
+        </div>
+
+    </div>
+    <div class="actions">
+        <br>
+        <div class="ui green button" {{action 'saveNewCode'}}>Save</div>
+        <div class="ui red basic button" {{action "close"}}>Cancel</div>
+    </div>
+  </div>
+</div>
