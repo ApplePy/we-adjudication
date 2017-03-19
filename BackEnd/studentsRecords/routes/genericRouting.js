@@ -208,7 +208,7 @@ let PropertyValidator = function(...properties) {
 
             // Check that the needed properties exist
             for (let property of properties)
-            if (!mod[property])
+            if (typeof mod[property] === "undefined")
                 results.push(property + " must be specified.");
 
             if (results.length > 0)

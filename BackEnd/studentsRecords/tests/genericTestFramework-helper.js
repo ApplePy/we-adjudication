@@ -336,7 +336,7 @@ let Tests = {
 
                                 // Check to make sure all required elements are present
                                 let expect400 = false;
-                                for (let element of requiredElements) if (!selection[0][element]) expect400 = true;
+                                for (let element of requiredElements) if (typeof selection[0][element] === "undefined") expect400 = true;
 
                                 // Check conditions to expect certain error codes
                                 if (expect400) {
@@ -398,7 +398,7 @@ let Tests = {
 
                                 // Check to make sure all required elements are present
                                 let expect400 = false;
-                                for (let element of requiredElements) if (!selection[0][element]) expect400 = true;
+                                for (let element of requiredElements) if (typeof selection[0][element] === "undefined") expect400 = true;
 
                                 // Check conditions to expect certain error codes
                                 if (expect400) {
@@ -450,7 +450,7 @@ let Tests = {
                         .end((err, res) => {
                             // Check to make sure all required elements are present
                             let expect400 = false;
-                            for (let element of requiredElements) if (!selection[0][element]) expect400 = true;
+                            for (let element of requiredElements) if (typeof selection[0][element] === "undefined") expect400 = true;
 
                             // Check conditions to expect certain error codes
                             if (expect400) {
@@ -502,7 +502,7 @@ let Tests = {
                         .end((err, res) => {
                             // Check to make sure all required elements are present
                             let expect400 = false;
-                            for (let element of requiredElements) if (!selection[element]) expect400 = true;
+                            for (let element of requiredElements) if (typeof selection[element] === "undefined") expect400 = true;
 
                             // Check conditions to expect certain error codes
                             if (expect400) {
