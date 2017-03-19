@@ -1,0 +1,78 @@
+<div class="ui segment">
+  <div class="ui form">
+    <h3>Add Rule</h3>
+  {{#if confirming}}
+    <p>Confirm that this is the desired rule:</p>
+    <h3>
+    {{#each rulesToBeAdded as |rule|}}
+      {{rule.parameter.description}} {{rule.opr.description}} {{rule.value}} {{rule.link.description}}
+    {{/each}}
+    </h3>
+    <button class="green ui button" {{action "saveRule"}}>Yes</button>
+    <button class="blue ui button" {{action "notConfirmed"}}>No, Back to Form</button>
+  {{else}}
+    {{#if rulesToBeAdded}}
+      <p>Rule to be Added: </p>
+      {{#each rulesToBeAdded as |rule|}}
+        <div class="three fields">
+          <div class="seven wide field">
+            <h4>{{rule.parameter.description}} {{rule.opr.description}} {{rule.value}} {{rule.link.description}}</h4>
+          </div>
+          {{#unless rule.link}}
+            <div class="four wide field">
+              <select class="ui search dropdown" onchange={{action 'selectLink' value="target.value"}}>
+                <option disabled selected>link</option>
+                {{#each links as |link|}}
+                  <option value={{link.id}}>{{link.description}}</option>
+                {{/each}}
+              </select>
+            </div>
+            <div class="one wide field">
+              <button class="red ui icon button" {{action "removeRule" rule}}><i class="delete icon"></i></button>
+            </div>
+          {{/unless}}
+        </div>
+      {{/each}}
+    {{/if}}
+    {{#if devBool}}
+      <div class="fields">
+        <div class="three wide field">
+          <select class="ui search dropdown" onchange={{action 'selectParam' value="target.value"}}>
+            <option disabled selected>Parameter</option>
+            {{#each parameters as |param|}}
+              <option value={{param.id}}>{{param.description}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="four wide field">
+          <select class="ui search dropdown" onchange={{action 'selectOpr' value="target.value"}}>
+            <option disabled selected>operator</option>
+            {{#each oprs as |opr|}}
+              <option value={{opr.id}}>{{opr.description}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="four wide field">
+          {{input size="15" placeholder="value" value= newValue}}
+        </div>
+        <div class="one wide field">
+          <button class="ui green icon button" {{action "addRule"}}><i class="plus icon"></i></button>
+        </div>
+        {{#if rulesToBeAdded}}
+          <div class="two wide field">
+            <button class="ui red basic button" {{action "cancelLink"}}>Cancel</button>
+          </div>
+        {{/if}}
+      </div>
+    {{else}}
+      <p>If you would like to add another expression, choose any operator from the dropdown menu listed
+        beside the rule displayed.</p>
+      <p>If you are satisfied with the rule, select 'done' from the dropdown
+        and save
+      </p>
+      <button class="green ui button" {{action "doneAdding"}}>Done Building</button>
+    {{/if}}
+  {{/if}}
+    <button class="red ui button" {{action "cancel"}}>Cancel</button>
+  </div>
+</div>
