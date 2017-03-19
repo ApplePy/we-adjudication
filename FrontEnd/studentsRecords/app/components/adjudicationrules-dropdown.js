@@ -10,11 +10,16 @@ export default Ember.Component.extend({
   links: [
     {
       id: 0,
+      val: "",
+      description: ""
+    },
+    {
+      id: 1,
       val: "&&",
       description: "and"
     },
     {
-      id: 1,
+      id: 2,
       val: "||",
       description: "or"
     }
