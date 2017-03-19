@@ -16,11 +16,6 @@
       {{#each rules as |rule|}}
         <tr>
           <td class="eight wide">{{rule.booleanExp}}</td>
-          {{#if rule.assessmentCode}}
-            <td class="three wide">
-              The rule must be removed from Assessment Code before modifying.  See "Manage Adjudication Codes"
-            </td>
-          {{/if}}
           <td class="two wide"><button class="green right floated ui button" {{action "updateRule" rule}}>Update</button></td>
           <td class="one wide"><button class="red ui button" {{action "deleteRule" rule}}>Delete</button></td>
         </tr>

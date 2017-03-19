@@ -18,7 +18,7 @@ export default Ember.Component.extend({
   },
 
    close: function() {
-     rollbackAttributes();
+     this.get('codeToEdit').rollbackAttributes();
      this.set('notDONE', false);
      Ember.$('.ui.modal').modal('hide');
      Ember.$('.ui.modal').remove();
