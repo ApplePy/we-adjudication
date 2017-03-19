@@ -80,6 +80,7 @@ export default Ember.Component.extend({
       this.set('isHomeShowing', false);
       this.set('isStudentsRecordsDataEntry', false);
       this.set('isManageSystemShowing', false);
+      this.set('isManageRulesShowing', false);
       this.set('isAboutShowing', false);
       this.set('isAdding', false);
       this.set('isHighSchoolShowing', false);
@@ -94,6 +95,7 @@ export default Ember.Component.extend({
       this.set('isAboutShowing', false);
       this.set('isAdding', false);
       this.set('isHighSchoolShowing', false);
+      this.set('isManageAdjudicationShowing', false);
     },
 
     about (){

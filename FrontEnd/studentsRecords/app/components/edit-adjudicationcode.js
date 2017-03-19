@@ -5,15 +5,12 @@ export default Ember.Component.extend({
   notDONE: null,
   codeToEdit: null,
   ruleModel: [],
+  codeModel: null,
 
  actions: {
   saveCode() {
-        this.get('store').findRecord('assessment-code', this.get('codeToEdit').id).then((code) => {
-        code.set('code', this.get('codeToEdit.code'));
-        code.set('name', this.get('codeToEdit.name'));
-        code.save();
-      });
-
+    this.get('codeToEdit').save();
+    this.send('reloadArray');
     this.set('notDONE', false);
     Ember.$('.ui.modal').modal('hide');
     Ember.$('.ui.modal').remove();
@@ -21,11 +18,15 @@ export default Ember.Component.extend({
   },
 
    close: function() {
+     rollbackAttributes();
      this.set('notDONE', false);
      Ember.$('.ui.modal').modal('hide');
      Ember.$('.ui.modal').remove();
    },
-  
+
+   reloadArray(){
+      this.set('codeModel', this.get('store').peekAll('assessment-code'));
+   },
 
     deleteRule(ruleToDel) {
       let code = this.get('store').peekRecord('assessment-code', this.get('codeToEdit').id);
