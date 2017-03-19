@@ -9,9 +9,42 @@ import XLSX from "npm:xlsx-browserify-shim";
 export default Ember.Component.extend({
 
 	store: Ember.inject.service(),
+	processing: false,
+	processError: false,
+
+	files: [
+		{name: "genders.xlsx", complete: false},
+		{name: "residencies.xlsx", complete: false},
+		{name: "UndergraduateCourses.xlsx", complete: false},
+		{name: "HighSchools.xlsx", complete: false},
+		{name: "students.xlsx", complete: false},
+		{name: "AdmissionComments.xlsx", complete: false},
+		{name: "RegistrationComments.xlsx", complete: false},
+		{name: "BasisOfAdmission.xlsx", complete: false},
+		{name: "AdmissionAverages.xlsx", complete: false},
+		{name: "AdvancedStanding.xlsx", complete: false},
+		{name: "scholarshipsAndAwards.xlsx", complete: false},
+		{name: "HighSchoolCourseInformation.xlsx", complete: false},
+		{name: "UndergraduateRecordCourses.xlsx", complete: false},
+		{name: "UndergraduateRecordPlans.xlsx", complete: false}
+	],
 
 	actions: {
 		uploadFile() {
+			// Signal processing
+			this.set('processing', true);
+			this.set('processError', false);
+			let processOff = () => {
+				this.set('processing', false);
+
+				// Set file to complete
+				for (let file of this.get('files')) {
+					if (file.name.toUpperCase() === fileName.toUpperCase()) {
+						Ember.set(file, "complete", true);
+					}
+				}
+			};
+			let errorOff = (err) => {this.set('processing', false); this.set('processError', true); throw err;};
 
 			//var file = Ember.$("#excelSheet").val();
 			let file = document.getElementById('excelSheet').files[0];
@@ -30,18 +63,22 @@ export default Ember.Component.extend({
 				this.workbook = XLSX.read(data, { type: 'binary', cellDates: true });	// Moved into the "this" variable to save typing
 
 				if (fileName.toUpperCase() === "genders.xlsx".toUpperCase()) {
-					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "gender"), true);
+					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "gender"), true)
+					.then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "residencies.xlsx".toUpperCase()) {
-					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "residency"), true);
+					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "residency"), true)
+					.then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "UndergraduateCourses.xlsx".toUpperCase()) {
 					parseStrategies.byRow.call(this, false, valueArray => saveStrategies.createAndSave.call(this, {
 						courseLetter: valueArray[0],
 						courseNumber: valueArray[1],
 						name: valueArray[2],
 						unit: valueArray[3]
-					}, "course-code"), true);
+					}, "course-code"), true)
+					.then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "HighSchools.xlsx".toUpperCase()) {
-					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "secondary-school"), true);
+					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "secondary-school"), true)
+					.then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "students.xlsx".toUpperCase()) {
 					// Get all genders and residencies (sensitive to pagination)
 					Promise.all([
@@ -75,19 +112,22 @@ export default Ember.Component.extend({
 								};
 								return saveStrategies.createAndSave.call(this, studentJSON, "student", "genderInfo", "resInfo");
 							}, true);
-						});
+						})
+						.then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "AdmissionComments.xlsx".toUpperCase()) {
 					miscellaneous.parseComments.call(this).then(comments => comments.forEach((value, key) => {
 						if (value !== "NONE FOUND") {
 							saveStrategies.modifyAndSave.call(this, "student", { number: key }, "admissionComments", value);
 						}
-					}));
+					}))
+					.then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "RegistrationComments.xlsx".toUpperCase()) {
 					miscellaneous.parseComments.call(this).then(comments => comments.forEach((value, key) => {
 						if (value !== "NONE FOUND") {
 							saveStrategies.modifyAndSave.call(this, "student", { number: key }, "registrationComments", value);
 						}
-					}));
+					}))
+					.then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "BasisOfAdmission.xlsx".toUpperCase()) {
 					parseStrategies.byRow.call(this, true, valueArray => {
 						if (valueArray[1] !== "NONE FOUND") {
@@ -95,7 +135,8 @@ export default Ember.Component.extend({
 						} else {
 							return new Promise((res) => res());
 						}
-					});
+					})
+					.then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "AdmissionAverages.xlsx".toUpperCase()) {
 					parseStrategies.byRow.call(this, true, valueArray => {
 						if (valueArray[1] !== "NONE FOUND") {
@@ -103,7 +144,8 @@ export default Ember.Component.extend({
 						} else {
 							return new Promise((res) => res());
 						}
-					});
+					})
+					.then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "AdvancedStanding.xlsx".toUpperCase()) {
 					miscellaneous.parseAwardsAndStandings.call(this, "course", "advanced-standing", (json, student, emberName) => {
 						// Save advanced standing
@@ -115,24 +157,31 @@ export default Ember.Component.extend({
 							from: json.from,
 							recipient: student
 						}, emberName, "recipient");
-					});
+					})
+					.then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "scholarshipsAndAwards.xlsx".toUpperCase()) {
 					miscellaneous.parseAwardsAndStandings.call(this, "note", "award", (json, student, emberName) => {
 						// Save advanced standing
 						return saveStrategies.createAndSave.call(this, { note: json.note, recipient: student }, emberName, "recipient");
-					});
+					})
+					.then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "HighSchoolCourseInformation.xlsx".toUpperCase()) {
 					// Parse through each column and create all column
 					parseStrategies.byColumn.call(this,
 						true,
+						true,
 						[['source'], ['subject', 'description'], ['schoolName']],
-						[{ modelName: "hs-course-source", source: "name" }, { modeName: "hs-subject", subject: "name" }, { modelName: "secondary-school", schoolName: "name" }],
+						[{ modelName: "hs-course-source", source: "name" }, { modelName: "hs-subject", subject: "name" }, { modelName: "secondary-school", schoolName: "name" }],
 						(results, context) => {
 							//Results is an array of objects
 							// Context is the arbitrary objects we passed in
+							let saves = [];
 							for (let result of results) {
+								// Remove modelName from list of keys to rename
 								let keys = Object.keys(context);
-								keys.remove('modelName');
+								keys = keys.splice(1, 1);	// Remove modelName
+
+								// Do key renaming
 								for (let key of keys) {
 									// WARNING: JAVASCRIPT MAGIC
 									result[context[key]] = result[key];		// Create a new property with the right name
@@ -140,8 +189,11 @@ export default Ember.Component.extend({
 								}
 
 								// Assuming the value doesn't already exist
-								return saveStrategies.createAndSave.call(this, result, context.modelName);
+								saves.push(saveStrategies.createAndSave.call(this, result, context.modelName));
 							}
+
+							// Return a promise representing all the saves
+							return Promise.all(saves);
 						}, false)
 						.then(() => {
 							// Get all prerequisite models
@@ -401,12 +453,12 @@ let miscellaneous = {
 	 * @param {function} saveFunction		The save function to use, accepting parameters (row json, student object, emberName)
 	 */
 	parseAwardsAndStandings: function (noneFoundColumn, emberName, saveFunction) {
-		this.get('store').query('student', {}).then(records => {
+		return this.get('store').query('student', {}).then(records => {
 			// Get number of records to retrieved
 			let totalRecords = records.get('meta').total;
 
 			// Get all students
-			this.get('store').query('student', { limit: totalRecords, offset: 0 }).then(students => {
+			return this.get('store').query('student', { limit: totalRecords, offset: 0 }).then(students => {
 				parseStrategies.byRowJSON.call(this, json => {
 					// If they have an award
 					if (json[noneFoundColumn] !== "NONE FOUND") {
@@ -614,14 +666,15 @@ let parseStrategies = {
 	 * Parse sheets by columns (or groups of columns), returning the contents of a column (or group of columns), optionally de-deduplicated.
 	 * 
 	 * @param {boolean} removeDuplicates	Boolean dictates if duplicate elements in a column should be removed.
-	 * @param {object[]} columnsToRead		An array of ['columnName', ...] objects that specify groups of columns to read.
+	 * @param {boolean} requireAllColumns	Boolean dictates if all columns must be present to be added to the output.
+	 * @param {string[][]} columnsToRead	An array of ['columnName', ...] objects that specify groups of columns to read.
 	 * @param {any[]} contexts						An array of objects that are passed to the save function with their corresponding column group.
 	 * @param {function} saveFunction			The save function that is passed ([column group contents], context). Returns a promise.
 	 * @param {boolean} ignoreSaveErrors	Dictates if errors from the saveFunction should be suppressed.
 	 * @throws {string}										Throws on bad parameters.
 	 * @returns {Promise}									Returns a promise that resolves into an array of saved objects.
 	 */
-	byColumn: function (removeDuplicates, columnsToRead, contexts, saveFunction, ignoreSaveErrors = false) {
+	byColumn: function (removeDuplicates, requireAllColumns, columnsToRead, contexts, saveFunction, ignoreSaveErrors = false) {
 		// Basic sanity check
 		if (typeof removeDuplicates !== "boolean" || columnsToRead.length <= 0 ||
 			contexts.length !== columnsToRead.length || typeof saveFunction !== "function" || typeof ignoreSaveErrors !== "boolean") {
@@ -637,7 +690,7 @@ let parseStrategies = {
 			let savePromises = [];	// Stores all the promises emitted from the save function
 
 			//Loop through different groups of columns to read
-			for (let i = 0; i <= columnsToRead.length; i++) {
+			for (let i = 0; i < columnsToRead.length; i++) {
 				let results = [];  //Array to save results in for each group of columns
 
 				//Iterate through rows
@@ -646,11 +699,18 @@ let parseStrategies = {
 					let rowContents = {}; //Contents of row
 					for (let col of keys) {
 						//Checks to see if the column I am currently on is one that I am looking for
-						if (columnsToRead[i].indexOf(col) !== -1) {
+						if (columnsToRead[i].findIndex(key => key === col) !== -1) {
 							//Add property and value to rowContents
 							rowContents[col] = row[col];
 						}
 					}
+
+					// Check if all columns are populated, skip rest of processing if columns are missing
+					let keyMissing = columnsToRead[i].findIndex(key => typeof rowContents[key] === "undefined");
+					if (requireAllColumns === true && keyMissing !== -1) {
+						continue;
+					}
+
 					//Check if duplicates are to be removed
 					if (removeDuplicates) {
 						//Find if rowContents is in results
@@ -679,6 +739,7 @@ let parseStrategies = {
 				let savePromise = ignoreSaveErrors ? saveFunction(results, contexts[i]).catch((err) => console.warn(err)) : saveFunction(results, contexts[i]);
 				savePromises.push(savePromise);
 			}
+
 			// Wait on all saves and only resolve when finished
 			Promise.all(savePromises).then(resolve).catch(reject);
 		});
@@ -701,7 +762,7 @@ let saveStrategies = {
 		if (modifyObjects.length % 2 !== 0) {
 			throw "Missing a parameter in the list of properties to modify and their new value.";
 		}
-		else if (typeof filter !== "object" || filter === null || typeof emberName !== "string" && emberName.length <= 0) {
+		else if (typeof filter !== "object" || filter === null || typeof emberName !== "string" || emberName.length <= 0) {
 			throw "Invalid emberName or filter!";
 		}
 
@@ -744,7 +805,7 @@ let saveStrategies = {
 	 */
 	createAndSave: function (recordJSON, emberName, ...relatedModels) {
 		// Basic sanity check
-		if (typeof recordJSON !== "object" || recordJSON === null || typeof emberName !== "string" && emberName.length <= 0) {
+		if (typeof recordJSON !== "object" || recordJSON === null || typeof emberName !== "string" || emberName.length <= 0) {
 			throw "Invalid arguments!";
 		}
 

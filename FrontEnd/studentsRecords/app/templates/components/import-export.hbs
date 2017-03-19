@@ -1,25 +1,22 @@
 <h1>Import Student's Records</h1>
 
-<input type="file" id="excelSheet">
-<button class="ui blue button" {{action 'uploadFile'}}>Upload</button>
+<span class="ui basic {{if processError 'error'}} segment">
+	<div class="ui {{if processing 'active'}} inverted dimmer">
+		<div class="ui tiny indeterminate text loader">Uploading</div>
+	</div>
+	<input type="file" id="excelSheet">
+	<button class="ui blue button" {{action 'uploadFile'}}>Upload</button>
+</span>
 
 <div class="ui segment">
 	<h3>Upload file's in the following order with the correct name:</h3>
 	<ol>
-		<li>genders.xlsx</li>
-		<li>residencies.xlsx</li>
-		<li>UndergraduateCourses.xlsx</li>
-		<li>HighSchools.xlsx</li>
-		<li>students.xlsx</li>
-		<li>AdmissionComments.xlsx</li>
-		<li>RegistrationComments.xlsx</li>
-		<li>BasisOfAdmission.xlsx</li>
-		<li>AdmissionAverages.xlsx</li>
-		<li>AdvancedStanding.xlsx</li>
-		<li>scholarshipsAndAwards.xlsx</li>
-		<li>HighSchoolCourseInformation.xlsx</li>
-		<li>UndergraduateRecordCourses.xlsx</li>
-		<li>UndergraduateRecordPlans.xlsx</li>
+		{{#each files as |file|}}
+		<li>
+			{{file.name}}
+			{{#if file.complete}}<i class="green check circle icon"></i>{{/if}}
+		</li>
+		{{/each}}
 	</ol>
 	<p>***Files names are case sensitive***</p>
 	<p>***Files must be of type .xlsx***</p>
