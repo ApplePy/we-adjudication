@@ -9,13 +9,15 @@
 {{/if}}
 <div class="ui segment">
   {{#if rules}}
-    <table class="ui eleven column very basic table">
+    <table class="ui twelve column very basic table">
       <tr>
         <td class="eight wide"><h3>Rule</h3></td>
+        <td class="one wide"><h3>Link</h3></td>
       </tr>
       {{#each rules as |rule|}}
         <tr>
           <td class="eight wide">{{rule.booleanExp}}</td>
+          <td class="one wide">{{rule.logicalLink}}</td>
           <td class="two wide"><button class="green right floated ui button" {{action "updateRule" rule}}>Update</button></td>
           <td class="one wide"><button class="red ui button" {{action "deleteRule" rule}}>Delete</button></td>
         </tr>

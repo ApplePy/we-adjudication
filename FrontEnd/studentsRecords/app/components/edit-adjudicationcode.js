@@ -33,6 +33,12 @@ export default Ember.Component.extend({
       let rule = this.get('store').peekRecord('logical-expression', ruleToDel.id);
       rule.set('assessmentCode', null);
       rule.save();
+
+      if(this.get('codeToEdit').get('logicalExpressions').get('length') > 0){
+        var lastRule = this.get('codeToEdit').get('logicalExpressions').get('lastObject');
+        lastRule.set('logicalLink', null);
+      }
+      this.set('addedRule', false);
     }
 
   },
