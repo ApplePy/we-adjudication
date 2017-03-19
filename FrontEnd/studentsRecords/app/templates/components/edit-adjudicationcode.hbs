@@ -13,13 +13,21 @@
         {{textarea rows='8' cols='8' value=codeToEdit.name}}
         </div>
 
-     <div>
+
         <label>Rules</label>
-        {{adjudicationrules-dropdown program = codeToEdit.id planModel = ruleModel}}
         {{#each codeToEdit.logicalExpressions as |rule|}}
-            {{rule.booleanExp}} <div class="ui red button" {{action 'deleteRule' rule}}>Delete</div>
+         <p>{{rule.booleanExp}} {{rule.logicalLink}}
+          <div class="ui red icon button" {{action 'deleteRule' rule}}>
+          <i class="delete icon"></i>
+          </div>
+          </p>
         {{/each}}
-        </div>
+        {{#if codeToEdit.logicalExpressions}}
+          {{adjudicationrules-dropdown program = codeToEdit.id planModel = ruleModel addedRule = true}}
+        {{else}}
+          {{adjudicationrules-dropdown program = codeToEdit.id planModel = ruleModel addedRule = false}}
+        {{/if}}
+
 
     </div>
     <div class="actions">

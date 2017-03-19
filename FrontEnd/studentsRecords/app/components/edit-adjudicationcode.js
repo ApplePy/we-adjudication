@@ -19,6 +19,7 @@ export default Ember.Component.extend({
 
    close: function() {
      this.get('codeToEdit').rollbackAttributes();
+     this.send('reloadArray');
      this.set('notDONE', false);
      Ember.$('.ui.modal').modal('hide');
      Ember.$('.ui.modal').remove();
@@ -29,10 +30,9 @@ export default Ember.Component.extend({
    },
 
     deleteRule(ruleToDel) {
-      let code = this.get('store').peekRecord('assessment-code', this.get('codeToEdit').id);
       let rule = this.get('store').peekRecord('logical-expression', ruleToDel.id);
-      code.get('logicalExpressions').removeObject(rule);
-      code.save();
+      rule.set('assessmentCode', null);
+      rule.save();
     }
 
   },

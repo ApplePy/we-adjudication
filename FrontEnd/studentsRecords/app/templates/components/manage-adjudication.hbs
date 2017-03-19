@@ -2,19 +2,19 @@
 <table class="ui fixed sixteen column very basic table">
   <tr>
 <td class="two wide"><h4>Code</h4></td>
-<td class="five wide"><h4>Description</h4></td>
-<td class="five wide"><h4>Rules</h4></td>
+<td class="three wide"><h4>Description</h4></td>
+<td class="seven wide"><h4>Rules</h4></td>
 <td class="two wide"></td>
  <td class="two wide"></td>
 </tr>
 {{#each codeModel as |assessmentCode| }}
 <tr>
 <td class="two wide">{{assessmentCode.code}}</td>
-<td class="five wide">{{assessmentCode.name}}</td>
-<td class="five wide">
+<td class="three wide">{{assessmentCode.name}}</td>
+<td class="seven wide">
   <ul>
     {{#each assessmentCode.logicalExpressions as |rule|}}
-  <li>{{rule.booleanExp}}</li>
+  <li>{{rule.booleanExp}} {{rule.logicalLink}}</li>
   {{/each}}
   </ul>
   </td>
