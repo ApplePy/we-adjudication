@@ -33,7 +33,6 @@ export default Ember.Component.extend({
     selectLink(link){
       var code = this.get('store').peekRecord('assessment-code', this.get('program'));
       var rule = code.get('logicalExpressions').get('lastObject');
-      console.log(this.get('links')[link].description);
       rule.logicalLink = this.get('links')[link].description;
       rule.save();
       this.set('isAdding', false);
@@ -44,6 +43,13 @@ export default Ember.Component.extend({
       if(this.get('selectedPlan') === null){
         var firstPlan = this.get('planModel').objectAt(0);
         this.set('selectedPlan', firstPlan);
+      }
+      //Check to see if there is a rule to be set as the parent
+      var code = this.get('store').peekRecord('assessment-code', this.get('program'));
+
+      if(code.get('logicalExpressions').get('length') > 0){
+        var rule = code.get('logicalExpressions').get('lastObject');
+        rule.set('parentExpression', this.get('selectedPlan'));
       }
 
 /*
@@ -57,6 +63,10 @@ export default Ember.Component.extend({
 
      var updatedProgram = this.get('store').peekRecord('assessment-code', this.get('program'));
      var rule = this.get('store').peekRecord('logical-expression', this.get('selectedPlan').id);
+      if(updatedProgram.get('logicalExpressions').get('length') > 0){
+        var lastRule = updatedProgram.get('logicalExpressions').get('lastObject');
+        rule.set('parentExpression', lastRule);
+      }
      rule.set('logicalLink', null);
      rule.set('assessmentCode', updatedProgram);
      rule.save();
