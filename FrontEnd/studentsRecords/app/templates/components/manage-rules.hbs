@@ -1,0 +1,33 @@
+<div class="inline field">
+  <h1>Manage Adjudication Rules
+    <button class="ui green button" {{action "add"}}>Add Rule</button>
+  </h1>
+</div>
+{{#if isAdding}}
+  <br>
+  {{add-rule notDONE = isAdding ruleArray = rules}}
+{{/if}}
+<div class="ui segment">
+  {{#if rules}}
+    <table class="ui twelve column very basic table">
+      <tr>
+        <td class="eight wide"><h3>Rule</h3></td>
+        <td class="one wide"><h3>Link</h3></td>
+      </tr>
+      {{#each rules as |rule|}}
+        <tr>
+          <td class="eight wide">{{rule.booleanExp}}</td>
+          <td class="one wide">{{rule.logicalLink}}</td>
+          <td class="two wide"><button class="green right floated ui button" {{action "updateRule" rule}}>Update</button></td>
+          <td class="one wide"><button class="red ui button" {{action "deleteRule" rule}}>Delete</button></td>
+        </tr>
+      {{/each}}
+    </table>
+  {{else}}
+    <p>There are no adjudication rules currently in the database</p>
+  {{/if}}
+</div>
+
+{{#if isUpdating}}
+  {{update-rule notDONE = isUpdating rule = ruleToEdit}}
+{{/if}}

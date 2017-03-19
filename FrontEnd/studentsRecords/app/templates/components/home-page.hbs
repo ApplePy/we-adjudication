@@ -27,6 +27,16 @@
         Manage System
       </a>
 
+       <a class="item" {{action "manageAdjudication"}}a>
+        <i class="large code icon"></i>
+        Manage Adjudication Codes
+      </a>
+
+      <a class="item" {{action "manageRules"}}>
+        <i class="large write icon"></i>
+        Manage Adjudication Rules
+      </a>
+
       <a class="item " {{action "about"}}>
         <i class="large user icon"></i>
         About
@@ -51,8 +61,14 @@
       {{#if isAdding}}
         {{add-student}}
       {{/if}}
+       {{#if isManageAdjudicationShowing}}
+        {{manage-adjudication}}
+      {{/if}}
       {{#if isHighSchoolShowing}}
         {{high-school-data}}
+      {{/if}}
+      {{#if isManageRulesShowing}}
+        {{manage-rules}}
       {{/if}}
     </div>
   </div>

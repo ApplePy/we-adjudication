@@ -59,6 +59,40 @@ export default Ember.Component.extend({
           hint: "Testing placeholder - adds a female student image to the record."
         }
       ]
+    },
+    {
+      title: "Adjudication Rules",
+      description: "When using the \"Manage Adjudication Rules\" page:",
+      list: [
+        {
+          button: "Parameter",
+          hint: "The object you wish to compare.  Example: Program"
+        },
+        {
+          button: "Operator",
+          hint: "The comparison you wish to make.  Example: Equals"
+        },
+        {
+          button: "Value",
+          hint: "The value to which you wish to compare the parameter.  Example: Software Engineering"
+        },
+        {
+          button: "Add",
+          hint: "Add the expression to the rule"
+        },
+        {
+          button: "Link dropdown",
+          hint: "Connect two expressions with a logical link.  Choosing 'done' will complete the entire expression and " +
+                "you will be prompted to save or cancel.  Choosing anything other than done will allow you to select " +
+                "another expression."
+        },
+        {
+          button: "Rule Example",
+          hint: "If a student is graduating from Software Engineering, they must have received an average of 50 in " +
+                "SE 3350.  The expression to represent this would be Program equals Software Engineering and Course " +
+                " Letter equals SE and Course Number equals 3350 and Grade greater than or equal to 50"
+        }
+      ]
     }
   ],
 
