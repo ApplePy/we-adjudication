@@ -4,5 +4,6 @@ export default DS.Model.extend({
   termCode: DS.belongsTo('term-code'),
   student: DS.belongsTo('student'),
   programRecords: DS.hasMany('program-record'),
-  courses: DS.hasMany('course-code')
+  courses: DS.hasMany('course-code'),
+  adjudications: DS.hasMany('adjudication')
 });
