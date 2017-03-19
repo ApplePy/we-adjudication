@@ -5,7 +5,7 @@
 		<div class="ui tiny indeterminate text loader">Uploading</div>
 	</div>
 	<input type="file" id="excelSheet">
-	<button class="ui blue button" {{action 'uploadFile'}}>Upload</button>
+	<button class="ui {{if processError 'red' 'blue'}} button" {{action 'uploadFile'}}>Upload</button>
 </span>
 
 <div class="ui segment">

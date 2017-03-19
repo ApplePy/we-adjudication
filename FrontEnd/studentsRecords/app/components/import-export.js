@@ -44,7 +44,11 @@ export default Ember.Component.extend({
 					}
 				}
 			};
-			let errorOff = (err) => {this.set('processing', false); this.set('processError', true); throw err;};
+			let errorOff = (err) => {
+				this.set('processing', false);
+				this.set('processError', true);
+				console.error(err);
+			};
 
 			//var file = Ember.$("#excelSheet").val();
 			let file = document.getElementById('excelSheet').files[0];
@@ -171,7 +175,7 @@ export default Ember.Component.extend({
 						true,
 						true,
 						[['source'], ['subject', 'description'], ['schoolName']],
-						[{ modelName: "hs-course-source", source: "name" }, { modelName: "hs-subject", subject: "name" }, { modelName: "secondary-school", schoolName: "name" }],
+						[{ modelName: "hs-course-source", source: "code" }, { modelName: "hs-subject", subject: "name" }, { modelName: "secondary-school", schoolName: "name" }],
 						(results, context) => {
 							//Results is an array of objects
 							// Context is the arbitrary objects we passed in
@@ -205,7 +209,7 @@ export default Ember.Component.extend({
 						})
 						.then(values => {
 							// Create all the courses
-							parseStrategies.byRowJSON.call(this, rowContents => {
+							return parseStrategies.byRowJSON.call(this, rowContents => {
 								if (rowContents.schoolName !== "NONE FOUND") {
 									// Find needed elements
 									let school = values[3].find(el => el.get('name') === rowContents.schoolName);
@@ -224,7 +228,7 @@ export default Ember.Component.extend({
 										source: source,
 										school: school,
 										subject: subject
-									}, "hs-course");
+									}, "hs-course", "source", "school", "subject");
 								} else {
 									return new Promise((res) => res());
 								}
@@ -255,7 +259,7 @@ export default Ember.Component.extend({
 										}
 									}, false, "studentNumber", "schoolName");
 								});
-						});
+						}).then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "UndergraduateRecordCourses.xlsx".toUpperCase()) {
 					parseStrategies.byRowJSON.call(this, rowContents => {
 						// Save grades
@@ -432,7 +436,7 @@ let miscellaneous = {
 	 * @returns {Promise}
 	 */
 	getAllModels: function(emberName) {
-		return this.get('store').getAll(emberName).then(records => {
+		return this.get('store').findAll(emberName).then(records => {
 			let meta = records.get('meta');
 
 			// Was not paginated, return
