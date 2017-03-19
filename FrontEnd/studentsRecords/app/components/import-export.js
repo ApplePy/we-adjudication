@@ -58,10 +58,11 @@ export default Ember.Component.extend({
 								}
 
 								// Parse birthday
-								console.log(valueArray);
-								console.log(typeof valueArray[4]);
-								let dateParse = valueArray[4].split('-');
-								let date = new Date(dateParse[2], dateParse[1] - 1, dateParse[0]);
+								// Solution gleaned from https://github.com/SheetJS/js-xlsx/issues/126
+								// NOTE: Storing date in UTC time!
+								/* jshint eqeqeq: false, -W041: false */
+								let parsed_date = XLSX.SSF.parse_date_code(valueArray[4], {date1904: this.workbook.Workbook.WBProps.date1904 == true});
+								let date = new Date(Date.UTC(parsed_date.y, parsed_date.m - 1, parsed_date.d));
 
 								// Create new record
 								let studentJSON = {
@@ -72,7 +73,7 @@ export default Ember.Component.extend({
 									genderInfo: gender,
 									resInfo: residency
 								};
-								return saveStrategies.createAndSave.call(this, studentJSON, "student");
+								return saveStrategies.createAndSave.call(this, studentJSON, "student", "genderInfo", "resInfo");
 							}, true);
 						});
 				} else if (fileName.toUpperCase() === "AdmissionComments.xlsx".toUpperCase()) {
@@ -92,7 +93,7 @@ export default Ember.Component.extend({
 						if (valueArray[1] !== "NONE FOUND") {
 							return saveStrategies.modifyAndSave.call(this, "student", { number: valueArray[0] }, "basisOfAdmission", valueArray[1]);
 						} else {
-							return null;
+							return new Promise((res) => res());
 						}
 					});
 				} else if (fileName.toUpperCase() === "AdmissionAverages.xlsx".toUpperCase()) {
@@ -100,7 +101,7 @@ export default Ember.Component.extend({
 						if (valueArray[1] !== "NONE FOUND") {
 							return saveStrategies.modifyAndSave.call(this, "student", { number: valueArray[0] }, "admissionAverage", valueArray[1]);
 						} else {
-							return null;
+							return new Promise((res) => res());
 						}
 					});
 				} else if (fileName.toUpperCase() === "AdvancedStanding.xlsx".toUpperCase()) {
@@ -113,12 +114,12 @@ export default Ember.Component.extend({
 							grade: json.grade,
 							from: json.from,
 							recipient: student
-						}, emberName);
+						}, emberName, "recipient");
 					});
 				} else if (fileName.toUpperCase() === "scholarshipsAndAwards.xlsx".toUpperCase()) {
-					miscellaneous.parseAwardsAndStandings.call(this, "note", "advanced-standing", (json, student, emberName) => {
+					miscellaneous.parseAwardsAndStandings.call(this, "note", "award", (json, student, emberName) => {
 						// Save advanced standing
-									return saveStrategies.createAndSave.call(this, { note: json.note, recipient: student }, emberName);
+						return saveStrategies.createAndSave.call(this, { note: json.note, recipient: student }, emberName, "recipient");
 					});
 				} else if (fileName.toUpperCase() === "HighSchoolCourseInformation.xlsx".toUpperCase()) {
 					// Parse through each column and create all column
@@ -173,7 +174,7 @@ export default Ember.Component.extend({
 										subject: subject
 									}, "hs-course");
 								} else {
-									return null;
+									return new Promise((res) => res());
 								}
 							}, false, "studentNumber", "schoolName")
 							// Create all the grade entries
@@ -384,7 +385,7 @@ let miscellaneous = {
 
 			// Was not paginated, return
 			if (typeof meta === "undefined" || meta === null) {
-				return records
+				return records;
 			}
 
 			let total = meta.get('total');
@@ -402,14 +403,15 @@ let miscellaneous = {
 	parseAwardsAndStandings: function (noneFoundColumn, emberName, saveFunction) {
 		this.get('store').query('student', {}).then(records => {
 			// Get number of records to retrieved
-			let totalRecords = records.get('meta').get('total');
+			let totalRecords = records.get('meta').total;
 
 			// Get all students
 			this.get('store').query('student', { limit: totalRecords, offset: 0 }).then(students => {
 				parseStrategies.byRowJSON.call(this, json => {
+					// If they have an award
 					if (json[noneFoundColumn] !== "NONE FOUND") {
 						// Get student
-						let student = students.find(el => el.get('number') === json.studentNumber);
+						let student = students.find(el => el.get('number') === parseInt(json.studentNumber));
 
 						// Sanity check
 						if (typeof student === "undefined") {
@@ -419,7 +421,7 @@ let miscellaneous = {
 						// Save
 						return saveFunction.call(this, json, student, emberName);
 					} else {
-						return null;
+						return new Promise((res) => res());
 					}
 				}, true, "studentNumber");
 			});
@@ -434,7 +436,7 @@ let miscellaneous = {
 	parseComments: function () {
 		let self = this;
 
-		return new Promise(function(resolve, reject) {
+		return new Promise(function(resolve) {
 			let comments = new Map();
 
 			// Go through each row and collect the comments
@@ -448,7 +450,7 @@ let miscellaneous = {
 				comments.set(valueArray[0], noteAddition);
 
 				// No promise to return
-				return null;
+				return new Promise((res) => res());
 			}, true)
 			// Send the comments off
 			.then(() => resolve(comments));
@@ -541,7 +543,6 @@ let parseStrategies = {
 
 					let cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
 					let cell = worksheet[cellAddress];
-					console.log(cell);
 					try {
 						// Get value and save it to valueArray
 						let cellValue = cell.v;
@@ -735,19 +736,37 @@ let saveStrategies = {
 	/**
 	 * Saves a new element to backend if it does not already exist.
 	 *
-	 * @param {object} recordJSON		A flat JS object that represents the new model object.
-	 * @param {string} emberName		A string representing the name of the ember model.
-	 * @throws {string}							Throws when the parameters are malformed.
-	 * @returns {Promise}						Returns promise that resolves into a record.
+	 * @param {object} recordJSON				A flat JS object that represents the new model object.
+	 * @param {string} emberName				A string representing the name of the ember model.
+	 * @param {...string} relatedModels	Strings of property names in recordJSON that are actually ember models. For doing check-for-duplicates queries properly.
+	 * @throws {string}									Throws when the parameters are malformed.
+	 * @returns {Promise}								Returns promise that resolves into a record.
 	 */
-	createAndSave: function (recordJSON, emberName) {
+	createAndSave: function (recordJSON, emberName, ...relatedModels) {
 		// Basic sanity check
 		if (typeof recordJSON !== "object" || recordJSON === null || typeof emberName !== "string" && emberName.length <= 0) {
 			throw "Invalid arguments!";
 		}
 
+		// Create a query JSON object with the ember models replaced with their IDs
+		let queryJSON = {};
+
+		// Optimization to save time
+		if (relatedModels.length === 0) {
+			queryJSON = recordJSON;
+		} else {
+			for (let prop of Object.keys(recordJSON)) {
+				// If not an ember model property, copy over, otherwise only copy ID
+				if (relatedModels.findIndex(element => element === prop) === -1) {
+					queryJSON[prop] = recordJSON[prop];
+				} else {
+					queryJSON[prop] = recordJSON[prop].get('id');
+				}
+			}
+		}
+
 		// Check if record already exists
-		return this.get('store').query(emberName, {filter: recordJSON, limit: 1}).then(records => {
+		return this.get('store').query(emberName, {filter: queryJSON, limit: 1}).then(records => {
 
 			// If the record already exists
 			if (records.get('length') !== 0) {
