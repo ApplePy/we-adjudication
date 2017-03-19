@@ -66,6 +66,8 @@ export default Ember.Component.extend({
       if(updatedProgram.get('logicalExpressions').get('length') > 0){
         var lastRule = updatedProgram.get('logicalExpressions').get('lastObject');
         rule.set('parentExpression', lastRule);
+      } else {
+        rule.set('parentExpression', null);
       }
      rule.set('logicalLink', null);
      rule.set('assessmentCode', updatedProgram);
