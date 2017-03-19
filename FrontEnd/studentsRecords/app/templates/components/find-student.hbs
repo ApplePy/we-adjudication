@@ -1,3 +1,6 @@
+{{#if showFoundStudent}}
+ {{show-found-student INDEX = currentIndex notDONE = showFoundStudent offset = offset studentsModel = studentArray}}
+{{else}}
 <div class="ui modal">
   <div class="header">Search for a student number</div>
   <div class="content">
@@ -20,3 +23,5 @@
     </div>
   </div>
 </div>
+{{/if}}
+

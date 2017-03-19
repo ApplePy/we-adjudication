@@ -9,6 +9,7 @@ export default Ember.Component.extend({
   lName: "",
   notDONE: null,
   student: null,
+  showFoundStudent: false,
   studentArray: [],
 
   actions: {
@@ -19,7 +20,18 @@ export default Ember.Component.extend({
       //the result array where matching students will be stored
       var resultArray = [];
 
-      // Create filter object
+      this.get('store').query('student', {
+         filter: {
+           snum: studentID,
+           //firstN: firstName,
+           //lastN: lastName
+         }
+       }).then((codes) => {
+        for(var i = 0; i < codes.get('length'); i++) {
+          this.get('studentArray').pushObject(codes.objectAt(i));
+        }
+       });
+
       var filterObject = {};
       if (studentID != "") {
         filterObject["number"] = studentID;
@@ -31,32 +43,39 @@ export default Ember.Component.extend({
         filterObject["lastName"] = lastName;
       }
 
-      this.get('store').query('student', {filter: filterObject}).then(
+      this.get('store').query('student', {limit: 10}).then(
        (result) => {
-         result.forEach(element => this.get('studentArray').pushObject(element));
-
+         let totalRecords = result.get('meta').total;
+         this.get('store').query('student', {limit: totalRecords, filter: filterObject}).then((result) =>{
+           result.forEach(element => this.get('studentArray').pushObject(element));
         
-          //if the result array is bigger than one, show a list
-          if(result.get('length') > 1) {
-            // TODO
-          }
+            if (result.get('length') === 1)
+            {
+             var index = this.get('studentsModel').indexOf(result.get("firstObject"));
+            }
+            
+            if(result.get('length') > 1) 
+            {
+              this.set('showFoundStudent', true);
+              console.log(this.get('studentArray'));
+           }
 
-          //if one, show the result
-          if (result.get('length') === 1){
-            var index = this.get('studentsModel').indexOf(result.get("firstObject"));
-          }
+           if(result.get('length') === 0)
+            {
+              alert("No student found!");
+            }
+          
+            this.set('INDEX', index);
+            this.set('notDONE', false);
 
-          this.set('INDEX', index);
-          this.set('notDONE', false);
-
-          Ember.$('.ui.modal').modal('hide');
-          Ember.$('.ui.modal').remove();
+            Ember.$('.ui.modal').modal('hide');
+            Ember.$('.ui.modal').remove();
         }
       ).catch((err) => {
         console.log(err);
         alert("Invalid search!");
-        //checks to see if any students are returned
-     console.log(this.get('studentArray'));
+        console.log(this.get('studentArray'));
+         });
       });
     },
 
