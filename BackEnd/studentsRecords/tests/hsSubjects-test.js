@@ -31,8 +31,8 @@ let itemList = Common.DBElements.hsSubjectList;
 let EmberModel = HSSubjects;
 let newModel = Common.Generators.HSSubject;
 let filterValueSearches = ['name', 'description'];
-let requiredValues = ['name'];
-let uniqueValues = ['name'];
+let requiredValues = ['name', 'description'];
+let uniqueValues = [];
 
 // Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
 

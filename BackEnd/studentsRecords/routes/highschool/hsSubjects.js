@@ -14,7 +14,7 @@ module.exports =
         HSSubjects,
         'hsSubject',
         false,
-        new PropertyValidator("name"),
+        new PropertyValidator("name", "description"),
         undefined,
         undefined,
         undefined,
