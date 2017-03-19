@@ -1,14 +1,31 @@
-<h2>WE Adjudication</h2>
-<P>
-  The Western Engineering Adjudication System (WE Adjudication) automates the adjudication process performed in the
-  Faculty of Engineering at Western University.
-  <br/><br/>The system automatically assesses each student's eligibility to graduate, remain in a program, or progress
-  at the university.  Students' records are maintained in a centralized database.  This application was assigned through
-  the 2016/2017 SE3350B course with requirements provided by Undergraduate Services in the Faculty of Engineering.
-</P>
+{{#if VA001IsPermitted }}
 
-<h2>Digital Panda</h2>
-<P>
-  Digital Panda is a team of 5 third year Software Engineering Students at Western University.
-</P>
-{{show-logo}}
+	<h2>WE Adjudication</h2>
+	<P>
+	  The Western Engineering Adjudication System (WE Adjudication) automates the adjudication process performed in the
+	  Faculty of Engineering at Western University.
+	  <br/><br/>The system automatically assesses each student's eligibility to graduate, remain in a program, or progress
+	  at the university.  Students' records are maintained in a centralized database.  This application was assigned through
+	  the 2016/2017 SE3350B course with requirements provided by Undergraduate Services in the Faculty of Engineering.
+	</P>
+
+	<h2>Digital Panda</h2>
+	<P>
+	  Digital Panda is a team of 5 third year Software Engineering Students at Western University.
+	</P>
+	{{show-logo}}
+
+{{else}}
+  <div class="ui center aligned raised segment">
+    <div class="ui icon header">
+      <i class="protect icon"></i>
+      Permission Denied
+    </div>
+    <div>
+      <p>This feature (VA001 is not allowed for your account.</p>
+      <p>Please contact the system administrator for more information.</p>
+    </div>
+
+  </div>
+
+{{/if}}
