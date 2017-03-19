@@ -1,9 +1,9 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var mongoose = require('./../../studentsRecordsDB').mongoose;
+let mongoose = require('./../../studentsRecordsDB').mongoose;
 
-var hsSubjectSchema = mongoose.Schema(
+let hsSubjectSchema = mongoose.Schema(
     {
         name: {type: String, unique: true},
         description: String,
@@ -11,6 +11,6 @@ var hsSubjectSchema = mongoose.Schema(
     }
 );
 
-var HSSubjects = mongoose.model('hsSubject', hsSubjectSchema);
+let HSSubjects = mongoose.model('hsSubject', hsSubjectSchema);
 
 module.exports = HSSubjects;

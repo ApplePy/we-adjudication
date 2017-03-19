@@ -1,18 +1,14 @@
-var Awards = require('../../models/schemas/studentinfo/awardSchema');
-var Setup = require('../genericRouting');
+let Awards = require('../../models/schemas/studentinfo/awardSchema');
+let Route = require('../genericRouting').Route;
+let PropertyValidator = require('../genericRouting').PropertyValidator;
 
 
 module.exports =
-    Setup(
+    new Route(
         Awards,
         'award',
         true,
-        (req, res, mod) => {
-            if (!mod.recipient || !mod.note)
-                return ["Recipient and note must be specified"];
-            else
-                return 0
-        },
+        new PropertyValidator("recipient", "note"),
         undefined,
         undefined,
         undefined,

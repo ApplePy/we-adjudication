@@ -2,33 +2,24 @@
  * Created by darryl on 2017-02-13.
  */
 
-var HSCourses = require('../../models/schemas/highschool/hsCourseSchema');
-var HSGrades = require('../../models/schemas/highschool/hsGradeSchema');
-var Setup = require('../genericRouting');
+let HSCourses = require('../../models/schemas/highschool/hsCourseSchema');
+let HSGrades = require('../../models/schemas/highschool/hsGradeSchema');
+let Route = require('../genericRouting').Route;
+let PropertyValidator = require('../genericRouting').PropertyValidator;
 
 
 module.exports =
-    Setup(
+    new Route(
         HSCourses,
         'hsCourse',
         true,
-        (req, res, model) => {
-            let list = [];
-            if (!model.level)
-                list.push("Course level must be specified.");
-            if (typeof model.unit !== "number")
-                list.push("Course unit must be specified.");
-            if (list.length > 0)
-                return list;
-            else
-                return 0;
-        },
+        new PropertyValidator("level", "unit"),
         undefined,
         undefined,
         undefined,
         undefined,
         (req, res, deleted) => {
             // Delete associated grades
-            HSGrades.remove({course: deleted._id}, err => {});
+            HSGrades.remove({course: deleted._id}, () => {});
         }
     );

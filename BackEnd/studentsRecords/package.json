@@ -4,7 +4,9 @@
   "description": "studentsRecords server",
   "main": "index.js",
   "scripts": {
-    "test": "mocha tests/*-test.js"
+    "test": "mocha tests/*-test.js",
+    "coverage": "istanbul cover _mocha tests/*-test.js",
+    "lint": "jshint -c .jshintrc --exclude 'coverage/, node_modules/, miscellaneous/' ."
   },
   "author": "Ouda",
   "license": "ISC",

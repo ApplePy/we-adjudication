@@ -1,7 +1,7 @@
 # This file is a template, and might need editing before it works on your project.
 # Official framework image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/node/tags/
-image: incode.ca:9001/se3352a/requirements-assignment-2:latest
+image: registry.incode.ca/se3352a/requirements-assignment-2:latest
 
 # Pick zero or more services to be used on all builds.
 # Only needed when using a docker container to run your tests in.
@@ -17,6 +17,7 @@ stages:
 # Code common to the front- and back-end tests
 .test_common: &test_common
   stage: test
+  coverage: /Lines\s*:\s*(\d*\.?\d+)%/
   # This folder is cached between builds
   # http://docs.gitlab.com/ce/ci/yaml/README.html#cache
   variables:
@@ -37,6 +38,8 @@ stages:
      - npm config set proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/            # Setup proxy to stop killing bandwidth
      - npm config set https-proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/
      - npm config set strict-ssl false
+  except:
+     - temp
 
 
 
@@ -49,15 +52,24 @@ stages:
 # This test ensures the back end works
 test_backend:
   <<: *test_common
+  artifacts:
+    expire_in: 2 weeks
+    paths:
+      - BackEnd/studentsRecords/coverage/
   script:
    - cd BackEnd/studentsRecords
    - npm install
-   - npm test
+   - npm run lint
+   - npm run coverage
 
 
 # This test ensures the front end works
 test_frontend:
   <<: *test_common
+  artifacts:
+    expire_in: 2 weeks
+    paths:
+      - FrontEnd/studentsRecords/coverage/
   script:
    - pushd .
    - cd BackEnd/studentsRecords
@@ -67,7 +79,7 @@ test_frontend:
    - cd FrontEnd/studentsRecords
    - npm install
    - bower install
-   - ember test
+   - npm run coverage
   after_script:
    - pkill node
   allow_failure: true
@@ -119,7 +131,7 @@ build:
 # Common components to deploy jobs
 .deploy_common: &deploy_common
   stage: deploy
-  image: incode.ca:9001/se3352a/requirements-assignment-2:compose
+  image: registry.incode.ca/se3352a/requirements-assignment-2:compose
   variables:
       DOCKER_HOST: tcp://pandadocker.isolation.ad.murrayweb.ca:2375
   only:
@@ -127,15 +139,20 @@ build:
 
 
 # This job takes the contents from the previous job, builds them into a docker image, then deploys everything
-deploy:
+production:
   <<: *deploy_common
   dependencies:
    - build
+  before_script:
+    - mkdir ~/.docker
+    - echo $PANDADOCKER_AUTH > ~/.docker/config.json
   script:
     - docker-compose -H $DOCKER_HOST down --volumes     # Destroy the old image
     - docker-compose -H $DOCKER_HOST up -d --build --force-recreate
+  after_script:
+    - rm -f ~/.docker/config.json
   environment:
-    name: staging
+    name: production
     url: http://digitalpanda.incode.ca/
     on_stop: shutdown
 
@@ -147,6 +164,6 @@ shutdown:
   script:
     - docker-compose -H $DOCKER_HOST down --volumes     # Destroy the old image
   environment:
-    name: staging
+    name: production
     url: http://digitalpanda.incode.ca/
     action: stop

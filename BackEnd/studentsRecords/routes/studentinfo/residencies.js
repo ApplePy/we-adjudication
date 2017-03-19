@@ -1,35 +1,19 @@
-var Residencies = require('../../models/schemas/studentinfo/residencySchema');
-var Students = require('../../models/schemas/studentinfo/studentSchema');
-var Setup = require('../genericRouting');
+let Residencies = require('../../models/schemas/studentinfo/residencySchema');
+let Students = require('../../models/schemas/studentinfo/studentSchema');
+let Route = require('../genericRouting').Route;
+let PropertyValidator = require('../genericRouting').PropertyValidator;
+let MapToNull = require('../genericRouting').MapToNull;
 
 
 module.exports =
-    Setup(
+    new Route(
         Residencies,
         'residency',
         false,
-        (req, res, mod) => {
-            if (!mod.name)
-                return ["name must be specified"];
-            else
-                return 0
-        },
+        new PropertyValidator("name"),
         undefined,
         undefined,
         undefined,
-        (request, response, next) => {
-            // Map all affected students to null
-            Students.update(
-                {resInfo: request.params.mongo_id},
-                {$set: {resInfo: null}},
-                {multi: true},
-                function (error, students) {
-                    if (error) response.status(500).send({error: error});
-                    else {
-                        // All students mapped successfully, delete residency
-                        next();
-                    }
-                });
-        },
+        new MapToNull(Students, "resInfo"),
         undefined
     );

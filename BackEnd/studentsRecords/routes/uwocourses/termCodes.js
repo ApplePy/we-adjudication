@@ -2,24 +2,22 @@
  * Created by darryl on 2017-02-13.
  */
 
-var TermCodes = require('../../models/schemas/uwocourses/termCodeSchema');
-var Setup = require('../genericRouting');
+let TermCodes = require('../../models/schemas/uwocourses/termCodeSchema');
+let Terms = require('../../models/schemas/uwocourses/termSchema');
+let Route = require('../genericRouting').Route;
+let PropertyValidator = require('../genericRouting').PropertyValidator;
+let MapToNull = require('../genericRouting').MapToNull;
 
 
 module.exports =
-    Setup(
+    new Route(
         TermCodes,
         'termCode',
-        true,
-        (req, res, mod) => {
-            if (!mod.name)
-                return ["Term name must be specified"];
-            else
-                return 0;
-        },
+        false,
+        new PropertyValidator("name"),
         undefined,
         undefined,
         undefined,
-        undefined,
+        new MapToNull(Terms, "termCode"),
         undefined
     );

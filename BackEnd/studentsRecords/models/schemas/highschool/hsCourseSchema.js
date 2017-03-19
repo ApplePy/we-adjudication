@@ -1,10 +1,10 @@
 /**
  * Created by darryl on 2017-02-09.
  */
-var mongoose = require('./../../studentsRecordsDB').mongoose;
-var mongoosePaginate = require('mongoose-paginate');
+let mongoose = require('./../../studentsRecordsDB').mongoose;
+let mongoosePaginate = require('mongoose-paginate');
 
-var hsCourseSchema = mongoose.Schema(
+let hsCourseSchema = mongoose.Schema(
     {
         level: {type: Number, required: true},
         unit: {type: Number, required: true},
@@ -16,6 +16,6 @@ var hsCourseSchema = mongoose.Schema(
 );
 hsCourseSchema.plugin(mongoosePaginate);
 
-var HSCourses = mongoose.model('hsCourse', hsCourseSchema);
+let HSCourses = mongoose.model('hsCourse', hsCourseSchema);
 
 module.exports = HSCourses;

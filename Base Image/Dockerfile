@@ -36,7 +36,7 @@ RUN apt-get update -y && \
 	
 # Install watchman
 RUN apt-get update && \
-	apt-get install -y autoconf python-setuptools python3-setuptools python-dev python3-dev && \
+	apt-get install -y --no-install-recommends autotools-dev automake python-dev libtool pkg-config libssl-dev && \
 	git clone https://github.com/facebook/watchman.git && \
 	cd watchman && \
 	./autogen.sh && \
@@ -45,12 +45,11 @@ RUN apt-get update && \
 	make install && \
 	cd .. && \
 	rm -rf watchman && \
-	apt-get purge -y autoconf python-setuptools python3-setuptools python-dev python3-dev && \
+	apt-get purge -y autotools-dev automake python-dev libtool pkg-config libssl-dev && \
 	apt-get autoremove --purge -y && \
 	apt-get clean
 
 # Install nodemon, express, bower, and ember
 RUN export USER=root && \
-	npm install -g nodemon express bower ember-cli phantomjs-prebuilt mocha && \
+	npm install -g jshint nodemon express bower ember-cli phantomjs-prebuilt mocha istanbul && \
 	npm cache clean
-

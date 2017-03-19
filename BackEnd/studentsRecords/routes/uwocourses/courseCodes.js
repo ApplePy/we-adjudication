@@ -2,26 +2,17 @@
  * Created by darryl on 2017-02-13.
  */
 
-var CourseCodes = require('../../models/schemas/uwocourses/courseCodeSchema');
-var Setup = require('../genericRouting');
+let CourseCodes = require('../../models/schemas/uwocourses/courseCodeSchema');
+let Route = require('../genericRouting').Route;
+let PropertyValidator = require('../genericRouting').PropertyValidator;
 
 
 module.exports =
-    Setup(
+    new Route(
         CourseCodes,
         'courseCode',
         true,
-        (req, res, model) => {
-            let list = [];
-            if (!model.courseNumber)
-                list.push("The course number must be specified.");
-            if (!model.courseLetter)
-                list.push("The course letter must be specified.");
-            if (list.length)
-                return list;
-            else
-                return 0;
-        },
+        new PropertyValidator("courseNumber", "courseLetter"),
         undefined,
         undefined,
         undefined,

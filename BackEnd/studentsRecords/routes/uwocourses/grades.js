@@ -2,38 +2,22 @@
  * Created by darryl on 2017-02-13.
  */
 
-var Grades = require('../../models/schemas/uwocourses/gradeSchema');
-var CourseCodes = require('../../models/schemas/uwocourses/courseCodeSchema');
-var Setup = require('../genericRouting');
+let Grades = require('../../models/schemas/uwocourses/gradeSchema');
+let CourseCodes = require('../../models/schemas/uwocourses/courseCodeSchema');
+let Route = require('../genericRouting').Route;
+let PropertyValidator = require('../genericRouting').PropertyValidator;
+let MapToNull = require('../genericRouting').MapToNull;
 
 
 module.exports =
-    Setup(
+    new Route(
         Grades,
         'grade',
         true,
-        (req, res, mod) => {
-            if (!mod.mark)
-                return ["Mark must be specified"];
-            else
-                return 0;
-        },
+        new PropertyValidator("mark"),
         undefined,
         undefined,
         undefined,
-        (req, res, next) => {
-            // Map all affected courses to null
-            CourseCodes.update(
-                {gradeInfo: req.params.mongo_id},
-                {$set: {gradeInfo: null}},
-                {multi: true},
-                function (error, courses) {
-                    if (error) res.status(500).send({error: error});
-                    else {
-                        // All courses mapped successfully, delete grade
-                        next();
-                    }
-                });
-        },
+        new MapToNull(CourseCodes, "gradeInfo"),
         undefined
     );

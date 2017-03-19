@@ -22,25 +22,13 @@ let mongoose = DB.mongoose;
 
 ///// THINGS TO CHANGE ON COPYPASTA /////
 let ProgramRecords = require('../models/schemas/uwocourses/programRecordSchema');
-let TermCodes = require('../models/schemas/uwocourses/termCodeSchema');
+let Terms = require('../models/schemas/uwocourses/termSchema');
 
 let emberName = "programRecord";
 let emberNamePluralized = "programRecords";
 let itemList = Common.DBElements.programRecordList;
-let emberModel = ProgramRecords;
-let newModel = () => {
-    let plans = Common.DBElements.planCodeList.filter(() => Math.random() * 10 > 8);
-    if (plans.length == 0)
-        plans.push(Common.DBElements.planCodeList.randomObject());
-
-    return {
-        name: faker.random.words(1, 3),
-        level: faker.random.number(9),
-        load: Common.DBElements.courseLoadList.randomObject(),
-        status: Common.DBElements.programStatusList.randomObject(),
-        plan: plans
-    };
-};
+let EmberModel = ProgramRecords;
+let newModel = Common.Generators.ProgramRecord;
 let filterValueSearches = [
     'name',
     'level',
@@ -55,27 +43,27 @@ let uniqueValues = [];
 /////////////////////////////////////////
 
 
-describe('Program Records', function() {
+describe('Program Records', function () {
 
-    describe('/GET functions', function() {
+    describe('/GET functions', function () {
         before(Common.regenAllData);
 
         // Make sure that you can retrieve all values
         Common.Tests.GetTests.getAll(
             emberName,
             emberNamePluralized,
-            emberModel,
+            EmberModel,
             itemList,
-            function() {
+            function () {
                 let limit = itemList.length;
-                return {offset: 0, limit: limit};
+                return { offset: 0, limit: limit };
             });
 
         // Make sure that you can retrieve all values one page at a time
         Common.Tests.GetTests.getPagination(
             emberName,
             emberNamePluralized,
-            emberModel,
+            EmberModel,
             itemList);
 
         // Check that you can search by all non-array elements
@@ -85,7 +73,7 @@ describe('Program Records', function() {
                 Common.Tests.GetTests.getByFilterSuccess(
                     emberName,
                     emberNamePluralized,
-                    emberModel,
+                    EmberModel,
                     function (next) {
                         // Pick random model for data
                         let model = itemList[faker.random.number(itemList.length - 1)];
@@ -93,37 +81,37 @@ describe('Program Records', function() {
                         // Convert MongoID into a string before attempting search
                         let param = (model[element] instanceof mongoose.Types.ObjectId) ? model[element].toString() : model[element];
 
-                        next([{[element]: param}, itemList.filter((el) => el[element] == model[element])]);
+                        next([{ [element]: param }, itemList.filter((el) => el[element] === model[element])]);
                     },
                     "Search by " + element,
                     function () {
                         let limit = itemList.length;
-                        return {offset: 0, limit: limit};
+                        return { offset: 0, limit: limit };
                     });
                 cb();
             },
-            err => {});
+            () => { });
 
         // Make sure that searches for a nonexistent object returns nothing but succeeds
         Common.Tests.GetTests.getByFilterSuccess(
             emberName,
             emberNamePluralized,
-            emberModel,
+            EmberModel,
             function (next) {
-                next([{name: "NonExistent"}, []]);
+                next([{ name: "NonExistent" }, []]);
             },
             "Search for a nonexistent model",
-            function() {
+            function () {
                 let limit = itemList.length;
-                return {offset: 0, limit: limit};
+                return { offset: 0, limit: limit };
             });
 
         // Ensure you can search by ID
         Common.Tests.GetTests.getByID(
             emberName,
             emberNamePluralized,
-            emberModel,
-            function(next) {
+            EmberModel,
+            function (next) {
                 next(itemList[faker.random.number(itemList.length - 1)]);
             });
 
@@ -131,21 +119,21 @@ describe('Program Records', function() {
         Common.Tests.GetTests.getByID(
             emberName,
             emberNamePluralized,
-            emberModel,
-            function(next) {
-                next(new emberModel({}));
+            EmberModel,
+            function (next) {
+                next(new EmberModel({}));
             },
             "This ID does not exist, should 404.");
     });
 
-    describe('/PUT functions', function() {
+    describe('/PUT functions', function () {
         beforeEach(Common.regenAllData);
 
         // Make sure PUTs work correctly
         Common.Tests.PutTests.putUpdated(
             emberName,
             emberNamePluralized,
-            emberModel,
+            EmberModel,
             function (next) {
                 // Get a random model and make random updates
                 let model = itemList[faker.random.number(itemList.length - 1)];
@@ -163,7 +151,7 @@ describe('Program Records', function() {
         Common.Tests.PutTests.putUpdated(
             emberName,
             emberNamePluralized,
-            emberModel,
+            EmberModel,
             function (next) {
                 // Get a random model and make random updates
                 let model = itemList[faker.random.number(itemList.length - 1)];
@@ -190,7 +178,7 @@ describe('Program Records', function() {
                 Common.Tests.PutTests.putNotUnique(
                     emberName,
                     emberNamePluralized,
-                    emberModel,
+                    EmberModel,
                     function (next) {
                         // Get a random model and make random updates
                         let model1 = itemList[faker.random.number(itemList.length - 1)];
@@ -211,7 +199,7 @@ describe('Program Records', function() {
                     "Posting with duplicate of unique field " + value + ", should 500.");
                 cb();
             },
-            err => {});
+            () => { });
 
         // Make sure that attempts to not supply required values fails
         each(
@@ -220,7 +208,7 @@ describe('Program Records', function() {
                 Common.Tests.PutTests.putUpdated(
                     emberName,
                     emberNamePluralized,
-                    emberModel,
+                    EmberModel,
                     function (next) {
                         // Get a random model and make random updates
                         let model = itemList[faker.random.number(itemList.length - 1)];
@@ -239,17 +227,17 @@ describe('Program Records', function() {
                     "Missing " + value + ", this should 400.");
                 cb();
             },
-            err => {});
+            () => { });
 
         // Make sure that attempts to push to a non-existent object fails
         Common.Tests.PutTests.putUpdated(
             emberName,
             emberNamePluralized,
-            emberModel,
+            EmberModel,
             function (next) {
                 // Get a random model and make random updates
                 let updates = newModel();
-                let model = new emberModel(updates);
+                let model = new EmberModel(updates);
 
                 // Pass the updated object and the PUT contents to the tester to make sure the changes happen
                 next([updates, model]);
@@ -258,19 +246,19 @@ describe('Program Records', function() {
             "This model does not exist yet, this should 404.");
     });
 
-    describe('/POST functions', function() {
+    describe('/POST functions', function () {
         beforeEach(Common.regenAllData);
 
         // Make sure POSTs work correctly
         Common.Tests.PostTests.postNew(
             emberName,
             emberNamePluralized,
-            emberModel,
+            EmberModel,
             function (next) {
                 // Get a random model and make random updates
                 let newContent = newModel();
-                let model = new emberModel(newContent);
-                next([newContent, model])
+                let model = new EmberModel(newContent);
+                next([newContent, model]);
             },
             requiredValues);
 
@@ -280,8 +268,8 @@ describe('Program Records', function() {
         Common.Tests.PostTests.postNew(
             emberName,
             emberNamePluralized,
-            emberModel,
-            function(next) {
+            EmberModel,
+            function (next) {
                 // Select a model and then attempt to set the new object's ID to the already-existing object
                 let model = itemList[faker.random.number(itemList.length - 1)];
                 let modelObj = newModel();
@@ -292,12 +280,13 @@ describe('Program Records', function() {
             },
             requiredValues,
             "POSTing a record with an ID that already exists. Should ignore the new ID.",
-            function(next, res) {
+            function (next, res) {
                 // Make sure the ID is different
-                expect (res.body[emberName]._id).to.not.equal(idFerry.toString());
+                expect(res.body[emberName]._id).to.not.equal(idFerry.toString());
 
                 // Make sure the creation was successful anyways
-                emberModel.findById(res.body[emberName]._id, function (err, results) {
+                EmberModel.findById(res.body[emberName]._id, function (err, results) {
+                    /* jshint expr: true */
                     expect(err).to.be.null;
                     expect(results).to.not.be.null;
                     next();
@@ -311,7 +300,7 @@ describe('Program Records', function() {
                 Common.Tests.PostTests.postNew(
                     emberName,
                     emberNamePluralized,
-                    emberModel,
+                    EmberModel,
                     function (next) {
                         // Get a random model and make random updates
                         let newContent = newModel();
@@ -319,32 +308,33 @@ describe('Program Records', function() {
                         // Delete a required value
                         delete newContent[value];
 
-                        let model = new emberModel(newContent);
-                        next([newContent, model])
+                        let model = new EmberModel(newContent);
+                        next([newContent, model]);
                     },
                     requiredValues,
                     "Missing " + value + ", this should 400.");
                 cb();
             },
-            err => {});
+            () => { });
 
         // Make sure attempts to post duplicate data fails
         // TODO: I'm not sure if this test is appropriate...
-        it.skip("POSTing a record with duplicate data, should 500.");
-        /*Common.Tests.PostTests.postNotUnique(
-         emberName,
-         emberNamePluralized,
-         emberModel,
-         function (next) {
-         let model = itemList[faker.random.number(itemList.length - 1)];
+        Common.Tests.PostTests.postNotUnique(
+            emberName,
+            emberNamePluralized,
+            EmberModel,
+            function (next) {
+                let model = itemList[faker.random.number(itemList.length - 1)];
 
-         next([model, model]);
-         },
-         requiredValues,
-         "POSTing a record with duplicate data, should 500.");*/
+                next([model, model]);
+            },
+            requiredValues,
+            "POSTing a record with duplicate data, should 500.",
+            undefined,
+            it.skip);
     });
 
-    describe('/DELETE functions', function(){
+    describe('/DELETE functions', function () {
         beforeEach(Common.regenAllData);
 
         let elementFerry = null;
@@ -353,21 +343,22 @@ describe('Program Records', function() {
         Common.Tests.DeleteTests.deleteExisting(
             emberName,
             emberNamePluralized,
-            emberModel,
+            EmberModel,
             function (next) {
                 elementFerry = itemList[faker.random.number(itemList.length - 1)];
                 next(elementFerry._id);
             },
             undefined,
-            function (next, res) {
+            function (next) {
                 // Check that all dependent objects got deassociated
                 each([
-                        [TermCodes, "programRecords"]
-                    ],
+                    [Terms, "programRecords"]
+                ],
                     function (value, next) {
                         value[0].find(
-                            {[value[1]]: {$in: [elementFerry._id]}},
+                            { [value[1]]: { $in: [elementFerry._id] } },
                             (err, records) => {
+                                /* jshint expr: true */
                                 expect(err).to.be.null;
                                 expect(records).to.not.contain(elementFerry._id);
 
@@ -375,6 +366,7 @@ describe('Program Records', function() {
                             });
                     },
                     err => {
+                        /* jshint expr: true */
                         expect(err).to.be.null;
                         next();
                     });
@@ -384,7 +376,7 @@ describe('Program Records', function() {
         Common.Tests.DeleteTests.deleteNonexistent(
             emberName,
             emberNamePluralized,
-            emberModel,
+            EmberModel,
             function (next) {
                 next(mongoose.Types.ObjectId());
             });

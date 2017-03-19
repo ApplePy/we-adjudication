@@ -1,18 +1,14 @@
-var AdvancedStandings = require('../../models/schemas/studentinfo/advancedStandingSchema');
-var Setup = require('../genericRouting');
+let AdvancedStandings = require('../../models/schemas/studentinfo/advancedStandingSchema');
+let Route = require('../genericRouting').Route;
+let PropertyValidator = require('../genericRouting').PropertyValidator;
 
 
 module.exports =
-    Setup(
+    new Route(
         AdvancedStandings,
         'advancedStanding',
         true,
-        (req, res, mod) => {
-            if (!mod.recipient)
-                return ["Recipient must be specified"];
-            else
-                return 0
-        },
+        new PropertyValidator("recipient"),
         undefined,
         undefined,
         undefined,
