@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var RoleCodes = require('../models/schemas/authentication/roleCodes');
+var RoleCodes = require('../../models/schemas/authentication/roleCodes');
 var bodyParser = require('body-parser');
 var parseUrlencoded = bodyParser.urlencoded({extended: false});
 var parseJSON = bodyParser.json();

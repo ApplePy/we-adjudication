@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var Users = require('../models/schemas/authentication/users');
+var Users = require('../../models/schemas/authentication/users');
 var bodyParser = require('body-parser');
 var parseUrlencoded = bodyParser.urlencoded({extended: false});
 var parseJSON = bodyParser.json();
