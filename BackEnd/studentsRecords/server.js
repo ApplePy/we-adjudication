@@ -27,6 +27,13 @@ let departments = require('./routes/uwoadjudication/departments');
 let faculties = require('./routes/uwoadjudication/faculties');
 let logicalExpressions = require('./routes/uwoadjudication/logicalExpressions');
 let programAdministrations = require('./routes/uwoadjudication/programAdministrations');
+//let logins = require('./routes/authentication/logins');
+//let logins = require('./routes/authentication/passwords');
+//let logins = require('./routes/authentication/roleCodes');
+//let logins = require('./routes/authentication/rolePermissions');
+//let logins = require('./routes/authentication/roots');
+//let logins = require('./routes/authentication/userRoles');
+//let logins = require('./routes/authentication/users');
 
 
 app.use(function (request, response, next) {
