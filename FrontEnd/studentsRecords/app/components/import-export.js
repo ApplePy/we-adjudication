@@ -28,7 +28,7 @@ export default Ember.Component.extend({
 		{ name: "AdvancedStanding.xlsx", complete: false },
 		{ name: "scholarshipsAndAwards.xlsx", complete: false },
 		{ name: "HighSchoolCourseInformation.xlsx", complete: false },
-		{name: "UndergraduateRecordCourses.xlsx", complete: false},
+		{ name: "UndergraduateRecordCourses.xlsx", complete: false },
 		{ name: "UndergraduateRecordPlans.xlsx", complete: false }
 	],
 
@@ -75,7 +75,7 @@ export default Ember.Component.extend({
 				} else if (fileName.toUpperCase() === "residencies.xlsx".toUpperCase()) {
 					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "residency"), true)
 						.then(processOff).catch(errorOff);
-				} 
+				}
 				// NOTE TO SELF: the course-code model multiplicity makes zero sense
 				else if (fileName.toUpperCase() === "UndergraduateCourses.xlsx".toUpperCase()) {
 					parseStrategies.byRow.call(this, false, valueArray => saveStrategies.createAndSave.call(this, {
@@ -254,47 +254,47 @@ export default Ember.Component.extend({
 					Promise.all([
 						miscellaneous.getAllModels.call(this, "student"),
 						miscellaneous.getAllModels.call(this, "term-code"),
-						this.get('store').query("course-code", { filter: {termInfo: null, gradeInfo: null}, limit: 0 })
-						.then(records => this.get('store').query("course-code", { filter: {termInfo: null, gradeInfo: null}, limit: records.get('meta').total })),
+						this.get('store').query("course-code", { filter: { termInfo: null, gradeInfo: null }, limit: 0 })
+							.then(records => this.get('store').query("course-code", { filter: { termInfo: null, gradeInfo: null }, limit: records.get('meta').total })),
 						miscellaneous.getAllModels.call(this, "term")
 					])
-					.then(values => {
-						// Save grades, skip if a prerequisite piece of data is missing
-						return parseStrategies.byRowJSON.call(this, rowContents => {
-							let student = values[0].find(el => el.get('number') === parseInt(rowContents.studentNumber));
-							let termCode = values[1].find(el => el.get('name') === rowContents.term);
-							let courseCodeTemplate = values[2].find(el => el.get('courseLetter') === rowContents.courseLetter && el.get('courseNumber') === rowContents.courseNumber);
-							let term = values[3].find(el => el.get('termCode.name') === rowContents.term && el.get('student.number') === parseInt(rowContents.studentNumber));
+						.then(values => {
+							// Save grades, skip if a prerequisite piece of data is missing
+							return parseStrategies.byRowJSON.call(this, rowContents => {
+								let student = values[0].find(el => el.get('number') === parseInt(rowContents.studentNumber));
+								let termCode = values[1].find(el => el.get('name') === rowContents.term);
+								let courseCodeTemplate = values[2].find(el => el.get('courseLetter') === rowContents.courseLetter && el.get('courseNumber') === rowContents.courseNumber);
+								let term = values[3].find(el => el.get('termCode.name') === rowContents.term && el.get('student.number') === parseInt(rowContents.studentNumber));
 
-							// Sanity check
-							if (typeof student === "undefined" || typeof termCode === "undefined" || typeof courseCodeTemplate === "undefined") {
-								throw "Missing student " + rowContents.studentNumber + " or termCode " + rowContents.term + " or course " + [rowContents.courseLetter, rowContents.courseNumber].join(' ');
-							}
-
-							// Create grade
-							return saveStrategies.createAndSave.call(this, {mark: rowContents.grade, note: rowContents.note}, "grade")
-							.then(grade => {
-								// Create term if none created yet for student
-								if (typeof term === 'undefined') {
-									// TODO: Does this term-replacement shenaniganry work?
-									return saveStrategies.createAndSave.call(this, { termCode: termCode, student: student }, "term", "termCode", "student")
-									.then(newTerm => { term = newTerm; return new Promise(res => res(grade)); });
+								// Sanity check
+								if (typeof student === "undefined" || typeof termCode === "undefined" || typeof courseCodeTemplate === "undefined") {
+									throw "Missing student " + rowContents.studentNumber + " or termCode " + rowContents.term + " or course " + [rowContents.courseLetter, rowContents.courseNumber].join(' ');
 								}
 
-								return grade;
-							})
-							.then(grade => {
-								// Duplicate course template for this term
-								let newModel = courseCodeTemplate.toJSON();
-								// set the properties you want to alter
-								newModel.termInfo = term;
-								newModel.gradeInfo = grade;
+								// Create grade
+								return saveStrategies.createAndSave.call(this, { mark: rowContents.grade, note: rowContents.note }, "grade")
+									.then(grade => {
+										// Create term if none created yet for student
+										if (typeof term === 'undefined') {
+											// TODO: Does this term-replacement shenaniganry work?
+											return saveStrategies.createAndSave.call(this, { termCode: termCode, student: student }, "term", "termCode", "student")
+												.then(newTerm => { term = newTerm; return new Promise(res => res(grade)); });
+										}
 
-								// Save course template
-								return saveStrategies.createAndSave.call(this, newModel, "course-code", "termInfo", "gradeInfo");
-							});
-						}, true, "studentNumber", "term");
-					}).then(processOff).catch(errorOff);
+										return grade;
+									})
+									.then(grade => {
+										// Duplicate course template for this term
+										let newModel = courseCodeTemplate.toJSON();
+										// set the properties you want to alter
+										newModel.termInfo = term;
+										newModel.gradeInfo = grade;
+
+										// Save course template
+										return saveStrategies.createAndSave.call(this, newModel, "course-code", "termInfo", "gradeInfo");
+									});
+							}, true, "studentNumber", "term");
+						}).then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "UndergraduateRecordPlans.xlsx".toUpperCase()) {
 					// NOTE: Inefficient use of resources? Yes. Efficient use of my time? Also yes.
 					Promise.all([
@@ -429,7 +429,7 @@ let miscellaneous = {
 	 * @param {object[]} results	A row in the column that was searched.
 	 * @param {object} context		An object providing the model name to save and the old column name->new property names.
 	 */
-	columnKeyReplaceAndSave: function(results, context) {
+	columnKeyReplaceAndSave: function (results, context) {
 		(results, context) => {
 			//Results is an array of objects
 			// Context is the arbitrary objects we passed in
@@ -454,7 +454,7 @@ let miscellaneous = {
 			return Promise.all(saves);
 		}
 	},
-	
+
 	/**
 	 * Retrieves all models.
 	 * 
