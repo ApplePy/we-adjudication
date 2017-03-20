@@ -1,11 +1,11 @@
 import DS from 'ember-data';
 
 export default DS.Model.extend({
-  number: DS.attr(),
-  firstName: DS.attr(),
-  lastName: DS.attr(),
+  number: DS.attr('number'),
+  firstName: DS.attr('string'),
+  lastName: DS.attr('string'),
   DOB: DS.attr('date'),
-  photo: DS.attr(),
+  photo: DS.attr('string'),
   registrationComments: DS.attr('string'),
   basisOfAdmission: DS.attr('string'),
   admissionAverage: DS.attr('string'),
@@ -15,6 +15,6 @@ export default DS.Model.extend({
   resInfo: DS.belongsTo('residency'),
   genderInfo: DS.belongsTo('gender'),
   hsGrades: DS.hasMany('hs-grade'),
-  terms: DS.hasMany('term-code')
+  terms: DS.hasMany('term')
 
 });
