@@ -27,13 +27,13 @@ let departments = require('./routes/uwoadjudication/departments');
 let faculties = require('./routes/uwoadjudication/faculties');
 let logicalExpressions = require('./routes/uwoadjudication/logicalExpressions');
 let programAdministrations = require('./routes/uwoadjudication/programAdministrations');
-//let logins = require('./routes/authentication/logins');
-//let logins = require('./routes/authentication/passwords');
-//let logins = require('./routes/authentication/roleCodes');
-//let logins = require('./routes/authentication/rolePermissions');
-//let logins = require('./routes/authentication/roots');
-//let logins = require('./routes/authentication/userRoles');
-//let logins = require('./routes/authentication/users');
+let logins = require('./routes/authentication/logins');
+let passwords = require('./routes/authentication/passwords');
+let roleCodes = require('./routes/authentication/roleCodes');
+let rolePermissions = require('./routes/authentication/rolePermissions');
+let roots = require('./routes/authentication/roots');
+let userRoles = require('./routes/authentication/userRoles');
+let users = require('./routes/authentication/users');
 
 
 app.use(function (request, response, next) {
@@ -81,6 +81,15 @@ api.use('/departments', departments);
 api.use('/faculties', faculties);
 api.use('/logicalExpressions', logicalExpressions);
 api.use('/programAdministrations', programAdministrations);
+
+//For authentication
+app.use('/users', users);
+app.use('/passwords', passwords);
+app.use('/roleCodes', roleCodes);
+app.use('/userRoles', userRoles);
+app.use('/rolePermissions', rolePermissions);
+app.use('/logins', logins);
+app.use('/roots', roots);
 
 // Set default serve
 if (process.env.NODE_ENV === 'production') app.use(express.static('dist'));

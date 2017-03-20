@@ -1,9 +1,9 @@
 var express = require('express');
 var router = express.Router();
-var UserRoles = require('../models/userRoles');
-var Passwords = require('../models/passwords');
-var Logins = require('../models/logins');
-var RolePermissions = require('../models/rolePermissions');
+var UserRoles = require('../models/schemas/authentication/userRoles');
+var Passwords = require('../models/schemas/authentication/passwords');
+var Logins = require('../models/schemas/authentication/logins');
+var RolePermissions = require('../models/schemas/authentication/rolePermissions');
 
 
 var bodyParser = require('body-parser');
