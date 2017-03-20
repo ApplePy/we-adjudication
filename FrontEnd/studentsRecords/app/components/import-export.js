@@ -89,7 +89,13 @@ export default Ember.Component.extend({
 					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "term-code"), true)
 						.then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "HighSchools.xlsx".toUpperCase()) {
-					parseStrategies.singleColumn.call(this, cellValue => saveStrategies.createAndSave.call(this, { name: cellValue }, "secondary-school"), true)
+					parseStrategies.singleColumn.call(this, cellValue => {
+						if (cellValue !== "NONE FOUND") {
+							return saveStrategies.createAndSave.call(this, { name: cellValue }, "secondary-school");
+						} else {
+							return new Promise(res => res());
+						}
+					}, true)
 						.then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "students.xlsx".toUpperCase()) {
 					// Get all genders and residencies (sensitive to pagination)
@@ -183,7 +189,7 @@ export default Ember.Component.extend({
 						true,
 						true,
 						[['source'], ['subject', 'description'], ['schoolName']],
-						[{ modelName: "hs-course-source", source: "code" }, { modelName: "hs-subject", subject: "name" }, { modelName: "secondary-school", schoolName: "name" }],
+						[{ modelName: "hs-course-source", source: "code" }, { modelName: "hs-subject", subject: "name" }, { modelName: "secondary-school", schoolName: "name", exclusions: {name: "NONE FOUND"}}],
 						miscellaneous.columnKeyReplaceAndSave.bind(this), false)
 						.then(() => {
 							// Get all prerequisite models
@@ -197,6 +203,7 @@ export default Ember.Component.extend({
 							// Create all the courses
 							return parseStrategies.byRowJSON.call(this, rowContents => {
 								if (rowContents.schoolName !== "NONE FOUND") {
+
 									// Find needed elements
 									let school = values[3].find(el => el.get('name') === rowContents.schoolName);
 									let subject = values[0].find(el => el.get('name') === rowContents.subject);
@@ -204,7 +211,7 @@ export default Ember.Component.extend({
 
 									// Sanity check
 									if (typeof school === 'undefined' || typeof subject === 'undefined' || typeof source === 'undefined') {
-										throw "Required values are missing!";
+										throw {message: "Required values are missing!", school: school, subject: subject, source: source};
 									}
 
 									// Save a new high school course
@@ -219,20 +226,19 @@ export default Ember.Component.extend({
 									return new Promise((res) => res());
 								}
 							}, false, "studentNumber", "schoolName")
+								.then(() => this.get('store').peekAll('hs-course'))
 								// Create all the grade entries
-								.then((hsCourses) => {
-									// Remove null courses
-									hsCourses = hsCourses.filter(el => el !== null);
+								.then(hsCourses => {
 
 									return parseStrategies.byRowJSON.call(this, rowContents => {
 										if (rowContents.schoolName !== "NONE FOUND") {
 											// Find student
-											let student = values[2].find(el => el.get('number') === rowContents.studentNumber);
+											let student = values[2].find(el => el.get('number') === parseInt(rowContents.studentNumber));
 
 											// Find course
 											let course = hsCourses.find(el => {
-												if (el.get('level') === rowContents.level && el.get('unit') === rowContents.units &&
-													el.get('source.name') === rowContents.source && el.get('subject.name') === rowContents.subject &&
+												if (el.get('level') === parseInt(rowContents.level) && el.get('unit') === parseInt(rowContents.units) &&
+													el.get('source.code') === rowContents.source && el.get('subject.name') === rowContents.subject &&
 													el.get('school.name') === rowContents.schoolName) {
 													return true;
 												} else {
@@ -240,8 +246,13 @@ export default Ember.Component.extend({
 												}
 											});
 
+											// Sanity check
+											if (typeof student !== "object" || typeof course !== "object") {
+												throw {message: "Student or Course not found!", student: student, course: course, rowContents: rowContents};
+											}
+
 											// Save the student's grade
-											return saveStrategies.createAndSave.call(this, { mark: rowContents.grade, course: course, recipient: student }, "hs-grade");
+											return saveStrategies.createAndSave.call(this, { mark: rowContents.grade, course: course, recipient: student }, "hs-grade", "course", "recipient");
 										}
 									}, false, "studentNumber", "schoolName");
 								});
@@ -427,32 +438,49 @@ let miscellaneous = {
 	 * Given results and a context in format {modelName: name, old column name: new column name}, make changes and save.
 	 * 
 	 * @param {object[]} results	A row in the column that was searched.
-	 * @param {object} context		An object providing the model name to save and the old column name->new property names.
+	 * @param {object} context		An object providing the model name to save, any excluded key:value pairs, and the old column name->new property names.
 	 */
 	columnKeyReplaceAndSave: function (results, context) {
-		(results, context) => {
-			//Results is an array of objects
-			// Context is the arbitrary objects we passed in
-			let saves = [];
-			for (let result of results) {
-				// Remove modelName from list of keys to rename
-				let keys = Object.keys(context);
-				keys = keys.splice(1, 1);	// Remove modelName
+		//Results is an array of objects
+		// Context is the arbitrary objects we passed in
+		let saves = [];
+		for (let result of results) {
+			// Get special keys
+			let modelName = context.modelName;
+			let exclusions = context.exclusions;
 
-				// Do key renaming
-				for (let key of keys) {
-					// WARNING: JAVASCRIPT MAGIC
-					result[context[key]] = result[key];		// Create a new property with the right name
-					delete result[key];						// Delete property with wrong name
-				}
+			// Remove modelName from list of keys to rename
+			let keys = Object.keys(context);
+			keys = keys.filter(el => el !== "modelName" && el !== "exclusions");
 
-				// Assuming the value doesn't already exist
-				saves.push(saveStrategies.createAndSave.call(this, result, context.modelName));
+			// Do key renaming
+			for (let key of keys) {
+				// WARNING: JAVASCRIPT MAGIC
+				result[context[key]] = result[key];		// Create a new property with the right name
+				delete result[key];						// Delete property with wrong name
 			}
 
-			// Return a promise representing all the saves
-			return Promise.all(saves);
+
+			// Check for disallowed key values (OUDA HACK)
+			if (typeof exclusions !== "undefined") {
+				let excluded = false;
+				for (let exclusionKey of Object.keys(exclusions)) {
+					if (result[exclusionKey] === exclusions[exclusionKey]) {
+						excluded = true;
+						break;
+					}
+				}
+				if (excluded === true) {
+					continue;
+				}
+			}
+
+			// Assuming the value doesn't already exist
+			saves.push(saveStrategies.createAndSave.call(this, result, modelName));
 		}
+
+		// Return a promise representing all the saves
+		return Promise.all(saves);
 	},
 
 	/**
@@ -462,16 +490,16 @@ let miscellaneous = {
 	 * @returns {Promise}
 	 */
 	getAllModels: function (emberName) {
-		return this.get('store').findAll(emberName).then(records => {
+		return this.get('store').query(emberName, {}).then(records => {
 			let meta = records.get('meta');
 
 			// Was not paginated, return
-			if (typeof meta === "undefined" || meta === null) {
-				return records;
+			if (typeof meta === "undefined" || typeof meta.total === "undefined" || meta === null) {
+				return this.get('store').findAll(emberName);
 			}
 
-			let total = meta.get('total');
-			return this.get('store').query(emberName, { limit: total, offset: 0 });
+			let total = meta.total;
+			return this.get('store').query(emberName, { limit: total, offset: 0 }).then(() => this.get('store').findAll(emberName));
 		});
 	},
 
@@ -862,7 +890,7 @@ let saveStrategies = {
 			// If the record already exists
 			if (records.get('length') !== 0) {
 				// Provide warning and send the found record
-				console.warn("Record " + recordJSON + " already exists. Not saving again.");
+				console.warn("Record already exists. Not saving again.");
 				return records.get('firstObject');	// Return previously-saved element
 			}
 
