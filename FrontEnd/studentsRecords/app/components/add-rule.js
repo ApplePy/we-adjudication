@@ -12,24 +12,22 @@ export default Ember.Component.extend({
 
   parameters: [
     {
-      id: 0,
-      val: "Program",
-      description: "Program"
+      id: 0, val: "assessmentCode", description: "AssessmentCodeIsTrue"
     },
     {
-      id: 1,
-      val: "adjudication.termAvg",
-      description: "Term Average"
+      id: 1, val: "course", description: "Course"
     },
     {
-      id: 2,
-      val: "course.grade",
-      description: "Grade"
+      id: 2, val: "course.grade", description: "Grade"
     },
     {
-      id: 3,
-      val: "course",
-      description: "Course"
+      id: 3, val: "Program", description: "Program"
+    },
+    {
+      id: 4, val: "program.plan", description: "Plan"
+    },
+    {
+      id: 5, val: "adjudication.termAvg", description: "TermAverage"
     }
   ],
   oprs: [
