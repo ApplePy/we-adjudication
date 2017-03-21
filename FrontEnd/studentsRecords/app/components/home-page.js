@@ -19,6 +19,8 @@ export default Ember.Component.extend({
   isAboutShowing: false,
   isHighSchoolShowing: false,
   isManageAdjudicationShowing: false,
+  //delete
+  isAdjudicationStatsShowing: false,
 
   actions: {
     home () {
@@ -30,6 +32,8 @@ export default Ember.Component.extend({
       this.set('isAdding', false);
       this.set('isHighSchoolShowing', false);
       this.set('isManageAdjudicationShowing', false);
+      //delete
+      this.set('isAdjudicationStatsShowing', false);
     },
 
     studentsDataEntry (){
@@ -41,6 +45,8 @@ export default Ember.Component.extend({
       this.set('isAdding', false);
       this.set('isHighSchoolShowing', false);
       this.set('isManageAdjudicationShowing', false);
+      //delete
+      this.set('isAdjudicationStatsShowing', false);
     },
 
     manageSystem (){
@@ -52,6 +58,8 @@ export default Ember.Component.extend({
       this.set('isAdding', false);
       this.set('isHighSchoolShowing', false);
       this.set('isManageAdjudicationShowing', false);
+      //delete
+      this.set('isAdjudicationStatsShowing', false);
     },
 
     manageHighSchoolData (){
@@ -63,6 +71,8 @@ export default Ember.Component.extend({
       this.set('isAboutShowing', false);
       this.set('isAdding', false);
       this.set('isManageAdjudicationShowing', false);
+      //delete
+      this.set('isAdjudicationStatsShowing', false);
     },
 
     addStudent (){
@@ -74,6 +84,8 @@ export default Ember.Component.extend({
       this.set('isAdding', true);
       this.set('isHighSchoolShowing', false);
       this.set('isManageAdjudicationShowing', false);
+      //delete
+      this.set('isAdjudicationStatsShowing', false);
     },
 
      manageAdjudication (){
@@ -85,6 +97,8 @@ export default Ember.Component.extend({
       this.set('isAdding', false);
       this.set('isHighSchoolShowing', false);
       this.set('isManageAdjudicationShowing', true);
+      //delete
+      this.set('isAdjudicationStatsShowing', false);
     },
 
     manageRules(){
@@ -96,6 +110,8 @@ export default Ember.Component.extend({
       this.set('isAdding', false);
       this.set('isHighSchoolShowing', false);
       this.set('isManageAdjudicationShowing', false);
+      //delete
+      this.set('isAdjudicationStatsShowing', false);
     },
 
     about (){
@@ -107,6 +123,22 @@ export default Ember.Component.extend({
       this.set('isAdding', false);
       this.set('isHighSchoolShowing', false);
       this.set('isManageAdjudicationShowing', false);
+      //delete
+      this.set('isAdjudicationStatsShowing', false);
+    },
+
+    //delete
+    adjudicationStats (){
+      this.set('isHomeShowing', false);
+      this.set('isStudentsRecordsDataEntry', false);
+      this.set('isManageSystemShowing', false);
+      this.set('isManageRulesShowing', false);
+      this.set('isAboutShowing', false);
+      this.set('isAdding', false);
+      this.set('isHighSchoolShowing', false);
+      this.set('isManageAdjudicationShowing', false);
+      //delete
+      this.set('isAdjudicationStatsShowing', true);
     }
   }
 });

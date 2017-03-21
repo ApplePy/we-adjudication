@@ -42,6 +42,11 @@
         About
       </a>
 
+      <a class="item " {{action "adjudicationStats"}}>
+        <i class="large code icon"></i>
+        Adjudication Statistics
+      </a>
+
     </div>
   </div>
   <div class="thirteen wide column ">
@@ -69,6 +74,9 @@
       {{/if}}
       {{#if isManageRulesShowing}}
         {{manage-rules}}
+      {{/if}}
+      {{#if isAdjudicationStatsShowing}}
+        {{adjudication-statistics}}
       {{/if}}
     </div>
   </div>

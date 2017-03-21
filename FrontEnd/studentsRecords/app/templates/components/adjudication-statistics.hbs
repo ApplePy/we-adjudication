@@ -1,1 +1,7 @@
-{{yield}}
+<h1>fdx</h1>
+<select onchange={{action 'selectTerm' value="target.value"}}>
+    <option value="null">Select Term</option>
+     {{#each termArray as |termChoice|}}
+     <option value={{termChoice.id}}>{{termChoice.name}} </option>
+     {{/each}}
+</select>
