@@ -54,13 +54,21 @@ export default Ember.Component.extend({
 			};
 
 			//var file = Ember.$("#excelSheet").val();
-			let file = document.getElementById('excelSheet').files[0];
-			let fileName = file.name;
-			console.log(file);
-			console.log(fileName);
+			let file = null;
+			let fileName = null;
+			let reader = null;
+			try {
+				file = document.getElementById('excelSheet').files[0];
+				fileName = file.name;
+				console.log(file);
+				console.log(fileName);
 
-			//File Reader
-			let reader = new FileReader();
+				//File Reader
+				reader = new FileReader();
+			} catch (err) {
+				errorOff(err);
+				throw err;
+			}
 
 			//File loads
 			reader.onload = (event) => {
@@ -109,7 +117,7 @@ export default Ember.Component.extend({
 
 								// Sanity check
 								if (typeof gender === "undefined" || typeof residency === "undefined") {
-									throw "Gender or residency not found!";
+									throw Error("Gender or residency not found!");
 								}
 
 								// Parse birthday
@@ -200,6 +208,8 @@ export default Ember.Component.extend({
 								miscellaneous.getAllModels.call(this, 'secondary-school')]);
 						})
 						.then(values => {
+							let newCourses = new Map();
+
 							// Create all the courses
 							return parseStrategies.byRowJSON.call(this, rowContents => {
 								if (rowContents.schoolName !== "NONE FOUND") {
@@ -211,21 +221,28 @@ export default Ember.Component.extend({
 
 									// Sanity check
 									if (typeof school === 'undefined' || typeof subject === 'undefined' || typeof source === 'undefined') {
-										throw {message: "Required values are missing!", school: school, subject: subject, source: source};
+										throw Error("Required values are missing!");
 									}
 
-									// Save a new high school course
-									return saveStrategies.createAndSave.call(this, {
+									// Add new course to set - make a crappy key for uniqueness
+									newCourses.set(([rowContents.level, rowContents.units, source.get('id'), school.get('id'), subject.get('id')]).join(""), {
 										level: rowContents.level,
 										unit: rowContents.units,
 										source: source,
 										school: school,
 										subject: subject
-									}, "hs-course", "source", "school", "subject");
-								} else {
+									});
+									
 									return new Promise((res) => res());
 								}
 							}, false, "studentNumber", "schoolName")
+								.then(() => {
+									let saves = [];
+									// Save a new high school course
+									newCourses.forEach(val => saves.push(saveStrategies.createAndSave.call(this, val, "hs-course", "source", "school", "subject")));
+
+									return Promise.all(saves);
+								})
 								.then(() => this.get('store').peekAll('hs-course'))
 								// Create all the grade entries
 								.then(hsCourses => {
@@ -248,7 +265,7 @@ export default Ember.Component.extend({
 
 											// Sanity check
 											if (typeof student !== "object" || typeof course !== "object") {
-												throw {message: "Student or Course not found!", student: student, course: course, rowContents: rowContents};
+												throw Error("Student or Course not found!");
 											}
 
 											// Save the student's grade
@@ -265,46 +282,59 @@ export default Ember.Component.extend({
 					Promise.all([
 						miscellaneous.getAllModels.call(this, "student"),
 						miscellaneous.getAllModels.call(this, "term-code"),
-						this.get('store').query("course-code", { filter: { termInfo: null, gradeInfo: null }, limit: 0 })
-							.then(records => this.get('store').query("course-code", { filter: { termInfo: null, gradeInfo: null }, limit: records.get('meta').total })),
+						miscellaneous.getAllModels.call(this, "course-code"),
 						miscellaneous.getAllModels.call(this, "term")
 					])
 						.then(values => {
-							// Save grades, skip if a prerequisite piece of data is missing
-							return parseStrategies.byRowJSON.call(this, rowContents => {
-								let student = values[0].find(el => el.get('number') === parseInt(rowContents.studentNumber));
-								let termCode = values[1].find(el => el.get('name') === rowContents.term);
-								let courseCodeTemplate = values[2].find(el => el.get('courseLetter') === rowContents.courseLetter && el.get('courseNumber') === rowContents.courseNumber);
-								let term = values[3].find(el => el.get('termCode.name') === rowContents.term && el.get('student.number') === parseInt(rowContents.studentNumber));
+							// Only get the course codes that are completely unlinked as the "templates"
+							values[2] = values[2].filter(el => typeof el.get('termInfo.id') === "undefined" && typeof el.get('gradeInfo.id') === "undefined");
 
-								// Sanity check
-								if (typeof student === "undefined" || typeof termCode === "undefined" || typeof courseCodeTemplate === "undefined") {
-									throw "Missing student " + rowContents.studentNumber + " or termCode " + rowContents.term + " or course " + [rowContents.courseLetter, rowContents.courseNumber].join(' ');
-								}
+							// Save all term-codes first
+							return parseStrategies.byColumn.call(this, true, true,
+								[['term']],
+								[{ modelName: 'term-code', term: "name" }],
+								miscellaneous.columnKeyReplaceAndSave.bind(this), false)
+								.then(() => {
+									// Save all term objects
+									return parseStrategies.byRowJSON.call(this, rowContents => {
+										return saveStrategies.createAndSave.call(this, {
+											termCode: values[1].find(el => el.get('name') === rowContents.term),
+											student: values[0].find(el => el.get('number') === parseInt(rowContents.studentNumber))
+										}, "term", "termCode", "student");
+									}, false, "studentNumber", "term");
+								})
+								.then(() => {
+									return parseStrategies.byRowJSON.call(this, rowContents => {
+										// Save the grade
+										let student = values[0].find(el => el.get('number') === parseInt(rowContents.studentNumber));
+										let term = values[3].find(el => el.get('termCode.name') === rowContents.term && el.get('student.number') === parseInt(rowContents.studentNumber));
+										let courseCodeTemplate = values[2].find(el => el.get('courseLetter') === rowContents.courseLetter && el.get('courseNumber') === rowContents.courseNumber);
 
-								// Create grade
-								return saveStrategies.createAndSave.call(this, { mark: rowContents.grade, note: rowContents.note }, "grade")
-									.then(grade => {
-										// Create term if none created yet for student
-										if (typeof term === 'undefined') {
-											// TODO: Does this term-replacement shenaniganry work?
-											return saveStrategies.createAndSave.call(this, { termCode: termCode, student: student }, "term", "termCode", "student")
-												.then(newTerm => { term = newTerm; return new Promise(res => res(grade)); });
+										// Sanity check
+										if (typeof student === "undefined" || typeof courseCodeTemplate === "undefined") {
+											throw Error("Missing student " + rowContents.studentNumber + " or course " + [rowContents.courseLetter, rowContents.courseNumber].join(' '));
 										}
 
-										return grade;
-									})
-									.then(grade => {
-										// Duplicate course template for this term
-										let newModel = courseCodeTemplate.toJSON();
-										// set the properties you want to alter
-										newModel.termInfo = term;
-										newModel.gradeInfo = grade;
+										// Create grade
+										// TODO: This isn't guarding against duplicate import... I just want it to work :(
+										return saveStrategies.createAndSave.call(this, { mark: rowContents.grade, note: rowContents.note }, "grade")
+											.then(grade => {
+												// Duplicate course template for this term
+												let newModel = courseCodeTemplate.toJSON();
+												// set the properties you want to alter
+												newModel.termInfo = term;
+												newModel.gradeInfo = grade;
 
-										// Save course template
-										return saveStrategies.createAndSave.call(this, newModel, "course-code", "termInfo", "gradeInfo");
-									});
-							}, true, "studentNumber", "term");
+												// Sanity check
+												if (typeof newModel.termInfo === "undefined" || typeof newModel.gradeInfo === "undefined") {
+													throw Error("New model is missing an important property!");
+												}
+
+												// Save course template
+												return saveStrategies.createAndSave.call(this, newModel, "course-code", "termInfo", "gradeInfo");
+											});
+									}, false, "studentNumber", "term");
+								});
 						}).then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "UndergraduateRecordPlans.xlsx".toUpperCase()) {
 					// NOTE: Inefficient use of resources? Yes. Efficient use of my time? Also yes.
@@ -525,7 +555,7 @@ let miscellaneous = {
 
 						// Sanity check
 						if (typeof student === "undefined") {
-							throw "Student not found!";
+							throw Error("Student not found!");
 						}
 
 						// Save
@@ -581,7 +611,7 @@ let parseStrategies = {
 	byRowJSON: function (saveFunction, ignoreSaveErrors = false, ...multiLineVariables) {
 		// Basic sanity check
 		if (typeof saveFunction !== "function" || typeof ignoreSaveErrors !== "boolean") {
-			throw "Invalid arguments!";
+			throw Error("Invalid arguments!");
 		}
 
 		//Get worksheet
@@ -598,7 +628,7 @@ let parseStrategies = {
 				let rowContents = {};
 				let keys = Object.keys(row);
 				for (let col of keys) {
-					if (multiLineVariables.indexOf(col) === -1) {
+					if (multiLineVariables.indexOf(col) === -1 || row[col] === "") {		//The blank string is to fix an XLSX issue that only appears to be in UndergraduateRecordCourses
 						rowContents[col] = row[col];
 					} else {
 						preservedVariables[col] = row[col];
@@ -608,8 +638,16 @@ let parseStrategies = {
 				// Mash them together and save
 				let result = Ember.$.extend({}, rowContents, preservedVariables);
 				// Save values for row, and store the promise returned; ignore errors if requested
+				try {
 				let savePromise = ignoreSaveErrors ? saveFunction(result).catch((err) => console.warn(err)) : saveFunction(result);
 				savePromises.push(savePromise);
+				} catch (err) {
+					if (ignoreSaveErrors) {
+						console.warn(err);
+					} else {
+						throw err;
+					}
+				}
 			}
 			// Wait on all saves and only resolve when finished
 			Promise.all(savePromises).then(resolve).catch(reject);
@@ -629,7 +667,7 @@ let parseStrategies = {
 	byRow: function (savePreviousRowValue, saveFunction, ignoreSaveErrors = false) {
 		// Basic sanity check
 		if (typeof savePreviousRowValue !== "boolean" || typeof saveFunction !== "function" || typeof ignoreSaveErrors !== "boolean") {
-			throw "Invalid arguments!";
+			throw Error("Invalid arguments!");
 		}
 
 		//Get worksheet
@@ -685,7 +723,7 @@ let parseStrategies = {
 	singleColumn: function (saveFunction, ignoreSaveErrors = false) {
 		// Basic sanity check
 		if (typeof saveFunction !== "function" || typeof ignoreSaveErrors !== "boolean") {
-			throw "Invalid arguments!";
+			throw Error("Invalid arguments!");
 		}
 
 		//Get worksheet
@@ -704,7 +742,7 @@ let parseStrategies = {
 				try {
 					cellValue = cell.v;
 					// HAX to handle Ouda file weirdness
-					if (cellValue === "---END OF FILE") { throw "Ignore this."; }
+					if (cellValue === "---END OF FILE") { throw Error("Ignore this."); }
 				} catch (err) {
 					// Try/Catch was present in high schools parsing
 					continue;	// Ignore erroring row
@@ -736,7 +774,7 @@ let parseStrategies = {
 		// Basic sanity check
 		if (typeof removeDuplicates !== "boolean" || columnsToRead.length <= 0 ||
 			contexts.length !== columnsToRead.length || typeof saveFunction !== "function" || typeof ignoreSaveErrors !== "boolean") {
-			throw "Invalid arguments!";
+			throw Error("Invalid arguments!");
 		}
 
 		//Get worksheet
@@ -818,17 +856,17 @@ let saveStrategies = {
 	modifyAndSave: function (emberName, filter, ...modifyObjects) {
 		// Basic sanity check
 		if (modifyObjects.length % 2 !== 0) {
-			throw "Missing a parameter in the list of properties to modify and their new value.";
+			throw Error("Missing a parameter in the list of properties to modify and their new value.");
 		}
 		else if (typeof filter !== "object" || filter === null || typeof emberName !== "string" || emberName.length <= 0) {
-			throw "Invalid emberName or filter!";
+			throw Error("Invalid emberName or filter!");
 		}
 
 		// Find the record to change
 		return this.get('store').query(emberName, { filter: filter }).then((models) => {
 			// No matching model found!
 			if (models.get('length') === 0) {
-				throw "No model matching filter " + filter + " was found.";
+				throw Error("No model matching filter " + filter + " was found.");
 			}
 			// Get the model
 			let model = models.get("firstObject");
@@ -864,7 +902,7 @@ let saveStrategies = {
 	createAndSave: function (recordJSON, emberName, ...relatedModels) {
 		// Basic sanity check
 		if (typeof recordJSON !== "object" || recordJSON === null || typeof emberName !== "string" || emberName.length <= 0) {
-			throw "Invalid arguments!";
+			throw Error("Invalid arguments!");
 		}
 
 		// Create a query JSON object with the ember models replaced with their IDs
@@ -898,8 +936,9 @@ let saveStrategies = {
 			let model = this.get('store').createRecord(emberName, recordJSON);
 
 			// Return promise of the record saving
-			return model.save().then(() => {
+			return model.save().then(res => {
 				console.log("Added " + emberName.replace("-", " "));
+				return res;
 			}).catch(err => {
 				// Logging
 				console.debug(err);
