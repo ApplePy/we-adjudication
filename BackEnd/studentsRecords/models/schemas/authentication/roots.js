@@ -1,7 +1,7 @@
 /**
  * Created by Abdelkader on 2017-02-23.
  */
-var mongoose = require('mongoose');
+let mongoose = require('./../../studentsRecordsDB').mongoose;
 var rootsSchema = mongoose.Schema(
     {
         password: String,

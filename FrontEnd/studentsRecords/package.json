@@ -22,6 +22,7 @@
   "devDependencies": {
     "async": "^2.1.5",
     "broccoli-asset-rev": "^2.4.5",
+    "crypto-browserify": "^3.11.0",
     "ember-ajax": "^2.4.1",
     "ember-browserify": "^1.1.13",
     "ember-cli": "2.9.1",

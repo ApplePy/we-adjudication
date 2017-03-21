@@ -83,13 +83,13 @@ api.use('/logicalExpressions', logicalExpressions);
 api.use('/programAdministrations', programAdministrations);
 
 //For authentication
-app.use('/users', users);
-app.use('/passwords', passwords);
-app.use('/roleCodes', roleCodes);
-app.use('/userRoles', userRoles);
-app.use('/rolePermissions', rolePermissions);
-app.use('/logins', logins);
-app.use('/roots', roots);
+api.use('/users', users);
+api.use('/passwords', passwords);
+api.use('/roleCodes', roleCodes);
+api.use('/userRoles', userRoles);
+api.use('/rolePermissions', rolePermissions);
+api.use('/logins', logins);
+api.use('/roots', roots);
 
 // Set default serve
 if (process.env.NODE_ENV === 'production') app.use(express.static('dist'));
