@@ -37,6 +37,11 @@
         Manage Adjudication Rules
       </a>
 
+      <a class="item" {{action "adjudicateTab"}}>
+        <i class="large write icon"></i>
+        Adjudicate Students
+      </a>
+
       <a class="item " {{action "about"}}>
         <i class="large user icon"></i>
         About
@@ -69,6 +74,9 @@
       {{/if}}
       {{#if isManageRulesShowing}}
         {{manage-rules}}
+      {{/if}}
+{{#if isAdjudicationTabShowing}}
+        {{adjudication-tab}}
       {{/if}}
     </div>
   </div>

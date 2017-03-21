@@ -59,8 +59,9 @@
     <div class="item" data-tab="admission">Admission Record</div>
     <div class="item" data-tab="programRecord">Program Records</div>
     <div class="item" data-tab="advancedStanding">Advanced Standing</div>
-    <div class="item" data-tab="scholarshipsAwards">Scholarships and Awards</div>
+   <!-- <div class="item" data-tab="scholarshipsAwards">Scholarships and Awards</div> -->
     <div class="item" data-tab="highSchool">High School</div>
+    <div class="item" data-tab="adjudication">Adjudication</div>
   </div>
   <div class="ui bottom attached active tab segment"data-tab="basics">
     <!-- student basic information !-->
@@ -185,19 +186,15 @@
     <br>
      <div class="ui button" {{action "addCourse"}}>Add Course</div>
     {{#if showNewCourse}}
-    {{add-advanced-standing newrecipient = currentStudent notDONE = showNewCourse standings = advancedStandingArray}} <!-- INDEX = currentIndex notDONE = showFindStudent offset = offset studentsModel = studentsRecords -->
+    {{add-advanced-standing newrecipient = currentStudent notDONE = showNewCourse standings = advancedStandingArray}}
     {{/if}}
-  </div>
+   <!-- </div> -->
 
-  <div class="ui tab" data-tab="scholarshipsAwards">
-    <!-- scholarships and awards !-->
-    <br>
-    <h2>{{currentStudent.number}}</h2>
-    <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
-   <!-- <table class="ui three column very basic table">
-  <tr><td><h4>Note</h4></td></tr>
-  </table> -->
-  <h4>Note</h4>
+
+<div class="ui divider"></div>
+<div class="ui segment">
+<h3>Scholarships and Awards</h3>
+<h4>Note</h4>
     {{#each awardNotes as |award|}}
     {{scholarships-awards award = award awards = awardNotes}}
     <br>
@@ -208,9 +205,9 @@
     {{#if showNewAward}}
     {{add-award newrecipient = currentStudent studentID = currentStudent.number notDONE = showNewAward awards = awardNotes}}
     {{/if}}
+</div>
   </div>
  
-
 <div class="ui tab" data-tab="highSchool">
     <!-- High school !-->
     <br>
@@ -219,6 +216,16 @@
     {{#if currentStudent}}
     {{high-school student = currentStudent}}
     {{/if}}
+</div>
+
+<div class="ui tab" data-tab="adjudication">
+    <br>
+    <h2>{{currentStudent.number}}</h2>
+    <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
+     {{#each termModel as |term|}}
+    {{manual-adjudication student = currentStudent currentTerm = term codesArray = codeModel}}
+    <br>
+    {{/each}}
 </div>
 
 {{/if}}

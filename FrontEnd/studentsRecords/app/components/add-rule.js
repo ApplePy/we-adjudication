@@ -1,5 +1,4 @@
 import Ember from 'ember';
-
 export default Ember.Component.extend({
   store: Ember.inject.service(),
   ruleArray: null,
@@ -9,75 +8,91 @@ export default Ember.Component.extend({
   devBool: null,
   confirming: null,
   notDONE: null,
-
   parameters: [
     {
-      id: 0,
-      val: "Program",
-      description: "Program"
+      id: 0, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "CourseLetter"
     },
     {
-      id: 1,
-      val: "adjudication.termAvg",
-      description: "Term Average"
+      id: 1, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "CourseLetterAndNumber"
     },
     {
-      id: 2,
-      val: "course.grade",
-      description: "Grade"
+      id: 2, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "CourseNumber"
     },
     {
-      id: 3,
-      val: "course",
-      description: "Course"
+      id: 3, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "CourseName"
+    },
+    {
+      id: 4, oprs: [
+                    {id: 0, description: ">"},
+                    {id: 1, description: ">="},
+                    {id: 2, description: "=="},
+                    {id: 3, description: "<="},
+                    {id: 4, description: "<"},
+                    {id: 5, description: "!="}],
+      description: "CourseUnit"
+    },
+    {
+      id: 5, oprs: [
+                    {id: 0, description: ">"},
+                    {id: 1, description: ">="},
+                    {id: 2, description: "=="},
+                    {id: 3, description: "<="},
+                    {id: 4, description: "<"},
+                    {id: 5, description: "!="}],
+      description: "CumulativeAverage"
+    },
+    {
+      id: 6, oprs: [
+                    {id: 0, description: ">"},
+                    {id: 1, description: ">="},
+                    {id: 2, description: "=="},
+                    {id: 3, description: "<="},
+                    {id: 4, description: "<"},
+                    {id: 5, description: "!="}],
+      description: "Mark"
+    },
+    {
+      id: 7, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "ProgramName"
+    },
+    {
+      id: 8, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "ProgramLevel"
+    },
+    {
+      id: 9, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "ProgramLoad"
+    },
+    {
+      id: 10, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "ProgramStatus"
+    },
+    {
+      id: 11, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "Plan"
+    },
+    {
+      id: 12, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "Rule"
+    },
+    {
+      id: 13, oprs: [{id: 0, description: ">"},
+                    {id: 1, description: ">="},
+                    {id: 2, description: "=="},
+                    {id: 3, description: "<="},
+                    {id: 4, description: "<"},
+                    {id: 5, description: "!="}],
+      description: "TermAverage"
     }
   ],
-  oprs: [
-    {
-      id: 0,
-      val: '>',
-      description: 'greater than'
-    },
-    {
-      id: 1,
-      val: ">=",
-      description: "greater than or equal to"
-    },
-    {
-      id: 2,
-      val: "==",
-      description: "equals"
-    },
-    {
-      id: 3,
-      val: "<=",
-      description: "less than or equal to"
-    },
-    {
-      id: 4,
-      val: "<",
-      description: "less than"
-    },
-    {
-      id: 5,
-      val: "!=",
-      description: "not equal"
-    }
-  ],
+  oprs: [],
   links: [
     {
       id: 0,
       val: "&&",
-      description: "and"
+      description: "AND"
     },
     {
       id: 1,
       val: "||",
-      description: "or"
+      description: "OR"
     }
   ],
   newValue: null,
-
   init(){
     this._super(...arguments);
     this.set('devBool', true);
@@ -86,10 +101,12 @@ export default Ember.Component.extend({
     this.set('selectedParam', null);
     this.set('selectedOpr', null);
   },
-
   actions:{
     addRule(){
       if(this.get('selectedOpr') !== null && this.get('selectedParam') !== null && this.get('newValue') !== null){
+        if(this.get('selectedParam').description === "Rule"){
+          this.set('newValue', '[' + this.get('newValue') + ']');
+        }
         var rule = {
           parameter: this.get('selectedParam'),
           opr: this.get('selectedOpr'),
@@ -100,15 +117,12 @@ export default Ember.Component.extend({
         this.set('newValue', null);
         this.set('devBool', false);
       } else {
-
       }
     },
-
     selectOpr(opr){
       var obj = this.get('oprs')[opr];
       this.set('selectedOpr', obj);
     },
-
     selectLink(link){
         var obj = this.get('links')[link];
         var rule = this.get('rulesToBeAdded').get('lastObject');
@@ -122,12 +136,11 @@ export default Ember.Component.extend({
         this.get('rulesToBeAdded').pushObject(newRule);
         this.set('devBool', true);
     },
-
     selectParam(param){
       var obj = this.get('parameters')[param];
+      this.set('oprs', obj.oprs);
       this.set('selectedParam', obj);
     },
-
     cancelLink(){
       var rule = this.get('rulesToBeAdded').get('lastObject');
       var newRule = {
@@ -140,15 +153,12 @@ export default Ember.Component.extend({
       this.get('rulesToBeAdded').pushObject(newRule);
       this.set('devBool', false);
     },
-
     removeRule(rule){
       this.set('rulesToBeAdded', this.get('rulesToBeAdded').without(rule))
     },
-
     doneAdding(){
       this.set('confirming', true);
     },
-
     saveRule(){
       //Set up the boolean expression
       var rules = this.get('rulesToBeAdded');
@@ -166,22 +176,17 @@ export default Ember.Component.extend({
         logicalLink: null,
         assessmentCode: null
       });
-
       var self = this;
       newRule.save().then(function(record){
         self.get('ruleArray').pushObject(record);
       });
-
       this.set('notDONE', false);
     },
-
     notConfirmed(){
       this.set('confirming', false);
     },
-
     cancel(){
       this.set('notDONE', false);
     }
   }
-
 });
