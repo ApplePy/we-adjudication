@@ -1,0 +1,36 @@
+{{#if isAdding}}
+  <div class="inline field">
+    <select onchange={{action 'selectPlan' value="target.value"}}>
+      {{#each planModel as |planChoice|}}
+        <option value={{planChoice.id}}>{{planChoice.booleanExp}}</option>
+      {{/each}}
+    </select>
+  </div>
+  <br>
+<div class="inline field">
+  <button class="ui icon button" {{action 'savePlan'}} title="Save">
+    <i class="check icon"></i>
+  </button>
+  <button class="ui icon button" {{action 'cancelAdd'}} title="Cancel">
+    <i class="delete icon"></i>
+  </button>
+</div>
+{{else if addedRule}}
+  <div class="two wide field">
+    <select class="ui search dropdown" onchange={{action 'selectLink' value="target.value"}}>
+      <option disabled selected>link</option>
+      {{#each links as |link|}}
+        <option value={{link.id}}>{{link.description}}</option>
+      {{/each}}
+    </select>
+  </div>
+{{else}}
+<div class="inline field">
+  <label>Add a Rule </label>
+<button class="ui icon button" {{action 'addPlan'}} title="Add a course">
+  <i class="plus icon"></i>
+</button>
+</div>
+{{/if}}
+<br>
+

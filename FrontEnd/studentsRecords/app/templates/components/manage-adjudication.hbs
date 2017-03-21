@@ -1,0 +1,35 @@
+<h1>Manage Adjudication Codes <div class="ui green button" {{action "addNewCode"}}>Add New Code</div></h1>
+<table class="ui fixed sixteen column very basic table">
+  <tr>
+<td class="two wide"><h4>Code</h4></td>
+<td class="three wide"><h4>Description</h4></td>
+<td class="seven wide"><h4>Rules</h4></td>
+<td class="two wide"></td>
+ <td class="two wide"></td>
+</tr>
+{{#each codeModel as |assessmentCode| }}
+<tr>
+<td class="two wide">{{assessmentCode.code}}</td>
+<td class="three wide">{{assessmentCode.name}}</td>
+<td class="seven wide">
+  <ul>
+    {{#each assessmentCode.logicalExpressions as |rule|}}
+  <li>{{rule.booleanExp}} {{rule.logicalLink}}</li>
+  {{/each}}
+  </ul>
+  </td>
+<td class="two wide"><div class="ui positive button" {{action "editCode" assessmentCode}}>Update</div></td>
+<td class="two wide"><div class="ui negative button" {{action "deletePressed" assessmentCode}}>Delete</div></td>
+</tr>
+{{/each}}
+
+</table>
+{{#if addNewCode}}
+{{add-assessmentcode notDONE=addNewCode codes=codeModel}}
+
+{{else if isDeletePressed}}
+{{confirm-delete notDONE=isDeletePressed onConfirm=(action 'deleteCode')}}
+
+{{else if isEditPressed}}
+{{edit-adjudicationcode notDONE=isEditPressed codeToEdit=code ruleModel=ruleModel codeModel = codeModel}}
+{{/if}}

@@ -1,0 +1,23 @@
+<h1>Import Student's Records</h1>
+
+<span class="ui basic {{if processError 'error'}} segment">
+	<div class="ui {{if processing 'active'}} inverted dimmer">
+		<div class="ui tiny indeterminate text loader">Uploading</div>
+	</div>
+	<input type="file" id="excelSheet">
+	<button class="ui {{if processError 'red' 'blue'}} button" {{action 'uploadFile'}}>Upload</button>
+</span>
+
+<div class="ui segment">
+	<h3>Upload file's in the following order with the correct name:</h3>
+	<ol>
+		{{#each files as |file|}}
+		<li>
+			{{file.name}}
+			{{#if file.complete}}<i class="green check circle icon"></i>{{/if}}
+		</li>
+		{{/each}}
+	</ol>
+	<p>***Files names are case sensitive***</p>
+	<p>***Files must be of type .xlsx***</p>
+</div>

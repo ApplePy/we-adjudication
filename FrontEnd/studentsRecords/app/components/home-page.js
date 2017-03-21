@@ -11,67 +11,15 @@ export default Ember.Component.extend({
     });
   },
 
-  isHomeShowing: true,
-  isStudentsRecordsDataEntry: false,
-  isManageSystemShowing: false,
-  isAdding: false,
-  isAboutShowing: false,
-  isHighSchoolShowing: false,
-
-
-  actions: {
-    home () {
-      this.set('isHomeShowing', true);
-      this.set('isStudentsRecordsDataEntry', false);
-      this.set('isManageSystemShowing', false);
-      this.set('isAboutShowing', false);
-      this.set('isAdding', false);
-      this.set('isHighSchoolShowing', false);
-    },
-
-    studentsDataEntry (){
-      this.set('isHomeShowing', false);
-      this.set('isStudentsRecordsDataEntry', true);
-      this.set('isManageSystemShowing', false);
-      this.set('isAboutShowing', false);
-      this.set('isAdding', false);
-      this.set('isHighSchoolShowing', false);
-    },
-
-    manageSystem (){
-      this.set('isHomeShowing', false);
-      this.set('isStudentsRecordsDataEntry', false);
-      this.set('isManageSystemShowing', true);
-      this.set('isAboutShowing', false);
-      this.set('isAdding', false);
-      this.set('isHighSchoolShowing', false);
-    },
-
-    manageHighSchoolData (){
-      this.set('isHighSchoolShowing', true);
-      this.set('isHomeShowing', false);
-      this.set('isStudentsRecordsDataEntry', false);
-      this.set('isManageSystemShowing', false);
-      this.set('isAboutShowing', false);
-      this.set('isAdding', false);
-    },
-
-    addStudent (){
-      this.set('isHomeShowing', false);
-      this.set('isStudentsRecordsDataEntry', false);
-      this.set('isManageSystemShowing', false);
-      this.set('isAboutShowing', false);
-      this.set('isAdding', true);
-      this.set('isHighSchoolShowing', false);
-    },
-
-    about (){
-      this.set('isHomeShowing', false);
-      this.set('isStudentsRecordsDataEntry', false);
-      this.set('isManageSystemShowing', false);
-      this.set('isAboutShowing', true);
-      this.set('isAdding', false);
-      this.set('isHighSchoolShowing', false);
-    }
-  }
+  pages: [
+    {route: "home", icon: "large home icon", text: "Home"},
+    {route: "home.students", icon: "large leanpub icon", text: "Students Records"},
+    {route: "home.add-student", icon: "large add user icon", text: "Add Student"},
+    {route: "home.manage-high-school", icon: "large address book icon", text: "Manage High School Data"},
+    {route: "home.manage-system", icon: "large code icon", text: "Manage System"},
+    {route: "home.import", icon: "large download icon", text: "Import Student Records"},
+    {route: "home.manage-adjudication-codes", icon: "large code icon", text: "Manage Adjudication Codes"},
+    {route: "home.manage-adjudication-rules", icon: "large write icon", text: "Manage Adjudication Rules"},
+    {route: "home.about", icon: "large user icon", text: "About"}
+  ]
 });

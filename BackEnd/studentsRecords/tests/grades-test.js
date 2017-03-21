@@ -34,7 +34,7 @@ let filterValueSearches = [
     'mark',
     'note'
 ];
-let requiredValues = ['mark'];
+let requiredValues = [];
 let uniqueValues = [];
 
 // Remember to change QueryOperand functions and postPut/postPost/postDelete hooks as appropriate
