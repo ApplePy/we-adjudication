@@ -7,7 +7,16 @@ const Router = Ember.Router.extend({
 });
 
 Router.map(function() {
-  this.route('home', {path: '/'});
+  this.route('home', {path: '/'}, function() {
+    this.route('welcome', {path: '/'});
+    this.route('students');
+    this.route('manage-system');
+    this.route('about');
+    this.route('add-student');
+    this.route('manage-adjudication-codes');
+    this.route('manage-high-school');
+    this.route('manage-adjudication-rules');
+  });
 });
 
 export default Router;

@@ -11,102 +11,14 @@ export default Ember.Component.extend({
     });
   },
 
-  isHomeShowing: true,
-  isStudentsRecordsDataEntry: false,
-  isManageSystemShowing: false,
-  isManageRulesShowing: false,
-  isAdding: false,
-  isAboutShowing: false,
-  isHighSchoolShowing: false,
-  isManageAdjudicationShowing: false,
-
-  actions: {
-    home () {
-      this.set('isHomeShowing', true);
-      this.set('isStudentsRecordsDataEntry', false);
-      this.set('isManageSystemShowing', false);
-      this.set('isManageRulesShowing', false);
-      this.set('isAboutShowing', false);
-      this.set('isAdding', false);
-      this.set('isHighSchoolShowing', false);
-      this.set('isManageAdjudicationShowing', false);
-    },
-
-    studentsDataEntry (){
-      this.set('isHomeShowing', false);
-      this.set('isStudentsRecordsDataEntry', true);
-      this.set('isManageSystemShowing', false);
-      this.set('isManageRulesShowing', false);
-      this.set('isAboutShowing', false);
-      this.set('isAdding', false);
-      this.set('isHighSchoolShowing', false);
-      this.set('isManageAdjudicationShowing', false);
-    },
-
-    manageSystem (){
-      this.set('isHomeShowing', false);
-      this.set('isStudentsRecordsDataEntry', false);
-      this.set('isManageSystemShowing', true);
-      this.set('isManageRulesShowing', false);
-      this.set('isAboutShowing', false);
-      this.set('isAdding', false);
-      this.set('isHighSchoolShowing', false);
-      this.set('isManageAdjudicationShowing', false);
-    },
-
-    manageHighSchoolData (){
-      this.set('isHighSchoolShowing', true);
-      this.set('isHomeShowing', false);
-      this.set('isStudentsRecordsDataEntry', false);
-      this.set('isManageRulesShowing', false);
-      this.set('isManageSystemShowing', false);
-      this.set('isAboutShowing', false);
-      this.set('isAdding', false);
-      this.set('isManageAdjudicationShowing', false);
-    },
-
-    addStudent (){
-      this.set('isHomeShowing', false);
-      this.set('isStudentsRecordsDataEntry', false);
-      this.set('isManageSystemShowing', false);
-      this.set('isManageRulesShowing', false);
-      this.set('isAboutShowing', false);
-      this.set('isAdding', true);
-      this.set('isHighSchoolShowing', false);
-      this.set('isManageAdjudicationShowing', false);
-    },
-
-     manageAdjudication (){
-      this.set('isHomeShowing', false);
-      this.set('isStudentsRecordsDataEntry', false);
-      this.set('isManageSystemShowing', false);
-      this.set('isManageRulesShowing', false);
-      this.set('isAboutShowing', false);
-      this.set('isAdding', false);
-      this.set('isHighSchoolShowing', false);
-      this.set('isManageAdjudicationShowing', true);
-    },
-
-    manageRules(){
-      this.set('isHomeShowing', false);
-      this.set('isStudentsRecordsDataEntry', false);
-      this.set('isManageSystemShowing', false);
-      this.set('isManageRulesShowing', true);
-      this.set('isAboutShowing', false);
-      this.set('isAdding', false);
-      this.set('isHighSchoolShowing', false);
-      this.set('isManageAdjudicationShowing', false);
-    },
-
-    about (){
-      this.set('isHomeShowing', false);
-      this.set('isStudentsRecordsDataEntry', false);
-      this.set('isManageSystemShowing', false);
-      this.set('isManageRulesShowing', false);
-      this.set('isAboutShowing', true);
-      this.set('isAdding', false);
-      this.set('isHighSchoolShowing', false);
-      this.set('isManageAdjudicationShowing', false);
-    }
-  }
+  pages: [
+    {route: "home", icon: "large home icon", text: "Home"},
+    {route: "home.students", icon: "large leanpub icon", text: "Students Records"},
+    {route: "home.add-student", icon: "large add user icon", text: "Add Student"},
+    {route: "home.manage-high-school", icon: "large address book icon", text: "Manage High School Data"},
+    {route: "home.manage-system", icon: "large code icon", text: "Manage System"},
+    {route: "home.manage-adjudication-codes", icon: "large code icon", text: "Manage Adjudication Codes"},
+    {route: "home.manage-adjudication-rules", icon: "large write icon", text: "Manage Adjudication Rules"},
+    {route: "home.about", icon: "large user icon", text: "About"}
+  ]
 });
