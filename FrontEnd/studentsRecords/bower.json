@@ -4,7 +4,7 @@
     "ember": "~2.9.0",
     "ember-cli-shims": "0.1.3",
     "semantic-ui": "^2.2.6",
-    "blob": "*"
+    "blob": "*",
     "async": "^2.1.5"
   }
 }
