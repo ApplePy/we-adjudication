@@ -1,0 +1,87 @@
+<div class="ui modal">
+  {{#if term}}
+    <div class="header">Edit Term Information</div>
+    <div class="content">
+      <div class="ui form">
+        <div class="inline field">
+          <label>Term Name</label>
+          <select onchange={{action 'selectTerm' value="target.value"}}>
+            {{#each termCodes as |termChoice|}}
+              <option value={{termChoice.id}} selected={{eq term.termCode.id termChoice.id}}>{{termChoice.name}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+      <br>
+      <div class="actions">
+        <br>
+        <div class="ui green button" {{action 'saveTerm' term}}>Save</div>
+        <div class="ui red basic button" {{action "close" term}}>Cancel</div>
+      </div>
+    </div>
+  {{/if}}
+  {{#if program}}
+    <div class="header">Edit Program Information</div>
+    <div class="content">
+      <div class="ui form">
+        <div class="inline field">
+          <label>Program Name</label>
+          {{input size="20" type="text" value = program.name}}
+        </div>
+        <div class="inline field">
+          <label>Program Level</label>
+          {{input size="20" type="text" value = program.level}}
+        </div>
+        <div class="inline field">
+          <label>Load</label>
+          <select onchange={{action 'selectLoad' value="target.value"}}>
+            {{#each loadModel as |loadChoice|}}
+              <option value={{loadChoice.id}} selected={{eq program.load.id loadChoice.id}}>{{loadChoice.load}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="inline field">
+          <label>Status</label>
+          <select onchange={{action 'selectStatus' value="target.value"}}>
+            {{#each statusModel as |statusChoice|}}
+              <option value={{statusChoice.id}} selected={{eq program.status.id statusChoice.id}}>{{statusChoice.status}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+    </div>
+      <br>
+      <div class="actions">
+        <br>
+        <div class="ui green button" {{action 'saveProgram' program}}>Save</div>
+        <div class="ui red basic button" {{action "close" program}}>Cancel</div>
+      </div>
+  {{/if}}
+  {{#if course}}
+    <div class="header">Edit Course Information</div>
+    <div class="content">
+      <div class="ui form">
+        <div class="inline field">
+          <label>Grade</label>
+          {{input size="10" type="number" value = course.gradeInfo.mark}}
+        </div>
+        <div class="inline field">
+          <label>Note</label>
+          {{textarea cols="5" rows="5" value = course.gradeInfo.note}}
+        </div>
+          {{manage-courses course = course}}
+        <br>
+        <p>
+          Note: A course must be associated with a grade to be recognized by the system.  A grade must be
+          associated with a course to be viewed in the student record
+        </p>
+        <div class="actions">
+          <br>
+          <div class="ui green button" {{action 'saveRecord' course}}>Save</div>
+          <div class="ui red basic button" {{action "closeCourse" course course.gradeInfo.id}}>Cancel</div>
+
+        </div>
+      </div>
+    </div>
+  {{/if}}
+</div>

@@ -1,0 +1,73 @@
+{{#each codes as |codeObj|}}
+<div class="ui segment">
+  <h2 class="ui header">{{codeObj.name}}</h2>
+  <div class="ui action input">
+      <!-- Loop through input properties that need to be filled out -->
+      {{#each codeObj.inputModelProp as |inputProp index|}}
+
+        <!-- If matching property model is a string or number, display an input box -->
+        {{#if (or (eq inputProp.type "string") (eq inputProp.type "number"))}}
+          {{input type=inputProp.type placeholder=(lookup codeObj.placeholder index) id=(append-number codeObj.emberName index)}}
+
+        <!-- If matching property model is an ember model, display a dropdown -->
+        {{else if (eq inputProp.type "model")}}
+          <select class="ui search dropdown" id={{append-number codeObj.emberName index}}>
+            <option disabled selected>{{lookup codeObj.placeholder index}}</option>
+
+            {{#each (get lists inputProp.modelName) as |element|}}
+              <option value={{element.id}}>{{get element inputProp.modelLabel}}</option>
+            {{else}}
+              <option>No options found</option>
+            {{/each}}
+
+          </select>
+        {{/if}}
+
+      {{/each}}
+      <!-- Add new content button -->
+      <button class="positive ui button" {{action 'addCode' codeObj}}>Add</button>
+  </div>
+
+  <div class="ui divider"></div>
+
+  <!-- Loop through the list of objects and display them -->
+  {{#each (get lists codeObj.emberName) as |code eleIndex|}}
+    <br>
+      <div class="ui input">
+
+        <!-- Loop through the properties of this model -->
+        {{#each codeObj.inputModelProp as |prop index|}}
+
+        <div class={{concat "ui icon input " (append-number codeObj.emberName eleIndex)}} onclick={{action "resetState"}}>
+          <!-- If matching property model is a string or number, display an input box -->
+          {{#if (or (eq prop.type "string") (eq prop.type "number"))}}
+            {{input type=prop.type value=(mut (get code prop.name))}}
+          <!-- If matching property model is an ember model, display a dropdown -->
+
+          {{else if (eq prop.type "model")}}
+            <select
+             class="ui search dropdown"
+             id={{append-number codeObj.emberName index}}>
+
+              {{#each (get lists prop.modelName) as |element|}}
+                <option value={{element.id}}
+                selected={{eq (get (get code prop.name) "id") element.id}}>
+                {{get element prop.modelLabel}}
+                {{!--{{code.sourceID}}--}}
+                </option>
+              {{/each}}
+
+            </select>
+
+          {{/if}}
+        </div>
+        {{/each}}
+
+        <button disabled class="ui primary button buttonmodify" {{action 'modifyCode' codeObj.emberName code eleIndex}}>Save</button>
+        <button class="negative ui button" {{action 'deleteCode' codeObj.emberName code.id}}>Delete</button>
+      </div>
+      <br>
+    {{/each}}
+
+</div>
+{{/each}}

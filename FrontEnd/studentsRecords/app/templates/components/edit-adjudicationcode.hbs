@@ -1,0 +1,39 @@
+<div class="ui modal">
+  <div class="header">Edit {{codeToEdit.code}}</div>
+  <div class="content">
+      <div class="ui form">
+
+        <div class="inline field">
+        <label>Code</label>
+        {{input type="text" value=codeToEdit.code}}
+        </div>
+
+        <div class="inline field">
+        <label>Description</label>
+        {{textarea rows='8' cols='8' value=codeToEdit.name}}
+        </div>
+
+
+        <label>Rules</label>
+        {{#each codeToEdit.logicalExpressions as |rule|}}
+         <p>{{rule.booleanExp}} {{rule.logicalLink}}
+          <div class="ui red icon button" {{action 'deleteRule' rule}}>
+          <i class="delete icon"></i>
+          </div>
+          </p>
+        {{/each}}
+        {{#if codeToEdit.logicalExpressions}}
+          {{adjudicationrules-dropdown program = codeToEdit.id planModel = ruleModel addedRule = true}}
+        {{else}}
+          {{adjudicationrules-dropdown program = codeToEdit.id planModel = ruleModel addedRule = false}}
+        {{/if}}
+
+      <p>Caution!  If you add a rule that is already attached to a code, it will be removed from that code</p>
+    </div>
+    <div class="actions">
+        <br>
+        <div class="ui green button" {{action 'saveCode'}}>Save</div>
+        <div class="ui red basic button" {{action "close"}}>Cancel</div>
+    </div>
+  </div>
+</div>

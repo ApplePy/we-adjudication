@@ -5,6 +5,10 @@ export default Ember.Component.extend({
   showAllStudents: false,
   residencyModel: null,
   genderModel: null,
+  statusModel: null,
+  loadModel: null,
+  planModel: null,
+  termCodeModel: null,
   selectedResidency: null,
   selectedGender: null,
   selectedDate: null,
@@ -26,6 +30,8 @@ export default Ember.Component.extend({
   showNewAward: false,
   awardNotes: [],
   advancedStandingArray: [],
+  termModel: [],
+  updateAdmission: false,
 
   studentModel: Ember.observer('offset', function () {
     var self = this;
@@ -66,6 +72,42 @@ export default Ember.Component.extend({
       self.set('genderModel', records);
     });
 
+    this.get('store').findAll('program-status').then(function (records) {
+      self.set('statusModel', records);
+    });
+
+    this.get('store').findAll('plan-code').then(function (records) {
+      self.set('planModel', records);
+    });
+
+    this.get('store').findAll('course-load').then(function (records) {
+      self.set('loadModel', records);
+    });
+
+    this.get('store').findAll('term-code').then(function(records){
+      self.set('termCodeModel', records);
+    });
+
+    //load all of the grades into the store
+    this.get('store').query('grade', {limit: 10}).then((records) => {
+      if( typeof records.get('meta') === "object" &&
+        typeof records.get('meta').total === "number" &&
+        10 < records.get('meta').total)
+      {
+        this.get('store').query('grade', {limit: records.get('meta').total - 10, offset: 10});
+      }
+    });
+
+    //Load all of the program records into the store
+    this.get('store').query('program-record', {limit: 10}).then((records) => {
+      if( typeof records.get('meta') === "object" &&
+        typeof records.get('meta').total === "number" &&
+        10 < records.get('meta').total)
+      {
+        this.get('store').query('program-record', {limit: records.get('meta').total - 10, offset: 10});
+      }
+    });
+
     // load first page of the students records
     this.set('limit', 10);
     this.set('offset', 0);
@@ -81,8 +123,6 @@ export default Ember.Component.extend({
 
       // Show first student data
       self.set('currentIndex', self.get('firstIndex'));
-
-
     });
 
   },
@@ -95,32 +135,82 @@ export default Ember.Component.extend({
     this.set('selectedDate', datestring);
 
     //Fixes gender/residency bug
-
     this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
     this.set('awardNotes', []);
     this.set('advancedStandingArray', []);
+    this.set('termModel', []);
 
     this.set('selectedGender', this.get('currentStudent').get('genderInfo').get('id'));
 
     this.get('store').query('award', {
-         filter: {
-           recipient: this.get('currentStudent').id
-         }
-       }).then((awards) => {
-        for(var i = 0; i < awards.get('length'); i++) {
-          this.get('awardNotes').pushObject(awards.objectAt(i));
-        }
-       });
+      filter: {
+        recipient: this.get('currentStudent').id
+      }
+    }).then((awards) => {
+      for (var i = 0; i < awards.get('length'); i++) {
+        this.get('awardNotes').pushObject(awards.objectAt(i));
+      }
+    });
 
-       this.get('store').query('advanced-standing', {
-         filter: {
-           recipient: this.get('currentStudent').id
-         }
-       }).then((standing) => {
-        for(var i = 0; i < standing.get('length'); i++) {
-          this.get('advancedStandingArray').pushObject(standing.objectAt(i));
+    this.get('store').query('advanced-standing', {
+      filter: {
+        recipient: this.get('currentStudent').id
+      }
+    }).then((standing) => {
+      for (var i = 0; i < standing.get('length'); i++) {
+        this.get('advancedStandingArray').pushObject(standing.objectAt(i));
+      }
+    });
+
+     //Load all of the terms for this student
+     var baseLimit = 10;
+     this.get('store').query('term', {
+        limit: baseLimit,
+        filter: {
+          student: this.get('currentStudent').id
         }
-       });
+     }).then((terms) => {
+
+       for(var i = 0; i < terms.get('length'); i++) {
+          var term = terms.objectAt(i);
+          this.get('termModel').pushObject(term);
+
+          this.get('store').query('course-code', {limit: baseLimit, filter: {termInfo: term.id}}).then((records) => {
+            if( typeof records.get('meta') === "object" &&
+                typeof records.get('meta').total === "number" &&
+                baseLimit < records.get('meta').total)
+            {
+                this.get('store').query('course-code', {limit: records.get('meta').total - baseLimit, offset: baseLimit, filter: {termInfo: term.id}});
+            }
+          });
+       }
+
+       if( typeof terms.get('meta') === "object" &&
+         typeof terms.get('meta').total === "number" &&
+         baseLimit < terms.get('meta').total)
+       {
+         this.get('store').query('term', {
+           limit: terms.get('meta').total - baseLimit,
+           offset: baseLimit,
+           filter: {student: this.get('currentStudent').id}
+         }).then((moreTerms) => {
+           for(var i = 0; i < moreTerms.get('length'); i++) {
+             var term = moreTerms.objectAt(i);
+             this.get('termModel').pushObject(term);
+
+             this.get('store').query('course-code', {limit: baseLimit, filter: {termInfo: term.id}}).then((records) => {
+               if( typeof records.get('meta') === "object" &&
+                 typeof records.get('meta').total === "number" &&
+                 baseLimit < records.get('meta').total)
+               {
+                 this.get('store').query('course-code', {limit: records.get('meta').total - baseLimit, offset: baseLimit, filter: {termInfo: term.id}});
+               }
+             });
+           }
+         });
+       }
+     });
+
   },
 
   didRender() {
@@ -145,7 +235,6 @@ export default Ember.Component.extend({
       this.get('currentStudent').rollbackAttributes();
       //Change the selected values so it doesn't mess with next student
       this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
-      //WILL HAVE TO CHANGE GENDER BASED ON NEW MODEL
       this.set('selectedGender', this.get('currentStudent').get('genderInfo').get('id'));
       this.set('selectedDate', this.get('currentStudent').get('DOB').toISOString().substring(0, 10));
     },
@@ -243,6 +332,10 @@ export default Ember.Component.extend({
 
     addAward() {
       this.set('showNewAward', true);
+    },
+
+    updateAdmission() {
+      this.set('updateAdmission', true);
     },
   }
 });

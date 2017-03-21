@@ -45,7 +45,7 @@ let Route = function(Model,
                 return response.status(400).json({errors: {messages: verRes, request: request.body}});
 
             modelObj.save(function (error) {
-                if (error) response.status(500).send({errors: error});
+                if (error) response.status(500).send({errors: error, request: request.body});
                 else {
                     // Send success and call post hook
                     response.status(201).json({[modelNameEmberized]: modelObj});
@@ -165,7 +165,7 @@ let Route = function(Model,
                     modelObj.save(function (error) {
                         if (error) {
                             // Ends up here if the recipient specified is bad
-                            response.status(500).send({errors: error});
+                            response.status(500).send({errors: error, request: request.body});
                         }
                         else {
                             // Send success and call post hook

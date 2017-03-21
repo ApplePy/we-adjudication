@@ -57,8 +57,10 @@
   <div class="ui top attached tabular menu">
     <div class="active item" data-tab="basics">Basic Info</div>
     <div class="item" data-tab="admission">Admission Record</div>
+    <div class="item" data-tab="programRecord">Program Records</div>
     <div class="item" data-tab="advancedStanding">Advanced Standing</div>
     <div class="item" data-tab="scholarshipsAwards">Scholarships and Awards</div>
+    <div class="item" data-tab="highSchool">High School</div>
   </div>
   <div class="ui bottom attached active tab segment"data-tab="basics">
     <!-- student basic information !-->
@@ -68,7 +70,7 @@
         <div class="ui form">
           <div class="inline field">
             <label>Student Number</label>
-            {{input size="10" type="text"  value = currentStudent.number}}
+            {{input size="10" type="text" readonly = true value = currentStudent.number}}
           </div>
           <div class="inline field">
             <label>First Name</label>
@@ -120,28 +122,44 @@
     <br>
     <h2>{{currentStudent.number}}</h2>
       <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
-    <br><br>
+    <br>
         <div class="ui form">
           <div class="inline field">
             <label>Admission Average</label>
-            {{input type="number" value = currentStudent.admissionAverage}}
+            {{input type="input" readonly = true value = currentStudent.admissionAverage}}
           </div>
 
           <div class="inline field">
             <label>Basis Of Admission</label>
-            {{textarea cols="1" rows="6" value = currentStudent.basisOfAdmission}}
+            {{textarea cols="1" rows="6" readonly = true value = currentStudent.basisOfAdmission}}
           </div>
 
           <div class="inline field">
             <label>Admission Comments</label>
-            {{textarea cols="1" rows="6" value = currentStudent.admissionComments}}
+            {{textarea cols="1" rows="6" readonly = true value = currentStudent.admissionComments}}
           </div>
 
           <div class="inline field">
             <label>Registration Comments</label>
-            {{textarea cols="1" rows="6" value = currentStudent.registrationComments}}
+            {{textarea cols="1" rows="6" readonly = true value = currentStudent.registrationComments}}
           </div>
+
+          <div class="inline field">
+           <div class="ui positive button" {{action "updateAdmission"}}>Update</div>
+          </div>
+          {{#if updateAdmission}}
+    {{update-admission student = currentStudent notDONE = updateAdmission}} <!-- INDEX = currentIndex notDONE = showFindStudent offset = offset studentsModel = studentsRecords -->
+    {{/if}}
         </div>
+  </div>
+  <div class="ui tab" data-tab="programRecord">
+    <br>
+    <h2>{{currentStudent.number}}</h2>
+    <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
+    <!-- Display the program records for this student-->
+    {{program-records terms = termModel student = currentStudent statusModel = statusModel loadModel = loadModel
+                      planModel = planModel termCodes = termCodeModel}}
+
   </div>
 
   <div class="ui tab" data-tab="advancedStanding">
@@ -191,8 +209,19 @@
     {{add-award newrecipient = currentStudent studentID = currentStudent.number notDONE = showNewAward awards = awardNotes}}
     {{/if}}
   </div>
-{{/if}}
+ 
 
+<div class="ui tab" data-tab="highSchool">
+    <!-- High school !-->
+    <br>
+    <h2>{{currentStudent.number}}</h2>
+    <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
+    {{#if currentStudent}}
+    {{high-school student = currentStudent}}
+    {{/if}}
+</div>
+
+{{/if}}
 
 
 
