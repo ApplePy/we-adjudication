@@ -27,6 +27,13 @@ let departments = require('./routes/uwoadjudication/departments');
 let faculties = require('./routes/uwoadjudication/faculties');
 let logicalExpressions = require('./routes/uwoadjudication/logicalExpressions');
 let programAdministrations = require('./routes/uwoadjudication/programAdministrations');
+let logins = require('./routes/authentication/logins');
+let passwords = require('./routes/authentication/passwords');
+let roleCodes = require('./routes/authentication/roleCodes');
+let rolePermissions = require('./routes/authentication/rolePermissions');
+let roots = require('./routes/authentication/roots');
+let userRoles = require('./routes/authentication/userRoles');
+let users = require('./routes/authentication/users');
 
 
 app.use(function (request, response, next) {
@@ -74,6 +81,15 @@ api.use('/departments', departments);
 api.use('/faculties', faculties);
 api.use('/logicalExpressions', logicalExpressions);
 api.use('/programAdministrations', programAdministrations);
+
+//For authentication
+api.use('/users', users);
+api.use('/passwords', passwords);
+api.use('/roleCodes', roleCodes);
+api.use('/userRoles', userRoles);
+api.use('/rolePermissions', rolePermissions);
+api.use('/logins', logins);
+api.use('/roots', roots);
 
 // Set default serve
 if (process.env.NODE_ENV === 'production') app.use(express.static('dist'));

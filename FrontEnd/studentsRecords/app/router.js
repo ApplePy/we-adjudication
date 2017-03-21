@@ -7,6 +7,10 @@ const Router = Ember.Router.extend({
 });
 
 Router.map(function() {
+  this.route('import');
+  this.route('admin-portal');
+  this.route('login');
+  this.route('user');
   this.route('home', {path: '/'}, function() {
     this.route('welcome', {path: '/'});
     this.route('students');
