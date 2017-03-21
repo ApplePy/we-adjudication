@@ -367,8 +367,13 @@ export default Ember.Component.extend({
 											};
 										},
 										(record, rowContents) => {
+
 											// Modifiy a program record
-											record.set('plan', record.get('plan').addObject(values[4].find(el => el.get('name') === rowContents.plan)));
+											let plan = values[4].find(el => el.get('name') === rowContents.plan);
+											if (typeof plan === "undefined") {
+												throw Error("Cannot find plan!");
+											}
+											record.get('plan').pushObject(plan);
 										}, "studentNumber", "term", "program", "level", "load");
 								})
 								.then(() => {
@@ -386,7 +391,11 @@ export default Ember.Component.extend({
 										},
 										(record, rowContents) => {
 											// Modifiy a term
-											record.set('plan', record.get('plan').addObject(values[5].find(el => el.get('name') === rowContents.program && el.get('level') === parseInt(rowContents.level) && el.get('load.load') === rowContents.load)));
+											let programRecord = values[5].find(el => el.get('name') === rowContents.program && el.get('level') === parseInt(rowContents.level) && el.get('load.load') === rowContents.load);
+											if (typeof programRecord === "undefined") {
+												throw Error("Cannot find program record!");
+											}
+											record.get('programRecords').pushObject(programRecord);
 										}, "studentNumber", "term", "program", "level", "load");
 								});
 						})
@@ -455,13 +464,7 @@ let miscellaneous = {
 
 				// Continue once all the saves are done
 				return Promise.all(savePromises);
-			})
-			.catch(err => {
-				// If program record generation failed, rollback any unsaved records
-				this.get('store').peekAll(emberName).forEach(el => el.rollbackAttributes());
-
-				throw err;
-			})
+			});
 	},
 
 	/**
@@ -626,6 +629,16 @@ let parseStrategies = {
 
 			for (let row of sheetJSON) {
 				let rowContents = {};
+
+				// Don't process rows with ---END OF FILE on them
+				let cont = false;
+				for (let cell of Object.values(row)) {
+					if (cell === "---END OF FILE") {
+						cont = true;
+					}
+				}
+				if (cont === true) { continue; }
+
 				let keys = Object.keys(row);
 				for (let col of keys) {
 					if (multiLineVariables.indexOf(col) === -1 || row[col] === "") {		//The blank string is to fix an XLSX issue that only appears to be in UndergraduateRecordCourses
