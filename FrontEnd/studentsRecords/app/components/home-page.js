@@ -17,6 +17,7 @@ export default Ember.Component.extend({
     {route: "home.add-student", icon: "large add user icon", text: "Add Student"},
     {route: "home.manage-high-school", icon: "large address book icon", text: "Manage High School Data"},
     {route: "home.manage-system", icon: "large code icon", text: "Manage System"},
+    {route: "home.import", icon: "large download icon", text: "Import Student Records"},
     {route: "home.manage-adjudication-codes", icon: "large code icon", text: "Manage Adjudication Codes"},
     {route: "home.manage-adjudication-rules", icon: "large write icon", text: "Manage Adjudication Rules"},
     {route: "home.about", icon: "large user icon", text: "About"}

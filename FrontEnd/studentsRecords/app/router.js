@@ -11,6 +11,7 @@ Router.map(function() {
     this.route('welcome', {path: '/'});
     this.route('students');
     this.route('manage-system');
+    this.route('import');
     this.route('about');
     this.route('add-student');
     this.route('manage-adjudication-codes');
