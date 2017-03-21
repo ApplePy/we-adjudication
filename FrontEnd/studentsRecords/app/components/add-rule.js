@@ -108,6 +108,9 @@ export default Ember.Component.extend({
   actions:{
     addRule(){
       if(this.get('selectedOpr') !== null && this.get('selectedParam') !== null && this.get('newValue') !== null){
+        if(this.get('selectedParam').description === "Rule"){
+          this.set('newValue', '[' + this.get('newValue') + ']');
+        }
         var rule = {
           parameter: this.get('selectedParam'),
           opr: this.get('selectedOpr'),
