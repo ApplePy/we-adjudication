@@ -3,7 +3,7 @@ import Ember from 'ember';
 export default Ember.Component.extend({
 
 	isUsersShowing: true,
-  isFeatureEditing: false,
+  isFeaturesEditing: false,
   isRolesEditing: false,
   ADM01IsPermitted: Ember.computed(function(){ //Manage system roles
     var authentication = this.get('oudaAuth');

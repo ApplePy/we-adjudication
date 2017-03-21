@@ -1,5 +1,7 @@
 import Ember from 'ember';
 
+import XLSX from "npm:xlsx-browserify-shim";
+
 export default Ember.Component.extend({
 
 	isEditing: false,
