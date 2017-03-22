@@ -48,22 +48,24 @@ export default Ember.Component.extend({
 
 	},
 
-
 	actions: {
 
+		//Dropdown value changed
 		saveDropdownVal(event) {
 		    // Get value of dropdown
 		    let value = event.target.value;
 		    this.set("searchValue", value);
 	    },
 
+	    //Convert to PDF button clicked
 		convertToPDF() {
 
 			var doc = new jsPDF();
 
-			//Saves information to be printed out
+			//Gets required adjudication info
 			getAdjudicationInfo.call(this).then(adjudicationInfo => {
 
+				//Parse adjudication info
 				let adjudicationInfo = adjudicationInfo.map(adjInfo => {
 					Program: this.get("searchValue"),
 					StudentNumber: adjInfo.student.get('number'),
@@ -96,11 +98,13 @@ export default Ember.Component.extend({
 
 		},
 
+		//Convert to Excel button clicked
 		convertToExcel() {
 
-			//Saves information to be printed out
+			//Get required adjudication info
 			let adjudicationInfo = getAdjudicationInfo.call(this).then(adjudicationInfo => {
 
+				//Parse adjudication info
 				let adjudicationInfo = adjudicationInfo.map(adjInfo => {
 					Program: this.get("searchValue"),
 					StudentNumber: adjInfo.student.get('number'),
@@ -165,8 +169,9 @@ getAdjudicationInfo() {
 		}
 	}).then((programRecords) => {
 		//Get all terms
-		//TODO: this is pagenated
-		return this.get('store').findAll('term').then(terms => {
+		return this.get('store').query('term', {}).then(dummy => {
+			return this.get('store').query('term', {limit: dummy.get('meta').total});
+		}).then(terms => {
 			return terms.filter(term => {
 				let termIndex = term.programRecords.findIndex(programRecord => {
 					let programRecordIndex = programRecords.findIndex(progRec => 
