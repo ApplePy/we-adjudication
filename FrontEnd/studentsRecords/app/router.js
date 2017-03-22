@@ -22,6 +22,7 @@ Router.map(function() {
     this.route('manage-high-school');
     this.route('manage-adjudication-rules');
     this.route('adjudicate');
+    this.route('adjudication');
   });
 });
 

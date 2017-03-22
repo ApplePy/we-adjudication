@@ -29,7 +29,12 @@ export default Ember.Component.extend({
 		{ name: "scholarshipsAndAwards.xlsx", complete: false },
 		{ name: "HighSchoolCourseInformation.xlsx", complete: false },
 		{ name: "UndergraduateRecordCourses.xlsx", complete: false },
-		{ name: "UndergraduateRecordPlans.xlsx", complete: false }
+		{ name: "UndergraduateRecordPlans.xlsx", complete: false },
+		{ name: "AssessmentCodes.xlsx", complete: false },
+		{ name: "Faculties.xlsx", complete: false },
+		{ name: "Departments.xlsx", complete: false },
+		{ name: "ProgramAdministrations.xlsx", complete: false },
+		{ name: "UndergraduateRecordAdjudications.xlsx", complete: false }
 	],
 
 	actions: {
@@ -398,6 +403,128 @@ export default Ember.Component.extend({
 											record.get('programRecords').pushObject(programRecord);
 										}, "studentNumber", "term", "program", "level", "load");
 								});
+						})
+						.then(processOff).catch(errorOff);
+				} else if (fileName.toUpperCase() === "AssessmentCodes.xlsx".toUpperCase()) {
+					parseStrategies.byRow.call(this, false, valueArray => saveStrategies.createAndSave.call(this, {
+						code: valueArray[0],
+						name: valueArray[1],
+					}, "assessment-code"), true)
+						.then(processOff).catch(errorOff);
+				} else if (fileName.toUpperCase() === "Faculties.xlsx".toUpperCase()) {
+					parseStrategies.byRow.call(this, false, valueArray => saveStrategies.createAndSave.call(this, {
+						name: valueArray[0]
+					}, "faculty"), true)
+						.then(processOff).catch(errorOff);
+				} else if (fileName.toUpperCase() === "Departments.xlsx".toUpperCase()) {
+					miscellaneous.getAllModels.call(this, "faculty")
+						.then(faculties => {
+							return parseStrategies.byRow.call(this, false, valueArray => {
+								// Get faculty
+								let faculty = faculties.find(el => el.get('name') === valueArray[1]);
+
+								// Sanity check
+								if (typeof faculty === "undefined") {
+									throw Error("Faculty not found");
+								}
+								return saveStrategies.createAndSave.call(this, {
+									name: valueArray[0],
+									faculty: faculty
+								}, "department", "faculty");
+							}, true);
+						})
+					.then(processOff).catch(errorOff);
+				} else if (fileName.toUpperCase() === "ProgramAdministrations.xlsx".toUpperCase()) {
+					miscellaneous.getAllModels.call(this, "department")
+						.then(departments => {
+							return parseStrategies.byRow.call(this, false, valueArray => {
+								// Get faculty
+								let department = departments.find(el => el.get('name') === valueArray[2]);
+
+								// Sanity check
+								if (typeof department === "undefined") {
+									throw Error("Department not found");
+								}
+								return saveStrategies.createAndSave.call(this, {
+									name: valueArray[0],
+									position: valueArray[1],
+									department: department
+								}, "program-administration", "department");
+							}, true);
+						})
+					.then(processOff).catch(errorOff);
+				} else if (fileName.toUpperCase() === "UndergraduateRecordAdjudications.xlsx".toUpperCase()) {
+					// Populate prerequisite data, part 1
+					parseStrategies.byColumn.call(this, true, true,
+						[['studentNumber'], ['term']],
+						[{ modelName: 'student', filterPattern: { number: 'studentNumber' } }, { modelName: 'term-code' }],
+						(results, context) => {
+							// Go through all results
+							for (let result of results) {
+								// Set up filter object
+								let filterKeys = Object.keys(context.filterPattern);
+								let filter = {};
+								for (let key of filterKeys) {
+									filter[key] = result[context[key]];
+								}
+								// Look for object
+								return this.get('store').query(context.modelName, { filter: filter, limit: 1, offset: 0 });
+							}
+						}, false)
+						// Use the previous results to get the terms
+						.then(() => {
+							// This maps a student#/termCode pair to a term object
+							let studentToTermMapping = new Map();
+
+							return parseStrategies.byColumn.call(this, true, true,
+								[['studentNumber', 'term']],
+								[{ modelName: 'term' }],
+								(results, context) => {
+									// NOTE: Hardcoding some stuff in since there's only one pass of this function.
+									for (let result of results) {
+										// Students already loaded, peek should work
+										let student = this.get('store').peekAll('student').filter(el => el.get('number') === result);
+										student = student.get('firstObject');
+
+										// Term code should work, peek
+										let termcode = this.get('store').peekAll('term-code').filter(el => el.get('code') === result.term);
+										termcode = termcode.get('firstObject');
+
+										// Sanity check
+										if (typeof student === "undefined" || typeof termcode === "undefined") {
+											throw Error("Student or termcode was not found for " + rowContents.studentNumber + " " + rowContents.term + "! Objects found: ", student, termcode);
+										}
+
+										// Find the matching term and then put into map
+										return this.get('store').query(context.modelName, { filter: { student: student.get('id'), termCode: termcode.get('id') }, limit: 1 })
+											.then(recordList => studentToTermMapping.set(result.studentNumber + result.term, recordList.get('firstObject')))
+									}
+								}, false)
+								// Pass on completed map to next chain
+								.then(() => studentToTermMapping);
+						})
+						.then(studentToTermMapping => {
+							// Add adjudications, now that term objects have been found
+							return parseStrategies.byRow.call(false, rowContents => {
+								// Get term
+								let term = studentToTermMapping.get(rowContents.studentNumber + rowContents.term);
+
+								// Sanity check
+								if (typeof term === 'undefined') {
+									throw Error("Term " + rowContents.term + "not found!");
+								}
+
+								// Save adjudication
+								return saveStrategies.createAndSave.call(this, {
+									date: new Date(),
+									termAVG: rowContents.termAVG,
+									termUnitsPassed: rowContents.termUnitsPassed,
+									termUnitsTotal: rowContents.termUnitsTotal,
+									term: term,
+									assessmentCode: null
+								}, "adjudication", "term");
+
+							}, false);
 						})
 						.then(processOff).catch(errorOff);
 				}

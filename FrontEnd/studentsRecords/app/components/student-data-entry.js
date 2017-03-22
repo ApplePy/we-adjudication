@@ -32,6 +32,7 @@ export default Ember.Component.extend({
   advancedStandingArray: [],
   termModel: [],
   updateAdmission: false,
+  codeModel: [],
 
   studentModel: Ember.observer('offset', function () {
     var self = this;
@@ -97,6 +98,19 @@ export default Ember.Component.extend({
         this.get('store').query('grade', {limit: records.get('meta').total - 10, offset: 10});
       }
     });
+
+this.set('codeModel', []);
+    //load all the codes
+     this.get('store').query('assessment-code', {limit: 10}).then((records) => {
+    let totalRecords = records.get('meta').total;
+    let offsetUsed = records.get('meta').offset;
+    let limitUsed = records.get('meta').limit;
+    this.get('store').query('assessment-code', {limit: totalRecords}).then((code) => {
+    for (var i = 0; i < code.get('length'); i++) {
+        this.get('codeModel').pushObject(code.objectAt(i));
+      }
+    });
+  });
 
     //Load all of the program records into the store
     this.get('store').query('program-record', {limit: 10}).then((records) => {

@@ -16,12 +16,12 @@ export default Ember.Component.extend({
     {
       id: 1,
       val: "&&",
-      description: "and"
+      description: "AND"
     },
     {
       id: 2,
       val: "||",
-      description: "or"
+      description: "OR"
     }
   ],
 
@@ -77,9 +77,9 @@ export default Ember.Component.extend({
       this.set('addedRule', true);
 
     },
-
     cancelAdd(){
       this.set('isAdding', false);
+      this.set('addedRule', true);
     }
 
   }

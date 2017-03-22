@@ -5,41 +5,86 @@ export default Ember.Component.extend({
   studentsModel: null,
   INDEX: null,
   studentID: null,
+  fName: "",
+  lName: "",
   notDONE: null,
   student: null,
+  showFoundStudent: false,
+  studentArray: [],
 
- actions: {
+  actions: {
     find: function () {
       var studentID = this.get('studentID');
+      var firstName = this.get('fName');
+      var lastName = this.get('lName');
+      //the result array where matching students will be stored
+      var resultArray = [];
 
-     this.get('store').query('student', {filter: {number: studentID}}).then(
-       (result) => {
-         if(result.get('length') > 0){
-           var index = this.get('studentsModel').indexOf(result.objectAt(0));
-           this.set('INDEX', index);
-
-           this.set('notDONE', false);
-           Ember.$('.ui.modal').modal('hide');
-           Ember.$('.ui.modal').remove();
-         } else {
-           alert("Invalid student number!");
+      this.get('store').query('student', {
+         filter: {
+           snum: studentID,
+           //firstN: firstName,
+           //lastN: lastName
          }
+       }).then((codes) => {
+        for(var i = 0; i < codes.get('length'); i++) {
+          this.get('studentArray').pushObject(codes.objectAt(i));
+        }
+       });
 
-       }
-     ).catch(()=>{
-      alert("Error!");
-      this.set('notDONE', false);
-      Ember.$('.ui.modal').modal('hide');
-      Ember.$('.ui.modal').remove();
-     });
+      var filterObject = {};
+      if (studentID != "") {
+        filterObject["number"] = studentID;
+      }
+      if (firstName != "") {
+        filterObject["firstName"] = firstName;
+      }
+      if (lastName != "") {
+        filterObject["lastName"] = lastName;
+      }
+
+      this.get('store').query('student', {limit: 10}).then(
+       (result) => {
+         let totalRecords = result.get('meta').total;
+         this.get('store').query('student', {limit: totalRecords, filter: filterObject}).then((result) =>{
+           result.forEach(element => this.get('studentArray').pushObject(element));
+        
+            if (result.get('length') === 1)
+            {
+             var index = this.get('studentsModel').indexOf(result.get("firstObject"));
+            }
+            
+            if(result.get('length') > 1) 
+            {
+              this.set('showFoundStudent', true);
+              console.log(this.get('studentArray'));
+           }
+
+           if(result.get('length') === 0)
+            {
+              alert("No student found!");
+            }
+          
+            this.set('INDEX', index);
+            this.set('notDONE', false);
+
+            Ember.$('.ui.modal').modal('hide');
+            Ember.$('.ui.modal').remove();
+        }
+      ).catch((err) => {
+        console.log(err);
+        alert("Invalid search!");
+        console.log(this.get('studentArray'));
+         });
+      });
     },
 
-   close: function() {
-     this.set('notDONE', false);
+    close: function () {
+      this.set('notDONE', false);
 
-     Ember.$('.ui.modal').modal('hide');
-     Ember.$('.ui.modal').remove();
-   }
+      Ember.$('.ui.modal').modal('hide');
+      Ember.$('.ui.modal').remove();
+    }
   },
 
   didRender() {
