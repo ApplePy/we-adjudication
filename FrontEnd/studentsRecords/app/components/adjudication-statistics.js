@@ -162,16 +162,16 @@ export default Ember.Component.extend({
 //Gets adjudication info based on selected search parameter
 getAdjudicationInfo() {
 
-	//Given program record
-	return this.get('store').query('program-record', {
+	return this.get('store').query('program-record', { //Get program record
 		filter: {
-			name: this.get("searchValue");
+			name: this.get("searchValue"); //Program record has already been selected
 		}
 	}).then((programRecords) => {
 		//Get all terms
 		return this.get('store').query('term', {}).then(dummy => {
 			return this.get('store').query('term', {limit: dummy.get('meta').total});
 		}).then(terms => {
+			//Filter terms to get the ones with the selected program record
 			return terms.filter(term => {
 				let termIndex = term.programRecords.findIndex(programRecord => {
 					let programRecordIndex = programRecords.findIndex(progRec => 
@@ -183,6 +183,7 @@ getAdjudicationInfo() {
 			});
 		});
 	}).then(filteredTerms => {
+		//Get students that are associated with the term
 		return this.get('store').query('student', {}).then(dummy => {
 			return this.get('store').query('student', {limit: dummy.get('meta').total});
 		}).then(students => {
@@ -192,6 +193,7 @@ getAdjudicationInfo() {
 			});
 		});
 	}).then(filteredTermsandStudents => {
+		//Filter adjudication based on the selected terms
 		return this.get('store').query('adjudication', {}).then(dummy => {
 			return this.get('store').query('adjudication', {limit: dummy.get('meta').total});
 		}).then(adjudications => {
@@ -201,13 +203,16 @@ getAdjudicationInfo() {
 				return (foundIndex !== -1);
 			});	
 		}).then(filteredAdjudications => {
+			//Return adjudication and students
 			return filteredAdjudications.map(adjudication => {
 				adjudication: adjudication,
 				student: filteredTermsandStudents.find(termandstudent => adjudication.get('term.id') === termandstudent.term.get('id')).student
 			});
 		});
 	}).then(filteredAdjudicationsAndStudents => {
+		//Get the assessment codes associated with the adjudications
 		return this.get('store').findAll('assessment-code').then(assessmentCode => {
+			//Return the adjudication, student and assessment codes
 			return filteredAdjudicationsAndStudents.map(adjudicationAndStudent => {
 				adjudication: adjudicationAndStudent.adjudication,
 				student: adjudicationAndStudent.student,
