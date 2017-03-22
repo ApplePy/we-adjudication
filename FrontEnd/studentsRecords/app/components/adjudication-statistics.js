@@ -99,47 +99,57 @@ export default Ember.Component.extend({
 		convertToExcel() {
 
 			//Saves information to be printed out
-			let adjudicationInfo = getAdjudicationInfo.call(this);
+			let adjudicationInfo = getAdjudicationInfo.call(this).then(adjudicationInfo => {
 
-			//Get worksheet
-			function getSheet() {
+				let adjudicationInfo = adjudicationInfo.map(adjInfo => {
+					Program: this.get("searchValue"),
+					StudentNumber: adjInfo.student.get('number'),
+					FirstName: adjInfo.student.get('firstName'),
+					LastName: adjInfo.student.get('lastName'),
+					AdjCode: adjInfo.assessmentCode.get('code'),
+					AdjName: adjInfo.assessmentCode.get('name'),
+					"Date": adjInfo.adjudication.get('date')
+				});
 
-				//Write column titles to Excel
-				let keys = Object.keys(adjudicationInfo[0]);
-				let C = 0;
-				for (let col of keys) {
-					var cell_ref = XLSX.utils.encode_cell({c:C,r:0});
-					ws[cell_ref] = {v: col};
-					C++;
-				}
+				//Get worksheet
+				function getSheet() {
 
-				//Write to Excel
-				var ws = {};
-				let R = 1;
-				for (let adjInfo of adjudicationInfo) {
-					let keys = Object.keys(adjInfo);
+					//Write column titles to Excel
+					let keys = Object.keys(adjudicationInfo[0]);
 					let C = 0;
 					for (let col of keys) {
-						var cell_ref = XLSX.utils.encode_cell({c:C,r:R});
-						ws[cell_ref] = {v: adjInfo[col]};
+						var cell_ref = XLSX.utils.encode_cell({c:C,r:0});
+						ws[cell_ref] = {v: col};
 						C++;
 					}
-					R++;
+
+					//Write to Excel
+					var ws = {};
+					let R = 1;
+					for (let adjInfo of adjudicationInfo) {
+						let keys = Object.keys(adjInfo);
+						let C = 0;
+						for (let col of keys) {
+							var cell_ref = XLSX.utils.encode_cell({c:C,r:R});
+							ws[cell_ref] = {v: adjInfo[col]};
+							C++;
+						}
+						R++;
+					}
+
+					return ws;
 				}
 
-				return ws;
-			}
+				//Create workbook
+				var workbook = new Workbook();
 
-			//Create workbook
-			var workbook = new Workbook();
+				//Add worksheet to workbook
+				workbook.SheetNames.push("adjudicationSheet");
+				workbook.Sheets[ws_name] = getSheet();
 
-			//Add worksheet to workbook
-			workbook.SheetNames.push("adjudicationSheet");
-			workbook.Sheets[ws_name] = getSheet();
-
-			//Write exel file
-			XLSX.writeFile(workbook, 'adjudication.xlsx');
-
+				//Write exel file
+				return XLSX.writeFile(workbook, 'adjudication.xlsx');
+			});
 		}
 	}
 
