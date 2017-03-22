@@ -26,7 +26,7 @@ export default Ember.Component.extend({
 		          	this.get('store')
 		          	.query(emberName, { limit: records.get("meta").total })
 		          	.then(() => {
-		          		Ember.set(this.get('systemLists'), emberName, this.get('store').peekAll(emberName))
+		          		Ember.set(this.get('systemLists'), emberName, this.get('store').peekAll(emberName));
 		          	});
 		        } else {
 		          	Ember.set(this.get('systemLists'), emberName, this.get('store').peekAll(emberName));
@@ -36,6 +36,16 @@ export default Ember.Component.extend({
 
 	    // Populate the Secondary School course source, and subject list
 	    getAll("program-record");
+
+	    //Remove duplicate program records
+	    let programRecordNames = new Set();
+	    for (let programRecord of Ember.get(this.get('systemLists'), "program-record")) {
+	    	if (programRecordNames.has(programRecord.name) === false) {
+	    		programRecordNames.add(programRecord.name);
+	    	}
+	    }
+	    Ember.set(this.get('systemLists'), "program-record", programRecordNames);
+
 	},
 
 
@@ -52,26 +62,38 @@ export default Ember.Component.extend({
 			var doc = new jsPDF();
 
 			//Saves information to be printed out
-			let adjudicationInfo = getAdjudicationInfo.call(this);
+			getAdjudicationInfo.call(this).then(adjudicationInfo => {
 
-			//Write to PDF
-			let y = 10;
-			for (let adjInfo of adjudicationInfo) {
-				let keys = Object.keys(adjInfo);
-				let x = 10;
-				for (let col of keys) {
-					doc.text(adjInfo[col], x, y);
-					x += 20;
-				}
-				y += 20;
-				if (y >= 100) {
-					doc.addPage();
-					y = 0;
-				}
-			}
+				let adjudicationInfo = adjudicationInfo.map(adjInfo => {
+					Program: this.get("searchValue"),
+					StudentNumber: adjInfo.student.get('number'),
+					FirstName: adjInfo.student.get('firstName'),
+					LastName: adjInfo.student.get('lastName'),
+					AdjCode: adjInfo.assessmentCode.get('code'),
+					AdjName: adjInfo.assessmentCode.get('name'),
+					"Date": adjInfo.adjudication.get('date')
+				});
 
-			//Save document
-			doc.save('adjudication.pdf');
+				//Write to PDF
+				let y = 10;
+				for (let adjInfo of adjudicationInfo) {
+					let keys = Object.keys(adjInfo);
+					let x = 10;
+					for (let col of keys) {
+						doc.text(adjInfo[col], x, y);
+						x += 20;
+					}
+					y += 20;
+					if (y >= 100) {
+						doc.addPage();
+						y = 0;
+					}
+				}
+
+				//Save document
+				return doc.save('adjudication.pdf');
+			});
+
 		},
 
 		convertToExcel() {
@@ -126,27 +148,57 @@ export default Ember.Component.extend({
 //Gets adjudication info based on selected search parameter
 getAdjudicationInfo() {
 
-	//Let adjudicationInfo be an array of objects.  One object per row of info.
-	let adjudicationInfo = [];
-
-	//Populate adjudication info
-	this.get('store').query('program-record', {
+	//Given program record
+	return this.get('store').query('program-record', {
 		filter: {
 			name: this.get("searchValue");
 		}
 	}).then((programRecords) => {
-		let terms = [];
-		for (let programRecord of programRecords) {
-			this.get('store').query('term', {
-				filter: {
-					programRecords: programRecord
-				}
-			}).then((terms) => {
-				let term = records.get('firstObject');
+		//Get all terms
+		//TODO: this is pagenated
+		return this.get('store').findAll('term').then(terms => {
+			return terms.filter(term => {
+				let termIndex = term.programRecords.findIndex(programRecord => {
+					let programRecordIndex = programRecords.findIndex(progRec => 
+						return programRecord.get('id') === progRec.get('id')
+					);
+					return (programRecordIndex !== -1);
+				});
+				return (termIndex !== -1);
 			});
-		}		
-	});
+		});
+	}).then(filteredTerms => {
+		return this.get('store').query('student', {}).then(dummy => {
+			return this.get('store').query('student', {limit: dummy.get('meta').total});
+		}).then(students => {
+			return filteredTerms.map(term => {
+				term: term,
+				student: term.get('student')
+			});
+		});
+	}).then(filteredTermsandStudents => {
+		return this.get('store').query('adjudication', {}).then(dummy => {
+			return this.get('store').query('adjudication', {limit: dummy.get('meta').total});
+		}).then(adjudications => {
+			return adjudications.filter(adjudication => {
+				let foundIndex = filteredTermsandStudents.findIndex(termandstudent => adjudication.get('term.id') === termandstudent.term.get('id'));
 
-	return adjudicationInfo;
+				return (foundIndex !== -1);
+			});	
+		}).then(filteredAdjudications => {
+			return filteredAdjudications.map(adjudication => {
+				adjudication: adjudication,
+				student: filteredTermsandStudents.find(termandstudent => adjudication.get('term.id') === termandstudent.term.get('id')).student
+			});
+		});
+	}).then(filteredAdjudicationsAndStudents => {
+		return this.get('store').findAll('assessment-code').then(assessmentCode => {
+			return filteredAdjudicationsAndStudents.map(adjudicationAndStudent => {
+				adjudication: adjudicationAndStudent.adjudication,
+				student: adjudicationAndStudent.student,
+				assessmentCode: adjudicationAndStudent.adjudication.get('assessmentCode')
+			});
+		});
+	});
 
 }
