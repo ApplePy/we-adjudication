@@ -34,89 +34,99 @@ export default Ember.Component.extend({
 	      	});
 	  	};
 
-    // Populate the Secondary School course source, and subject list
-    getAll("program-record");
-},
-
-
-actions: {
-
-	saveDropdownVal(event) {
-	    // Get value of dropdown
-	    let value = event.target.value;
-	    this.set("searchValue", value);
-    },
-
-	convertToPDF() {
-
-		var doc = new jsPDF();
-
-		//Saves information to be printed out
-		let adjudicationInfo = getAdjudicationInfo.call(this);
-
-		//Write to PDF
-		let y = 10;
-		for (let adjInfo of adjudicationInfo) {
-			let keys = Object.keys(adjInfo);
-			let x = 10;
-			for (let col of keys) {
-				doc.text(adjInfo[col], x, y);
-				x += 20;
-			}
-			y += 20;
-			if (y >= 100) {
-				doc.addPage();
-				y = 0;
-			}
-		}
-
-		//Save document
-		doc.save('adjudication.pdf');
+	    // Populate the Secondary School course source, and subject list
+	    getAll("program-record");
 	},
 
-	convertToExcel() {
 
-		//Saves information to be printed out
-		let adjudicationInfo = getAdjudicationInfo.call(this);
+	actions: {
 
-		//Get worksheet
-		function getSheet() {
+		saveDropdownVal(event) {
+		    // Get value of dropdown
+		    let value = event.target.value;
+		    this.set("searchValue", value);
+	    },
 
-			//Write to Excel
-			var ws = {};
-			let R = 0;
+		convertToPDF() {
+
+			var doc = new jsPDF();
+
+			//Saves information to be printed out
+			let adjudicationInfo = getAdjudicationInfo.call(this);
+
+			//Write to PDF
+			let y = 10;
 			for (let adjInfo of adjudicationInfo) {
 				let keys = Object.keys(adjInfo);
-				let C = 0;
+				let x = 10;
 				for (let col of keys) {
-					var cell_ref = XLSX.utils.encode_cell({c:C,r:R});
-					ws[cell_ref] = {v: adjInfo[col]};
-					C++;
+					doc.text(adjInfo[col], x, y);
+					x += 20;
 				}
-				R++;
+				y += 20;
+				if (y >= 100) {
+					doc.addPage();
+					y = 0;
+				}
 			}
 
-			return ws;
+			//Save document
+			doc.save('adjudication.pdf');
+		},
+
+		convertToExcel() {
+
+			//Saves information to be printed out
+			let adjudicationInfo = getAdjudicationInfo.call(this);
+
+			//Get worksheet
+			function getSheet() {
+
+				//Write column titles to Excel
+				let keys = Object.keys(adjudicationInfo[0]);
+				let C = 0;
+				for (let col of keys) {
+					var cell_ref = XLSX.utils.encode_cell({c:C,r:0});
+					ws[cell_ref] = {v: col};
+					C++;
+				}
+
+				//Write to Excel
+				var ws = {};
+				let R = 1;
+				for (let adjInfo of adjudicationInfo) {
+					let keys = Object.keys(adjInfo);
+					let C = 0;
+					for (let col of keys) {
+						var cell_ref = XLSX.utils.encode_cell({c:C,r:R});
+						ws[cell_ref] = {v: adjInfo[col]};
+						C++;
+					}
+					R++;
+				}
+
+				return ws;
+			}
+
+			//Create workbook
+			var workbook = new Workbook();
+
+			//Add worksheet to workbook
+			workbook.SheetNames.push("adjudicationSheet");
+			workbook.Sheets[ws_name] = getSheet();
+
+			//Write exel file
+			XLSX.writeFile(workbook, 'adjudication.xlsx');
+
 		}
-
-		//Create workbook
-		var workbook = new Workbook();
-
-		//Add worksheet to workbook
-		workbook.SheetNames.push("adjudicationSheet");
-		workbook.Sheets[ws_name] = getSheet();
-
-		//Write exel file
-		XLSX.writeFile(workbook, 'adjudication.xlsx');
-
 	}
-}
 
 });
 
-//Gets adjudication info based on selected search
+//Gets adjudication info based on selected search parameter
 getAdjudicationInfo() {
 
+	//Let adjudicationInfo be an array of objects.  One object per row of info.
 	let adjudicationInfo = [];
 
 	//Populate adjudication info
