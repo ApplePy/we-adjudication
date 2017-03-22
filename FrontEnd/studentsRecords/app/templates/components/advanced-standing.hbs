@@ -9,8 +9,10 @@
 <td class="two wide"><div class="ui negative button" {{action "deleteStanding"}}>Delete</div></td>
 </tr>
 </table>
+
  {{#if descriptionShow}}
 {{show-description title = standing.course description = standing.description notDONE = descriptionShow}}
+
 {{else if updateCourse}}
 {{update-standing updatestanding = standing notDONE = updateCourse}}
  {{/if}}

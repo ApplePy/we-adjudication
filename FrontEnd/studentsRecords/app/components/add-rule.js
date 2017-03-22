@@ -1,4 +1,5 @@
 import Ember from 'ember';
+
 export default Ember.Component.extend({
   store: Ember.inject.service(),
   ruleArray: null,
@@ -8,6 +9,7 @@ export default Ember.Component.extend({
   devBool: null,
   confirming: null,
   notDONE: null,
+
   parameters: [
     {
       id: 0, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "CourseLetter"
@@ -93,6 +95,7 @@ export default Ember.Component.extend({
     }
   ],
   newValue: null,
+
   init(){
     this._super(...arguments);
     this.set('devBool', true);
@@ -101,6 +104,7 @@ export default Ember.Component.extend({
     this.set('selectedParam', null);
     this.set('selectedOpr', null);
   },
+
   actions:{
     addRule(){
       if(this.get('selectedOpr') !== null && this.get('selectedParam') !== null && this.get('newValue') !== null){
@@ -117,12 +121,14 @@ export default Ember.Component.extend({
         this.set('newValue', null);
         this.set('devBool', false);
       } else {
+
       }
     },
     selectOpr(opr){
       var obj = this.get('oprs')[opr];
       this.set('selectedOpr', obj);
     },
+
     selectLink(link){
         var obj = this.get('links')[link];
         var rule = this.get('rulesToBeAdded').get('lastObject');
@@ -136,11 +142,13 @@ export default Ember.Component.extend({
         this.get('rulesToBeAdded').pushObject(newRule);
         this.set('devBool', true);
     },
+
     selectParam(param){
       var obj = this.get('parameters')[param];
       this.set('oprs', obj.oprs);
       this.set('selectedParam', obj);
     },
+
     cancelLink(){
       var rule = this.get('rulesToBeAdded').get('lastObject');
       var newRule = {
@@ -153,12 +161,15 @@ export default Ember.Component.extend({
       this.get('rulesToBeAdded').pushObject(newRule);
       this.set('devBool', false);
     },
+
     removeRule(rule){
       this.set('rulesToBeAdded', this.get('rulesToBeAdded').without(rule))
     },
+
     doneAdding(){
       this.set('confirming', true);
     },
+
     saveRule(){
       //Set up the boolean expression
       var rules = this.get('rulesToBeAdded');
@@ -176,17 +187,22 @@ export default Ember.Component.extend({
         logicalLink: null,
         assessmentCode: null
       });
+
       var self = this;
       newRule.save().then(function(record){
         self.get('ruleArray').pushObject(record);
       });
+
       this.set('notDONE', false);
     },
+
     notConfirmed(){
       this.set('confirming', false);
     },
+
     cancel(){
       this.set('notDONE', false);
     }
   }
+
 });

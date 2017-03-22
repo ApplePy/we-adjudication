@@ -1,4 +1,5 @@
 import Ember from 'ember';
+
 export default Ember.Component.extend({
     recipient: null,
     standing: null,
@@ -6,6 +7,7 @@ export default Ember.Component.extend({
     descriptionShow: null,
     updateCourse: null,
     standings: null,
+
  actions: {
   deleteStanding() {
     this.set('standings', this.get('standings').without(this.get('standing')));
@@ -15,9 +17,11 @@ export default Ember.Component.extend({
         standing.save();
       });
   },
+
   updateStanding() {
        this.set('updateCourse', true);
   },
+
   showDescription() {
     this.set('descriptionShow', true);
   },
