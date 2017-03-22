@@ -21,6 +21,7 @@ Router.map(function() {
     this.route('manage-adjudication-codes');
     this.route('manage-high-school');
     this.route('manage-adjudication-rules');
+    this.route('adjudication');
   });
 });
 

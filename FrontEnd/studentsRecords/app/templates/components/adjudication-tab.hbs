@@ -1,0 +1,32 @@
+<div class="ui top attached tabular menu">
+    <div class="active item" data-tab="Adjudication">Adjudication</div>
+    <div class="item" data-tab="AdjudicationStatistics">Adjudication Statistics</div>
+  </div>
+
+<div class="ui bottom attached active tab segment"data-tab="Adjudication"> 
+    <h2>Adjudication</h2>
+    <p>Some disclaimer (add stuff later)</p>
+
+     <select onchange={{action 'selectTerm' value="target.value"}}>
+         <option value="null">Select Term</option>
+              {{#each termArray as |termChoice|}}
+                <option value={{termChoice.id}}>{{termChoice.name}} </option>
+              {{/each}}
+    </select>
+    <label>Select Date: </label>
+    {{input type="date" value = selectedDate}}
+    {{#if buttonDisabled}}
+    <div class="ui green disabled button" {{action "adjudicate"}}>Adjudicate Students</div>
+{{else}}
+<div class="ui green button" {{action "adjudicate"}}>Adjudicate Students</div>
+    {{/if}}
+
+    {{#if isAdjShow}}
+        {{adjudicate-students termCode=selectedTerm notDONE=isAdjShow studentArray=studentArray terms=termsToAdju date=selectedDate}}
+    {{/if}}
+
+</div>
+
+<div class="ui tab" data-tab="AdjudicationStatistics">
+
+</div>

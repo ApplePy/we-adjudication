@@ -20,6 +20,7 @@ export default Ember.Component.extend({
     {route: "home.import", icon: "large download icon", text: "Import Student Records"},
     {route: "home.manage-adjudication-codes", icon: "large code icon", text: "Manage Adjudication Codes"},
     {route: "home.manage-adjudication-rules", icon: "large write icon", text: "Manage Adjudication Rules"},
+    {route: "home.adjudication", icon: "large write icon", text: "Adjudicate Students"},
     {route: "home.about", icon: "large user icon", text: "About"}
   ]
 });

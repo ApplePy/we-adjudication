@@ -1,0 +1,36 @@
+<div class="ui segment">
+<h3>{{currentTerm.termCode.name}}</h3>
+<div class="ui divider"></div>
+<div class="ui form">
+            <div class="inline field">
+                <label>Date</label>
+                {{input type="date" value = selectedDate}}
+            </div>
+            <div class="inline field">
+                 <label>Term Average</label>
+                {{input type="number" value = adjudication.termAVG}}
+            </div>
+            <div class="inline field">
+                <label>Term Units Passed</label>
+                    {{input type="number" value = adjudication.termUnitsPassed}}
+            </div>
+            <div class="inline field">
+                <label>Term Units Total</label>
+                {{input type="number" value = adjudication.termUnitsTotal}}
+            </div>
+            <div class="inline field">
+                <label>Assessment Code</label>
+                <select onchange={{action 'selectCode' value="target.value"}}>
+                    <option value="null">Select Code</option>
+              {{#each codesArray as |codeChoice|}}
+                <option value={{codeChoice.id}} selected={{eq adjudication.assessmentCode.id
+                                                                   codeChoice.id}}>{{codeChoice.code}} </option>
+              {{/each}}
+            </select>
+            </div>
+    </div>
+<div class="actions">
+        <br>
+        <div class="ui green button" {{action "save"}}>Save</div>
+</div>
+</div>
