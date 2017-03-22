@@ -29,7 +29,12 @@ export default Ember.Component.extend({
 		{ name: "scholarshipsAndAwards.xlsx", complete: false },
 		{ name: "HighSchoolCourseInformation.xlsx", complete: false },
 		{ name: "UndergraduateRecordCourses.xlsx", complete: false },
-		{ name: "UndergraduateRecordPlans.xlsx", complete: false }
+		{ name: "UndergraduateRecordPlans.xlsx", complete: false },
+		{ name: "AssessmentCodes.xlsx", complete: false },
+		{ name: "Faculties.xlsx", complete: false },
+		{ name: "Departments.xlsx", complete: false },
+		{ name: "ProgramAdministrations.xlsx", complete: false },
+		{ name: "UndergraduateRecordAdjudications.xlsx", complete: false }
 	],
 
 	actions: {
@@ -400,6 +405,54 @@ export default Ember.Component.extend({
 								});
 						})
 						.then(processOff).catch(errorOff);
+				} else if (fileName.toUpperCase() === "AssessmentCodes.xlsx".toUpperCase()) {
+					parseStrategies.byRow.call(this, false, valueArray => saveStrategies.createAndSave.call(this, {
+						code: valueArray[0],
+						name: valueArray[1],
+					}, "assessment-code"), true)
+						.then(processOff).catch(errorOff);
+				} else if (fileName.toUpperCase() === "Faculties.xlsx".toUpperCase()) {
+					parseStrategies.byRow.call(this, false, valueArray => saveStrategies.createAndSave.call(this, {
+						name: valueArray[0]
+					}, "faculty"), true)
+						.then(processOff).catch(errorOff);
+				} else if (fileName.toUpperCase() === "Departments.xlsx".toUpperCase()) {
+					miscellaneous.getAllModels.call(this, "faculty")
+						.then(faculties => {
+							return parseStrategies.byRow.call(this, false, valueArray => {
+								// Get faculty
+								let faculty = faculties.find(el => el.get('name') === valueArray[1]);
+
+								// Sanity check
+								if (typeof faculty === "undefined") {
+									throw Error("Faculty not found");
+								}
+								return saveStrategies.createAndSave.call(this, {
+									name: valueArray[0],
+									faculty: faculty
+								}, "department", "faculty");
+							}, true);
+						})
+					.then(processOff).catch(errorOff);
+				} else if (fileName.toUpperCase() === "ProgramAdministrations.xlsx".toUpperCase()) {
+					miscellaneous.getAllModels.call(this, "department")
+						.then(departments => {
+							return parseStrategies.byRow.call(this, false, valueArray => {
+								// Get faculty
+								let department = departments.find(el => el.get('name') === valueArray[2]);
+
+								// Sanity check
+								if (typeof department === "undefined") {
+									throw Error("Department not found");
+								}
+								return saveStrategies.createAndSave.call(this, {
+									name: valueArray[0],
+									position: valueArray[1],
+									department: department
+								}, "program-administration", "department");
+							}, true);
+						})
+					.then(processOff).catch(errorOff);
 				}
 			};
 
