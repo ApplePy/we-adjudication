@@ -20,6 +20,7 @@ export default Ember.Component.extend({
   isFinished: false,
   isWorking: false,
   hasError: false,
+  parsingError: false,
 
   init(){
     this._super(...arguments);
@@ -289,9 +290,7 @@ loop(){
       this.send('done');
 } catch (err){
     console.log('error');
-    this.set('hasError', true);
-    this.send('cancel');
-
+    this.send('parsingError');
   }
     },
 
@@ -306,6 +305,7 @@ loop(){
     done: function(){
       this.set('isFinished', true);
       this.set('isWorking', false);
+      this.set('parsingError', false);
    //   this.send('cancel');
     },
 
@@ -313,6 +313,14 @@ loop(){
       this.set('isFinished', false);
       this.set('isWorking', true);
       this.set('hasError', false);
+      this.set('parsingError', false);
+    },
+
+    parsingError() {
+      this.set('isFinished', false);
+      this.set('isWorking', false);
+      this.set('hasError', false);
+      this.set('parsingError', true);
     }
   },
 
