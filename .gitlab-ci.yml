@@ -40,6 +40,7 @@ stages:
      - npm config set strict-ssl false
   except:
      - temp
+     - tags
 
 
 
@@ -92,11 +93,10 @@ test_frontend:
 #                               #
 #################################
 
-# This job sets up the back, builds the front, copies the built front to the back, and saves it all for deployment
-build:
+# Common components to build jobs
+.build_common: &build_common
   stage: build
   artifacts:
-    expire_in: 2 weeks
     paths:
      - BackEnd/studentsRecords/
   variables:
@@ -116,9 +116,27 @@ build:
    - bower install
    - ember build --environment production
    - cp -r dist/ ../../BackEnd/studentsRecords/dist/
+
+
+# This job sets up the back, builds the front, copies the built front to the back, and saves it all for the review app
+# This blocks to save the server from overload!
+build_review:
+  <<: *build_common
+  when: manual
+  artifacts:
+    expire_in: 1 day
+  except:
+    - master
+    - tags
+
+
+# This job sets up the back, builds the front, copies the built front to the back, and saves it all for deployment
+build:
+  <<: *build_common
+  artifacts:
+    expire_in: 2 weeks
   only:
    - master
-   - auto_deployment
 
 
 
@@ -134,8 +152,6 @@ build:
   image: registry.incode.ca/se3352a/requirements-assignment-2:compose
   variables:
       DOCKER_HOST: tcp://pandadocker.isolation.ad.murrayweb.ca:2375
-  only:
-     - master
 
 
 # This job takes the contents from the previous job, builds them into a docker image, then deploys everything
@@ -155,6 +171,8 @@ production:
     name: production
     url: http://digitalpanda.incode.ca/
     on_stop: shutdown
+  only:
+    - master
 
 
 # This job stops the deployment containers
@@ -167,3 +185,41 @@ shutdown:
     name: production
     url: http://digitalpanda.incode.ca/
     action: stop
+  only:
+    - master
+
+# This job takes the contents from the previous job, builds them into a docker image, then deploys everything
+deploy_review:
+  <<: *deploy_common
+  dependencies:
+   - build_review
+  before_script:
+    - mkdir ~/.docker
+    - echo $PANDADOCKER_AUTH > ~/.docker/config.json
+  script:
+    - docker-compose -p $CI_ENVIRONMENT_SLUG -H $DOCKER_HOST down --volumes     # Destroy the old image
+    - docker-compose -p $CI_ENVIRONMENT_SLUG -H $DOCKER_HOST up -d --build --force-recreate
+  after_script:
+    - rm -f ~/.docker/config.json
+  environment:
+    name: review/$CI_ENVIRONMENT_SLUG
+    url: http://$CI_ENVIRONMENT_SLUG.digitalpanda.incode.ca/
+    on_stop: shutdown_review
+  except:
+    - master
+    - tags
+
+
+# This job stops the deployment containers
+shutdown_review:
+  <<: *deploy_common
+  when: manual
+  script:
+    - docker-compose -p $CI_ENVIRONMENT_SLUG -H $DOCKER_HOST down --volumes     # Destroy the old image
+  environment:
+    name: review/$CI_ENVIRONMENT_SLUG
+    url: http://$CI_ENVIRONMENT_SLUG.digitalpanda.incode.ca/
+    action: stop
+  except:
+    - master
+    - tags
