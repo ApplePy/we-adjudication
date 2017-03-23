@@ -204,18 +204,19 @@ export default Ember.Component.extend({
 						[['source'], ['subject', 'description'], ['schoolName']],
 						[{ modelName: "hs-course-source", source: "code" }, { modelName: "hs-subject", subject: "name" }, { modelName: "secondary-school", schoolName: "name", exclusions: {name: "NONE FOUND"}}],
 						miscellaneous.columnKeyReplaceAndSave.bind(this), false)
+						// Get all prerequisite models
 						.then(() => {
-							// Get all prerequisite models
 							return Promise.all([
 								miscellaneous.getAllModels.call(this, 'hs-subject'),
 								miscellaneous.getAllModels.call(this, 'hs-course-source'),
 								miscellaneous.getAllModels.call(this, 'student'),
 								miscellaneous.getAllModels.call(this, 'secondary-school')]);
 						})
+						// Create all the courses
 						.then(values => {
 							let newCourses = new Map();
 
-							// Create all the courses
+							// Get all unique courses
 							return parseStrategies.byRowJSON.call(this, rowContents => {
 								if (rowContents.schoolName !== "NONE FOUND") {
 
@@ -237,10 +238,11 @@ export default Ember.Component.extend({
 										school: school,
 										subject: subject
 									});
-									
+
 									return new Promise((res) => res());
 								}
 							}, false, "studentNumber", "schoolName")
+								// Save the unique courses
 								.then(() => {
 									let saves = [];
 									// Save a new high school course
@@ -248,7 +250,8 @@ export default Ember.Component.extend({
 
 									return Promise.all(saves);
 								})
-								.then(() => this.get('store').peekAll('hs-course'))
+								// Get all the courses, including previously-existing ones
+								.then(() => miscellaneous.getAllModels.call(this, 'hs-course'))
 								// Create all the grade entries
 								.then(hsCourses => {
 
@@ -646,10 +649,17 @@ let miscellaneous = {
 	/**
 	 * Retrieves all models.
 	 * 
-	 * @param {string} emberName	The model to get.
+	 * @param {string} emberName		The model to get.
+	 * @param {boolean} peekInstead	Run a peekAll instead of a findAll; use only if you know the data's been loaded.
 	 * @returns {Promise}
 	 */
-	getAllModels: function (emberName) {
+	getAllModels: function (emberName, peekInstead = false) {
+		// If peek is requested instead, just do that
+		if (peekInstead === true) {
+			return new Promise(res => res(this.get('store').peekAll(emberName)));
+		}
+		
+		// Otherwise, do a full find
 		return this.get('store').query(emberName, {}).then(records => {
 			let meta = records.get('meta');
 
