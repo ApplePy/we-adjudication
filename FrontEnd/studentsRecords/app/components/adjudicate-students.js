@@ -250,7 +250,14 @@ loop(){
             //Get the rule object...
             var ruleObj = this.get('codeModel').objectAt(i).get('logicalExpressions').objectAt(j);
             var rule = ruleObj.get('booleanExp');
-            this.parseRules(ruleExp, ruleObj, rule);
+            try {
+              this.parseRules(ruleExp, ruleObj, rule);
+            } catch (err){
+              console.log('error');
+              this.set('hasError', true);
+              this.send('cancel');
+              break;
+            }
             this.set('ruleExp', this.get('ruleExp') + this.get('parseResult'));
           }
           //Just console logging for now.  Will have to check if true/false
