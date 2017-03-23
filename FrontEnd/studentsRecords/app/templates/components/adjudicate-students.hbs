@@ -14,19 +14,14 @@
         <div class="ui inline field">
           <i class="huge green checkmark icon"></i>
           <h3>All Done!</h3>
+          {{#if hasError}}
+            <p>One or more students will require manual adjudication</p>
+          {{/if}}
           <div class="basic green ui button" {{action "cancel"}}>OK</div>
         </div>
         <br>
-      {{else if hasError}}
-        <br>
-        <div class="ui inline field">
-          <i class="huge orange warning icon"></i>
-          <h3>Warning!</h3>
-          <p>One or more students will require manual adjudication</p>
-        </div>
-        <br>
       {{else}}
-    
+
     <div class="actions">
          <div class="basic green ui button" {{action "loop"}}>Are you sure you want to adjudicate</div>
       <div class="basic red ui button" {{action "cancel"}}>Cancel</div>

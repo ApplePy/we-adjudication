@@ -15,11 +15,11 @@ export default Ember.Component.extend({
   date: null,
   studentArray: [],
   notDONE: null,
-  termCode: null, 
+  termCode: null,
   manualAdjuID: null,
   isFinished: false,
-   isWorking: false,
-    hasError: false,
+  isWorking: false,
+  hasError: false,
 
   init(){
     this._super(...arguments);
@@ -81,30 +81,44 @@ export default Ember.Component.extend({
     for(var k=0; k < rule.length; k++){
       //Parse through to get the parameter, operator, value, and link for the
       var m = rule.indexOf('(', k);
-      var z = rule.indexOf(']', m);
-      if(z == -1){
-        k= rule.indexOf(')', m);
-      } else {
-        while(z != -1){
-          k = rule.indexOf(')', z);
-          z = rule.indexOf(']', k + 1);
-        }
-      }
-      var exp = rule.substr(m,k - m);
-      var endParam = exp.indexOf(' ') - 1
-      var param = exp.substr(1, endParam);
-      var endOpr = exp.indexOf(" ", endParam + 2);
-      var opr = exp.substr(endParam + 2, endOpr - endParam - 2);
-      if(param === "Rule"){
+      if(rule.substr(m + 1, 4) === "Rule"){
+        var y = rule.indexOf('[', m);
+        var z = rule.indexOf(']', y);
+        k = rule.indexOf(')', z);
+        y = rule.indexOf('[', y + 1);
+        while(y < z && y != -1){
+            y = rule.indexOf('[', y + 1);
+            k = rule.indexOf(')', z);
+            z = rule.indexOf(']', z + 1);
+          }
+        var exp = rule.substr(m,k - m);
+        var endParam = exp.indexOf(' ') - 1
+        var param = exp.substr(1, endParam);
+        var endOpr = exp.indexOf(" ", endParam + 2);
+        var opr = exp.substr(endParam + 2, endOpr - endParam - 2);
         var value = exp.substr(endOpr + 2, exp.length - endOpr - 3);
+        var link = rule.substr(k + 2, rule.indexOf(' ', k + 2) - k - 2);
+        if(link == "AND"){
+          link = '&&';
+        } else if (link == "OR"){
+          link = '||';
+        }
+        this.parseRules("", null, value);
       } else {
+        k= rule.indexOf(')', m);
+        var exp = rule.substr(m,k - m);
+        var endParam = exp.indexOf(' ') - 1
+        var param = exp.substr(1, endParam);
+        var endOpr = exp.indexOf(" ", endParam + 2);
+        var opr = exp.substr(endParam + 2, endOpr - endParam - 2);
+
         var value = exp.substr(endOpr + 1);
-      }
-      var link = rule.substr(k + 2, rule.indexOf(' ', k + 2) - k - 2);
-      if(link == "AND"){
-        link = '&&';
-      } else if (link == "OR"){
-        link = '||';
+        var link = rule.substr(k + 2, rule.indexOf(' ', k + 2) - k - 2);
+        if(link == "AND"){
+          link = '&&';
+        } else if (link == "OR"){
+          link = '||';
+        }
       }
       var found = false;
       //Get the value based on the parameter
@@ -188,7 +202,7 @@ export default Ember.Component.extend({
           }
         }
       } else if (param === "Rule"){
-        this.parseRules("", null, value);
+        //this.parseRules("", null, value);
         param = true;
         found = true;
         value = this.get('ruleToRule');
@@ -245,12 +259,13 @@ loop(){
 
         if (codeToAdd == null) {
           codeToAdd = this.get('manualAdjuID');
+          this.set('hasError', true);
         }
   for(var z = 0; z < this.get('terms').objectAt(b).get('adjudications').get('length'); z++) {
   this.get('store').findRecord('adjudication',this.get('terms').objectAt(b).get('adjudications').objectAt(z).get('id'), { backgroundReload: false }).then(function(standing) {
         standing.deleteRecord();
         standing.save();
-      }); 
+      });
 }
 
         //Save the adjudication stuff
@@ -264,12 +279,10 @@ loop(){
         termUnitsTotal: 0,
       });
       adjudication.save();
-
-
       }
       this.send('done');
     },
-   
+
 
     //Gets rid of the modal
     cancel: function () {
@@ -281,14 +294,7 @@ loop(){
     done: function(){
       this.set('isFinished', true);
       this.set('isWorking', false);
-      this.set('hasError', false);
    //   this.send('cancel');
-    },
-
-    error: function(){
-      this.set('isFinished', false);
-      this.set('isWorking', false);
-      this.set('hasError', true);
     },
 
     working: function(){

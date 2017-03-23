@@ -15,16 +15,13 @@ export default Ember.Component.extend({
       id: 0, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "CourseLetter"
     },
     {
-      id: 1, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "CourseLetterAndNumber"
+      id: 1, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "CourseNumber"
     },
     {
-      id: 2, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "CourseNumber"
+      id: 2, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "CourseName"
     },
     {
-      id: 3, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "CourseName"
-    },
-    {
-      id: 4, oprs: [
+      id: 3, oprs: [
                     {id: 0, description: ">"},
                     {id: 1, description: ">="},
                     {id: 2, description: "=="},
@@ -34,17 +31,7 @@ export default Ember.Component.extend({
       description: "CourseUnit"
     },
     {
-      id: 5, oprs: [
-                    {id: 0, description: ">"},
-                    {id: 1, description: ">="},
-                    {id: 2, description: "=="},
-                    {id: 3, description: "<="},
-                    {id: 4, description: "<"},
-                    {id: 5, description: "!="}],
-      description: "CumulativeAverage"
-    },
-    {
-      id: 6, oprs: [
+      id: 4, oprs: [
                     {id: 0, description: ">"},
                     {id: 1, description: ">="},
                     {id: 2, description: "=="},
@@ -54,33 +41,49 @@ export default Ember.Component.extend({
       description: "Mark"
     },
     {
-      id: 7, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "ProgramName"
+      id: 5, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "ProgramName"
     },
     {
-      id: 8, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "ProgramLevel"
+      id: 6, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "ProgramLevel"
     },
     {
-      id: 9, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "ProgramLoad"
+      id: 7, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "ProgramLoad"
     },
     {
-      id: 10, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "ProgramStatus"
+      id: 8, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "ProgramStatus"
     },
     {
-      id: 11, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "Plan"
+      id: 9, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "Plan"
     },
     {
-      id: 12, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "Rule"
-    },
-    {
-      id: 13, oprs: [{id: 0, description: ">"},
-                    {id: 1, description: ">="},
-                    {id: 2, description: "=="},
-                    {id: 3, description: "<="},
-                    {id: 4, description: "<"},
-                    {id: 5, description: "!="}],
-      description: "TermAverage"
+      id: 10, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "Rule"
     }
   ],
+  /*
+  Parameters to be added if needed/required!!! (Cumulative Average, Term Average, and a course letter and number)
+   {
+   id: 1, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "CourseLetterAndNumber"
+   },
+   {
+   id: 5, oprs: [
+   {id: 0, description: ">"},
+   {id: 1, description: ">="},
+   {id: 2, description: "=="},
+   {id: 3, description: "<="},
+   {id: 4, description: "<"},
+   {id: 5, description: "!="}],
+   description: "CumulativeAverage"
+   },
+   {
+   id: 13, oprs: [{id: 0, description: ">"},
+   {id: 1, description: ">="},
+   {id: 2, description: "=="},
+   {id: 3, description: "<="},
+   {id: 4, description: "<"},
+   {id: 5, description: "!="}],
+   description: "TermAverage"
+   }
+  */
   oprs: [],
   links: [
     {

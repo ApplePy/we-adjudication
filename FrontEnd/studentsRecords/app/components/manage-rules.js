@@ -6,6 +6,7 @@ export default Ember.Component.extend({
   isAdding: false,
   isUpdating: false,
   ruleToEdit: null,
+  needsHelp: false,
 
   init() {
     this._super(...arguments);
@@ -42,6 +43,10 @@ export default Ember.Component.extend({
           self.set('rules', self.get('rules').without(object));
         });
       });
+    },
+
+    needsHelp(){
+      this.set('needsHelp', true);
     }
   },
 
