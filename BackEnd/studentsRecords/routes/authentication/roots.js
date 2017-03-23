@@ -48,7 +48,6 @@ router.route('/')
                     response: null
                 });
                 newLogin.save(function (error) {
-                    console.log('here');
                     if (error) return console.error(error);
                     response.json({root: newLogin});
                 });
