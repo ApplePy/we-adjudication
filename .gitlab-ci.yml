@@ -101,19 +101,9 @@ test_frontend:
       NODE_TLS_REJECT_UNAUTHORIZED: "0"   # To support the proxy
   before_script:
        - 'echo "{ \"allow_root\": true }" > /root/.bowerrc'
-       - npm config set proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/   # Setup proxy to stop killing bandwidth
-       - npm config set https-proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/
-       - npm config set strict-ssl false
-  script:
-   - pushd .
-   - cd BackEnd/studentsRecords
-   - npm install --production
-   - popd
-   - cd FrontEnd/studentsRecords
-   - npm install                  # Don't worry about production flag
-   - bower install
-   - ember build --environment production
-   - cp -r dist/ ../../BackEnd/studentsRecords/dist/
+      #  - npm config set proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/   # Setup proxy to stop killing bandwidth
+      #  - npm config set https-proxy http://gitlab-ci.isolation.ad.murrayweb.ca:8080/
+      #  - npm config set strict-ssl false
 
 
 # This job sets up the back, builds the front, copies the built front to the back, and saves it all for the review app
@@ -129,6 +119,18 @@ build_review:
   except:
     - master
     - tags
+  script:
+   - pushd .
+   - cd BackEnd/studentsRecords
+   - npm install --production
+   - popd
+   - cd FrontEnd/studentsRecords
+   - npm install                  # Don't worry about production flag
+   - bower install
+   - echo $CI_COMMIT_REF_SLUG
+   - HOST=$CI_COMMIT_REF_SLUG.digitalpanda.incode.ca ember build --environment production
+   - echo $HOST
+   - cp -r dist/ ../../BackEnd/studentsRecords/dist/
 
 
 # This job sets up the back, builds the front, copies the built front to the back, and saves it all for deployment
@@ -140,6 +142,16 @@ build:
      - BackEnd/studentsRecords/
   only:
    - master
+  script:
+   - pushd .
+   - cd BackEnd/studentsRecords
+   - npm install --production
+   - popd
+   - cd FrontEnd/studentsRecords
+   - npm install                  # Don't worry about production flag
+   - bower install
+   - HOST=digitalpanda.incode.ca ember build --environment production
+   - cp -r dist/ ../../BackEnd/studentsRecords/dist/
 
 
 
@@ -200,20 +212,20 @@ deploy_review:
   <<: *deploy_common
   variables:
       DOCKER_HOST: tcp://pandadocker.isolation.ad.murrayweb.ca:2375
-      VIRTUAL_HOST: $CI_ENVIRONMENT_SLUG.digitalpanda.incode.ca
+      VIRTUAL_HOST: $CI_COMMIT_REF_SLUG.digitalpanda.incode.ca
   dependencies:
    - build_review
   before_script:
     - mkdir ~/.docker
     - echo $PANDADOCKER_AUTH > ~/.docker/config.json
   script:
-    - docker-compose -p $CI_ENVIRONMENT_SLUG -H $DOCKER_HOST down --volumes     # Destroy the old image
-    - docker-compose -p $CI_ENVIRONMENT_SLUG -H $DOCKER_HOST up -d --build --force-recreate
+    - docker-compose -p $CI_COMMIT_REF_SLUG -H $DOCKER_HOST down --volumes     # Destroy the old image
+    - docker-compose -p $CI_COMMIT_REF_SLUG -H $DOCKER_HOST up -d --build --force-recreate
   after_script:
     - rm -f ~/.docker/config.json
   environment:
     name: review/$CI_COMMIT_REF_NAME
-    url: http://$CI_ENVIRONMENT_SLUG.digitalpanda.incode.ca/
+    url: http://$CI_COMMIT_REF_SLUG.digitalpanda.incode.ca/
     on_stop: shutdown_review
   except:
     - master
@@ -228,10 +240,10 @@ shutdown_review:
       GIT_STRATEGY: None
   when: manual
   script:
-    - docker-compose -p $CI_ENVIRONMENT_SLUG -H $DOCKER_HOST down --volumes     # Destroy the old image
+    - docker-compose -p CI_COMMIT_REF_SLUG -H $DOCKER_HOST down --volumes     # Destroy the old image
   environment:
     name: review/$CI_COMMIT_REF_NAME
-    url: http://$CI_ENVIRONMENT_SLUG.digitalpanda.incode.ca/
+    url: http://$CI_COMMIT_REF_SLUG.digitalpanda.incode.ca/
     action: stop
   except:
     - master

@@ -48,7 +48,7 @@ module.exports = function(environment) {
   }
 
   if (environment === 'production') {
-    ENV.APP.host = 'http://digitalpanda.incode.ca';
+    ENV.APP.host = 'http://' + process.env.HOST;
     ENV.contentSecurityPolicy['connect-src'] = "'self'";
   }
 
