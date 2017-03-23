@@ -235,6 +235,7 @@ export default Ember.Component.extend({
       this.set('ruleToRule', ruleExp);
     }
   },
+
   actions:{
 loop(){
   this.send('working');
@@ -252,9 +253,7 @@ loop(){
             //Get the rule object...
             var ruleObj = this.get('codeModel').objectAt(i).get('logicalExpressions').objectAt(j);
             var rule = ruleObj.get('booleanExp');
-
-              this.parseRules(ruleExp, ruleObj, rule);
-
+            this.parseRules(ruleExp, ruleObj, rule);
             this.set('ruleExp', this.get('ruleExp') + this.get('parseResult'));
           }
           //Just console logging for now.  Will have to check if true/false
@@ -306,22 +305,21 @@ loop(){
       this.set('isFinished', true);
       this.set('isWorking', false);
       this.set('parsingError', false);
-   //   this.send('cancel');
     },
 
     working: function(){
       this.set('isFinished', false);
       this.set('isWorking', true);
       this.set('hasError', false);
-      this.set('parsingError', false);
+       this.set('parsingError', false);
     },
 
-    parsingError() {
+    parsingIssues: function() {
       this.set('isFinished', false);
       this.set('isWorking', false);
       this.set('hasError', false);
       this.set('parsingError', true);
-    }
+    },
   },
 
 
