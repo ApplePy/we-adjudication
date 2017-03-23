@@ -7,6 +7,9 @@ services:
       - mongo
     ports:
       - 80
+    networks:
+      - default
+      - outside
     environment:
       - VIRTUAL_HOST
       - NODE_ENV=production
@@ -14,9 +17,18 @@ services:
   mongo:
     image: mongo:latest
     restart: always
+    networks:
+      - default
   mongo-seed:
     build: ./mongo-seed
+    networks:
+      - default
     depends_on:
       - mongo
     links:
       - mongo
+
+networks:
+  outside:
+    external:
+      name: proxy
