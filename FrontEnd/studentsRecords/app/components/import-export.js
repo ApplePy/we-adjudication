@@ -286,64 +286,99 @@ export default Ember.Component.extend({
 					// NOTE: Not storing sections, and ignoring the 1-to-many on grades -> course-code
 
 					// Get prerequisite data
-					// NOTE: Inefficient use of resources? Yes. Efficient use of my time? Also yes.
-					Promise.all([
-						miscellaneous.getAllModels.call(this, "student"),
-						miscellaneous.getAllModels.call(this, "term-code"),
-						miscellaneous.getAllModels.call(this, "course-code"),
-						miscellaneous.getAllModels.call(this, "term")
-					])
-						.then(values => {
-							// Only get the course codes that are completely unlinked as the "templates"
-							values[2] = values[2].filter(el => typeof el.get('termInfo.id') === "undefined" && typeof el.get('gradeInfo.id') === "undefined");
-
-							// Save all term-codes first
+					miscellaneous.getAllModels.call(this, "term-code")
+						// Save all term-codes first
+						.then(() => {
 							return parseStrategies.byColumn.call(this, true, true,
 								[['term']],
 								[{ modelName: 'term-code', term: "name" }],
-								miscellaneous.columnKeyReplaceAndSave.bind(this), false)
-								.then(() => {
-									// Save all term objects
-									return parseStrategies.byRowJSON.call(this, rowContents => {
-										return saveStrategies.createAndSave.call(this, {
-											termCode: values[1].find(el => el.get('name') === rowContents.term),
-											student: values[0].find(el => el.get('number') === parseInt(rowContents.studentNumber))
-										}, "term", "termCode", "student");
-									}, false, "studentNumber", "term");
-								})
-								.then(() => {
-									return parseStrategies.byRowJSON.call(this, rowContents => {
-										// Save the grade
-										let student = values[0].find(el => el.get('number') === parseInt(rowContents.studentNumber));
-										let term = values[3].find(el => el.get('termCode.name') === rowContents.term && el.get('student.number') === parseInt(rowContents.studentNumber));
-										let courseCodeTemplate = values[2].find(el => el.get('courseLetter') === rowContents.courseLetter && el.get('courseNumber') === rowContents.courseNumber);
+								miscellaneous.columnKeyReplaceAndSave.bind(this), false);
+						})
+						// Get all the students that may get a new term, and their existing terms
+						.then(() => Promise.all([
+								miscellaneous.getAllModels.call(this, "student"),
+								miscellaneous.getAllModels.call(this, "term")
+						]))
+						// Find and save all new term objects
+						.then(studentsAndTerms => {
+							let studentTermPairs = new Map();
 
-										// Sanity check
-										if (typeof student === "undefined" || typeof courseCodeTemplate === "undefined") {
-											throw Error("Missing student " + rowContents.studentNumber + " or course " + [rowContents.courseLetter, rowContents.courseNumber].join(' '));
+							// Get all term objects
+							return parseStrategies.byRowJSON.call(this, rowContents => {
+								// Sanity Check
+								if (typeof rowContents.studentNumber === "undefined" || typeof rowContents.term === "undefined") {
+									throw new Error("Student number or term missing from row, and could not be inferred.");
+								}
+
+								let strippedDownRow = { studentNumber: rowContents.studentNumber, term: rowContents.term };
+								// Create crappy key for uniqueness and add to map
+								studentTermPairs.set(rowContents.studentNumber.toString() + rowContents.term, strippedDownRow);
+								return new Promise(res => res());
+							}, false, "studentNumber", "term")
+							// Save all term objects
+								.then(() => {
+									studentTermPairs.forEach(value => {
+										// Construct new term
+										let newTerm = {
+											termCode: miscellaneous.getAllModels.call(this, "term-code", true).find(el => el.get('name') === value.term),
+											student: studentsAndTerms[0].find(el => el.get('number') === parseInt(value.studentNumber))
+										};
+
+										// sanity check
+										if (typeof newTerm.termCode === "undefined" || typeof newTerm.student === "undefined") {
+											throw new Error("The new term could not be saved. A term code or student was not found.");
 										}
 
-										// Create grade
-										// TODO: This isn't guarding against duplicate import... I just want it to work :(
-										return saveStrategies.createAndSave.call(this, { mark: rowContents.grade, note: rowContents.note }, "grade")
-											.then(grade => {
-												// Duplicate course template for this term
-												let newModel = courseCodeTemplate.toJSON();
-												// set the properties you want to alter
-												newModel.termInfo = term;
-												newModel.gradeInfo = grade;
-
-												// Sanity check
-												if (typeof newModel.termInfo === "undefined" || typeof newModel.gradeInfo === "undefined") {
-													throw Error("New model is missing an important property!");
-												}
-
-												// Save course template
-												return saveStrategies.createAndSave.call(this, newModel, "course-code", "termInfo", "gradeInfo");
-											});
-									}, false, "studentNumber", "term");
+										// Save the new term object
+										saveStrategies.createAndSave.call(this, newTerm, "term", "termCode", "student");
+									});
+									return null;
 								});
-						}).then(processOff).catch(errorOff);
+						})
+						// Get existing courses
+						.then(miscellaneous.getAllModels.bind(this, "course-code"))
+						// Save all courses per term, and the grade achieved
+						.then(() => {
+							// Filter existing course codes to only the unlinked "templates"
+							let templateCourseCodes = miscellaneous.getAllModels.call(this, "course-code", true).filter(el => typeof el.get('termInfo.id') === "undefined" && typeof el.get('gradeInfo.id') === "undefined");
+
+							// For each row, take the student and term to get the term object, and then make a copy of the courseCodeTemplates if needed, and save (let createAndSave deal with duplication)
+							return parseStrategies.byRowJSON.call(this, rowContents => {
+								// Get the term for this line (it really really should exist)
+								let term = miscellaneous.getAllModels.call(this, "term", true).find(el => el.get('termCode.name') === rowContents.term && el.get('student.number') === parseInt(rowContents.studentNumber));
+								let template = templateCourseCodes.find(el => el.get('courseLetter') === rowContents.courseLetter && el.get('courseNumber') === rowContents.courseNumber);
+
+								// Sanity check
+								if (typeof term === "undefined" || typeof template === "undefined") {
+									throw Error("A term for a student, or a course template, could not be found.");
+								}
+
+								// Save grade
+								return saveStrategies.createAndSave.call(this, {
+									mark: rowContents.grade,
+									note: rowContents.note
+								}, "grade")
+								// then save the linking course
+								.then(grade => {
+									// Sanity check
+									if (typeof grade === "undefined") {
+										throw Error("createAndSave did not return a new grade.");
+									}
+
+									// Create new copy of the template
+									let newModel = template.toJSON();
+									// set the properties you want to alter
+									newModel.termInfo = term;
+									newModel.gradeInfo = grade;								
+
+									// Save course template
+									return saveStrategies.createAndSave.call(this, newModel, "course-code", "termInfo", "gradeInfo");
+									});
+
+
+							}, false, "studentNumber", "term");
+						})
+						.then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "UndergraduateRecordPlans.xlsx".toUpperCase()) {
 					// NOTE: Inefficient use of resources? Yes. Efficient use of my time? Also yes.
 					Promise.all([
@@ -651,12 +686,12 @@ let miscellaneous = {
 	 * 
 	 * @param {string} emberName		The model to get.
 	 * @param {boolean} peekInstead	Run a peekAll instead of a findAll; use only if you know the data's been loaded.
-	 * @returns {Promise}
+	 * @returns {Promise|object}
 	 */
 	getAllModels: function (emberName, peekInstead = false) {
 		// If peek is requested instead, just do that
 		if (peekInstead === true) {
-			return new Promise(res => res(this.get('store').peekAll(emberName)));
+			return this.get('store').peekAll(emberName);
 		}
 		
 		// Otherwise, do a full find
@@ -669,7 +704,8 @@ let miscellaneous = {
 			}
 
 			let total = meta.total;
-			return this.get('store').query(emberName, { limit: total, offset: 0 }).then(() => this.get('store').findAll(emberName));
+			return this.get('store').query(emberName, { limit: total, offset: 0 })
+				.then(() => this.get('store').findAll(emberName));
 		});
 	},
 
