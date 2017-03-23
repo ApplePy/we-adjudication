@@ -45,6 +45,7 @@ Items to change:
 | filterValueSearches   | A list of strings that contain the model properties that can be searched for **(does not support partial-text or subset array search)**       |
 | requiredValues        | A list of strings that contain the model properties that must be present in a update/creation of an object                                    |
 | uniqueValues          | A list of strings that contain model properties that must be unique amongst all the objects **(does not support unique compound properties)** |
+| testName              | The name used to identify the test. Normally is a readable version of emberName.                                                              |
 
 #### Notes
 * Remember to import all the models you need, and change the
