@@ -20,6 +20,7 @@ export default Ember.Component.extend({
   isFinished: false,
   isWorking: false,
   hasError: false,
+  parsingError: false,
 
   init(){
     this._super(...arguments);
@@ -237,6 +238,7 @@ export default Ember.Component.extend({
   actions:{
 loop(){
   this.send('working');
+  try {
       for(var b=0; b < this.get('terms').length; b++){
         this.set('courses', this.get('terms').objectAt(b).get('courses'));
         this.set('programRecords', this.get('terms').objectAt(b).get('programRecords'));
@@ -250,7 +252,9 @@ loop(){
             //Get the rule object...
             var ruleObj = this.get('codeModel').objectAt(i).get('logicalExpressions').objectAt(j);
             var rule = ruleObj.get('booleanExp');
-            this.parseRules(ruleExp, ruleObj, rule);
+
+              this.parseRules(ruleExp, ruleObj, rule);
+
             this.set('ruleExp', this.get('ruleExp') + this.get('parseResult'));
           }
           //Just console logging for now.  Will have to check if true/false
@@ -284,6 +288,10 @@ loop(){
       adjudication.save();
       }
       this.send('done');
+} catch (err){
+    console.log('error');
+    this.send('parsingError');
+  }
     },
 
 
@@ -297,6 +305,7 @@ loop(){
     done: function(){
       this.set('isFinished', true);
       this.set('isWorking', false);
+      this.set('parsingError', false);
    //   this.send('cancel');
     },
 
@@ -304,6 +313,14 @@ loop(){
       this.set('isFinished', false);
       this.set('isWorking', true);
       this.set('hasError', false);
+      this.set('parsingError', false);
+    },
+
+    parsingError() {
+      this.set('isFinished', false);
+      this.set('isWorking', false);
+      this.set('hasError', false);
+      this.set('parsingError', true);
     }
   },
 

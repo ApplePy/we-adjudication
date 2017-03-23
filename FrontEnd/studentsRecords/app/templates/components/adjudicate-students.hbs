@@ -20,6 +20,16 @@
           <div class="basic green ui button" {{action "cancel"}}>OK</div>
         </div>
         <br>
+      {{else if parsingError}}
+        <br>
+        <div class="ui inline field">
+          <i class="huge orange warning icon"></i>
+          <h3>Adjudication Did Not Work</h3>
+          <p>There was an error with parsing the rules of the codes.</p>
+          <p>Please ensure all rules follow expected formatting</p>
+          <div class="basic green ui button" {{action "cancel"}}>OK</div>
+        </div>
+        <br>
       {{else}}
 
     <div class="actions">
