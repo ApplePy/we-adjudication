@@ -8,6 +8,7 @@
           <br><br>
           <div class="ui centered inline text loader">Adjudication In Progress</div>
           <p>{{message}}</p>
+           <div class="basic red ui button" {{action "cancel"}}>Cancel</div>
         </div>
       {{else if isFinished}}
         <br>
@@ -17,6 +18,14 @@
           {{#if hasError}}
             <p>One or more students will require manual adjudication</p>
           {{/if}}
+          <div class="basic green ui button" {{action "cancel"}}>OK</div>
+        </div>
+        <br>
+
+        {{else if parsingError}}
+        <br>
+        <div class="ui inline field">
+          <h3>Adjudication Did Not Work</h3>
           <div class="basic green ui button" {{action "cancel"}}>OK</div>
         </div>
         <br>

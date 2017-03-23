@@ -20,6 +20,7 @@ export default Ember.Component.extend({
   isFinished: false,
   isWorking: false,
   hasError: false,
+  parsingError: false,
 
   init(){
     this._super(...arguments);
@@ -79,6 +80,7 @@ export default Ember.Component.extend({
     ruleExp += '(';
     //Get each boolean expression within the rule
     for(var k=0; k < rule.length; k++){
+  //    try {
       //Parse through to get the parameter, operator, value, and link for the
       var m = rule.indexOf('(', k);
       if(rule.substr(m + 1, 4) === "Rule"){
@@ -214,7 +216,12 @@ export default Ember.Component.extend({
       }
         ruleExp += eval(param + opr + value);
         ruleExp += link;
-    }
+     // }
+    /*  catch(err) {
+        console.log("error: " + err);
+        this.set('parsingError', true);
+      } */
+    } //end of for loop
     ruleExp += ')';
     if(ruleObj != null){
       var logicalLink = ruleObj.get('logicalLink');
@@ -231,6 +238,7 @@ export default Ember.Component.extend({
       this.set('ruleToRule', ruleExp);
     }
   },
+
   actions:{
 loop(){
   this.send('working');
@@ -294,14 +302,22 @@ loop(){
     done: function(){
       this.set('isFinished', true);
       this.set('isWorking', false);
-   //   this.send('cancel');
+      this.set('parsingError', false);
     },
 
     working: function(){
       this.set('isFinished', false);
       this.set('isWorking', true);
       this.set('hasError', false);
-    }
+       this.set('parsingError', false);
+    },
+
+    parsingIssues: function() {
+      this.set('isFinished', false);
+      this.set('isWorking', false);
+      this.set('hasError', false);
+      this.set('parsingError', true);
+    },
   },
 
 

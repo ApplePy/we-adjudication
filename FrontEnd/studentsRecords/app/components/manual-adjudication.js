@@ -11,7 +11,6 @@ export default Ember.Component.extend({
 
 init() {
     this._super(...arguments);
-//wouldnt this cause adjudication to be queried after the page loads????
     this.get('store').query('adjudication', {limit: 10}).then((records) => {
     let totalRecords = records.get('meta').total;
     let offsetUsed = records.get('meta').offset;
@@ -22,6 +21,7 @@ init() {
     }).then((adju) => {
       this.set('adjudication', adju.get('firstObject'));
      this.set('selectedDate', adju.get('firstObject').get('date').toISOString().substring(0, 10));
+     this.set('selectedCode', adju.get('firstObject').get('assessmentCode').get('id'));
     });
   });
   },
@@ -29,6 +29,7 @@ init() {
   actions: {
 
       save() {
+          console.log("code: " + this.get('selectedCode'));
           var self = this;
           this.get('store').findRecord('adjudication', this.get('adjudication').get('id')).then(function(adju) {
               adju.set('date', new Date(self.get('selectedDate')));
@@ -39,8 +40,6 @@ init() {
               adju.set('assessmentCode', code);
               adju.save();
           });
-
-        //   updatedStudent.set('DOB', new Date(this.get('selectedDate')));
       },
 
       selectCode(code) {
