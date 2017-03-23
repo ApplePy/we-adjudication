@@ -120,6 +120,7 @@ test_frontend:
 build_review:
   <<: *build_common
   when: manual
+  allow_failure: false
   artifacts:
     expire_in: 1 day
     paths:
@@ -151,13 +152,14 @@ build:
 .deploy_common: &deploy_common
   stage: deploy
   image: registry.incode.ca/se3352a/requirements-assignment-2:compose
-  variables:
-      DOCKER_HOST: tcp://pandadocker.isolation.ad.murrayweb.ca:2375
 
 
 # This job takes the contents from the previous job, builds them into a docker image, then deploys everything
 production:
   <<: *deploy_common
+  variables:
+      DOCKER_HOST: tcp://pandadocker.isolation.ad.murrayweb.ca:2375
+      VIRTUAL_HOST: digitalpanda.incode.ca
   dependencies:
    - build
   before_script:
@@ -179,6 +181,9 @@ production:
 # This job stops the deployment containers
 shutdown:
   <<: *deploy_common
+  variables:
+      DOCKER_HOST: tcp://pandadocker.isolation.ad.murrayweb.ca:2375
+      GIT_STRATEGY: None
   when: manual
   script:
     - docker-compose -H $DOCKER_HOST down --volumes     # Destroy the old image
@@ -192,6 +197,9 @@ shutdown:
 # This job takes the contents from the previous job, builds them into a docker image, then deploys everything
 deploy_review:
   <<: *deploy_common
+  variables:
+      DOCKER_HOST: tcp://pandadocker.isolation.ad.murrayweb.ca:2375
+      VIRTUAL_HOST: $CI_ENVIRONMENT_SLUG.digitalpanda.incode.ca
   dependencies:
    - build_review
   before_script:
@@ -214,6 +222,9 @@ deploy_review:
 # This job stops the deployment containers
 shutdown_review:
   <<: *deploy_common
+  variables:
+      DOCKER_HOST: tcp://pandadocker.isolation.ad.murrayweb.ca:2375
+      GIT_STRATEGY: None
   when: manual
   script:
     - docker-compose -p $CI_ENVIRONMENT_SLUG -H $DOCKER_HOST down --volumes     # Destroy the old image
