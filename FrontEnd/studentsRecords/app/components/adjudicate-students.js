@@ -237,6 +237,7 @@ export default Ember.Component.extend({
   actions:{
 loop(){
   this.send('working');
+  try {
       for(var b=0; b < this.get('terms').length; b++){
         this.set('courses', this.get('terms').objectAt(b).get('courses'));
         this.set('programRecords', this.get('terms').objectAt(b).get('programRecords'));
@@ -250,14 +251,9 @@ loop(){
             //Get the rule object...
             var ruleObj = this.get('codeModel').objectAt(i).get('logicalExpressions').objectAt(j);
             var rule = ruleObj.get('booleanExp');
-            try {
+
               this.parseRules(ruleExp, ruleObj, rule);
-            } catch (err){
-              console.log('error');
-              this.set('hasError', true);
-              this.send('cancel');
-              break;
-            }
+
             this.set('ruleExp', this.get('ruleExp') + this.get('parseResult'));
           }
           //Just console logging for now.  Will have to check if true/false
@@ -291,6 +287,12 @@ loop(){
       adjudication.save();
       }
       this.send('done');
+} catch (err){
+    console.log('error');
+    this.set('hasError', true);
+    this.send('cancel');
+
+  }
     },
 
 
