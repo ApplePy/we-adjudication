@@ -18,8 +18,8 @@ export default Ember.Component.extend({
   termCode: null,
   manualAdjuID: null,
   isFinished: false,
-   isWorking: false,
-    hasError: false,
+  isWorking: false,
+  hasError: false,
 
   init(){
     this._super(...arguments);
@@ -76,7 +76,6 @@ export default Ember.Component.extend({
   },
 
   parseRules(ruleExp, ruleObj, rule){
-    console.log(rule);
     ruleExp += '(';
     //Get each boolean expression within the rule
     for(var k=0; k < rule.length; k++){
@@ -84,25 +83,20 @@ export default Ember.Component.extend({
       var m = rule.indexOf('(', k);
       if(rule.substr(m + 1, 4) === "Rule"){
         var y = rule.indexOf('[', m);
-        console.log('y' + y);
         var z = rule.indexOf(']', y);
-        console.log('z' + z);
         k = rule.indexOf(')', z);
         y = rule.indexOf('[', y + 1);
         while(y < z && y != -1){
             y = rule.indexOf('[', y + 1);
             k = rule.indexOf(')', z);
-            console.log('k' + k);
             z = rule.indexOf(']', z + 1);
           }
         var exp = rule.substr(m,k - m);
-        console.log('exp:' + exp);
         var endParam = exp.indexOf(' ') - 1
         var param = exp.substr(1, endParam);
         var endOpr = exp.indexOf(" ", endParam + 2);
         var opr = exp.substr(endParam + 2, endOpr - endParam - 2);
         var value = exp.substr(endOpr + 2, exp.length - endOpr - 3);
-        console.log("link" + rule.substr(k + 2, rule.indexOf(' ', k + 2) - k - 2));
         var link = rule.substr(k + 2, rule.indexOf(' ', k + 2) - k - 2);
         if(link == "AND"){
           link = '&&';
@@ -218,7 +212,6 @@ export default Ember.Component.extend({
       if(!found){
         param = null;
       }
-        console.log(param + " " + opr + " " + value);
         ruleExp += eval(param + opr + value);
         ruleExp += link;
     }
@@ -235,7 +228,6 @@ export default Ember.Component.extend({
       ruleExp += logicalLink;
       this.set('parseResult', ruleExp);
     } else {
-      console.log('rule2rule' + ruleExp);
       this.set('ruleToRule', ruleExp);
     }
   },
@@ -259,8 +251,6 @@ loop(){
             this.set('ruleExp', this.get('ruleExp') + this.get('parseResult'));
           }
           //Just console logging for now.  Will have to check if true/false
-          console.log(this.get('ruleExp'));
-          console.log(eval(this.get('ruleExp')));
           if(eval(this.get('ruleExp'))) {
             codeToAdd = this.get('codeModel').objectAt(i);
             break;
@@ -269,6 +259,7 @@ loop(){
 
         if (codeToAdd == null) {
           codeToAdd = this.get('manualAdjuID');
+          this.set('hasError', true);
         }
   for(var z = 0; z < this.get('terms').objectAt(b).get('adjudications').get('length'); z++) {
   this.get('store').findRecord('adjudication',this.get('terms').objectAt(b).get('adjudications').objectAt(z).get('id'), { backgroundReload: false }).then(function(standing) {
@@ -288,8 +279,6 @@ loop(){
         termUnitsTotal: 0,
       });
       adjudication.save();
-
-
       }
       this.send('done');
     },
@@ -305,14 +294,7 @@ loop(){
     done: function(){
       this.set('isFinished', true);
       this.set('isWorking', false);
-      this.set('hasError', false);
    //   this.send('cancel');
-    },
-
-    error: function(){
-      this.set('isFinished', false);
-      this.set('isWorking', false);
-      this.set('hasError', true);
     },
 
     working: function(){
