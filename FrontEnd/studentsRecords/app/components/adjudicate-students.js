@@ -314,7 +314,7 @@ loop(){
        this.set('parsingError', false);
     },
 
-    parsingIssues: function() {
+    parsingError() {
       this.set('isFinished', false);
       this.set('isWorking', false);
       this.set('hasError', false);
