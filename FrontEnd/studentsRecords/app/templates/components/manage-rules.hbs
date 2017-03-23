@@ -1,6 +1,7 @@
 <div class="inline field">
   <h1>Manage Adjudication Rules
     <button class="ui green button" {{action "add"}}>Add Rule</button>
+    <button class="ui right floated button" {{action "needsHelp"}}>Help</button>
   </h1>
 </div>
 {{#if isAdding}}
@@ -30,4 +31,7 @@
 
 {{#if isUpdating}}
   {{update-rule notDONE = isUpdating rule = ruleToEdit}}
+{{/if}}
+{{#if needsHelp}}
+  {{help-page notDONE = needsHelp}}
 {{/if}}

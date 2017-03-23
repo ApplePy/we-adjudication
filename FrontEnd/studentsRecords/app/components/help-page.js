@@ -82,9 +82,9 @@ export default Ember.Component.extend({
         },
         {
           button: "Link dropdown",
-          hint: "Connect two expressions with a logical link.  Choosing 'done' will complete the entire expression and " +
-                "you will be prompted to save or cancel.  Choosing anything other than done will allow you to select " +
-                "another expression."
+          hint: "Connect two expressions with a logical link.  Choosing 'done building' will complete the entire expression and " +
+                "you will be prompted to save, return to that last rule, or cancel.  Choosing anything other than done will allow " +
+                "you to select another expression."
         },
         {
           button: "Rule Example",
