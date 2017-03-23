@@ -143,7 +143,6 @@ export default Ember.Component.extend({
         }
       } else if (param === "CourseName"){
         for(var n = 0; n < this.get('courses').get('length'); n++){
-          console.log(this.get('courses').objectAt(n).get('name'));
           if(this.get('courses').objectAt(n).get('name') == value){
             this.set('selectedCourse', this.get('courses').objectAt(n));
             param = this.get('courses').objectAt(n).get('name');
@@ -213,10 +212,8 @@ export default Ember.Component.extend({
       if(!found){
         param = null;
       }
-      console.log(param + opr + value);
       value = "\"" + value + "\"";
       param = "\"" + param + "\"";
-      console.log(value);
         ruleExp += eval(param + opr + value);
         ruleExp += link;
 
