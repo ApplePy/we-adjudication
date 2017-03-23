@@ -1,6 +1,6 @@
 ## What issue(s) does this Merge Request close?
 
-*Enter "Closes #**num here**, #**number here**, etc.*
+*Enter "Closes #**num here**, #**number here**, etc."*
 
 ## What does this Merge Request accomplish?
 
