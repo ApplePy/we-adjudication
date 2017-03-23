@@ -212,8 +212,11 @@ export default Ember.Component.extend({
       if(!found){
         param = null;
       }
+      value = "\"" + value + "\"";
+      param = "\"" + param + "\"";
         ruleExp += eval(param + opr + value);
         ruleExp += link;
+
     }
     ruleExp += ')';
     if(ruleObj != null){
