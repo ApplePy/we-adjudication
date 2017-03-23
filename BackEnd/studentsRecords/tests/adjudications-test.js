@@ -28,6 +28,7 @@ let emberNamePluralized = "adjudications";
 let itemList = Common.DBElements.adjudicationList;
 let EmberModel = Adjudications;
 let newModel = Common.Generators.Adjudication;
+let testName = "Adjudications";
 let filterValueSearches = ['date', 'termAVG', 'termUnitsPassed', 'termUnitsTotal'];
 let requiredValues = [];
 let uniqueValues = [];
@@ -37,7 +38,41 @@ let uniqueValues = [];
 /////////////////////////////////////////
 
 
-describe('Adjudications', function () {
+// Little patch to ensure that newModel does not violate uniqueness
+newModel = (function() {
+    // Save the original newModel function
+    let originalModel = newModel;
+
+    // Create the wrapped function
+    return function(...args) {
+        let unique = true;  // Flag var to signal uniqueness
+        let newObject = null;
+        let failCount = 0;
+        do {
+            newObject = originalModel(...args);
+
+            // Check that no unique values are being violated
+            for (let uniqueValue of uniqueValues) {
+                /* jshint loopfunc: true */
+                unique = itemList.findIndex(element => element[uniqueValue] === newObject[uniqueValue]) === -1;
+
+                // Stop processing once found to be not unique
+                if (unique !== true) {
+                    failCount += 1;
+                    if (failCount > 10) {
+                        throw Error("A unique object could not be created!");
+                    }
+                    break;
+                }
+            }
+        } while(unique !== true);
+
+        return newObject;
+    };
+})();
+
+
+describe(testName, function () {
 
     describe('/GET functions', function () {
         before(Common.regenAllData);
