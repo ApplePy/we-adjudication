@@ -3,9 +3,16 @@
     <div class="item" data-tab="AdjudicationStatistics">Adjudication Statistics</div>
   </div>
 
-<div class="ui bottom attached active tab segment"data-tab="Adjudication"> 
+<div class="ui bottom attached active tab segment"data-tab="Adjudication">
     <h2>Adjudication</h2>
-    <p>Some disclaimer (add stuff later)</p>
+    <p> Only students currently connected with the selected term will be adjudicated for that term.
+        Adjudication information will appear in the adjudication tab for each student.  If there is
+        any adjudication information already associated with the student for the selected term, it will
+        be overwritten.  It is recommended to do all manual adjucations after this adjudication process is run.
+    </p>
+  <p>
+    The system does not currently support term or cumulative averages.
+  </p>
 
      <select onchange={{action 'selectTerm' value="target.value"}}>
          <option value="null">Select Term</option>
