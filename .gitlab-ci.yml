@@ -96,9 +96,6 @@ test_frontend:
 # Common components to build jobs
 .build_common: &build_common
   stage: build
-  artifacts:
-    paths:
-     - BackEnd/studentsRecords/
   variables:
       NODE_TLS_REJECT_UNAUTHORIZED: "0"   # To support the proxy
   before_script:
@@ -125,6 +122,8 @@ build_review:
   when: manual
   artifacts:
     expire_in: 1 day
+    paths:
+     - BackEnd/studentsRecords/
   except:
     - master
     - tags
@@ -135,6 +134,8 @@ build:
   <<: *build_common
   artifacts:
     expire_in: 2 weeks
+    paths:
+     - BackEnd/studentsRecords/
   only:
    - master
 
