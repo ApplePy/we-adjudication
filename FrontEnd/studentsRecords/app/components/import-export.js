@@ -380,67 +380,94 @@ export default Ember.Component.extend({
 						})
 						.then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "UndergraduateRecordPlans.xlsx".toUpperCase()) {
-					// NOTE: Inefficient use of resources? Yes. Efficient use of my time? Also yes.
-					Promise.all([
-						miscellaneous.getAllModels.call(this, 'student'),
-						miscellaneous.getAllModels.call(this, 'term-code'),
-						miscellaneous.getAllModels.call(this, 'term'),
-						miscellaneous.getAllModels.call(this, 'course-load'),
-						miscellaneous.getAllModels.call(this, 'plan-code'),
-						miscellaneous.getAllModels.call(this, 'program-record'),
-					])
+					// Create missing term codes, course loads, and plans
+					parseStrategies.byColumn.call(this, true, true,
+						[['term'], ['load'], ['plan']],
+						[{ modelName: "term-code", term: "name" }, { modelName: "course-load" }, { modelName: "plan-code", plan: "name" }],
+						miscellaneous.columnKeyReplaceAndSave.bind(this), false)
+						// Get the course load and the plan codes for the next step
+						.then(() => Promise.all([
+							miscellaneous.getAllModels.call(this, 'course-load'),
+							miscellaneous.getAllModels.call(this, 'plan-code')
+						]))
+						// Create or modify program records
 						.then(values => {
-							// Create missing term codes, course loads, and plans
-							return parseStrategies.byColumn.call(this, true, true,
-								[['term'], ['load'], ['plan']],
-								[{ modelName: "term-code", term: "name" }, { modelName: "course-load" }, { modelName: "plan-code", plan: "name" }],
-								miscellaneous.columnKeyReplaceAndSave.bind(this), false)
-								.then(() => {
-									// Create or modify program records
-									return miscellaneous.createOrModifyRecords.call(this,
-										'program-record',
-										(rowContents, el) => el.get('name') === rowContents.program && el.get('level') === parseInt(rowContents.level) && el.get('load.load') === rowContents.load,
-										rowContents => {
-											// Create the JS object for a new program record
-											return {
-												name: rowContents.program,
-												level: parseInt(rowContents.level),
-												load: values[3].find(el => el.get('load') === rowContents.load),
-												plan: [values[4].find(el => el.get('name') === rowContents.plan)]
-											};
-										},
-										(record, rowContents) => {
+							let courseLoads = values[0];
+							let planCodes = values[1];
 
-											// Modifiy a program record
-											let plan = values[4].find(el => el.get('name') === rowContents.plan);
-											if (typeof plan === "undefined") {
-												throw Error("Cannot find plan!");
-											}
-											record.get('plan').pushObject(plan);
-										}, "studentNumber", "term", "program", "level", "load");
-								})
-								.then(() => {
-									// Create or modify student terms
-									return miscellaneous.createOrModifyRecords.call(this,
-										'term',
-										(rowContents, el) => el.get('termCode.name') === rowContents.term && el.get('student.number') === parseInt(rowContents.studentNumber),
-										rowContents => {
-											// Create the JS object for a new term
-											return {
-												termCode: values[1].find(el => el.get('name') === rowContents.term),
-												student: values[0].find(el => el.get('number') === parseInt(rowContents.studentNumber)),
-												programRecords: [values[5].find(el => el.get('name') === rowContents.program && el.get('level') === parseInt(rowContents.level) && el.get('load.load') === rowContents.load)]
-											};
-										},
-										(record, rowContents) => {
-											// Modifiy a term
-											let programRecord = values[5].find(el => el.get('name') === rowContents.program && el.get('level') === parseInt(rowContents.level) && el.get('load.load') === rowContents.load);
-											if (typeof programRecord === "undefined") {
-												throw Error("Cannot find program record!");
-											}
-											record.get('programRecords').pushObject(programRecord);
-										}, "studentNumber", "term", "program", "level", "load");
-								});
+							return miscellaneous.createOrModifyRecords.call(this,
+								'program-record',
+								// Find function to determine if a 
+								(rowContents, el) => el.get('name') === rowContents.program && el.get('level') === parseInt(rowContents.level) && el.get('load.load') === rowContents.load,
+								rowContents => {
+									// Create the JS object for a new program record
+									let newObj = {
+										name: rowContents.program,
+										level: parseInt(rowContents.level),
+										load: courseLoads.find(el => el.get('load') === rowContents.load),
+										plan: [planCodes.find(el => el.get('name') === rowContents.plan)]
+									};
+
+									// Sanity check
+									if (typeof newObj.load === "undefined" || typeof newObj.plan[0] === "undefined") {
+										throw Error("A load or plan was unable to be generated");
+									}
+
+									return newObj;
+								},
+								(record, rowContents) => {
+
+									// Modify a program record by attaching a plan
+									let plan = planCodes.find(el => el.get('name') === rowContents.plan);
+									if (typeof plan === "undefined") {
+										throw Error("Cannot find plan!");
+									}
+
+									// Push the plan to the record
+									record.get('plan').pushObject(plan);
+								}, false, "studentNumber", "term", "program", "level", "load");
+						})
+						// Retrieve records needed for next step
+						.then(() => Promise.all([
+							miscellaneous.getAllModels.call(this, 'student'),
+							miscellaneous.getAllModels.call(this, 'term-code'),
+							miscellaneous.getAllModels.call(this, 'program-record'),
+						]))
+						// Create or modify student terms to connect the program records
+						.then(values => {
+							let students = values[0];
+							let termCodes = values[1];
+							let programRecords = values[2];
+
+							return miscellaneous.createOrModifyRecords.call(this,
+								'term',
+								(rowContents, el) => el.get('termCode.name') === rowContents.term && el.get('student.number') === parseInt(rowContents.studentNumber),
+								rowContents => {
+									// Create the JS object for a new term
+									let newObj = {
+										termCode: termCodes.find(el => el.get('name') === rowContents.term),
+										student: students.find(el => el.get('number') === parseInt(rowContents.studentNumber)),
+										programRecords: [programRecords.find(el => el.get('name') === rowContents.program && el.get('level') === parseInt(rowContents.level) && el.get('load.load') === rowContents.load)]
+									};
+
+									// Sanity check
+									if (typeof newObj.termCode === "undefined" || typeof newObj.student === "undefined" || typeof newObj.programRecods[0] === "undefined") {
+										throw Error("Could not generate a new term code successfully! A parameter is missing.");
+									}
+
+									// Return new object
+									return newObj;
+								},
+								(record, rowContents) => {
+									// Modifiy a term
+									let programRecord = programRecords.find(el => el.get('name') === rowContents.program && el.get('level') === parseInt(rowContents.level) && el.get('load.load') === rowContents.load);
+									if (typeof programRecord === "undefined") {
+										throw Error("Cannot find program record!");
+									}
+
+									// Add program record to the term object
+									record.get('programRecords').pushObject(programRecord);
+								}, true, "studentNumber", "term", "program", "level", "load");
 						})
 						.then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "AssessmentCodes.xlsx".toUpperCase()) {
@@ -596,39 +623,40 @@ let miscellaneous = {
 	 * @param {function(object, object, number, object)} findRecord	A forEach predicate function (after getting the row contents bound to the first parameter) that returns true on a match, and false on no match.
 	 * @param {function(object)} createRecordJSON										A function that recieves the row contents as an object, and returns a JS object for the new record.
 	 * @param {function(object)} modifyFunction											A function that receives the row contents object, and performs the appropriate modifications to Ember Data.
+	 * @param {boolean} ignoreSaveErrors														Toggles on breaking on errors, redirecting errors to warning console instead.
 	 * @param {...string} multiLineVariables												A variadic parameter that specifies columns that only list entries once for multiple rows.
 	 */
-	createOrModifyRecords: function (emberName, findRecord, createRecordJSON, modifyFunction, ...multiLineVariables) {
+	createOrModifyRecords: function (emberName, findRecord, createRecordJSON, modifyFunction, ignoreSaveErrors, ...multiLineVariables) {
 		// Create records, or modify existing ones
-		return parseStrategies.byRowJSON.call(this, rowContents => {
-			// Find if record already exists
-			let record = this.get('store').peekAll(emberName).find(findRecord.bind(this, rowContents));
+		return miscellaneous.getAllModels.call(this, emberName)
+			.then(emberModelList => {
+				return parseStrategies.byRowJSON.call(this, rowContents => {
+					// Find if record already exists
+					let record = emberModelList.find(findRecord.bind(this, rowContents));
 
-			// New record
-			if (typeof record === "undefined") {
-				// First time ever seen, create
-				record = this.get('store').createRecord(emberName, createRecordJSON(rowContents));
-			}
-			// Record already exists, just add modification to object
-			else {
-				modifyFunction(record, rowContents);
-			}
-
-			// Return dummy promise to make byRowJSON happy.
-			return new Promise((res) => res());
-		}, false, ...multiLineVariables)
-			.then(() => {
-				let savePromises = [];
-
-				// Save all records
-				this.get('store').peekAll(emberName).forEach(el => {
-					if (el.get('isNew') === true || el.get('hasDirtyAttributes') === true) {
-						savePromises.push(el.save());
+					// New record
+					if (typeof record === "undefined") {
+						// First time ever seen, create
+						try {
+							record = this.get('store').createRecord(emberName, createRecordJSON(rowContents));
+							return ignoreSaveErrors ? record.save().catch(err => console.warn(err)) : record.save();
+						} catch (err) {
+							console.warn(err);
+							return new Promise(res => res());
+						}
 					}
-				});
-
-				// Continue once all the saves are done
-				return Promise.all(savePromises);
+					// Record already exists, just add modification to object
+					else {
+						try {
+							modifyFunction(record, rowContents);
+							return ignoreSaveErrors ? record.save().catch(err => console.warn(err)) : record.save();
+						} catch (err) {
+							console.warn(err);
+							return new Promise(res => res());
+						}
+					}
+				}, false, ...multiLineVariables)
+				.then(() => emberModelList);
 			});
 	},
 
