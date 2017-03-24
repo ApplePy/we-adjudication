@@ -519,79 +519,60 @@ export default Ember.Component.extend({
 						})
 					.then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "UndergraduateRecordAdjudications.xlsx".toUpperCase()) {
-					// Populate prerequisite data, part 1
-					parseStrategies.byColumn.call(this, true, true,
-						[['studentNumber'], ['term']],
-						[{ modelName: 'student', filterPattern: { number: 'studentNumber' } }, { modelName: 'term-code' }],
-						(results, context) => {
-							// Go through all results
-							for (let result of results) {
-								// Set up filter object
-								let filterKeys = Object.keys(context.filterPattern);
-								let filter = {};
-								for (let key of filterKeys) {
-									filter[key] = result[context[key]];
-								}
-								// Look for object
-								return this.get('store').query(context.modelName, { filter: filter, limit: 1, offset: 0 });
-							}
-						}, false)
-						// Use the previous results to get the terms
-						.then(() => {
-							// This maps a student#/termCode pair to a term object
-							let studentToTermMapping = new Map();
 
-							return parseStrategies.byColumn.call(this, true, true,
-								[['studentNumber', 'term']],
-								[{ modelName: 'term' }],
-								(results, context) => {
-									// NOTE: Hardcoding some stuff in since there's only one pass of this function.
-									for (let result of results) {
-										// Students already loaded, peek should work
-										let student = this.get('store').peekAll('student').filter(el => el.get('number') === result);
-										student = student.get('firstObject');
+					// Collect all terms
+					Promise.all([
+						miscellaneous.getAllModels.call(this, "student"),
+						miscellaneous.getAllModels.call(this, "term-code"),
+						miscellaneous.getAllModels.call(this, "term")
+					])
+					// Convert the terms array to a map with the student/termCode pair as the key
+					.then(values => {
+						let terms = values[2];
 
-										// Term code should work, peek
-										let termcode = this.get('store').peekAll('term-code').filter(el => el.get('code') === result.term);
-										termcode = termcode.get('firstObject');
+						// Get the unique student/term pairs
+						return parseStrategies.byColumn.call(this, true, true,
+							[['studentNumber', 'term']],
+							[{}],
+							(results, context) => {
+								let termsMap = new Map();
 
-										// Sanity check
-										if (typeof student === "undefined" || typeof termcode === "undefined") {
-											throw Error("Student or termcode was not found for " + rowContents.studentNumber + " " + rowContents.term + "! Objects found: ", student, termcode);
+								// Filter the terms array by the student/term pairs
+								terms.forEach(term => {
+									results.forEach(result => {
+										// If a matching tuple is found, add to map
+										if (term.get('student.number') === parseInt(result.studentNumber) && term.get('termCode.name') === result.term) {
+											termsMap.set(result.term + result.studentNumber, term);
 										}
+									});
+								});
 
-										// Find the matching term and then put into map
-										return this.get('store').query(context.modelName, { filter: { student: student.get('id'), termCode: termcode.get('id') }, limit: 1 })
-											.then(recordList => studentToTermMapping.set(result.studentNumber + result.term, recordList.get('firstObject')))
-									}
-								}, false)
-								// Pass on completed map to next chain
-								.then(() => studentToTermMapping);
-						})
-						.then(studentToTermMapping => {
-							// Add adjudications, now that term objects have been found
-							return parseStrategies.byRow.call(false, rowContents => {
-								// Get term
-								let term = studentToTermMapping.get(rowContents.studentNumber + rowContents.term);
+								// Return completed map
+								return termsMap;
+							}, false)
+							// The terms map will be wrapped in an array - remove wrapping
+							.then(wrapped => wrapped[0]);
+					})
+					// create a new adjudication record, and glue on the term object
+					.then(termsMap => {
+						return parseStrategies.byRowJSON.call(this, rowContents => {
+							let term = termsMap.get(rowContents.term + rowContents.studentNumber);
 
-								// Sanity check
-								if (typeof term === 'undefined') {
-									throw Error("Term " + rowContents.term + "not found!");
-								}
+							// Sanity check
+							if (typeof term === "undefined") {
+								throw Error("Term for adjudication item not found!");
+							}
 
-								// Save adjudication
-								return saveStrategies.createAndSave.call(this, {
-									date: new Date(),
+							// Save new adjudication object
+							return saveStrategies.createAndSave.call(this, {
 									termAVG: rowContents.termAVG,
 									termUnitsPassed: rowContents.termUnitsPassed,
 									termUnitsTotal: rowContents.termUnitsTotal,
-									term: term,
-									assessmentCode: null
+									term: term
 								}, "adjudication", "term");
-
-							}, false);
-						})
-						.then(processOff).catch(errorOff);
+						}, true);
+					})
+					.then(processOff).catch(errorOff);
 				}
 			};
 
