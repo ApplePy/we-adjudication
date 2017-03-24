@@ -11,6 +11,6 @@
 *(Optional) Provide a little bit of instruction on how to use the new functionality,
  or if the issue already has relevant information, refer reader to the issues*
 
- ## Are there any outstanding issues with the Merge Request?
+## Are there any outstanding issues with the Merge Request?
 
- *Just list off any issues still kicking around so we don't forget to put them in the issue tracker*
+*Just list off any issues still kicking around so we don't forget to put them in the issue tracker*
