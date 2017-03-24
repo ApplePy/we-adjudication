@@ -1,5 +1,6 @@
 
 let express = require('express');
+let path = require('path');
 let logger = require('./logger');
 let app = express();
 
@@ -92,7 +93,22 @@ api.use('/logins', logins);
 api.use('/roots', roots);
 
 // Set default serve
-if (process.env.NODE_ENV === 'production') app.use(express.static('dist'));
+if (process.env.NODE_ENV === 'production') {
+    app.use('/', express.static('dist'));
+    app.get('/*', (req, res) => res.sendFile(path.join(__dirname+'/dist','index.html')));
+}
+
+// Function to handle client errors
+app.use(function(req, res, next) {
+    res.sendStatus(404);
+});
+
+// Base error handler
+app.use(function (err, req, res, next) {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+    next();
+});
 
 // Port to listen on
 let port = 3700;

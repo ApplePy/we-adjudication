@@ -127,9 +127,7 @@ build_review:
    - cd FrontEnd/studentsRecords
    - npm install                  # Don't worry about production flag
    - bower install
-   - echo $CI_COMMIT_REF_SLUG
    - HOST=$CI_COMMIT_REF_SLUG.digitalpanda.incode.ca ember build --environment production
-   - echo $HOST
    - cp -r dist/ ../../BackEnd/studentsRecords/dist/
 
 
@@ -194,6 +192,7 @@ production:
 # This job stops the deployment containers
 shutdown:
   <<: *deploy_common
+  dependencies: []
   variables:
       DOCKER_HOST: tcp://pandadocker.isolation.ad.murrayweb.ca:2375
       GIT_STRATEGY: None
@@ -235,12 +234,13 @@ deploy_review:
 # This job stops the deployment containers
 shutdown_review:
   <<: *deploy_common
+  dependencies: []
   variables:
       DOCKER_HOST: tcp://pandadocker.isolation.ad.murrayweb.ca:2375
       GIT_STRATEGY: None
   when: manual
   script:
-    - docker-compose -p CI_COMMIT_REF_SLUG -H $DOCKER_HOST down --volumes     # Destroy the old image
+    - docker-compose -p $CI_COMMIT_REF_SLUG -H $DOCKER_HOST down --volumes     # Destroy the old image
   environment:
     name: review/$CI_COMMIT_REF_NAME
     url: http://$CI_COMMIT_REF_SLUG.digitalpanda.incode.ca/
