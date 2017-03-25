@@ -10,7 +10,7 @@ export default Ember.Component.extend({
  actions: {
   saveCode() {
     this.get('codeToEdit').save();
-    this.send('reloadArray');
+   // this.send('reloadArray'); <- this is the line
     this.set('notDONE', false);
     Ember.$('.ui.modal').modal('hide');
     Ember.$('.ui.modal').remove();
