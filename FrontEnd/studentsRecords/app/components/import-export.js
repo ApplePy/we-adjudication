@@ -451,8 +451,9 @@ export default Ember.Component.extend({
 									};
 
 									// Sanity check
-									if (typeof newObj.termCode === "undefined" || typeof newObj.student === "undefined" || typeof newObj.programRecods[0] === "undefined") {
-										throw Error("Could not generate a new term code successfully! A parameter is missing.");
+									if (typeof newObj.termCode === "undefined" || typeof newObj.student === "undefined" || typeof newObj.programRecords[0] === "undefined") {
+										console.debug(newObj);
+										throw Error("Could not generate a new term successfully! A parameter is missing.");
 									}
 
 									// Return new object
@@ -608,7 +609,9 @@ let miscellaneous = {
 	 * @param {...string} multiLineVariables												A variadic parameter that specifies columns that only list entries once for multiple rows.
 	 */
 	createOrModifyRecords: function (emberName, findRecord, createRecordJSON, modifyFunction, ignoreSaveErrors, ...multiLineVariables) {
-		// Create records, or modify existing ones
+		let changedRecords = [];
+
+		// Create records, or modify existing ones, but don't save yet
 		return miscellaneous.getAllModels.call(this, emberName)
 			.then(emberModelList => {
 				return parseStrategies.byRowJSON.call(this, rowContents => {
@@ -620,25 +623,35 @@ let miscellaneous = {
 						// First time ever seen, create
 						try {
 							record = this.get('store').createRecord(emberName, createRecordJSON(rowContents));
-							return ignoreSaveErrors ? record.save().catch(err => console.warn(err)) : record.save();
+							changedRecords.push(record);
 						} catch (err) {
 							console.warn(err);
-							return new Promise(res => res());
 						}
 					}
 					// Record already exists, just add modification to object
 					else {
 						try {
 							modifyFunction(record, rowContents);
-							return ignoreSaveErrors ? record.save().catch(err => console.warn(err)) : record.save();
 						} catch (err) {
 							console.warn(err);
-							return new Promise(res => res());
 						}
 					}
-				}, false, ...multiLineVariables)
-				.then(() => emberModelList);
-			});
+
+					// To keep byRowJSON happy
+					return new Promise(res => res());
+				}, ignoreSaveErrors, ...multiLineVariables);
+			})
+			// Save all changes
+			.then(() => {
+				let promises = [];
+					for (let record of changedRecords) {
+						let savePromise = ignoreSaveErrors ? record.save().catch(err => console.warn(err)) : record.save();
+						promises.push(savePromise);
+					}
+				return Promise.all(promises);
+			})
+			// Return all records
+			.then(miscellaneous.getAllModels.bind(this, emberName, true));
 	},
 
 	/**
