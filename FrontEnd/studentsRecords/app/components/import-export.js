@@ -568,7 +568,7 @@ export default Ember.Component.extend({
 							return saveStrategies.createAndSave.call(this, {
 									termAVG: rowContents.termAVG,
 									termUnitsPassed: rowContents.termUnitsPassed,
-									termUnitsTotal: rowContents.termUnitsTotal,
+									termUnitsTotal: rowContents.termUnitsTotals,
 									term: term
 								}, "adjudication", "term");
 						}, true);
