@@ -223,7 +223,7 @@ deploy_review:
   after_script:
     - rm -f ~/.docker/config.json
   environment:
-    name: review/$CI_COMMIT_REF_NAME
+    name: review/$CI_COMMIT_REF_SLUG
     url: http://$CI_COMMIT_REF_SLUG.digitalpanda.incode.ca/
     on_stop: shutdown_review
   except:
@@ -242,7 +242,7 @@ shutdown_review:
   script:
     - docker-compose -p $CI_COMMIT_REF_SLUG -H $DOCKER_HOST down --volumes     # Destroy the old image
   environment:
-    name: review/$CI_COMMIT_REF_NAME
+    name: review/$CI_COMMIT_REF_SLUG
     url: http://$CI_COMMIT_REF_SLUG.digitalpanda.incode.ca/
     action: stop
   except:
