@@ -814,8 +814,8 @@ let parseStrategies = {
 
 				// Don't process rows with ---END OF FILE on them
 				let cont = false;
-				for (let cell of Object.values(row)) {
-					if (cell === "---END OF FILE") {
+				for (let cellKey of Object.keys(row)) {
+					if (row[cellKey] === "---END OF FILE") {
 						cont = true;
 					}
 				}
