@@ -11,7 +11,7 @@ export default Ember.Component.extend({
   oldGrade: null,
   notDONE: null,
   systemLists: {
-    "secondarySchool": [],
+    "secondary-school": [],
     "hs-subject": [],
     "hs-course": []
   },
