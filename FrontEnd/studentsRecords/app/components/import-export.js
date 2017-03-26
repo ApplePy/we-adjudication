@@ -575,6 +575,10 @@ export default Ember.Component.extend({
 					})
 					.then(processOff).catch(errorOff);
 				}
+				else {
+				    errorOff(Error("Invalid file name."));
+				    alert("Invalid file name!");
+				}
 			};
 
 			//Error in file loading
