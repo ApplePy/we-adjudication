@@ -1077,7 +1077,7 @@ let newStanding = () => {
         course: course.course,
         description: course.description,
         units: Math.floor(Math.random() * 4) / 2 + 0.5, // Either 0, 0.5, 1, 1.5, or 2
-        grade: Math.floor(Math.random() * 101), // From 0-100
+        grade: faker.random.words(1, 2), // From 0-100
         from: fromData[Math.floor(Math.random() * fromData.length)],
         recipient: Lists.studentList[faker.random.number(Lists.studentList.length - 1)]
     };

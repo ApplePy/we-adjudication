@@ -178,14 +178,14 @@ export default Ember.Component.extend({
 					})
 						.then(processOff).catch(errorOff);
 				} else if (fileName.toUpperCase() === "AdvancedStanding.xlsx".toUpperCase()) {
-					miscellaneous.parseAwardsAndStandings.call(this, "course", "advanced-standing", (json, student, emberName) => {
+					miscellaneous.parseAwardsAndStandings.call(this, "Course", "advanced-standing", (json, student, emberName) => {
 						// Save advanced standing
 						return saveStrategies.createAndSave.call(this, {
-							course: json.course,
-							description: json.description,
-							units: json.units,
-							grade: json.grade,
-							from: json.from,
+							course: json.Course,
+							description: json.Description,
+							units: json.Units,
+							grade: json.Grade,
+							from: json.From,
 							recipient: student
 						}, emberName, "recipient");
 					})
