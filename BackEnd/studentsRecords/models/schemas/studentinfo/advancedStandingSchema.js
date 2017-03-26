@@ -9,7 +9,7 @@ let advancedStandingSchema = mongoose.Schema(
         course: String,
         description: String,
         units: Number,
-        grade: Number,
+        grade: String,
         from: String,
         recipient: {type: mongoose.Schema.ObjectId, ref: 'Students'}
     }
