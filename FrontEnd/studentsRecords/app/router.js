@@ -24,7 +24,7 @@ Router.map(function() {
     this.route('export');
     this.route('adjudication');
   });
-  this.route('home', {path: '/*path'});  // Handle the invalid path
+  this.route('404', {path: '/*path'});  // Handle the invalid path
 });
 
 export default Router;
