@@ -1,0 +1,38 @@
+<div class="ui pagination menu pagination-centered">
+  {{#if canStepBackward}}
+    <a class="item arrow prev enabled-arrow" href="#" {{action "incrementPage" -1}}>
+      &laquo;
+    </a>
+  {{else}}
+    <a class="item arrow prev disabled" href="#" {{action "incrementPage" -1}}>
+      &laquo;
+    </a>
+  {{/if}}
+
+  {{#each pageItems as |item|}}
+    {{#if item.dots}}
+      <a class="item dots disabled">
+        <span>...</span>
+      </a>
+    {{/if}}
+    {{#if item.current}}
+      <a class="item active page-number">
+        {{item.page}}
+      </a>
+    {{else}}
+      <a class="item page-number" href="#" {{action "pageClicked" item.page}}>
+        {{item.page}}
+      </a>
+    {{/if}}
+  {{/each}}
+
+  {{#if canStepForward}}
+    <a class="item arrow next enabled-arrow" href="#" {{action "incrementPage" 1}}>
+      &raquo;
+    </a>
+  {{else}}
+    <a class="item arrow next disabled" href="#" {{action "incrementPage" 1}}>
+      &raquo;
+    </a>
+  {{/if}}
+</div>
