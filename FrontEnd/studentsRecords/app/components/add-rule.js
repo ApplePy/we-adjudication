@@ -166,7 +166,9 @@ export default Ember.Component.extend({
     },
 
     removeRule(rule){
-      this.set('rulesToBeAdded', this.get('rulesToBeAdded').without(rule))
+      this.set('rulesToBeAdded', this.get('rulesToBeAdded').without(rule));
+      this.set('confirming', false);
+      this.set('devBool', true);
     },
 
     doneAdding(){
