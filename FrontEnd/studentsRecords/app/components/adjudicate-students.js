@@ -288,7 +288,7 @@ loop(){
       }
       this.send('done');
 } catch (err){
-    console.log('error');
+    console.log(err.toString());
     this.send('parsingError');
   }
     },
