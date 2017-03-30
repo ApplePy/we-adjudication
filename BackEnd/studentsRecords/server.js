@@ -92,6 +92,8 @@ api.use('/rolePermissions', rolePermissions);
 api.use('/logins', logins);
 api.use('/roots', roots);
 
+app.use("/favicon.ico", (req, res) => res.sendFile(path.join(__dirname+'/assets','favicon.ico')));
+
 // Set default serve
 if (process.env.NODE_ENV === 'production') {
     app.use('/', express.static('dist'));
