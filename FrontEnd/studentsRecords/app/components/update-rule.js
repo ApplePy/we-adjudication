@@ -12,12 +12,12 @@ export default Ember.Component.extend({
     {
       id: 1,
       val: "&&",
-      description: "and"
+      description: "AND"
     },
     {
       id: 2,
       val: "||",
-      description: "or"
+      description: "OR"
     }
   ],
 
@@ -31,7 +31,6 @@ export default Ember.Component.extend({
 
     selectLink(link){
       this.get('rule').set('logicalLink', this.get('links')[link].description);
-      this.get('rule').save();
       this.set('isAdding', false);
       this.set('addedRule', false);
     },
