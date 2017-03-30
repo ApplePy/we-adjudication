@@ -1,0 +1,42 @@
+<!-- Loop through the list of objects and display them -->
+{{#if content}}
+  {{#each pagedContent as |code eleIndex|}}
+  <br>
+    <div class="ui input">
+
+      <!-- Loop through the properties of this model -->
+      {{#each codeObj.inputModelProp as |prop index|}}
+
+      <div class={{concat "ui icon input " (append-number codeObj.emberName eleIndex)}} onclick={{action "resetState"}}>
+        <!-- If matching property model is a string or number, display an input box -->
+        {{#if (or (eq prop.type "string") (eq prop.type "number"))}}
+          {{input type=prop.type value=(mut (get code prop.name))}}
+        <!-- If matching property model is an ember model, display a dropdown -->
+
+        {{else if (eq prop.type "model")}}
+          <select
+            class="ui search dropdown"
+            id={{append-number codeObj.emberName index}}>
+
+            {{#each (get lists prop.modelName) as |element|}}
+              <option value={{element.id}}
+              selected={{eq (get (get code prop.name) "id") element.id}}>
+              {{get element prop.modelLabel}}
+              {{!--{{code.sourceID}}--}}
+              </option>
+            {{/each}}
+
+          </select>
+
+        {{/if}}
+      </div>
+      {{/each}}
+
+      <button disabled class="ui primary button buttonmodify" {{action 'modifyCode' codeObj.emberName code eleIndex}}>Save</button>
+      <button class="negative ui button" {{action 'deleteCode' codeObj.emberName code.id}}>Delete</button>
+    </div>
+    <br>
+  {{/each}}
+  <br />
+  {{page-numbers content=pagedContent showFL=true}}
+{{/if}}
