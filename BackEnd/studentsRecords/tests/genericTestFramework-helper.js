@@ -170,11 +170,11 @@ let Tests = {
          */
         getPagination: function (emberName, emberPluralized, ModelType, modelArray, pageSize = 5, itWrap = null) {
             if (itWrap === null) itWrap = it;
-            itWrap('it should GET all models, one page at a time', function (done) {
+            itWrap('it should GET all models, one page at a time using offsets', function (done) {
 
                 let remainingModels = new Set(modelArray.map(el => el._id.toString()));
 
-                times(Math.ceil(modelArray.length / 5), function (n, next) {
+                times(Math.ceil(modelArray.length / pageSize), function (n, next) {
                     // Request all advanced standings
                     chai.request(server)
                         .get('/api/' + emberPluralized)
@@ -203,7 +203,7 @@ let Tests = {
 
             });
 
-            return itWrap('it should GET nothing when the offset is too large', function (done) {
+            itWrap('it should GET nothing when the offset is too large', function (done) {
                 // Request all advanced standings
                 chai.request(server)
                     .get('/api/' + emberPluralized)
@@ -216,6 +216,58 @@ let Tests = {
                         expect(res.body.meta.total).to.equal(modelArray.length);
                         expect(res.body.meta.limit).to.equal(pageSize);
                         expect(res.body.meta.offset).to.equal(modelArray.length);
+                        expect(res.body[emberName]).to.have.length(0);
+
+                        done();
+                    });
+            });
+
+            itWrap('it should GET all models, one page at a time using page numbers', function (done) {
+
+                let remainingModels = new Set(modelArray.map(el => el._id.toString()));
+
+                times(Math.ceil(modelArray.length / pageSize), function (n, next) {
+                    // Request all advanced standings
+                    chai.request(server)
+                        .get('/api/' + emberPluralized)
+                        .query({ page: n + 1, limit: pageSize })
+                        .end((err, res) => {
+                            expect(res).to.have.status(200);
+                            expect(res).to.be.json;
+                            expect(res.body).to.have.property(emberName);
+                            expect(res.body).to.have.property("meta");
+                            expect(res.body.meta.total).to.equal(modelArray.length);
+                            expect(res.body.meta.limit).to.equal(pageSize);
+                            expect(res.body.meta.offset).to.equal(n * pageSize);
+                            expect(res.body[emberName]).to.have.length.at.most(pageSize);
+
+                            // Remove model from remaining models
+                            for (let num = 0; num < res.body[emberName].length; num++) {
+                                expect(remainingModels.delete(res.body[emberName][num]._id.toString())).to.be.true;
+                            }
+                            next();
+                        });
+                }, function (err) {
+                    if (err) throw err;
+                    expect(remainingModels.size).to.equal(0);
+                    done();
+                });
+
+            });
+
+            return itWrap('it should GET nothing when the page number is too large', function (done) {
+                // Request all advanced standings
+                chai.request(server)
+                    .get('/api/' + emberPluralized)
+                    .query({ page: Math.floor(modelArray.length / pageSize) + 2, limit: pageSize })
+                    .end((err, res) => {
+                        expect(res).to.have.status(200);
+                        expect(res).to.be.json;
+                        expect(res.body).to.have.property(emberName);
+                        expect(res.body).to.have.property("meta");
+                        expect(res.body.meta.total).to.equal(modelArray.length);
+                        expect(res.body.meta.limit).to.equal(pageSize);
+                        expect(res.body.meta.offset).to.equal(pageSize * (1 + Math.floor(modelArray.length / pageSize)));
                         expect(res.body[emberName]).to.have.length(0);
 
                         done();
