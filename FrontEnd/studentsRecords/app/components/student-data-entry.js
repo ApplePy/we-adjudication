@@ -85,40 +85,38 @@ export default Ember.Component.extend({
       self.set('loadModel', records);
     });
 
-    this.get('store').findAll('term-code').then(function(records){
+    this.get('store').findAll('term-code').then(function (records) {
       self.set('termCodeModel', records);
     });
 
     //load all of the grades into the store
-    this.get('store').query('grade', {limit: 10}).then((records) => {
-      if( typeof records.get('meta') === "object" &&
+    this.get('store').query('grade', { limit: 10 }).then((records) => {
+      if (typeof records.get('meta') === "object" &&
         typeof records.get('meta').total === "number" &&
-        10 < records.get('meta').total)
-      {
-        this.get('store').query('grade', {limit: records.get('meta').total - 10, offset: 10});
+        10 < records.get('meta').total) {
+        this.get('store').query('grade', { limit: records.get('meta').total - 10, offset: 10 });
       }
     });
 
-this.set('codeModel', []);
+    this.set('codeModel', []);
     //load all the codes
-     this.get('store').query('assessment-code', {limit: 10}).then((records) => {
-    let totalRecords = records.get('meta').total;
-    let offsetUsed = records.get('meta').offset;
-    let limitUsed = records.get('meta').limit;
-    this.get('store').query('assessment-code', {limit: totalRecords}).then((code) => {
-    for (var i = 0; i < code.get('length'); i++) {
-        this.get('codeModel').pushObject(code.objectAt(i));
-      }
+    this.get('store').query('assessment-code', { limit: 10 }).then((records) => {
+      let totalRecords = records.get('meta').total;
+      let offsetUsed = records.get('meta').offset;
+      let limitUsed = records.get('meta').limit;
+      this.get('store').query('assessment-code', { limit: totalRecords }).then((code) => {
+        for (var i = 0; i < code.get('length'); i++) {
+          this.get('codeModel').pushObject(code.objectAt(i));
+        }
+      });
     });
-  });
 
     //Load all of the program records into the store
-    this.get('store').query('program-record', {limit: 10}).then((records) => {
-      if( typeof records.get('meta') === "object" &&
+    this.get('store').query('program-record', { limit: 10 }).then((records) => {
+      if (typeof records.get('meta') === "object" &&
         typeof records.get('meta').total === "number" &&
-        10 < records.get('meta').total)
-      {
-        this.get('store').query('program-record', {limit: records.get('meta').total - 10, offset: 10});
+        10 < records.get('meta').total) {
+        this.get('store').query('program-record', { limit: records.get('meta').total - 10, offset: 10 });
       }
     });
 
@@ -176,54 +174,51 @@ this.set('codeModel', []);
       }
     });
 
-     //Load all of the terms for this student
-     var baseLimit = 10;
-     this.get('store').query('term', {
-        limit: baseLimit,
-        filter: {
-          student: this.get('currentStudent').id
-        }
-     }).then((terms) => {
+    //Load all of the terms for this student
+    var baseLimit = 10;
+    this.get('store').query('term', {
+      limit: baseLimit,
+      filter: {
+        student: this.get('currentStudent').id
+      }
+    }).then((terms) => {
 
-       for(var i = 0; i < terms.get('length'); i++) {
-          var term = terms.objectAt(i);
-          this.get('termModel').pushObject(term);
+      for (var i = 0; i < terms.get('length'); i++) {
+        var term = terms.objectAt(i);
+        this.get('termModel').pushObject(term);
 
-          this.get('store').query('course-code', {limit: baseLimit, filter: {termInfo: term.id}}).then((records) => {
-            if( typeof records.get('meta') === "object" &&
+        this.get('store').query('course-code', { limit: baseLimit, filter: { termInfo: term.id } }).then((records) => {
+          if (typeof records.get('meta') === "object" &&
+            typeof records.get('meta').total === "number" &&
+            baseLimit < records.get('meta').total) {
+            this.get('store').query('course-code', { limit: records.get('meta').total - baseLimit, offset: baseLimit, filter: { termInfo: term.id } });
+          }
+        });
+      }
+
+      if (typeof terms.get('meta') === "object" &&
+        typeof terms.get('meta').total === "number" &&
+        baseLimit < terms.get('meta').total) {
+        this.get('store').query('term', {
+          limit: terms.get('meta').total - baseLimit,
+          offset: baseLimit,
+          filter: { student: this.get('currentStudent').id }
+        }).then((moreTerms) => {
+          for (var i = 0; i < moreTerms.get('length'); i++) {
+            var term = moreTerms.objectAt(i);
+            this.get('termModel').pushObject(term);
+
+            this.get('store').query('course-code', { limit: baseLimit, filter: { termInfo: term.id } }).then((records) => {
+              if (typeof records.get('meta') === "object" &&
                 typeof records.get('meta').total === "number" &&
-                baseLimit < records.get('meta').total)
-            {
-                this.get('store').query('course-code', {limit: records.get('meta').total - baseLimit, offset: baseLimit, filter: {termInfo: term.id}});
-            }
-          });
-       }
-
-       if( typeof terms.get('meta') === "object" &&
-         typeof terms.get('meta').total === "number" &&
-         baseLimit < terms.get('meta').total)
-       {
-         this.get('store').query('term', {
-           limit: terms.get('meta').total - baseLimit,
-           offset: baseLimit,
-           filter: {student: this.get('currentStudent').id}
-         }).then((moreTerms) => {
-           for(var i = 0; i < moreTerms.get('length'); i++) {
-             var term = moreTerms.objectAt(i);
-             this.get('termModel').pushObject(term);
-
-             this.get('store').query('course-code', {limit: baseLimit, filter: {termInfo: term.id}}).then((records) => {
-               if( typeof records.get('meta') === "object" &&
-                 typeof records.get('meta').total === "number" &&
-                 baseLimit < records.get('meta').total)
-               {
-                 this.get('store').query('course-code', {limit: records.get('meta').total - baseLimit, offset: baseLimit, filter: {termInfo: term.id}});
-               }
-             });
-           }
-         });
-       }
-     });
+                baseLimit < records.get('meta').total) {
+                this.get('store').query('course-code', { limit: records.get('meta').total - baseLimit, offset: baseLimit, filter: { termInfo: term.id } });
+              }
+            });
+          }
+        });
+      }
+    });
 
   },
 
@@ -233,7 +228,7 @@ this.set('codeModel', []);
 
 
   actions: {
-    saveStudent () {
+    saveStudent() {
       console.log(this.get('currentStudent').get('genderInfo').get('id'));
       console.log(this.get('selectedGender'));
       var updatedStudent = this.get('currentStudent');
@@ -245,7 +240,7 @@ this.set('codeModel', []);
       console.log(this.get('selectedGender'));
     },
 
-    undoSave(){
+    undoSave() {
       this.get('currentStudent').rollbackAttributes();
       //Change the selected values so it doesn't mess with next student
       this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
@@ -258,7 +253,7 @@ this.set('codeModel', []);
     },
 
     nextStudent() {
-      this.set('movingBackword' , false);
+      this.set('movingBackword', false);
       if (this.get('currentIndex') < this.get('lastIndex')) {
         this.set('currentIndex', this.get('currentIndex') + 1);
         //     console.log(JSON.stringify(this.get('currentStudent')));
@@ -269,7 +264,7 @@ this.set('codeModel', []);
     },
 
     previousStudent() {
-      this.set('movingBackword' , true);
+      this.set('movingBackword', true);
       if (this.get('currentIndex') > 0) {
         this.set('currentIndex', this.get('currentIndex') - 1);
       }
@@ -287,40 +282,40 @@ this.set('codeModel', []);
       this.set('showFindStudent', false);
     },
 
-    selectGender (gender){
+    selectGender(gender) {
       this.set('selectedGender', gender);
       //Set the value of this student's gender to the gender selected
       var gen = this.get('store').peekRecord('gender', this.get('selectedGender'));
       this.get('currentStudent').set('genderInfo', gen);
     },
 
-    selectResidency (residency){
+    selectResidency(residency) {
       this.set('selectedResidency', residency);
       //Set the value of this student's residency to this one
       var res = this.get('store').peekRecord('residency', this.get('selectedResidency'));
       this.get('currentStudent').set('resInfo', res);
     },
 
-    assignDate (date){
+    assignDate(date) {
       this.set('selectedDate', date);
     },
 
     //Brings up the confirm-delete component.  Will ask if sure wants to delete
-    deleteStudent(){
+    deleteStudent() {
       this.set('isDeleting', true);
     },
 
     //Called from confirmation on modal
-    confirmedDelete(){
+    confirmedDelete() {
 
       //Delete the student from the database.  **Also need to delete advanced standing and scholarships and awards**
-      this.get('store').findRecord('student', this.get('currentStudent').id, { backgroundReload: false }).then(function(student) {
+      this.get('store').findRecord('student', this.get('currentStudent').id, { backgroundReload: false }).then(function (student) {
         student.deleteRecord();
         student.save(); // => DELETE to /student/:_id
       });
 
       //If this is the last student on the page, load previous.  If not, load next
-      if(this.get('currentIndex') === this.get('lastIndex')){
+      if (this.get('currentIndex') === this.get('lastIndex')) {
         this.send('previousStudent');
       } else {
         this.send('nextStudent');
@@ -335,13 +330,13 @@ this.set('codeModel', []);
       this.set('showAllStudents', false);
     },
 
-    help(){
+    help() {
       this.set('showHelp', true);
     },
 
     addCourse() {
-     this.set('showNewCourse', true);
-     //this.set('showAddCourseButton', false);
+      this.set('showNewCourse', true);
+      //this.set('showAddCourseButton', false);
     },
 
     addAward() {
