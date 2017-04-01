@@ -21,9 +21,11 @@ export default Ember.Component.extend({
   isWorking: false,
   hasError: false,
   parsingError: false,
+  termAvg: null,
 
   init(){
     this._super(...arguments);
+    this.set('termAvg', 0);
  this.get('store').query('adjudication', {limit: 10}).then((records) => {
       let totalRecords = records.get('meta').total;
       let offsetUsed = records.get('meta').offset;
@@ -208,8 +210,10 @@ export default Ember.Component.extend({
         found = true;
         value = this.get('ruleToRule');
       } else if (param === "TermAverage"){
-        //NOT YET IMPLEMENTED
+        param = this.get('termAvg');
+        found = true;
       }
+
       if(!found){
         param = null;
       }
@@ -217,8 +221,8 @@ export default Ember.Component.extend({
       param = "\"" + param + "\"";
         ruleExp += eval(param + opr + value);
         ruleExp += link;
-
     }
+
     ruleExp += ')';
     if(ruleObj != null){
       var logicalLink = ruleObj.get('logicalLink');
@@ -261,6 +265,7 @@ loop(){
             sumCourses += 1;
           }
           termAvg = sum / sumCourses;
+          this.set('termAvg', termAvg);
         }
 
         //for each code...
