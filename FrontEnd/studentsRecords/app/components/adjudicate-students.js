@@ -84,6 +84,13 @@ export default Ember.Component.extend({
     for(var k=0; k < rule.length; k++){
       //Parse through to get the parameter, operator, value, and link for the
       var m = rule.indexOf('(', k);
+      var param;
+      var endParam;
+      var exp;
+      var endOpr;
+      var opr;
+      var value;
+      var link;
       if(rule.substr(m + 1, 4) === "Rule"){
         var y = rule.indexOf('[', m);
         var z = rule.indexOf(']', y);
@@ -94,13 +101,13 @@ export default Ember.Component.extend({
             k = rule.indexOf(')', z);
             z = rule.indexOf(']', z + 1);
           }
-        var exp = rule.substr(m,k - m);
-        var endParam = exp.indexOf(' ') - 1
-        var param = exp.substr(1, endParam);
-        var endOpr = exp.indexOf(" ", endParam + 2);
-        var opr = exp.substr(endParam + 2, endOpr - endParam - 2);
-        var value = exp.substr(endOpr + 2, exp.length - endOpr - 3);
-        var link = rule.substr(k + 2, rule.indexOf(' ', k + 2) - k - 2);
+        exp = rule.substr(m,k - m);
+        endParam = exp.indexOf(' ') - 1;
+        param = exp.substr(1, endParam);
+        endOpr = exp.indexOf(" ", endParam + 2);
+        opr = exp.substr(endParam + 2, endOpr - endParam - 2);
+        value = exp.substr(endOpr + 2, exp.length - endOpr - 3);
+        link = rule.substr(k + 2, rule.indexOf(' ', k + 2) - k - 2);
         if(link == "AND"){
           link = '&&';
         } else if (link == "OR"){
@@ -109,14 +116,13 @@ export default Ember.Component.extend({
         this.parseRules("", null, value);
       } else {
         k= rule.indexOf(')', m);
-        var exp = rule.substr(m,k - m);
-        var endParam = exp.indexOf(' ') - 1
-        var param = exp.substr(1, endParam);
-        var endOpr = exp.indexOf(" ", endParam + 2);
-        var opr = exp.substr(endParam + 2, endOpr - endParam - 2);
-
-        var value = exp.substr(endOpr + 1);
-        var link = rule.substr(k + 2, rule.indexOf(' ', k + 2) - k - 2);
+        exp = rule.substr(m,k - m);
+        endParam = exp.indexOf(' ') - 1
+        param = exp.substr(1, endParam);
+        endOpr = exp.indexOf(" ", endParam + 2);
+        opr = exp.substr(endParam + 2, endOpr - endParam - 2);
+        value = exp.substr(endOpr + 1);
+        link = rule.substr(k + 2, rule.indexOf(' ', k + 2) - k - 2);
         if(link == "AND"){
           link = '&&';
         } else if (link == "OR"){
