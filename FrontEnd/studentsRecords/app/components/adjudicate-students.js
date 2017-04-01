@@ -243,6 +243,26 @@ loop(){
       for(var b=0; b < this.get('terms').length; b++){
         this.set('courses', this.get('terms').objectAt(b).get('courses'));
         this.set('programRecords', this.get('terms').objectAt(b).get('programRecords'));
+
+        //Find the term average, term units passed, and total term units
+        var termAvg = 0.0;
+        var termUnitsPassed = 0.0;
+        var termUnitsTotal = 0.0;
+        var sum = 0.0;
+        var sumCourses = 0;
+        for(var i = 0; i < this.get('courses').get('length'); i++){
+          termUnitsTotal += this.get('courses').objectAt(i).get('unit');
+          var grade = parseFloat(this.get('courses').objectAt(i).get('gradeInfo').get('mark'));
+          if(grade !== NaN){
+            if(grade >= 50){
+              termUnitsPassed = this.get('courses').objectAt(i).get('unit');
+            }
+            sum += grade;
+            sumCourses += 1;
+          }
+          termAvg = sum / sumCourses;
+        }
+
         //for each code...
         var codeToAdd = null;
         for(var i=0; i < this.get('codeModel').get('length'); i++){
@@ -278,11 +298,11 @@ loop(){
         var adjudication = this.get('store').createRecord('adjudication', {
         date: new Date(this.get('date')),
         assessmentCode: codeToAdd,
-    term: this.get('terms').objectAt(b),
+        term: this.get('terms').objectAt(b),
     //unset these after we get import working (we will assume we are always given these fields)
-        termAVG: 0,
-        termUnitsPassed: 0,
-        termUnitsTotal: 0,
+        termAVG: termAvg,
+        termUnitsPassed: termUnitsPassed,
+        termUnitsTotal: termUnitsTotal,
       });
       adjudication.save();
       }
