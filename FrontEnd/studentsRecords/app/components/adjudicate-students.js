@@ -253,7 +253,7 @@ loop(){
         for(var i = 0; i < this.get('courses').get('length'); i++){
           termUnitsTotal += this.get('courses').objectAt(i).get('unit');
           var grade = parseFloat(this.get('courses').objectAt(i).get('gradeInfo').get('mark'));
-          if(grade !== NaN){
+          if(!isNaN(grade)){
             if(grade >= 50){
               termUnitsPassed = this.get('courses').objectAt(i).get('unit');
             }
