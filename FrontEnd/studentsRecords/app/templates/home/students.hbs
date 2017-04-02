@@ -1,1 +1,6 @@
-{{student-data-entry}}
+{{!--TODO: Only display students if there are some in the system.--}}
+{{#if true}}
+  {{outlet}}
+{{else}}
+<em>No students found.</em>
+{{/if}}

@@ -13,7 +13,9 @@ Router.map(function() {
   this.route('user');
   this.route('home', {path: '/'}, function() {
     this.route('welcome', {path: '/'});
-    this.route('students');
+    this.route('students', function() {
+      this.route('student-entry', {path: '/:student_id'});
+    });
     this.route('manage-system');
     this.route('import');
     this.route('about');
