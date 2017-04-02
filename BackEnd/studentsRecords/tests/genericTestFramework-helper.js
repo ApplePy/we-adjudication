@@ -184,6 +184,7 @@ let Tests = {
                             expect(res).to.be.json;
                             expect(res.body).to.have.property(emberName);
                             expect(res.body).to.have.property("meta");
+                            expect(res.body.meta.total_pages).to.equal(Math.ceil(modelArray.length / pageSize));
                             expect(res.body.meta.total).to.equal(modelArray.length);
                             expect(res.body.meta.limit).to.equal(pageSize);
                             expect(res.body.meta.offset).to.equal(n * pageSize);
@@ -213,6 +214,7 @@ let Tests = {
                         expect(res).to.be.json;
                         expect(res.body).to.have.property(emberName);
                         expect(res.body).to.have.property("meta");
+                        expect(res.body.meta.total_pages).to.equal(Math.ceil(modelArray.length / pageSize));
                         expect(res.body.meta.total).to.equal(modelArray.length);
                         expect(res.body.meta.limit).to.equal(pageSize);
                         expect(res.body.meta.offset).to.equal(modelArray.length);
@@ -236,6 +238,7 @@ let Tests = {
                             expect(res).to.be.json;
                             expect(res.body).to.have.property(emberName);
                             expect(res.body).to.have.property("meta");
+                            expect(res.body.meta.total_pages).to.equal(Math.ceil(modelArray.length / pageSize));
                             expect(res.body.meta.total).to.equal(modelArray.length);
                             expect(res.body.meta.limit).to.equal(pageSize);
                             expect(res.body.meta.offset).to.equal(n * pageSize);
@@ -265,6 +268,7 @@ let Tests = {
                         expect(res).to.be.json;
                         expect(res.body).to.have.property(emberName);
                         expect(res.body).to.have.property("meta");
+                        expect(res.body.meta.total_pages).to.equal(Math.ceil(modelArray.length / pageSize));
                         expect(res.body.meta.total).to.equal(modelArray.length);
                         expect(res.body.meta.limit).to.equal(pageSize);
                         expect(res.body.meta.offset).to.equal(pageSize * (1 + Math.floor(modelArray.length / pageSize)));

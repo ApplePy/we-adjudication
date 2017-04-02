@@ -86,7 +86,8 @@ let Route = function(Model,
                                  {
                                      total: modelObjs.total,
                                      limit: modelObjs.limit,
-                                     offset: modelObjs.offset
+                                     offset: modelObjs.offset,
+                                     total_pages: Math.ceil(modelObjs.total / modelObjs.limit)
                                  }
                             });
                         });
@@ -123,7 +124,8 @@ let Route = function(Model,
                                     {
                                         total: modelObjs.total,
                                         limit: modelObjs.limit,
-                                        offset: modelObjs.offset
+                                        offset: modelObjs.offset,
+                                        total_pages: Math.ceil(modelObjs.total / modelObjs.limit)
                                     }
                                 });
                             });
