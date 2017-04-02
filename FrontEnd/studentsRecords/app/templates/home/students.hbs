@@ -1,5 +1,14 @@
-{{!--TODO: Only display students if there are some in the system.--}}
-{{#if true}}
+{{!--Only display students if there are some in the system.--}}
+{{#if students.length}}
+  {{!--Can't get away from this modal design in v2...--}}
+  {{#if showAllStudents}}
+    {{students-list model=model closeModal=(action "closeModal" "showAllStudents")}}
+  {{/if}}
+  
+  {{#if showFindStudent}}
+    {{find-student closeModal=(action "closeModal" "showFindStudent")}}
+  {{/if}}
+
   {{outlet}}
 {{else}}
 <em>No students found.</em>

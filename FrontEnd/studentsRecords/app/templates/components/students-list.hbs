@@ -1,7 +1,7 @@
 <div class="ui modal">
   <div class="header">List of 10 Students, click the arrow keys to get more students</div>
   <div class="content">
-    {{#each studentsModel as |oneStudent|}}
+    {{#each model as |oneStudent|}}
       <div class="ui grid">
         <div class="ten wide column">
           <div class="actions">
@@ -26,12 +26,7 @@
 
     <div class="actions">
       <hr>
-      <div class="ui button" {{action "loadPrevious"}}>
-        <i class="arrow left icon"></i>
-      </div>
-      <div class="ui button" {{action "loadNext"}}>
-        <i class="arrow right icon"></i>
-      </div>
+      {{page-numbers content=model}}
       <div class="ui button" {{action "exit"}}>OK</div>
     </div>
 

@@ -2,92 +2,63 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
   store: Ember.inject.service(),
-  showAllStudents: false,
+
+  // Passed actions
+  firstStudent: null,
+  lastStudent: null,
+  nextStudent: null,
+  previousStudent: null,
+  allStudents: null,
+  findStudent: null,
+  destroyedStudent: null,
+
+  // Modal toggling variables
+  showAllStudents: false, // Looks like can be nuked
+  isDeleting: false,
+  showHelp: false,
+  showFindStudent: false, // Looks like can be nuked
+  showNewCourse: false,
+  showNewAward: false,
+  updateAdmission: false,
+  currentStudent: null,
+  
   residencyModel: null,
   genderModel: null,
   statusModel: null,
   loadModel: null,
   planModel: null,
   termCodeModel: null,
-  selectedResidency: null,
-  selectedGender: null,
-  selectedDate: null,
-  studentsRecords: null,
-  currentStudent: null,
-  currentIndex: null,
-  firstIndex: 0,
-  lastIndex: 0,
-  studentPhoto: null,
-  limit: null,
-  offset: null,
-  old_offset: null,
-  pageSize: null,
-  movingBackword: false,
-  isDeleting: false,
-  showHelp: false,
-  showFindStudent: false,
-  showNewCourse: false,
-  showNewAward: false,
+  selectedResidency: null,  // USED
+  selectedGender: null,     // USED
+  selectedDate: null,       // USED
+  // studentsRecords: null,    // Looks like can be nuked
+  
+  currentIndex: null,       // Currently required by delete to load a valid student after deletion
+  // firstIndex: 0,            // Looks like it can be nuked
+  lastIndex: 0,             // Currently required by delete to load a valid student after deletion
+  studentPhoto: null,       // USED
+  // limit: null,              // Looks like can be nuked
+  // offset: null,             // Looks like can be nuked
+  // old_offset: null,         // Looks like can be nuked
+  // pageSize: null,           // Looks like can be nuked
+  // movingBackword: false,    // Looks like can be nuked
+  
   awardNotes: [],
   advancedStandingArray: [],
   termModel: [],
-  updateAdmission: false,
+  
   codeModel: [],
-
-  studentModel: Ember.observer('offset', function () {
-    var self = this;
-    this.get('store').query('student', {
-      limit: self.get('limit'),
-      offset: self.get('offset')
-    }).then(function (records) {
-      // Make sure records were returned before setting the new records
-      if (records.get('length') > 0 || self.get('old_offset') === null) {
-        self.set('old_offset', self.get('offset')); // Update last good offset property
-        self.set('studentsRecords', records);
-        self.set('firstIndex', records.indexOf(records.get("firstObject")));
-        self.set('lastIndex', records.indexOf(records.get("lastObject")));
-        if (self.get('movingBackword')) {
-          self.set('currentIndex', records.indexOf(records.get("lastObject")));
-        } else {
-          self.set('currentIndex', records.indexOf(records.get("firstObject")));
-        }
-      } else {
-        // Revert to last good offset property
-        self.set('offset', self.get('old_offset'));
-      }
-    });
-  }),
-
-  fetchStudent: Ember.observer('currentIndex', function () {
-    this.showStudentData(this.get('currentIndex'));
-  }),
 
   init() {
     this._super(...arguments);
-    // load Residency data model
-    this.get('store').findAll('residency').then(function (records) {
-      self.set('residencyModel', records);
-    });
-
-    this.get('store').findAll('gender').then(function (records) {
-      self.set('genderModel', records);
-    });
-
-    this.get('store').findAll('program-status').then(function (records) {
-      self.set('statusModel', records);
-    });
-
-    this.get('store').findAll('plan-code').then(function (records) {
-      self.set('planModel', records);
-    });
-
-    this.get('store').findAll('course-load').then(function (records) {
-      self.set('loadModel', records);
-    });
-
-    this.get('store').findAll('term-code').then(function (records) {
-      self.set('termCodeModel', records);
-    });
+    // load models for dropdowns
+    
+    this.set('residencyModel', this.get('store').peekAll('residency'));
+    this.set('genderModel', this.get('store').peekAll('gender'));
+    this.set('statusModel', this.get('store').peekAll('program-status'));
+    this.set('planModel', this.get('store').peekAll('plan-code'));
+    this.set('loadModel', this.get('store').peekAll('course-load'));
+    this.set('termCodeModel', this.get('store').peekAll('term-code'));
 
     //load all of the grades into the store
     this.get('store').query('grade', { limit: 10 }).then((records) => {
@@ -120,27 +91,13 @@ export default Ember.Component.extend({
       }
     });
 
-    // load first page of the students records
-    this.set('limit', 10);
-    this.set('offset', 0);
-    this.set('pageSize', 10);
-    var self = this;
-    this.get('store').query('student', {
-      limit: self.get('limit'),
-      offset: self.get('offset')
-    }).then(function (records) {
-      self.set('studentsRecords', records);
-      self.set('firstIndex', records.indexOf(records.get("firstObject")));
-      self.set('lastIndex', records.indexOf(records.get("lastObject")));
-
-      // Show first student data
-      self.set('currentIndex', self.get('firstIndex'));
-    });
-
+    // Show first student data
+      this.showStudentData();
   },
 
-  showStudentData: function (index) {
-    this.set('currentStudent', this.get('studentsRecords').objectAt(index));
+  showStudentData: function () {
+    // Current student is set by route, can safely ignore
+    //this.set('currentStudent', this.get('studentsRecords').objectAt(index));
     this.set('studentPhoto', this.get('currentStudent').get('photo'));
     var date = this.get('currentStudent').get('DOB');
     var datestring = date.toISOString().substring(0, 10);
@@ -249,37 +206,27 @@ export default Ember.Component.extend({
     },
 
     firstStudent() {
-      this.set('currentIndex', this.get('firstIndex'));
+      this.get('firstStudent')();
     },
 
     nextStudent() {
-      this.set('movingBackword', false);
-      if (this.get('currentIndex') < this.get('lastIndex')) {
-        this.set('currentIndex', this.get('currentIndex') + 1);
-        //     console.log(JSON.stringify(this.get('currentStudent')));
-      }
-      else {
-        this.set('offset', this.get('offset') + this.get('pageSize'));
-      }
+      this.get('nextStudent')();
     },
 
     previousStudent() {
-      this.set('movingBackword', true);
-      if (this.get('currentIndex') > 0) {
-        this.set('currentIndex', this.get('currentIndex') - 1);
-      }
-      else if (this.get('offset') > 0) {
-        this.set('offset', this.get('offset') - this.get('pageSize'));
-      }
+      this.get('previousStudent')();
     },
 
     lastStudent() {
-      this.set('currentIndex', this.get('lastIndex'));
+      this.get('lastStudent')();
     },
 
     allStudents() {
-      this.set('showAllStudents', true);
-      this.set('showFindStudent', false);
+      this.get('allStudents')();
+    },
+
+    findStudent() {
+      this.get("findStudent")();
     },
 
     selectGender(gender) {
@@ -312,22 +259,8 @@ export default Ember.Component.extend({
       this.get('store').findRecord('student', this.get('currentStudent').id, { backgroundReload: false }).then(function (student) {
         student.deleteRecord();
         student.save(); // => DELETE to /student/:_id
+        this.get('destroyedStudent')();
       });
-
-      //If this is the last student on the page, load previous.  If not, load next
-      if (this.get('currentIndex') === this.get('lastIndex')) {
-        this.send('previousStudent');
-      } else {
-        this.send('nextStudent');
-      }
-
-      //Subtract 1 from the last index of this page of students to account for the missing record
-      this.set('lastIndex', this.get('lastIndex') - 1);
-    },
-
-    findStudent() {
-      this.set('showFindStudent', true);
-      this.set('showAllStudents', false);
     },
 
     help() {

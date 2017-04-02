@@ -1,89 +1,100 @@
 import Ember from 'ember';
+import pagedArray from 'ember-cli-pagination/computed/paged-array';
+
 
 export default Ember.Component.extend({
   store: Ember.inject.service(),
-  studentsModel: null,
-  INDEX: null,
+
+  // Variables injected in
+  closeModal: null,
+
+  // Variables bound to template inputs
   studentID: null,
   fName: "",
   lName: "",
-  notDONE: null,
-  student: null,
+
+  // Modal-bound variables
   showFoundStudent: false,
   studentArray: [],
+  studentPaged: pagedArray('studentArray', {
+    perPage: 10
+  }),
+
+  studentsModel: null,
+  INDEX: null,
+  notDONE: null,
+  student: null,
 
   actions: {
     find: function () {
-      var studentID = this.get('studentID');
-      var firstName = this.get('fName');
-      var lastName = this.get('lName');
-      //the result array where matching students will be stored
-      var resultArray = [];
+      let studentID = this.get('studentID');
+      let firstName = this.get('fName');
+      let lastName = this.get('lName');
 
-      this.get('store').query('student', {
-         filter: {
-           snum: studentID,
-           //firstN: firstName,
-           //lastN: lastName
-         }
-       }).then((codes) => {
-        for(var i = 0; i < codes.get('length'); i++) {
-          this.get('studentArray').pushObject(codes.objectAt(i));
-        }
-       });
-
-      var filterObject = {};
-      if (studentID != "") {
-        filterObject["number"] = studentID;
+      // Set up filter object
+      let filterObject = {};
+      if (studentID !== "") {
+        filterObject.number = studentID;
       }
-      if (firstName != "") {
-        filterObject["firstName"] = firstName;
+      if (firstName !== "") {
+        filterObject.firstName = firstName;
       }
-      if (lastName != "") {
-        filterObject["lastName"] = lastName;
+      if (lastName !== "") {
+        filterObject.lastName = lastName;
       }
 
-      this.get('store').query('student', {limit: 10}).then(
-       (result) => {
-         let totalRecords = result.get('meta').total;
-         this.get('store').query('student', {limit: totalRecords, filter: filterObject}).then((result) =>{
-           result.forEach(element => this.get('studentArray').pushObject(element));
-        
-            if (result.get('length') === 1)
-            {
-             var index = this.get('studentsModel').indexOf(result.get("firstObject"));
-            }
-            
-            if(result.get('length') > 1) 
-            {
-              this.set('showFoundStudent', true);
-              console.log(this.get('studentArray'));
-           }
+      //Get all matching students
+      return this.get('store').query('student', { filter: filterObject })
+        .then(result => {
 
-           if(result.get('length') === 0)
-            {
-              alert("No student found!");
-            }
-          
-            this.set('INDEX', index);
-            this.set('notDONE', false);
+          // Get all students, not just the meta
+          let totalRecords = result.get('meta').total;
+          return this.get('store').query('student', { limit: totalRecords, filter: filterObject });
+        })
+        .then(result => {
 
+          // If only one result, go straight to it
+          if (result.get('length') === 1) {
+            // Remove this modal without triggering closeModal callback
             Ember.$('.ui.modal').modal('hide');
             Ember.$('.ui.modal').remove();
-        }
-      ).catch((err) => {
-        console.log(err);
-        alert("Invalid search!");
-        console.log(this.get('studentArray'));
-         });
-      });
+
+            this.get('closeModal')(result.get('firstObject'));
+          }
+
+          // If multiple results, display the list
+          else if (result.get('length') > 1) {
+            // DO NOT REMOVE MODAL. Leave it to studentsList to clean up modals kicking around. Otherwise the race condition causes students-list to not show.
+            // Ember.$('.ui.modal').modal('hide');
+            // Ember.$('.ui.modal').remove();
+
+            console.log('multiple');
+
+            this.set('studentArray', result);
+            this.set('showFoundStudent', true);
+          }
+
+          // No records were found
+          else {
+            alert("No student found!");
+            console.error("No student matching " + filterObject + " was found.");
+            this.send('close');
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          alert("Invalid search!");
+          console.log(this.get('studentArray'));
+          this.send("close");
+        });
     },
 
     close: function () {
-      this.set('notDONE', false);
-
       Ember.$('.ui.modal').modal('hide');
       Ember.$('.ui.modal').remove();
+
+      // Close this modal completely
+      this.get('closeModal')();
     }
   },
 
