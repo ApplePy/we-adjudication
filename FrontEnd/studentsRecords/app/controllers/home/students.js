@@ -64,6 +64,8 @@ export default Ember.Controller.extend({
       if (this.get('currentStudentIndex') > 0) {
         this.set('currentStudentIndex', this.get('currentStudentIndex') - 1);
         this.transitionToRoute('home.students.student-entry', this.get('students').objectAt(this.get('currentStudentIndex')));
+      } else {
+        console.warn("Can't navigate before the first student.");
       }
     },
 
@@ -73,6 +75,21 @@ export default Ember.Controller.extend({
     
     findStudent() {
       this.set("showFindStudent", true);
+    },
+
+    reload() {
+      // Handle deleting the last object in the array
+      if (this.get('students').get('length') <= 0) {
+        this.transitionToRoute("home");
+      }
+
+      // Handle deleting the last-positioned object in the array
+      while (this.get('currentStudentIndex') >= this.get('students').get('length')) {
+        this.set('currentStudentIndex', this.get('currentStudentIndex') - 1);
+      }
+
+      // Transition to next student
+      this.transitionToRoute('home.students.student-entry', this.get('students').objectAt(this.get('currentStudentIndex')));
     },
 
     closeModal(modalVariable, newStudent) {

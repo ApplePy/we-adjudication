@@ -256,10 +256,10 @@ export default Ember.Component.extend({
     confirmedDelete() {
 
       //Delete the student from the database.  **Also need to delete advanced standing and scholarships and awards**
-      this.get('store').findRecord('student', this.get('currentStudent').id, { backgroundReload: false }).then(function (student) {
-        student.deleteRecord();
-        student.save(); // => DELETE to /student/:_id
-        this.get('destroyedStudent')();
+      this.get('store').findRecord('student', this.get('currentStudent').id, { backgroundReload: false })
+      .then(student => {
+        student.destroyRecord()
+        .then(() => this.get('destroyedStudent')());
       });
     },
 

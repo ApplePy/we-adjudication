@@ -41,7 +41,7 @@ export default Ember.Route.extend({
     },
     destroyedStudent: function() {
       // Record was destroyed, take advantage of the students redirect to handle edge cases (e.g. last student deleted)
-      this.transitionTo("home.students");
+      this.controllerFor("home.students").send("reload");
     }
   }
 });
