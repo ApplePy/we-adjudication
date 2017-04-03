@@ -52,51 +52,17 @@ export default Ember.Component.extend({
   init() {
     this._super(...arguments);
     // load models for dropdowns
-    
     this.set('residencyModel', this.get('store').peekAll('residency'));
     this.set('genderModel', this.get('store').peekAll('gender'));
     this.set('statusModel', this.get('store').peekAll('program-status'));
     this.set('planModel', this.get('store').peekAll('plan-code'));
     this.set('loadModel', this.get('store').peekAll('course-load'));
     this.set('termCodeModel', this.get('store').peekAll('term-code'));
-
-    //load all of the grades into the store
-    this.get('store').query('grade', { limit: 10 }).then((records) => {
-      if (typeof records.get('meta') === "object" &&
-        typeof records.get('meta').total === "number" &&
-        10 < records.get('meta').total) {
-        this.get('store').query('grade', { limit: records.get('meta').total - 10, offset: 10 });
-      }
-    });
-
-    this.set('codeModel', []);
-    //load all the codes
-    this.get('store').query('assessment-code', { limit: 10 }).then((records) => {
-      let totalRecords = records.get('meta').total;
-      let offsetUsed = records.get('meta').offset;
-      let limitUsed = records.get('meta').limit;
-      this.get('store').query('assessment-code', { limit: totalRecords }).then((code) => {
-        for (var i = 0; i < code.get('length'); i++) {
-          this.get('codeModel').pushObject(code.objectAt(i));
-        }
-      });
-    });
-
-    //Load all of the program records into the store
-    this.get('store').query('program-record', { limit: 10 }).then((records) => {
-      if (typeof records.get('meta') === "object" &&
-        typeof records.get('meta').total === "number" &&
-        10 < records.get('meta').total) {
-        this.get('store').query('program-record', { limit: records.get('meta').total - 10, offset: 10 });
-      }
-    });
-
-    // Show first student data
-      this.showStudentData();
+    this.set('codeModel', this.get('store').peekAll('assessment-code'));
   },
 
-  didUpdateAttrs() {
-    // Show first student data on reload
+  didReceiveAttrs() {
+    // Show first student data on (re)load
     this.showStudentData();
   },
 
@@ -210,29 +176,17 @@ export default Ember.Component.extend({
       this.set('selectedDate', this.get('currentStudent').get('DOB').toISOString().substring(0, 10));
     },
 
-    firstStudent() {
-      this.get('firstStudent')();
-    },
+    firstStudent() { this.get('firstStudent')(); },
 
-    nextStudent() {
-      this.get('nextStudent')();
-    },
+    nextStudent() { this.get('nextStudent')(); },
 
-    previousStudent() {
-      this.get('previousStudent')();
-    },
+    previousStudent() { this.get('previousStudent')(); },
 
-    lastStudent() {
-      this.get('lastStudent')();
-    },
+    lastStudent() { this.get('lastStudent')(); },
 
-    allStudents() {
-      this.get('allStudents')();
-    },
+    allStudents() { this.get('allStudents')(); },
 
-    findStudent() {
-      this.get("findStudent")();
-    },
+    findStudent() { this.get("findStudent")(); },
 
     selectGender(gender) {
       this.set('selectedGender', gender);
@@ -248,41 +202,25 @@ export default Ember.Component.extend({
       this.get('currentStudent').set('resInfo', res);
     },
 
-    assignDate(date) {
-      this.set('selectedDate', date);
-    },
+    assignDate(date) { this.set('selectedDate', date); },
 
     //Brings up the confirm-delete component.  Will ask if sure wants to delete
-    deleteStudent() {
-      this.set('isDeleting', true);
-    },
+    deleteStudent() { this.set('isDeleting', true); },
 
     //Called from confirmation on modal
     confirmedDelete() {
 
       //Delete the student from the database.  **Also need to delete advanced standing and scholarships and awards**
-      this.get('store').findRecord('student', this.get('currentStudent').id, { backgroundReload: false })
-      .then(student => {
-        student.destroyRecord()
+      this.get('currentStudent').destroyRecord()
         .then(() => this.get('destroyedStudent')());
-      });
     },
 
-    help() {
-      this.set('showHelp', true);
-    },
+    help() { this.set('showHelp', true); },
 
-    addCourse() {
-      this.set('showNewCourse', true);
-      //this.set('showAddCourseButton', false);
-    },
+    addCourse() { this.set('showNewCourse', true); },
 
-    addAward() {
-      this.set('showNewAward', true);
-    },
+    addAward() { this.set('showNewAward', true); },
 
-    updateAdmission() {
-      this.set('updateAdmission', true);
-    },
+    updateAdmission() { this.set('updateAdmission', true); },
   }
 });
