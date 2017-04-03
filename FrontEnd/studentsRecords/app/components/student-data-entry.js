@@ -95,6 +95,11 @@ export default Ember.Component.extend({
       this.showStudentData();
   },
 
+  didUpdateAttrs() {
+    // Show first student data on reload
+    this.showStudentData();
+  },
+
   showStudentData: function () {
     // Current student is set by route, can safely ignore
     //this.set('currentStudent', this.get('studentsRecords').objectAt(index));
