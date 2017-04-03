@@ -76,34 +76,30 @@ export default Ember.Component.extend({
 
     //Fixes gender/residency bug
     this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
-    this.set('awardNotes', []);
-    this.set('advancedStandingArray', []);
-    this.set('termModel', []);
-
     this.set('selectedGender', this.get('currentStudent').get('genderInfo').get('id'));
 
-    this.get('store').query('award', {
-      filter: {
-        recipient: this.get('currentStudent').id
-      }
-    }).then((awards) => {
-      for (var i = 0; i < awards.get('length'); i++) {
-        this.get('awardNotes').pushObject(awards.objectAt(i));
-      }
-    });
 
-    this.get('store').query('advanced-standing', {
-      filter: {
-        recipient: this.get('currentStudent').id
-      }
-    }).then((standing) => {
-      for (var i = 0; i < standing.get('length'); i++) {
-        this.get('advancedStandingArray').pushObject(standing.objectAt(i));
-      }
-    });
+    // Get awards for student
+    this.set('awardNotes', []);
+    this.get('store').query('award', { filter: { recipient: this.get('currentStudent').id } })
+      .then((awards) => {
+        for (var i = 0; i < awards.get('length'); i++) {
+          this.get('awardNotes').pushObject(awards.objectAt(i));
+        }
+      });
+
+    // Get advanced standings for student
+    this.set('advancedStandingArray', []);
+    this.get('store').query('advanced-standing', { filter: { recipient: this.get('currentStudent').id } })
+      .then((standing) => {
+        for (var i = 0; i < standing.get('length'); i++) {
+          this.get('advancedStandingArray').pushObject(standing.objectAt(i));
+        }
+      });
 
     //Load all of the terms for this student
     var baseLimit = 10;
+    this.set('termModel', []);
     this.get('store').query('term', {
       limit: baseLimit,
       filter: {

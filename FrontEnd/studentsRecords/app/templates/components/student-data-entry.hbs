@@ -81,8 +81,9 @@
 
               <!-- GENDER HERE -->
               {{#each genderModel as |genderChoice|}}
-                <option value={{genderChoice.id}} selected={{eq currentStudent.genderInfo.id
-                                                                   genderChoice.id}}>{{genderChoice.name}} </option>
+                <option value={{genderChoice.id}} selected={{eq currentStudent.genderInfo.id genderChoice.id}}>
+                  {{genderChoice.name}}
+                </option>
               {{/each}}
             </select>
 
