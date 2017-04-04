@@ -20,28 +20,19 @@ export default Ember.Component.extend({
   showNewCourse: false,
   showNewAward: false,
   updateAdmission: false,
-  currentStudent: null,
+  currentStudentRoute: null,
   
+  currentStudent: null,
   residencyModel: null,
   genderModel: null,
   statusModel: null,
   loadModel: null,
   planModel: null,
   termCodeModel: null,
-  selectedResidency: null,  // USED
-  selectedGender: null,     // USED
+  selectedResidency: Ember.computed.oneWay('currentStudent.resInfo.id'),  // USED
+  selectedGender: Ember.computed.oneWay('currentStudent.genderInfo.id'),  // USED
   selectedDate: null,       // USED
-  // studentsRecords: null,    // Looks like can be nuked
-  
-  currentIndex: null,       // Currently required by delete to load a valid student after deletion
-  // firstIndex: 0,            // Looks like it can be nuked
-  lastIndex: 0,             // Currently required by delete to load a valid student after deletion
   studentPhoto: null,       // USED
-  // limit: null,              // Looks like can be nuked
-  // offset: null,             // Looks like can be nuked
-  // old_offset: null,         // Looks like can be nuked
-  // pageSize: null,           // Looks like can be nuked
-  // movingBackword: false,    // Looks like can be nuked
   
   awardNotes: [],
   advancedStandingArray: [],
@@ -51,6 +42,7 @@ export default Ember.Component.extend({
 
   init() {
     this._super(...arguments);
+    this.set('currentStudent', this.get('currentStudentRoute'));  // Kludge to handle the initial load, the observer will take care of the rest
     // load models for dropdowns
     this.set('residencyModel', this.get('store').peekAll('residency'));
     this.set('genderModel', this.get('store').peekAll('gender'));
@@ -59,25 +51,30 @@ export default Ember.Component.extend({
     this.set('loadModel', this.get('store').peekAll('course-load'));
     this.set('termCodeModel', this.get('store').peekAll('term-code'));
     this.set('codeModel', this.get('store').peekAll('assessment-code'));
-  },
-
-  didReceiveAttrs() {
-    // Show first student data on (re)load
     this.showStudentData();
   },
+  
+  // Reloads the modified student object from the database
+  reloadStudent: function() {
+    return this.get('store').findRecord("student", this.get('currentStudentRoute').get('id'), { reload: true })
+      .then(student => {
+        this.set('currentStudent', student);
+        this.showStudentData();
+        return student;
+      });
+  },
+
+  currentStudentObserver: Ember.observer('currentStudentRoute', function () {
+    // Replace the bum record with a good one
+    this.reloadStudent();
+  }),
 
   showStudentData: function () {
-    // Current student is set by route, can safely ignore
-    //this.set('currentStudent', this.get('studentsRecords').objectAt(index));
+    // Set some basic data
     this.set('studentPhoto', this.get('currentStudent').get('photo'));
     var date = this.get('currentStudent').get('DOB');
     var datestring = date.toISOString().substring(0, 10);
     this.set('selectedDate', datestring);
-
-    //Fixes gender/residency bug
-    this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
-    this.set('selectedGender', this.get('currentStudent').get('genderInfo').get('id'));
-
 
     // Get awards for student
     this.set('awardNotes', []);
@@ -165,11 +162,7 @@ export default Ember.Component.extend({
     },
 
     undoSave() {
-      this.get('currentStudent').rollbackAttributes();
-      //Change the selected values so it doesn't mess with next student
-      this.set('selectedResidency', this.get('currentStudent').get('resInfo').get('id'));
-      this.set('selectedGender', this.get('currentStudent').get('genderInfo').get('id'));
-      this.set('selectedDate', this.get('currentStudent').get('DOB').toISOString().substring(0, 10));
+      this.reloadStudent();
     },
 
     firstStudent() { this.get('firstStudent')(); },
