@@ -43,7 +43,7 @@ export default Ember.Component.extend({
   init() {
     this._super(...arguments);
     this.set('currentStudent', this.get('currentStudentRoute'));  // Kludge to handle the initial load, the observer will take care of the rest
-    // load models for dropdowns
+    // load models for dropdowns (was already populated in the route)
     this.set('residencyModel', this.get('store').peekAll('residency'));
     this.set('genderModel', this.get('store').peekAll('gender'));
     this.set('statusModel', this.get('store').peekAll('program-status'));

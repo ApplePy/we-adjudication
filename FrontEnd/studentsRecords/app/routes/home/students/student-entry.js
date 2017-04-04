@@ -9,6 +9,7 @@ export default Ember.Route.extend({
 
   afterModel: function() {
     // Load all the needed models in advance before loading the template
+    // WARNING: relationship data is lost!
     return Ember.RSVP.hash({
       residency: this.get('store').findAll('residency'),
       gender: this.get('store').findAll('gender'),
