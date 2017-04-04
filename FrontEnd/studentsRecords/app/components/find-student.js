@@ -34,13 +34,13 @@ export default Ember.Component.extend({
       // Set up filter object
       let filterObject = {};
       if (studentID !== "") {
-        filterObject.number = studentID;
+        filterObject.number = {$regex: studentID + ".*"};
       }
       if (firstName !== "") {
-        filterObject.firstName = firstName;
+        filterObject.firstName = {$regex: firstName + ".*"};
       }
       if (lastName !== "") {
-        filterObject.lastName = lastName;
+        filterObject.lastName = {$regex: lastName + ".*"};
       }
 
       //Get all matching students
