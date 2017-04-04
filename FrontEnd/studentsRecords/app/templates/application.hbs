@@ -1,47 +1,46 @@
 {{#if oudaAuth.isAuthenticated }}
 
-  <div class="ui segment container">
-    <div class="ui secondary center aligned grid padded segment">
-      <div class="three wide column">
+  <div class="ui secondary center aligned grid padded segment">
+    <div class="three wide column">
 
-        <img class="ui right aligned container image" src="/assets/images/UWO Stacked.png">
-        <h4> Logged in as:  {{oudaAuth.getName}}</h4>
-      </div>
-      <div class="thirteen wide column">
-        <br>
-        <h2>Welcome to Western Engineering Adjudication System</h2>
-      </div>
-
+      <img class="ui right aligned container image" src="/assets/images/UWO Stacked.png">
+      <h4> Logged in as:  {{oudaAuth.getName}}</h4>
     </div>
-
-    <div class="ui inverted menu">
-      <a class="item">
-        <i class="home icon"></i>
-        {{#link-to 'home'}}Home{{/link-to}}
-      </a>
-      <div class="right menu">
-        <a class="item">{{#link-to 'user'}}User Profile{{/link-to}}</a>
-        <a class="item">{{#link-to 'admin-portal'}}Admin Portal{{/link-to}}</a>
-        <a class="item">{{#link-to 'home.about'}}About{{/link-to}} </a>
-        <a class="item">{{log-out name=oudaAuth.getName}} </a>
-      </div>
+    <div class="thirteen wide column">
+      <br>
+      <h2>Welcome to Western Engineering Adjudication System</h2>
     </div>
-
-    <br> <br>
-    {{outlet}}
-    <br> <br>
-    <footer>
-      <div class="ui violet inverted grid segment">
-        <div class="fourteen wide column">
-          © Copyright - Digital Panda, Dr. Abdelkader Ouda
-        </div>
-        <div class="two wide column">
-          <img class="ui right aligned container image" src="/assets/images/DigitalPanda.png">
-        </div>
-      </div>
-    </footer>
 
   </div>
+
+  <div class="ui inverted menu">
+    {{#link-to 'home'}}
+      <a class="item">
+        <i class="home icon"></i>
+        Home
+      </a>
+    {{/link-to}}
+    <div class="right menu">
+      {{#link-to 'user'}}<a class="item">User Profile</a>{{/link-to}}
+      {{#link-to 'admin-portal'}}<a class="item">Admin Portal</a>{{/link-to}}
+      {{#link-to 'home.about'}}<a class="item">About</a>{{/link-to}}
+      <a class="item">{{log-out name=oudaAuth.getName}} </a>
+    </div>
+  </div>
+
+  <br> <br>
+  {{outlet}}
+  <br> <br>
+  <footer>
+    <div class="ui violet inverted grid segment">
+      <div class="fourteen wide column">
+        © Copyright - Digital Panda, Dr. Abdelkader Ouda
+      </div>
+      <div class="two wide column">
+        <img class="ui right aligned container image" src="/assets/images/DigitalPanda.png">
+      </div>
+    </div>
+  </footer>
 
 {{else}}
 
