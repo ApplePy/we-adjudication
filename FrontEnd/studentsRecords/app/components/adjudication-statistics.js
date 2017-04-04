@@ -18,33 +18,36 @@ export default Ember.Component.extend({
 	    // Get all the records necessary for the dropdown
 	    let getAll = emberName => {
 		    // Get the records
-		    this.get('store')
+		    return this.get('store')
 		    .query(emberName, { limit: 10, offset: 0 })
 		    .then(records => {
 		        // If the result was paginated, get all results
 		        if (typeof records.get("meta").total !== "undefined" && records.get('meta').limit < records.get('meta').total) {
-		          	this.get('store')
+		          	return this.get('store')
 		          	.query(emberName, { limit: records.get("meta").total })
-		          	.then(() => {
+		          	.then((placeholder) => {
 		          		Ember.set(this.get('systemLists'), emberName, this.get('store').peekAll(emberName));
+		          		return placeholder;
 		          	});
 		        } else {
 		          	Ember.set(this.get('systemLists'), emberName, this.get('store').peekAll(emberName));
+		          	return records;
 		        }
 	      	});
 	  	};
 
 	    // Populate the Secondary School course source, and subject list
-	    getAll("program-record");
-
-	    //Remove duplicate program records
-	    let programRecordNames = new Set();
-	    for (let programRecord of Ember.get(this.get('systemLists'), "program-record")) {
-	    	if (programRecordNames.has(programRecord.name) === false) {
-	    		programRecordNames.add(programRecord.name);
-	    	}
-	    }
-	    Ember.set(this.get('systemLists'), "program-record", programRecordNames);
+	    getAll("program-record").then(records => {
+	    	//Remove duplicate program records
+		    let programRecordNames = new Set();
+		    records.forEach(programRecord => {
+		    	if (programRecordNames.has(programRecord.get('name')) === false) {
+		    		programRecordNames.add(programRecord.get('name'));
+		    	}
+		    });
+		    Ember.set(this.get('systemLists'), "program-record", [...programRecordNames]);
+	    });
+	    
 	},
 
 	actions: {
@@ -98,7 +101,7 @@ export default Ember.Component.extend({
 					//Write column titles to Excel
 					let keys = Object.keys(adjudicationInfo[0]);
 					let C = 0;
-					var ws = {};
+					let ws = {};
 					for (let col of keys) {
 						let cell_ref = XLSX.utils.encode_cell({ c: C, r: 0 });
 						ws[cell_ref] = { v: col };
@@ -122,7 +125,8 @@ export default Ember.Component.extend({
 				}
 
 				//Create workbook
-				var workbook = new Workbook();
+				//var workbook = new XLSX.Workbook();
+				let workbook = { SheetNames:[], Sheets:{} };
 
 				//Add worksheet to workbook
 				workbook.SheetNames.push("adjudicationSheet");
@@ -148,11 +152,11 @@ export default Ember.Component.extend({
 			}).then(terms => {
 				//Filter terms to get the ones with the selected program record
 				return terms.filter(term => {
-					let termIndex = term.programRecords.findIndex(programRecord => {
-						let programRecordIndex = programRecords.findIndex(progRec => programRecord.get('id') === progRec.get('id'));
-						return (programRecordIndex !== -1);
+					let findTerm = term.get('programRecords').find(programRecord => {
+						let findProgramRecord = term.get('programRecords').find(progRec => programRecord.get('id') === progRec.get('id'));
+						return (term.get('programRecords').indexOf(findProgramRecord) !== -1);
 					});
-					return (termIndex !== -1);
+					return (term.get('programRecords').indexOf(findTerm) !== -1);
 				});
 			});
 		}).then(filteredTerms => {
@@ -160,11 +164,19 @@ export default Ember.Component.extend({
 			return this.get('store').query('student', {}).then(dummy => {
 				return this.get('store').query('student', { limit: dummy.get('meta').total });
 			}).then(students => {
-				return filteredTerms.map(term => { 
-					return {
-						term: term,
-						student: term.get('student')
-					};
+				return filteredTerms.map(term => {
+
+					return this.get('store').findRecord("term", term.get('id'), { reload: true }).then(refreshedTerm => {
+
+				    	term = refreshedTerm;
+
+						return {
+							term: term,
+							student: term.get('student')
+						};
+
+				    });
+
 				});
 			});
 		}).then(filteredTermsandStudents => {
@@ -173,44 +185,87 @@ export default Ember.Component.extend({
 				return this.get('store').query('adjudication', { limit: dummy.get('meta').total });
 			}).then(adjudications => {
 				return adjudications.filter(adjudication => {
-					let foundIndex = filteredTermsandStudents.findIndex(termandstudent => adjudication.get('term.id') === termandstudent.term.get('id'));
+					let found = filteredTermsandStudents.find(termandstudent => adjudication.get('term.id') === termandstudent._result.term.get('id'));
 
-					return (foundIndex !== -1);
+					return (filteredTermsandStudents.indexOf(found) !== -1);
 				});
 			}).then(filteredAdjudications => {
 				//Return adjudication and students
 				return filteredAdjudications.map(adjudication => {
 					return {
 						adjudication: adjudication,
-						student: filteredTermsandStudents.find(termandstudent => adjudication.get('term.id') === termandstudent.term.get('id')).student
+						student: filteredTermsandStudents.find(termandstudent => adjudication.get('term.id') === termandstudent._result.term.get('id'))._result.student
 					};
 				});
 			});
 		}).then(filteredAdjudicationsAndStudents => {
+
+			//console.log(filteredAdjudicationsAndStudents);
+
 			//Get the assessment codes associated with the adjudications
 			return this.get('store').findAll('assessment-code').then(assessmentCode => {
 				//Return the adjudication, student and assessment codes
 				return filteredAdjudicationsAndStudents.map(adjudicationAndStudent => {
-					return {
+
+					//console.log(adjudicationAndStudent);
+
+					return this.get('store').findRecord("adjudication", adjudicationAndStudent.adjudication.get('id'), { reload: true }).then(refreshedAdjudication => {
+
+				    	let adjudication = refreshedAdjudication;
+
+				    	console.log("here");
+				    	console.log(adjudication);
+
+						return {
+							adjudication: adjudicationAndStudent.adjudication,
+							student: adjudicationAndStudent.student,
+							assessmentCode: adjudication.get('assessmentCode')
+						};
+
+				    });
+
+					/*return {
 						adjudication: adjudicationAndStudent.adjudication,
 						student: adjudicationAndStudent.student,
 						assessmentCode: adjudicationAndStudent.adjudication.get('assessmentCode')
-					};
+					};*/
 				});
 			});
 		}).then(adjudicationInfo => {
+
+			//console.log(adjudicationInfo);
+
 			//Parse adjudication info
-				return adjudicationInfo.map(adjInfo => {
-					return {
-						Program: this.get("searchValue"),
-						StudentNumber: adjInfo.student.get('number'),
-						FirstName: adjInfo.student.get('firstName'),
-						LastName: adjInfo.student.get('lastName'),
-						AdjCode: adjInfo.assessmentCode.get('code'),
-						AdjName: adjInfo.assessmentCode.get('name'),
-						"Date": adjInfo.adjudication.get('date')
-					};
+			return adjudicationInfo.map(adjInfo => {
+
+				/*console.log("AdjInfo:");
+				console.log(adjInfo);
+				console.log("adjInfo.student:");
+				console.log(adjInfo.student);
+				console.log("adjInfo.student.get('number')");
+				console.log(adjInfo.student.get("number"));
+				console.log("object:");*/
+
+				console.log({
+					Program: this.get("searchValue"),
+					StudentNumber: adjInfo.student.get('number'),
+					FirstName: adjInfo.student.get('firstName'),
+					LastName: adjInfo.student.get('lastName'),
+					AdjCode: adjInfo.assessmentCode.get('code'),
+					AdjName: adjInfo.assessmentCode.get('name'),
+					"Date": adjInfo.adjudication.get('date')
 				});
+
+				return {
+					Program: this.get("searchValue"),
+					StudentNumber: adjInfo.student.get('number'),
+					FirstName: adjInfo.student.get('firstName'),
+					LastName: adjInfo.student.get('lastName'),
+					AdjCode: adjInfo.assessmentCode.get('code'),
+					AdjName: adjInfo.assessmentCode.get('name'),
+					"Date": adjInfo.adjudication.get('date')
+				};
+			});
 		});
 	}
 });
