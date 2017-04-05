@@ -57,6 +57,15 @@ export default Ember.Component.extend({
     },
     {
       id: 10, oprs: [{id: 0, description: "=="}, {id: 1, description: "!="}], description: "Rule"
+    },
+    {
+      id: 11, oprs: [{id: 0, description: ">"},
+      {id: 1, description: ">="},
+      {id: 2, description: "=="},
+      {id: 3, description: "<="},
+      {id: 4, description: "<"},
+      {id: 5, description: "!="}],
+      description: "TermAverage"
     }
   ],
   /*
@@ -74,15 +83,6 @@ export default Ember.Component.extend({
    {id: 5, description: "!="}],
    description: "CumulativeAverage"
    },
-   {
-   id: 13, oprs: [{id: 0, description: ">"},
-   {id: 1, description: ">="},
-   {id: 2, description: "=="},
-   {id: 3, description: "<="},
-   {id: 4, description: "<"},
-   {id: 5, description: "!="}],
-   description: "TermAverage"
-   }
   */
   oprs: [],
   links: [

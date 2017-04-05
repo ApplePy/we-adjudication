@@ -13,6 +13,13 @@ export default Ember.Component.extend({
     this._super(...arguments);
 
     this.set('courses', []);
+    var newCourse = {
+      courseLetter: null,
+      courseNumber: null,
+      name: null,
+      unit: null,
+    };
+    this.get('courses').pushObject(newCourse);
 
   },
 

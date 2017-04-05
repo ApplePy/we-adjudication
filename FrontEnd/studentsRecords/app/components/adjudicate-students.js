@@ -21,9 +21,11 @@ export default Ember.Component.extend({
   isWorking: false,
   hasError: false,
   parsingError: false,
+  termAvg: null,
 
   init(){
     this._super(...arguments);
+    this.set('termAvg', 0);
  this.get('store').query('adjudication', {limit: 10}).then((records) => {
       let totalRecords = records.get('meta').total;
       let offsetUsed = records.get('meta').offset;
@@ -82,6 +84,13 @@ export default Ember.Component.extend({
     for(var k=0; k < rule.length; k++){
       //Parse through to get the parameter, operator, value, and link for the
       var m = rule.indexOf('(', k);
+      var param;
+      var endParam;
+      var exp;
+      var endOpr;
+      var opr;
+      var value;
+      var link;
       if(rule.substr(m + 1, 4) === "Rule"){
         var y = rule.indexOf('[', m);
         var z = rule.indexOf(']', y);
@@ -92,13 +101,13 @@ export default Ember.Component.extend({
             k = rule.indexOf(')', z);
             z = rule.indexOf(']', z + 1);
           }
-        var exp = rule.substr(m,k - m);
-        var endParam = exp.indexOf(' ') - 1
-        var param = exp.substr(1, endParam);
-        var endOpr = exp.indexOf(" ", endParam + 2);
-        var opr = exp.substr(endParam + 2, endOpr - endParam - 2);
-        var value = exp.substr(endOpr + 2, exp.length - endOpr - 3);
-        var link = rule.substr(k + 2, rule.indexOf(' ', k + 2) - k - 2);
+        exp = rule.substr(m,k - m);
+        endParam = exp.indexOf(' ') - 1;
+        param = exp.substr(1, endParam);
+        endOpr = exp.indexOf(" ", endParam + 2);
+        opr = exp.substr(endParam + 2, endOpr - endParam - 2);
+        value = exp.substr(endOpr + 2, exp.length - endOpr - 3);
+        link = rule.substr(k + 2, rule.indexOf(' ', k + 2) - k - 2);
         if(link == "AND"){
           link = '&&';
         } else if (link == "OR"){
@@ -107,14 +116,13 @@ export default Ember.Component.extend({
         this.parseRules("", null, value);
       } else {
         k= rule.indexOf(')', m);
-        var exp = rule.substr(m,k - m);
-        var endParam = exp.indexOf(' ') - 1
-        var param = exp.substr(1, endParam);
-        var endOpr = exp.indexOf(" ", endParam + 2);
-        var opr = exp.substr(endParam + 2, endOpr - endParam - 2);
-
-        var value = exp.substr(endOpr + 1);
-        var link = rule.substr(k + 2, rule.indexOf(' ', k + 2) - k - 2);
+        exp = rule.substr(m,k - m);
+        endParam = exp.indexOf(' ') - 1
+        param = exp.substr(1, endParam);
+        endOpr = exp.indexOf(" ", endParam + 2);
+        opr = exp.substr(endParam + 2, endOpr - endParam - 2);
+        value = exp.substr(endOpr + 1);
+        link = rule.substr(k + 2, rule.indexOf(' ', k + 2) - k - 2);
         if(link == "AND"){
           link = '&&';
         } else if (link == "OR"){
@@ -208,8 +216,10 @@ export default Ember.Component.extend({
         found = true;
         value = this.get('ruleToRule');
       } else if (param === "TermAverage"){
-        //NOT YET IMPLEMENTED
+        param = this.get('termAvg');
+        found = true;
       }
+
       if(!found){
         param = null;
       }
@@ -217,8 +227,8 @@ export default Ember.Component.extend({
       param = "\"" + param + "\"";
         ruleExp += eval(param + opr + value);
         ruleExp += link;
-
     }
+
     ruleExp += ')';
     if(ruleObj != null){
       var logicalLink = ruleObj.get('logicalLink');
@@ -243,6 +253,27 @@ loop(){
       for(var b=0; b < this.get('terms').length; b++){
         this.set('courses', this.get('terms').objectAt(b).get('courses'));
         this.set('programRecords', this.get('terms').objectAt(b).get('programRecords'));
+
+        //Find the term average, term units passed, and total term units
+        var termAvg = 0.0;
+        var termUnitsPassed = 0.0;
+        var termUnitsTotal = 0.0;
+        var sum = 0.0;
+        var sumCourses = 0;
+        for(var i = 0; i < this.get('courses').get('length'); i++){
+          termUnitsTotal += this.get('courses').objectAt(i).get('unit');
+          var grade = parseFloat(this.get('courses').objectAt(i).get('gradeInfo').get('mark'));
+          if(!isNaN(grade)){
+            if(grade >= 50){
+              termUnitsPassed = this.get('courses').objectAt(i).get('unit');
+            }
+            sum += grade;
+            sumCourses += 1;
+          }
+          termAvg = sum / sumCourses;
+          this.set('termAvg', termAvg);
+        }
+
         //for each code...
         var codeToAdd = null;
         for(var i=0; i < this.get('codeModel').get('length'); i++){
@@ -278,11 +309,11 @@ loop(){
         var adjudication = this.get('store').createRecord('adjudication', {
         date: new Date(this.get('date')),
         assessmentCode: codeToAdd,
-    term: this.get('terms').objectAt(b),
+        term: this.get('terms').objectAt(b),
     //unset these after we get import working (we will assume we are always given these fields)
-        termAVG: 0,
-        termUnitsPassed: 0,
-        termUnitsTotal: 0,
+        termAVG: termAvg,
+        termUnitsPassed: termUnitsPassed,
+        termUnitsTotal: termUnitsTotal,
       });
       adjudication.save();
       }
