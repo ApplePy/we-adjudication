@@ -4,7 +4,6 @@ import XLSX from "npm:xlsx-browserify-shim";
 import jsPDF from "npm:jspdf";
 import map from 'npm:async/map';
 import FileSaver from 'npm:file-saver';
-import Workbook from 'npm:xlsx-workbook';
 
 
 export default Ember.Component.extend({
@@ -103,50 +102,39 @@ export default Ember.Component.extend({
 			this.getAdjudicationInfo.call(this).then(adjudicationInfo => {
 
 				//Get worksheet
-				function getCompletedSheet(worksheet) {
+				function getCompletedSheet() {
+
+					let worksheet = "";
 
 					//Write column titles to Excel
 					let keys = Object.keys(adjudicationInfo[0]);
-					let C = 0;
 					for (let col of keys) {
-						ws[0][C] = col;
-						C++;
+						worksheet += col.toString() + ",";
 					}
+					worksheet = worksheet.replace(/,$/,"\r\n");
 
 					//Write to Excel
-					let R = 1;
 					for (let adjInfo of adjudicationInfo) {
 						let keys = Object.keys(adjInfo);
-						let C = 0;
 						for (let col of keys) {
-							worksheet[R][C] = adjInfo[col];
-							C++;
+							if (adjInfo[col] instanceof Date) {
+								let date = adjInfo[col].getDate();
+								let month = adjInfo[col].getMonth() + 1;
+								let year = adjInfo[col].getFullYear();
+								let dateString = month.toString() + "/" + date.toString() + "/" + year.toString() + ",";
+								worksheet += dateString;
+							} else {
+								worksheet += adjInfo[col] + ",";
+							}
 						}
-						R++;
+						worksheet = worksheet.replace(/,$/,"\r\n");
 					}
 
 					return worksheet;
 				}
 
-				let worksheet = new Workbook.Worksheet("adjudicationSheet");
-
-				getCompletedSheet(worksheet);
-
-				let workbook = worksheet.save();
-
-
-				// //Create workbook
-				// //let workbook = XLSX.Workbook();
-				// let workbook = { SheetNames:[], Sheets:{} };
-
-				// //Add worksheet to workbook
-				// workbook.SheetNames.push("adjudicationSheet");
-				// workbook.Sheets["adjudicationSheet"] = getSheet();
-
-				var wopts = { bookType:'xlsx', bookSST:false, type:'binary' };
-				var wbout = XLSX.write(workbook,wopts);
+				let completedSheet = getCompletedSheet();
 				 
-
 				// Save file
 				function s2ab(s) {
 				  var buf = new ArrayBuffer(s.length);
@@ -156,7 +144,7 @@ export default Ember.Component.extend({
 				}
 				 
 				/* the saveAs call downloads a file on the local machine */
-				FileSaver.saveAs(new Blob([s2ab(wbout)],{type:"application/octet-stream"}), 'adjudication.xlsx');
+				FileSaver.saveAs(new Blob([s2ab(completedSheet)],{type:"application/octet-stream"}), 'adjudication.csv');
 			});
 		}
 	},
