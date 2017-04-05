@@ -3,7 +3,7 @@
 </div>
 
 <!-- Show the menu bar-->
-<div class="ui inverted menu">
+<div class="ui fluid eight item inverted menu">
   <a class="item" {{action 'saveStudent'}}>
     <i class="save icon"></i>
     Save
@@ -36,9 +36,6 @@
     <i class="search icon"></i>
     Find Record
   </a>
-  <a class="item" {{action 'help'}}>
-    Help
-  </a>
 </div>
 
 {{#if showFindStudent}}
@@ -49,17 +46,15 @@
  {{all-students INDEX = currentIndex notDONE = showAllStudents offset = offset studentsModel = studentsRecords}}
 {{else if isDeleting}}
   {{confirm-delete notDONE = isDeleting onConfirm=(action 'confirmedDelete')}}
-{{else if showHelp}}
-  {{help-page notDONE = showHelp}}
 {{else}}
   <!-- Show data entry form -->
 
-  <div class="ui top attached tabular menu">
+  <div class="ui top attached fluid seven item tabular menu">
     <div class="active item" data-tab="basics">Basic Info</div>
     <div class="item" data-tab="admission">Admission Record</div>
     <div class="item" data-tab="programRecord">Program Records</div>
     <div class="item" data-tab="advancedStanding">Advanced Standing</div>
-   <!-- <div class="item" data-tab="scholarshipsAwards">Scholarships and Awards</div> -->
+   <div class="item" data-tab="scholarshipsAwards">Scholarships/Awards</div> 
     <div class="item" data-tab="highSchool">High School</div>
     <div class="item" data-tab="adjudication">Adjudication</div>
   </div>
@@ -168,44 +163,31 @@
     <br>
     <h2>{{currentStudent.number}}</h2>
     <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
-   <table class="ui seven column very basic table">
-  <tr>
-<td class="three wide"><h4>Course</h4></td>
-<td class="three wide"><h4>From</h4></td>
-<td class="one wide"><h4>Units</h4></td>
-<td class="one wide"><h4>Grade</h4></td>
-<td class="three wide"></td>
-<td class="one wide"></td>
- <td class="three wide"></td>
-</tr>
-</table>
-    {{#each advancedStandingArray as |course|}}
-    {{advanced-standing standing = course standings = advancedStandingArray}}
+    <h3>Advanced Standing</h3>
+    <div class="ui segment">
+    {{advanced-standing standings = advancedStandingArray}}
     <br>
-    {{/each}}
-    <br>
-     <div class="ui button" {{action "addCourse"}}>Add Course</div>
+   <div class="ui button" {{action "addCourse"}}>Add Course</div> 
+     </div>
     {{#if showNewCourse}}
     {{add-advanced-standing newrecipient = currentStudent notDONE = showNewCourse standings = advancedStandingArray}}
     {{/if}}
-   <!-- </div> -->
+</div>
 
 
-<div class="ui divider"></div>
-<div class="ui segment">
+<div class="ui tab" data-tab="scholarshipsAwards">
+  <br>
+    <h2>{{currentStudent.number}}</h2>
+    <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
 <h3>Scholarships and Awards</h3>
-<h4>Note</h4>
-    {{#each awardNotes as |award|}}
+<div class="ui segment">
     {{scholarships-awards award = award awards = awardNotes}}
     <br>
-    {{/each}}
-    <br>
     <div class="ui button" {{action "addAward"}}>Add Scholarship/Award</div>
-
+</div>
     {{#if showNewAward}}
     {{add-award newrecipient = currentStudent studentID = currentStudent.number notDONE = showNewAward awards = awardNotes}}
     {{/if}}
-</div>
   </div>
  
 <div class="ui tab" data-tab="highSchool">
@@ -213,9 +195,11 @@
     <br>
     <h2>{{currentStudent.number}}</h2>
     <h3> {{currentStudent.firstName}} {{currentStudent.lastName}}</h3>
+    <div class="ui segment">
     {{#if currentStudent}}
     {{high-school student = currentStudent}}
     {{/if}}
+    </div>
 </div>
 
 <div class="ui tab" data-tab="adjudication">

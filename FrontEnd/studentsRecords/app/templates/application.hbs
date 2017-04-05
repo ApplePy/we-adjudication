@@ -1,12 +1,13 @@
 {{#if oudaAuth.isAuthenticated }}
-
+<div class="ui segment">
   <div class="ui secondary center aligned grid padded segment">
-    <div class="three wide column">
-
+   <!-- <div class="three wide column"> -->
+     <div class="two wide column" >
       <img class="ui right aligned container image" src="/assets/images/UWO Stacked.png">
       <h4> Logged in as:  {{oudaAuth.getName}}</h4>
     </div>
-    <div class="thirteen wide column">
+   <!-- <div class="thirteen wide column"> -->
+     <div class="eight wide column">
       <br>
       <h2>Welcome to Western Engineering Adjudication System</h2>
     </div>
@@ -24,6 +25,7 @@
       {{#link-to 'user'}}<a class="item">User Profile</a>{{/link-to}}
       {{#link-to 'admin-portal'}}<a class="item">Admin Portal</a>{{/link-to}}
       {{#link-to 'home.about'}}<a class="item">About</a>{{/link-to}}
+      <a>{{help-clicked}} </a>
       <a class="item">{{log-out name=oudaAuth.getName}} </a>
     </div>
   </div>
@@ -41,7 +43,7 @@
       </div>
     </div>
   </footer>
-
+</div>
 {{else}}
 
   <div>

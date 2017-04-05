@@ -58,8 +58,8 @@
         <tr>
           <td class="one wide"><h5>Course Code</h5></td>
           <td class="two wide"><h5>Course Name</h5></td>
-          <td class="one wide"><h5>Units</h5></td>
-          <td class="one wide"><h5>Grade</h5></td>
+          <td class="two wide"><h5>Units</h5></td>
+          <td class="two wide"><h5>Grade</h5></td>
           <td class="one wide"></td>
           <td class="two wide"></td>
         </tr>
@@ -67,8 +67,8 @@
           <tr>
             <td class="one wide">{{course.courseLetter}} {{course.courseNumber}}</td>
             <td class="two wide">{{course.name}}</td>
-            <td class="one wide">{{course.unit}}</td>
-            <td class="one wide">{{course.gradeInfo.mark}}</td>
+            <td class="two wide">{{course.unit}}</td>
+            <td class="two wide">{{course.gradeInfo.mark}}</td>
             <td class="one wide">
               {{#if course.gradeInfo.note}}
                 <div class="ui blue button" {{action "showNote" course.gradeInfo.note}}>Note</div>

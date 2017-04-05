@@ -24,7 +24,6 @@ export default Ember.Component.extend({
   pageSize: null,
   movingBackword: false,
   isDeleting: false,
-  showHelp: false,
   showFindStudent: false,
   showNewCourse: false,
   showNewAward: false,
@@ -333,10 +332,6 @@ this.set('codeModel', []);
     findStudent() {
       this.set('showFindStudent', true);
       this.set('showAllStudents', false);
-    },
-
-    help(){
-      this.set('showHelp', true);
     },
 
     addCourse() {

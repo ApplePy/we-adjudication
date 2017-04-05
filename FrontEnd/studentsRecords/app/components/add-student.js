@@ -12,7 +12,6 @@ export default Ember.Component.extend({
   numBox: null,
   fNameBox: null,
   lNameBox: null,
-  isHelpShowing: false,
   studentAdded: false,
   studentFailAdded: false,
 
@@ -83,10 +82,6 @@ export default Ember.Component.extend({
       this.get('store').findAll('residency').then((records) => {
         this.set('residencyModel', records);
       });
-    },
-
-    helpMe () {
-      this.set('isHelpShowing', true);
     },
 
     addMalePhoto () {
