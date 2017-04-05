@@ -64,23 +64,53 @@ export default Ember.Component.extend({
 		//Convert to PDF button clicked
 		convertToPDF() {
 
-			var doc = new jsPDF();
+			var doc = new jsPDF({orientation: 'landscape'});
 
 			//Gets required adjudication info
 			this.getAdjudicationInfo.call(this).then(adjudicationInfo => {
 
-				//Write to PDF
+				//Write column titles to PDF
 				let y = 10;
+				let keys = Object.keys(adjudicationInfo[0]);
+				let horizontal = 3;
+				for (let col of keys) {
+					if (col === "Program") {							
+						doc.text(col, horizontal, y);
+						horizontal += 8;
+					} else if (col === "StudentNumber") {							
+						doc.text(col, horizontal, y);
+						horizontal += 25;
+					} else if (col === "FirstName") {							
+						doc.text(col, horizontal, y);
+						horizontal += 12;
+					} else if (col === "LastName") {							
+						doc.text(col, horizontal, y);
+						horizontal += 12;
+					} else if (col === "AdjCode") {							
+						doc.text(col, horizontal, y);
+						horizontal += 10;
+					} else if (col === "AdjName") {							
+						doc.text(col, horizontal, y);
+						horizontal += 50;
+					} else {
+						doc.text(col, horizontal, y);
+					}
+					horizontal += 15;
+				}
+				y += 20;
+
+				//Write to PDF
 				for (let adjInfo of adjudicationInfo) {
 					let keys = Object.keys(adjInfo);
 					let x = 10;
 					for (let col of keys) {
 						if (typeof adjInfo[col] === "number" || adjInfo[col] instanceof Date) {							
 							doc.text(adjInfo[col].toString(), x, y);
+							x += 10;
 						} else {
 							doc.text(adjInfo[col], x, y);
 						}
-						x += 20;
+						x += 25;
 					}
 					y += 20;
 					if (y >= 100) {
@@ -278,39 +308,33 @@ export default Ember.Component.extend({
 			});
 		}).then(adjudicationInfo => {
 
-			console.log("Adjudication Info");
 			console.log(adjudicationInfo);
 
 			//Parse adjudication info
 			return adjudicationInfo.map(adjInfo => {
 
-				/*console.log("AdjInfo:");
-				console.log(adjInfo);
-				console.log("adjInfo.student:");
-				console.log(adjInfo.student);
-				console.log("adjInfo.student.get('number')");
-				console.log(adjInfo.student.get("number"));
-				console.log("object:");*/
+				if (adjInfo.assessmentCode === null) {
+					return {
+						Program: this.get("searchValue"),
+						StudentNumber: adjInfo.student.get('number'),
+						FirstName: adjInfo.student.get('firstName'),
+						LastName: adjInfo.student.get('lastName'),
+						AdjCode: "",
+						AdjName: "",
+						"Date": adjInfo.adjudication.get('date')
+					};
+				} else {
+					return {
+						Program: this.get("searchValue"),
+						StudentNumber: adjInfo.student.get('number'),
+						FirstName: adjInfo.student.get('firstName'),
+						LastName: adjInfo.student.get('lastName'),
+						AdjCode: adjInfo.assessmentCode.get('code'),
+						AdjName: adjInfo.assessmentCode.get('name'),
+						"Date": adjInfo.adjudication.get('date')
+					};
+				}
 
-				return {
-					Program: this.get("searchValue"),
-					StudentNumber: adjInfo.student.get('number'),
-					FirstName: adjInfo.student.get('firstName'),
-					LastName: adjInfo.student.get('lastName'),
-					AdjCode: "",
-					AdjName: "",
-					"Date": adjInfo.adjudication.get('date')
-				};
-
-				/*return {
-					Program: this.get("searchValue"),
-					StudentNumber: adjInfo.student.get('number'),
-					FirstName: adjInfo.student.get('firstName'),
-					LastName: adjInfo.student.get('lastName'),
-					AdjCode: adjInfo.assessmentCode.get('code'),
-					AdjName: adjInfo.assessmentCode.get('name'),
-					"Date": adjInfo.adjudication.get('date')
-				};*/
 			});
 		});
 	}
