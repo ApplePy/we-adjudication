@@ -20,7 +20,9 @@ init() {
         term: this.get('currentTerm').get('id') }   
     }).then((adju) => {
       this.set('adjudication', adju.get('firstObject'));
-     this.set('selectedDate', adju.get('firstObject').get('date').toISOString().substring(0, 10));
+     var date = adju.get('firstObject').get('date');
+    var datestring = date.toISOString().substring(0, 10);
+    this.set('selectedDate', datestring);
      this.set('selectedCode', adju.get('firstObject').get('assessmentCode').get('id'));
     });
   });
