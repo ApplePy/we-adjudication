@@ -2,6 +2,9 @@ import Ember from 'ember';
 
 import XLSX from "npm:xlsx-browserify-shim";
 import jsPDF from "npm:jspdf";
+import map from 'npm:async/map';
+import FileSaver from 'npm:file-saver';
+import Workbook from 'npm:xlsx-workbook';
 
 
 export default Ember.Component.extend({
@@ -73,7 +76,11 @@ export default Ember.Component.extend({
 					let keys = Object.keys(adjInfo);
 					let x = 10;
 					for (let col of keys) {
-						doc.text(adjInfo[col], x, y);
+						if (typeof adjInfo[col] === "number" || adjInfo[col] instanceof Date) {							
+							doc.text(adjInfo[col].toString(), x, y);
+						} else {
+							doc.text(adjInfo[col], x, y);
+						}
 						x += 20;
 					}
 					y += 20;
@@ -96,15 +103,13 @@ export default Ember.Component.extend({
 			this.getAdjudicationInfo.call(this).then(adjudicationInfo => {
 
 				//Get worksheet
-				function getSheet() {
+				function getCompletedSheet(worksheet) {
 
 					//Write column titles to Excel
 					let keys = Object.keys(adjudicationInfo[0]);
 					let C = 0;
-					let ws = {};
 					for (let col of keys) {
-						let cell_ref = XLSX.utils.encode_cell({ c: C, r: 0 });
-						ws[cell_ref] = { v: col };
+						ws[0][C] = col;
 						C++;
 					}
 
@@ -114,26 +119,44 @@ export default Ember.Component.extend({
 						let keys = Object.keys(adjInfo);
 						let C = 0;
 						for (let col of keys) {
-							let cell_ref = XLSX.utils.encode_cell({ c: C, r: R });
-							ws[cell_ref] = { v: adjInfo[col] };
+							worksheet[R][C] = adjInfo[col];
 							C++;
 						}
 						R++;
 					}
 
-					return ws;
+					return worksheet;
 				}
 
-				//Create workbook
-				//var workbook = new XLSX.Workbook();
-				let workbook = { SheetNames:[], Sheets:{} };
+				let worksheet = new Workbook.Worksheet("adjudicationSheet");
 
-				//Add worksheet to workbook
-				workbook.SheetNames.push("adjudicationSheet");
-				workbook.Sheets["adjudicationSheet"] = getSheet();
+				getCompletedSheet(worksheet);
 
-				//Write exel file
-				return XLSX.writeFile(workbook, 'adjudication.xlsx');
+				let workbook = worksheet.save();
+
+
+				// //Create workbook
+				// //let workbook = XLSX.Workbook();
+				// let workbook = { SheetNames:[], Sheets:{} };
+
+				// //Add worksheet to workbook
+				// workbook.SheetNames.push("adjudicationSheet");
+				// workbook.Sheets["adjudicationSheet"] = getSheet();
+
+				var wopts = { bookType:'xlsx', bookSST:false, type:'binary' };
+				var wbout = XLSX.write(workbook,wopts);
+				 
+
+				// Save file
+				function s2ab(s) {
+				  var buf = new ArrayBuffer(s.length);
+				  var view = new Uint8Array(buf);
+				  for (var i=0; i!=s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+				  return buf;
+				}
+				 
+				/* the saveAs call downloads a file on the local machine */
+				FileSaver.saveAs(new Blob([s2ab(wbout)],{type:"application/octet-stream"}), 'adjudication.xlsx');
 			});
 		}
 	},
@@ -164,76 +187,111 @@ export default Ember.Component.extend({
 			return this.get('store').query('student', {}).then(dummy => {
 				return this.get('store').query('student', { limit: dummy.get('meta').total });
 			}).then(students => {
-				return filteredTerms.map(term => {
-
-					return this.get('store').findRecord("term", term.get('id'), { reload: true }).then(refreshedTerm => {
-
-				    	term = refreshedTerm;
-
-						return {
-							term: term,
-							student: term.get('student')
-						};
-
-				    });
-
+				return new Promise((resolve, reject) => {
+					map(filteredTerms,
+						(term, done) => {
+							// Resolve all promises
+							this.get('store').findRecord("term", term.get('id'), { reload: true })
+								.then(refreshedTerm => {
+									refreshedTerm.get('student')
+									.then(refreshedStudent => {
+										// Return the new data
+										done(null,
+										{
+											term: refreshedTerm,
+											student: refreshedStudent
+										});
+									});
+							    })
+							    .catch(err => {
+							    	// If there's an error, call map's error callback
+							    	done(err);
+							    });
+						},
+						function(err, results) {
+							// results is now an array of stats for each file
+							if (err) {
+								reject(err);
+							} else {
+								resolve(results);
+							}		
+						});
 				});
 			});
 		}).then(filteredTermsandStudents => {
 			//Filter adjudication based on the selected terms
-			return this.get('store').query('adjudication', {}).then(dummy => {
+			return this.get('store').query('adjudication', {})
+			.then(dummy => {
 				return this.get('store').query('adjudication', { limit: dummy.get('meta').total });
 			}).then(adjudications => {
 				return adjudications.filter(adjudication => {
-					let found = filteredTermsandStudents.find(termandstudent => adjudication.get('term.id') === termandstudent._result.term.get('id'));
+					let found = filteredTermsandStudents.find(termandstudent => adjudication.get('term.id') === termandstudent.term.get('id'));
 
 					return (filteredTermsandStudents.indexOf(found) !== -1);
 				});
 			}).then(filteredAdjudications => {
 				//Return adjudication and students
-				return filteredAdjudications.map(adjudication => {
-					return {
-						adjudication: adjudication,
-						student: filteredTermsandStudents.find(termandstudent => adjudication.get('term.id') === termandstudent._result.term.get('id'))._result.student
-					};
+				return new Promise((resolve, reject) => {
+					map(filteredAdjudications,
+						(adjudication, done) => {
+							// Resolve all promises
+							done(null,
+							{
+								adjudication: adjudication,
+								student: filteredTermsandStudents.find(termandstudent => adjudication.get('term.id') === termandstudent.term.get('id')).student
+							});
+						},
+						function(err, results) {
+							// results is now an array of stats for each file
+							if (err) {
+								reject(err);
+							} else {
+								resolve(results);
+							}		
+						});
 				});
 			});
 		}).then(filteredAdjudicationsAndStudents => {
 
-			//console.log(filteredAdjudicationsAndStudents);
-
 			//Get the assessment codes associated with the adjudications
 			return this.get('store').findAll('assessment-code').then(assessmentCode => {
-				//Return the adjudication, student and assessment codes
-				return filteredAdjudicationsAndStudents.map(adjudicationAndStudent => {
 
-					//console.log(adjudicationAndStudent);
-
-					return this.get('store').findRecord("adjudication", adjudicationAndStudent.adjudication.get('id'), { reload: true }).then(refreshedAdjudication => {
-
-				    	let adjudication = refreshedAdjudication;
-
-				    	console.log("here");
-				    	console.log(adjudication);
-
-						return {
-							adjudication: adjudicationAndStudent.adjudication,
-							student: adjudicationAndStudent.student,
-							assessmentCode: adjudication.get('assessmentCode')
-						};
-
-				    });
-
-					/*return {
-						adjudication: adjudicationAndStudent.adjudication,
-						student: adjudicationAndStudent.student,
-						assessmentCode: adjudicationAndStudent.adjudication.get('assessmentCode')
-					};*/
+				return new Promise((resolve, reject) => {
+					map(filteredAdjudicationsAndStudents,
+						(adjudicationAndStudent, done) => {
+							// Resolve all promises
+							this.get('store').findRecord("adjudication", adjudicationAndStudent.adjudication.get('id'), { reload: true })
+							.then(refreshedAdjudication => {
+									refreshedAdjudication.get('assessmentCode')
+									.then(refreshedAssessmentCode => {
+										// Return the new data
+										done(null,
+										{
+											adjudication: adjudicationAndStudent.adjudication,
+											student: adjudicationAndStudent.student,
+											assessmentCode: refreshedAssessmentCode
+										});
+									});
+							    })
+							    .catch(err => {
+							    	// If there's an error, call map's error callback
+							    	done(err);
+							    });
+						},
+						function(err, results) {
+							// results is now an array of stats for each file
+							if (err) {
+								reject(err);
+							} else {
+								resolve(results);
+							}		
+						});
 				});
 			});
 		}).then(adjudicationInfo => {
 
-			//console.log(adjudicationInfo);
+			console.log("Adjudication Info");
+			console.log(adjudicationInfo);
 
 			//Parse adjudication info
 			return adjudicationInfo.map(adjInfo => {
@@ -246,25 +304,25 @@ export default Ember.Component.extend({
 				console.log(adjInfo.student.get("number"));
 				console.log("object:");*/
 
-				console.log({
-					Program: this.get("searchValue"),
-					StudentNumber: adjInfo.student.get('number'),
-					FirstName: adjInfo.student.get('firstName'),
-					LastName: adjInfo.student.get('lastName'),
-					AdjCode: adjInfo.assessmentCode.get('code'),
-					AdjName: adjInfo.assessmentCode.get('name'),
-					"Date": adjInfo.adjudication.get('date')
-				});
-
 				return {
 					Program: this.get("searchValue"),
 					StudentNumber: adjInfo.student.get('number'),
 					FirstName: adjInfo.student.get('firstName'),
 					LastName: adjInfo.student.get('lastName'),
+					AdjCode: "",
+					AdjName: "",
+					"Date": adjInfo.adjudication.get('date')
+				};
+
+				/*return {
+					Program: this.get("searchValue"),
+					StudentNumber: adjInfo.student.get('number'),
+					FirstName: adjInfo.student.get('firstName'),
+					LastName: adjInfo.student.get('lastName'),
 					AdjCode: adjInfo.assessmentCode.get('code'),
 					AdjName: adjInfo.assessmentCode.get('name'),
 					"Date": adjInfo.adjudication.get('date')
-				};
+				};*/
 			});
 		});
 	}
