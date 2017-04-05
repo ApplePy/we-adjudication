@@ -58,15 +58,24 @@ let Route = function(Model,
         .get(function (request, response) {
             let l = parseInt(request.query.limit);
             let o = parseInt(request.query.offset);
+            let p = parseInt(request.query.page);
             let filter = request.query.filter;
 
             // Get all model objects
             if (!filter) {
                 // Return models in pages
                 if (enablePaginate) {
-                    // Add default limits
-                    if (typeof o !== 'number' || isNaN(o)) o = 0;
+                    // Set default limit
                     if (typeof l !== 'number' || isNaN(l)) l = 0;
+
+                    // Calculate offset from page number
+                        if (typeof p === 'number' && isNaN(p) === false) {
+                            o = (p - 1) * l;    // Pages start at 1
+                        }
+
+                    // Add default offset
+                    if (typeof o !== 'number' || isNaN(o)) o = 0;
+                    
 
                     Model.paginate({}, {offset: o, limit: l},
                         function (error, modelObjs) {
@@ -77,7 +86,8 @@ let Route = function(Model,
                                  {
                                      total: modelObjs.total,
                                      limit: modelObjs.limit,
-                                     offset: modelObjs.offset
+                                     offset: modelObjs.offset,
+                                     total_pages: Math.ceil(modelObjs.total / modelObjs.limit)
                                  }
                             });
                         });
@@ -94,9 +104,16 @@ let Route = function(Model,
             else {
                 if (queryHook === null) {
                     if (enablePaginate){
-                        // Add default limits
-                        if (typeof o !== 'number' || isNaN(o)) o = 0;
+                        // Set default limit
                         if (typeof l !== 'number' || isNaN(l)) l = 1;
+
+                        // Calculate offset from page number
+                        if (typeof p === 'number' && isNaN(p) === false) {
+                            o = (p - 1) * l;    // Pages start at 1
+                        }
+
+                        // Add default offset
+                        if (typeof o !== 'number' || isNaN(o)) o = 0;
 
                         Model.paginate(filter, {offset: o, limit: l},
                             function (error, modelObjs) {
@@ -107,7 +124,8 @@ let Route = function(Model,
                                     {
                                         total: modelObjs.total,
                                         limit: modelObjs.limit,
-                                        offset: modelObjs.offset
+                                        offset: modelObjs.offset,
+                                        total_pages: Math.ceil(modelObjs.total / modelObjs.limit)
                                     }
                                 });
                             });
