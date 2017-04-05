@@ -308,8 +308,6 @@ export default Ember.Component.extend({
 			});
 		}).then(adjudicationInfo => {
 
-			console.log(adjudicationInfo);
-
 			//Parse adjudication info
 			return adjudicationInfo.map(adjInfo => {
 
