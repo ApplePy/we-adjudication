@@ -15,7 +15,6 @@ export default Ember.Component.extend({
   // Modal toggling variables
   showAllStudents: false, // Looks like can be nuked
   isDeleting: false,
-  showHelp: false,
   showFindStudent: false, // Looks like can be nuked
   showNewCourse: false,
   showNewAward: false,
@@ -203,8 +202,6 @@ export default Ember.Component.extend({
       this.get('currentStudent').destroyRecord()
         .then(() => this.get('destroyedStudent')());
     },
-
-    help() { this.set('showHelp', true); },
 
     addCourse() { this.set('showNewCourse', true); },
 

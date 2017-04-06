@@ -6,7 +6,6 @@ export default Ember.Component.extend({
   isAdding: false,
   isUpdating: false,
   ruleToEdit: null,
-  needsHelp: false,
 
   init() {
     this._super(...arguments);
@@ -44,10 +43,6 @@ export default Ember.Component.extend({
         });
       });
     },
-
-    needsHelp(){
-      this.set('needsHelp', true);
-    }
   },
 
 });

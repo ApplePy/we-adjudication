@@ -4,31 +4,31 @@
 <!-- delete should just delete the record -->
 <!-- ******** THESE FUNCTIONALITIES CANT BE TESTED UNTIL ROUTES ARE IN SO IDK IF THEY 100% WORK-->
 
-<table class="ui table">
-  <thead>
-    <th><h4>Grade</h4></th>
-    <th><h4>Year</h4></th>
-    <th><h4>Subject</h4></th>
-    <th><h4>From</h4></th>
-    <th></th>
-    <th></th>
-  </thead>
-  <tbody>
+<table class="ui six column very basic table">
+  <tr>
+    <td class="two wide"><h4>Grade</h4></td>
+    <td class="two wide"><h4>Year</h4></td>
+    <td class="two wide"><h4>Subject</h4></td>
+    <td class="two wide"><h4>From</h4></td>
+    <td class="two wide"></td>
+    <td class="two wide"></td>
+  </tr>
+  
     {{#each marks as |hsGrade|}}
     <tr>
-      <td>{{hsGrade.mark}}</td>
-      <td>{{hsGrade.course.level}}</td>
-      <td>{{hsGrade.course.subject.name}}</td>
-      <td>{{hsGrade.course.school.name}}</td>
-      <td class='collapsing'>
+      <td class="two wide">{{hsGrade.mark}}</td>
+      <td class="two wide">{{hsGrade.course.level}}</td>
+      <td class="two wide">{{hsGrade.course.subject.name}}</td>
+      <td class="two wide">{{hsGrade.course.school.name}}</td>
+      <td class='two wide'>
         <button class="ui positive button" {{action "updateModal" hsGrade}}>Update</button>
       </td>
-      <td class='collapsing'>
+      <td class='two wide'>
         <button class="ui negative button" {{action "deleteCourse" hsGrade}}>Delete</button>
       </td>
     </tr>
     {{/each}}
-  </tbody>
+ 
 </table>
 
 <button class="ui button" {{action "addHS"}}>Add High School Course</button>

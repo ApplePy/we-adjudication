@@ -1,14 +1,17 @@
-<div class="ui grid">
+<div class="ui stackable grid">
   <div class="three wide column">
-    <div class="ui violet vertical pointing menu">
-      {{#each pages as |page|}}
-      {{#link-to page.route class="item"}}
-        <i class={{page.icon}}></i>
-        {{page.text}}
-      {{/link-to}}   
-      {{/each}}
+    <div class="ui segment container">
+      <div class="ui fluid violet secondary vertical pointing menu">
+        {{#each pages as |page|}}
+          {{#link-to page.route class="item"}}
+            <i class={{page.icon}}></i>
+            {{page.text}}
+          {{/link-to}}
+        {{/each}}
+      </div>
     </div>
   </div>
+
   <div class="thirteen wide column ">
     <div class="ui segment container">
       {{outlet}}

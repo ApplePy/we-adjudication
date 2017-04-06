@@ -1,11 +1,18 @@
-<table class="ui fixed three column table">
+<table class="ui three column very basic table">
   <tr>
-<td class="twelve wide">{{award.note}}</td>
-<td class="two wide"><div class="ui positive button" {{action "updateAward"}}>Update</div></td>
-<td class="two wide"><div class="ui negative button" {{action "deleteAward"}}>Delete</div></td>
+<td class="ten wide"><h4>Note</h4></td>
+<td class="two wide"></td>
+<td class="two wide"></td>
 </tr>
-</table>
-
+{{#each awards as |award|}}
+  <tr>
+<td class="ten wide">{{award.note}}</td>
+<td class="two wide"><div class="ui positive button" {{action "updateAward"}}>Update</div></td>
+<td class="two wide"><div class="ui negative button" {{action "deleteAward" award}}>Delete</div></td>
+</tr>
  {{#if updateAward}} 
    {{update-award updateaward = award notDONE = updateAward}} 
  {{/if}}
+{{/each}}
+</table>
+
