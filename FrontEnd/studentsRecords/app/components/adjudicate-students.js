@@ -91,6 +91,7 @@ export default Ember.Component.extend({
       var opr;
       var value;
       var link;
+      var isMark = false;
       if(rule.substr(m + 1, 4) === "Rule"){
         var y = rule.indexOf('[', m);
         var z = rule.indexOf(']', y);
@@ -169,9 +170,11 @@ export default Ember.Component.extend({
       } else if (param === "CumulativeAverage"){
         //NOT YET IMPLEMENTED
       } else if (param === "Mark"){
-        if(this.get('selectedCourse').get('gradeInfo').get('mark') == value){
+        if(this.get('selectedCourse') !== null){
           param = this.get('selectedCourse').get('gradeInfo').get('mark');
           found = true;
+          this.set('selectedCourse', null);
+          isMark = true;
         }
       } else if (param === "ProgramName"){
         for(var n = 0; n < this.get('programRecords').get('length'); n++){
@@ -223,8 +226,13 @@ export default Ember.Component.extend({
       if(!found){
         param = null;
       }
-      value = "\"" + value + "\"";
-      param = "\"" + param + "\"";
+      if(!isMark){
+        value = "\"" + value + "\"";
+        param = "\"" + param + "\"";
+      } else {
+        param = parseInt(param, 10);
+        isMark = false;
+      }
         ruleExp += eval(param + opr + value);
         ruleExp += link;
     }
@@ -265,7 +273,7 @@ loop(){
           var grade = parseFloat(this.get('courses').objectAt(i).get('gradeInfo').get('mark'));
           if(!isNaN(grade)){
             if(grade >= 50){
-              termUnitsPassed = this.get('courses').objectAt(i).get('unit');
+              termUnitsPassed += this.get('courses').objectAt(i).get('unit');
             }
             sum += grade;
             sumCourses += 1;
